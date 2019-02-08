@@ -1,0 +1,54 @@
+{
+	"name": "evoweb/imagemap",
+	"type": "typo3-cms-extension",
+	"description": "Image map",
+	"homepage": "http://www.evoweb.de/",
+
+	"license": [
+		"GPL-2.0-or-later"
+	],
+
+	"support": {
+		"issues": "https://github.com/evoWeb/imagemap/issues"
+	},
+
+	"keywords": [
+		"imagemap",
+		"image map"
+	],
+
+	"require": {
+		"typo3/cms-core": "^8.7 || ^9.5",
+		"sjbr/static-info-tables": "^6.7"
+	},
+
+	"autoload": {
+		"psr-4": {
+			"Evoweb\\Imagemap\\": "Classes/"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"Evoweb\\Imagemap\\Tests\\": "Tests/",
+			"TYPO3\\CMS\\Core\\Tests\\": ".Build/Web/typo3/sysext/core/Tests/"
+		}
+	},
+
+	"config": {
+		"vendor-dir": ".Build/Web/vendor",
+		"bin-dir": ".Build/bin"
+	},
+	"extra": {
+		"typo3/cms": {
+			"cms-package-dir": "{$vendor-dir}/typo3/cms",
+			"web-dir": ".Build/Web"
+		}
+	},
+
+	"scripts": {
+		"post-autoload-dump": [
+			"mkdir -p .Build/Web/typo3conf/ext/",
+			"[ -L .Build/Web/typo3conf/ext/Imagemap ] || ln -snvf ../../../../. .Build/Web/typo3conf/ext/Imagemap"
+		]
+	}
+}
