@@ -1,0 +1,29 @@
+tt_content.imagemap < tt_content.image
+tt_content.imagemap {
+  templateRootPaths.20 = EXT:imagemap/Resources/Private/Templates/
+
+  templateName = ImageMap
+
+  dataProcessing {
+    30 = Evoweb\Imagemap\DataProcessing\ImagemapProcessor
+    30 {
+      data = field:tx_imagemap_links
+      name = TEXT
+      name {
+        data = field:titleText // field:altText // field:imagecaption // field:header
+        crop = 20
+        case = lower
+        replacement {
+          search = \s
+          replace = -
+          useRegExp = 1
+        }
+      }
+    }
+  }
+
+  imgMax = 1
+  maxW >
+  1.imageLinkWrap >
+  1.params = usemap="####IMAGEMAP_USEMAP###"
+}

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+	<file source-language="en" datatype="plaintext" original="messages" date="2019-02-09T15:13:33Z" product-name="imagemap">
+		<header/>
+		<body>
+			<trans-unit id="tx_imagemap_links.description" xml:space="preserve">
+				<source>Configure imagemap setup for the uploaded image.</source>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>

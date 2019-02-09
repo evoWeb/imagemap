@@ -1,0 +1,13 @@
+mod.wizards.newContentElement.wizardItems.common {
+  elements.imagemap {
+    iconIdentifier = extensions-imagemap-content
+    title = LLL:EXT:imagemap/Resources/Private/Language/locallang.xlf:imagemap.title
+    description = LLL:EXT:imagemap/Resources/Private/Language/locallang.xlf:imagemap.description
+    tt_content_defValues {
+      CType = imagemap
+    }
+  }
+  show := addToList(imagemap)
+}
+
+mod.web_layout.tt_content.preview.list.sfregister_form = EXT:sf_register/Resources/Private/Templates/Preview/Form.html

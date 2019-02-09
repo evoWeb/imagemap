@@ -1,4 +1,4 @@
 
 CREATE TABLE tt_content (
-    tx_imagemapwizard_links text NOT NULL,
+    tx_imagemap_links text NOT NULL
 );

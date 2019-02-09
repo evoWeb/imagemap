@@ -8,7 +8,7 @@ storeWindowSettings = 1
 imageMaxWH = 700
 
 #cat=basic//10; type=int ; label = maximal preview-image width/height: maximal size for the preview image
-previewImageMaxWH = 200
+previewImageMaxWH = 300
 
-#cat=basic//10; type=string ; label = additonal attributes: attributes besides the alt-attribute for each area
+#cat=basic//10; type=string ; label = additional attributes: attributes besides the alt-attribute for each area
 additionalAttributes = title

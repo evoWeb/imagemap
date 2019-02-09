@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+	<file source-language="en" datatype="plaintext" original="messages" date="2019-02-09T15:13:27Z" product-name="imagemap">
+		<header/>
+		<body>
+			<trans-unit id="imagemap.title" xml:space="preserve">
+				<source>ImageMap</source>
+			</trans-unit>
+			<trans-unit id="imagemap.description" xml:space="preserve">
+				<source>Adds a Imagemap element.</source>
+			</trans-unit>
+			<trans-unit id="imagemap.form.addrect" xml:space="preserve">
+				<source>Add Rect-Area</source>
+			</trans-unit>
+			<trans-unit id="imagemap.form.addcirc" xml:space="preserve">
+				<source>Add Circ-Area</source>
+			</trans-unit>
+			<trans-unit id="imagemap.form.addpoly" xml:space="preserve">
+				<source>Add Poly-Area</source>
+			</trans-unit>
+			<trans-unit id="imagemap.form.submit" xml:space="preserve">
+				<source>Apply &amp; Close</source>
+			</trans-unit>
+			<trans-unit id="imagemap.form.zoomin" xml:space="preserve">
+				<source>Zoom image to 100%</source>
+			</trans-unit>
+			<trans-unit id="imagemap.form.zoomout" xml:space="preserve">
+				<source>Zoom image to fit the Wizard popup.</source>
+			</trans-unit>
+			<trans-unit id="imagemap.form.area.label" xml:space="preserve">
+				<source>Label</source>
+			</trans-unit>
+			<trans-unit id="imagemap.form.area.link" xml:space="preserve">
+				<source>Link</source>
+			</trans-unit>
+			<trans-unit id="imagemap.form.area.linkwizard" xml:space="preserve">
+				<source>Open LinkWizard</source>
+			</trans-unit>
+			<trans-unit id="imagemap.form.area.up" xml:space="preserve">
+				<source>move up</source>
+			</trans-unit>
+			<trans-unit id="imagemap.form.area.down" xml:space="preserve">
+				<source>move down</source>
+			</trans-unit>
+			<trans-unit id="imagemap.form.area.undo" xml:space="preserve">
+				<source>undo</source>
+			</trans-unit>
+			<trans-unit id="imagemap.form.area.redo" xml:space="preserve">
+				<source>redo</source>
+			</trans-unit>
+			<trans-unit id="imagemap.form.area.remove" xml:space="preserve">
+				<source>remove</source>
+			</trans-unit>
+			<trans-unit id="imagemap.form.area.refresh" xml:space="preserve">
+				<source>Update Coords</source>
+			</trans-unit>
+			<trans-unit id="imagemap.form.area.expand" xml:space="preserve">
+				<source>show more options</source>
+			</trans-unit>
+			<trans-unit id="imagemap.form.area.collapse" xml:space="preserve">
+				<source>hide more options</source>
+			</trans-unit>
+			<trans-unit id="imagemap.form.poly.add" xml:space="preserve">
+				<source>add new edge to polygone</source>
+			</trans-unit>
+			<trans-unit id="imagemap.form.poly.addEdgeBefore" xml:space="preserve">
+				<source>add edge before current</source>
+			</trans-unit>
+			<trans-unit id="imagemap.form.poly.addEdgeAfter" xml:space="preserve">
+				<source>add edge after current</source>
+			</trans-unit>
+			<trans-unit id="imagemap.form.poly.removeEdge" xml:space="preserve">
+				<source>remove edge</source>
+			</trans-unit>
+			<trans-unit id="form.no_image" xml:space="preserve">
+				<source>No Image defined for current record (maybe you need to save your changes first).</source>
+			</trans-unit>
+			<trans-unit id="form.is_dirty" xml:space="preserve">
+				<source>The imagemap was changed, please save this record otherwise the changes might be lost.</source>
+			</trans-unit>
+			<trans-unit id="tt_content.tx_imagemap_links" xml:space="preserve">
+				<source>ImageMap Configuration</source>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>

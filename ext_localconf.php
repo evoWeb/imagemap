@@ -1,56 +1,47 @@
 <?php
 
-if (TYPO3_MODE=='BE') {
-	$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['GLOBAL']['softRefParser']['tx_imagemapwizard'] = "EXT:imagemap_wizard/classes/class.tx_imagemapwizard_softrefproc.php:&tx_imagemapwizard_softrefproc";
-    //$GLOBALS['TBE_MODULES_EXT']['xMOD_db_new_content_el']['addElClasses']['tx_imagemapwizard_wizicon'] = t3lib_extMgm::extPath($_EXTKEY).'classes/class.tx_imagemapwizard_wizicon.php';
-}
+call_user_func(function () {
+    $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['GLOBAL']['softRefParser']['tx_imagemap'] =
+        \Evoweb\Imagemap\Service\SoftRefProc::class;
 
-	require_once(t3lib_extMgm::extPath('imagemap_wizard') . 'classes/controller/class.tx_imagemapwizard_controller_wizard.php');
-	$typoscript = '
-		includeLibs.imagemap_wizard = EXT:imagemap_wizard/classes/class.tx_imagemapwizard_parser.php
-		tt_content.imagemap_wizard < tt_content.image
-		tt_content.imagemap_wizard.20.imgMax = 1
-		tt_content.imagemap_wizard.20.maxW >
-		tt_content.imagemap_wizard.20.1.imageLinkWrap >
-		tt_content.imagemap_wizard.20.1.params = usemap="####IMAGEMAP_USEMAP###"
-		tt_content.imagemap_wizard.20.1.stdWrap.postUserFunc = tx_imagemapwizard_parser->applyImageMap
-		tt_content.imagemap_wizard.20.1.stdWrap.postUserFunc.map.data = field:tx_imagemapwizard_links
-		tt_content.imagemap_wizard.20.1.stdWrap.postUserFunc.map.name = field:titleText // field:altText // field:imagecaption // field:header
-		tt_content.imagemap_wizard.20.1.stdWrap.postUserFunc.map.name.crop = 20
-		tt_content.imagemap_wizard.20.1.stdWrap.postUserFunc.map.name.case = lower
-	';
+    /**
+     * Page TypoScript for new content element wizards
+     */
+    \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addPageTSConfig(
+        '<INCLUDE_TYPOSCRIPT: source="FILE:EXT:imagemap/Configuration/TSconfig/Wizards/NewContentElement.typoscript">'
+    );
 
-	$imwizardConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['imagemap_wizard']);
-	if($imwizardConf['allTTCtypes']) {
-		$typoscript .= '
-			tt_content.imagemap_wizard.20.imgMax >
-			tt_content.image.20 < tt_content.imagemap_wizard.20
-			tt_content.imagemap_wizard.20.imgMax = 1
-		';
-	}
+    // Register Icons
+    /** @var \TYPO3\CMS\Core\Imaging\IconRegistry $iconRegistry */
+    $iconRegistry = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Imaging\IconRegistry::class);
+    $iconRegistry->registerIcon(
+        'extensions-imagemap-content',
+        \TYPO3\CMS\Core\Imaging\IconProvider\SvgIconProvider::class,
+        ['source' => 'EXT:imagemap/Resources/Public/Icons/content-image.svg']
+    );
+    $icons = [
+        'add' => 'EXT:imagemap/Resources/Public/Icons/add.gif',
+        'redo' => 'EXT:imagemap/Resources/Public/Icons/arrow_redo.png',
+        'link' => 'EXT:imagemap/Resources/Public/Icons/link_edit.png',
+        'zoomin' => 'EXT:imagemap/Resources/Public/Icons/magnifier_zoom_in.png',
+        'zoomout' => 'EXT:imagemap/Resources/Public/Icons/magnifier_zoom_out.png',
+    ];
+    foreach ($icons as $identifier => $iconPath) {
+        $iconRegistry->registerIcon(
+            'extensions-imagemap-' . $identifier,
+            \TYPO3\CMS\Core\Imaging\IconProvider\BitmapIconProvider::class,
+            ['source' => $iconPath]
+        );
+    }
 
-	t3lib_extMgm::addTypoScript($_EXTKEY,'setup',$typoscript,43);
-
-	t3lib_extMgm::addPageTSConfig('
-		mod.wizards.newContentElement.wizardItems.common.elements.imagemap {
-			icon = EXT:imagemap_wizard/tt_content_imagemap.gif
-			title = LLL:EXT:imagemap_wizard/locallang.xml:imagemap.title
-			description = LLL:EXT:imagemap_wizard/locallang.xml:imagemap.description
-			tt_content_defValues {
-				CType = imagemap_wizard
-			}
-		}
-		mod.wizards.newContentElement.wizardItems.common.show := addToList(imagemap)
-
-		templavoila.wizards.newContentElement.wizardItems.common.elements.imagemap {
-			icon = EXT:imagemap_wizard/tt_content_imagemap.gif
-			title = LLL:EXT:imagemap_wizard/locallang.xml:imagemap.title
-			description = LLL:EXT:imagemap_wizard/locallang.xml:imagemap.description
-			tt_content_defValues {
-				CType = imagemap_wizard
-			}
-		}
-		templavoila.wizards.newContentElement.wizardItems.common.show := addToList(imagemap)
-	');
-
-?>
+    $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1549738969] = [
+        'nodeName' => 'imagemap',
+        'priority' => '70',
+        'class' => \Evoweb\Imagemap\Form\Element\ImagemapElement::class,
+    ];
+    $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1549819420] = [
+        'nodeName' => 'imagemapPopup',
+        'priority' => '70',
+        'class' => \Evoweb\Imagemap\Form\FieldControl\EditPopup::class,
+    ];
+});

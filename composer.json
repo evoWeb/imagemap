@@ -48,7 +48,7 @@
 	"scripts": {
 		"post-autoload-dump": [
 			"mkdir -p .Build/Web/typo3conf/ext/",
-			"[ -L .Build/Web/typo3conf/ext/Imagemap ] || ln -snvf ../../../../. .Build/Web/typo3conf/ext/Imagemap"
+			"[ -L .Build/Web/typo3conf/ext/imagemap ] || ln -snvf ../../../../. .Build/Web/typo3conf/ext/imagemap"
 		]
 	}
 }
