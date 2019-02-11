@@ -17,7 +17,7 @@ call_user_func(function () {
     $iconRegistry->registerIcon(
         'extensions-imagemap-content',
         \TYPO3\CMS\Core\Imaging\IconProvider\SvgIconProvider::class,
-        ['source' => 'EXT:imagemap/Resources/Public/Icons/content-image.svg']
+        ['source' => 'EXT:imagemap/Resources/Public/Icons/content-imagemap.svg']
     );
     $icons = [
         'add' => 'EXT:imagemap/Resources/Public/Icons/add.gif',
