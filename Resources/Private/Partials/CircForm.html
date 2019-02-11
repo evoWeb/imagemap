@@ -1,0 +1,65 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+			xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+			xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+			data-namespace-typo3-fluid="true">
+
+<div id="circForm" class="areaForm bgColor5">
+	<div id="MAPFORMID_main" class="basicOptions">
+		<div class="colorPreview ptr"><div><!-- --></div></div>
+		<label for="MAPFORMID_label"><f:translate id="imagemap.form.area.label" extensionName="imagemap"/>:</label><input type="text" id="MAPFORMID_label" value="..." />
+		<label for="MAPFORMID_link"><f:translate id="imagemap.form.area.link" extensionName="imagemap"/>:</label><input type="text" id="MAPFORMID_link" value="..." />
+		<f:variable name="linkParameter" value="{
+			mode: 'wizard',
+			field: 'MAPFORMID_link',
+			P: {
+				returnUrl: returnUrl,
+				formName: formName,
+				itemName: 'MAPFORMID_link',
+				currentValue: 'MAPAREAVALUE_URL',
+				pid: data.pid,
+				fieldChangeFunc: {
+					focus: 'focus()',
+					callback: 'canvasObject.triggerAreaLinkUpdate(\"OBJID\")'
+				}
+			}
+		}"/>
+		<f:variable name="link"><be:moduleLink route="wizard_link" arguments="{linkParameter}"/></f:variable>
+		<a href="#" id="MAPFORMID_linkwizard" onclick="this.blur(); vHWin=window.open('{link}', '', 'height=600,width=500,status=0,menubar=0,scrollbars=1'); vHWin.focus(); return false;">
+			<span title="{f:translate(id: 'imagemap.form.area.linkwizard', extensionName: 'imagemap')}"><core:icon identifier="extensions-imagemap-link"/></span>
+		</a>
+		<span id="MAPFORMID_up" class="ptr sortbtn upbtn" title="{f:translate(id: 'imagemap.form.area.up', extensionName: 'imagemap')}"><core:icon identifier="actions-move-up"/></span>
+		<span id="MAPFORMID_down" class="ptr sortbtn downbtn" title="{f:translate(id: 'imagemap.form.area.down', extensionName: 'imagemap')}"><core:icon identifier="actions-move-down"/></span>
+		<span id="MAPFORMID_undo" class="ptr undo" title="{f:translate(id: 'imagemap.form.area.undo', extensionName: 'imagemap')}"><core:icon identifier="actions-edit-undo"/></span>
+		<span id="MAPFORMID_redo" class="ptr redo" title="{f:translate(id: 'imagemap.form.area.redo', extensionName: 'imagemap')}"><core:icon identifier="extensions-imagemap-redo"/></span>
+		<span id="MAPFORMID_del" class="ptr" title="{f:translate(id: 'imagemap.form.area.remove', extensionName: 'imagemap')}"><core:icon identifier="actions-edit-delete"/></span>
+		<div class="arrow exp ptr">
+			<span class="ptr expUpDown down" title="{f:translate(id: 'imagemap.form.area.expand', extensionName: 'imagemap')}"><core:icon identifier="actions-view-table-expand"/></span>
+			<span class="ptr expUpDown up" title="{f:translate(id: 'imagemap.form.area.collapse', extensionName: 'imagemap')}"><core:icon identifier="actions-view-table-collapse"/></span>
+		</div>
+	</div>
+	<div id="MAPFORMID_more" class="moreOptions">
+		<div class="halfLine">
+			<div id="MAPFORMID_color" class="colors"><div class="colorBox"><div><!-- --></div></div><div class="colorPicker"><!-- --></div><div class="cc"><!-- --></div></div>
+			<div id="MAPFORMID_stroke" class="colors"><div class="strokeBox"><div><!-- --></div></div><div class="strokePicker"><!-- --></div><div class="cc"><!-- --></div></div>
+			<div id="MAPFORMID_attributes" class="attributes">
+				<f:for each="{attributeKeys}" as="key">
+					<div class="attribute">
+						<label for="MAPFORMID_{f:format.case(value: key, mode: 'lower')}">{f:format.case(value: key, mode: 'capital')}:</label>
+						<input type="text" id="MAPFORMID_{f:format.case(value: key, mode: 'lower')}" value="..." />
+						<br class="cc" />
+					</div>
+				</f:for>
+			</div>
+		</div>
+		<div class="positionOptions halfLine">
+			<span id="MAPFORMID_upd" class="ptr refresh" title="{f:translate(id: 'imagemap.form.area.refresh', extensionName: 'imagemap')}"><core:icon identifier="actions-system-refresh"/></span>
+			<label for="MAPFORMID_x" class="XYlabel XYlabel-first">X:</label><input type="text" class="formCoord" id="MAPFORMID_x" value="x" />
+			<label for="MAPFORMID_y" class="XYlabel">Y:</label><input type="text" class="formCoord" id="MAPFORMID_y" value="y" /><br class="cc"/>
+			<label for="MAPFORMID_radius" class="XYlabel XYlabel-first">R:</label><input type="text" class="formCoord" id="MAPFORMID_radius" value="r" />
+			<div class="cc"><!-- --></div>
+		</div>
+		<div class="cc"><!-- --></div>
+	</div>
+</div>
+
+</html>

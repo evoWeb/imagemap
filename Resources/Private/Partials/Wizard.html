@@ -1,0 +1,99 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+			xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+			data-namespace-typo3-fluid="true">
+
+<script>
+var canvaseObject,
+		scaleFactor = '{scaleFactor}',
+		defaultAttributeset = {<f:format.raw>{emptyAttributeSet}</f:format.raw>};
+
+jQuery(document).ready(function() {
+	var canvasObject = new canvasClass();
+	canvasObject.init('canvas', 'picture', 'areaForms');
+	{existingFields}
+
+	scaleFactor = canvasObject.initializeScaling(scaleFactor);
+	canvasObject.setScale(scaleFactor);
+
+	if (scaleFactor < 1) {
+			jQuery('#magnify > .zout').hide();
+	} else {
+			jQuery('#magnify > .zin').hide();
+			jQuery('#magnify > .zout').hide();
+	}
+
+	jQuery('#addRect').click(function() {
+			canvasObject.addArea(new areaRectClass(), '', '', '', '', 1, defaultAttributeset);
+			return false;
+	});
+
+	jQuery('#addPoly').click(function() {
+			canvasObject.addArea(new areaPolyClass(), '', '', '', '', 1, defaultAttributeset);
+			return false;
+	});
+
+	jQuery('#addCirc').click(function() {
+			canvasObject.addArea(new areaCircleClass(), '', '', '', '', 1, defaultAttributeset);
+			return false;
+	});
+
+	jQuery('#submit').click(function() {
+			setValue('<map>' + canvasObject.persistanceXML() + '\n</map>');
+			close();
+	});
+
+	jQuery('#canvas')
+		.mousedown(function(e){
+				return canvasObject.mousedown(e);
+		}).mouseup(function(e){
+				return canvasObject.mouseup(e);
+		}).mousemove(function(e){
+				return canvasObject.mousemove(e);
+		}).dblclick(function(e){
+				return canvasObject.dblclick(e);
+		});
+
+	jQuery('> .zin', '#magnify').click(function() {
+			canvasObject.setScale(1);
+			jQuery(this).hide();
+			jQuery('#magnify > .zout').show();
+	});
+
+	jQuery('> .zout', '#magnify').click(function() {
+			canvasObject.setScale(scaleFactor);
+			jQuery(this).hide();
+			jQuery('#magnify > .zin').show();
+	});
+});
+</script>
+
+<div id="root">
+
+	<div id="pic">
+		<div id="magnify">
+			<span class="zin" title="{f:translate(id: 'imagemap.form.zoomin', extensionName: 'imagemap')}"><core:icon identifier="extensions-imagemap-zoomin" size="default" /></span>
+			<span class="zout" title="{f:translate(id: 'imagemap.form.zoomout', extensionName: 'imagemap')}"><core:icon identifier="extensions-imagemap-zoomout" size="default" /></span>
+		</div>
+		<div id="picture">
+			<div id="image">{image -> f:format.raw()}</div>
+			<div id="canvas" class="canvas"><!-- --></div>
+		</div>
+	</div>
+
+	<div id="actions">
+		<input type="submit" id="addRect" value="{f:translate(id: 'imagemap.form.addrect', extensionName: 'imagemap')}" />
+		<input type="submit" id="addCirc" value="{f:translate(id: 'imagemap.form.addcirc', extensionName: 'imagemap')}" />
+		<input type="submit" id="addPoly" value="{f:translate(id: 'imagemap.form.addpoly', extensionName: 'imagemap')}" />
+		<input type="submit" id="submit" value="{f:translate(id: 'imagemap.form.submit', extensionName: 'imagemap')}" />
+	</div>
+
+	<div id="areaForms">
+		<f:render partial="RectForm" arguments="{_all}"/>
+		<f:render partial="CircForm" arguments="{_all}"/>
+		<f:render partial="PolyForm" arguments="{_all}"/>
+	</div>
+
+	<span class="cc"><!-- --></span>
+</div>
+
+</html>

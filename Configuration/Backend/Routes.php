@@ -3,6 +3,6 @@
 return [
     'imagemap_wizard' => [
         'path' => '/imagemap/wizard',
-        'target' => \Evoweb\Imagemap\Controller\PopupController::class . '::wizardAction'
+        'target' => \Evoweb\Imagemap\Controller\PopupController::class . '::mainAction'
     ]
 ];

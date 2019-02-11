@@ -62,7 +62,6 @@ class DataObject
     protected $map;
 
     /**
-     *
      * @param string $table
      * @param string $field
      * @param int $uid
