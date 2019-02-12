@@ -2,69 +2,28 @@
 			xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
 			data-namespace-typo3-fluid="true">
 
-<script>
-var canvaseObject,
-		scaleFactor = '{scaleFactor}',
-		defaultAttributeset = {<f:format.raw>{emptyAttributeSet}</f:format.raw>};
+<f:variable name="attributes"><f:for each="{data.attributeKeys}" as="key" iteration="iterator">{key}: ''<f:if condition="{iterator.isLast}"><f:else>,
+</f:else></f:if></f:for></f:variable>
 
-jQuery(document).ready(function() {
-	var canvasObject = new canvasClass();
-	canvasObject.init('canvas', 'picture', 'areaForms');
-	{existingFields -> f:format.raw()}
-
-	scaleFactor = canvasObject.initializeScaling(scaleFactor);
-	canvasObject.setScale(scaleFactor);
-
-	if (scaleFactor < 1) {
-			jQuery('#magnify > .zout').hide();
-	} else {
-			jQuery('#magnify > .zin').hide();
-			jQuery('#magnify > .zout').hide();
-	}
-
-	jQuery('#addRect').click(function() {
-			canvasObject.addArea(new areaRectClass(), '', '', '', '', 1, defaultAttributeset);
-			return false;
-	});
-
-	jQuery('#addPoly').click(function() {
-			canvasObject.addArea(new areaPolyClass(), '', '', '', '', 1, defaultAttributeset);
-			return false;
-	});
-
-	jQuery('#addCirc').click(function() {
-			canvasObject.addArea(new areaCircleClass(), '', '', '', '', 1, defaultAttributeset);
-			return false;
-	});
-
-	jQuery('#submit').click(function() {
-			setValue('<map>' + canvasObject.persistanceXML() + '\n</map>');
-			close();
-	});
-
-	jQuery('#canvas')
-		.mousedown(function(e){
-				return canvasObject.mousedown(e);
-		}).mouseup(function(e){
-				return canvasObject.mouseup(e);
-		}).mousemove(function(e){
-				return canvasObject.mousemove(e);
-		}).dblclick(function(e){
-				return canvasObject.dblclick(e);
-		});
-
-	jQuery('> .zin', '#magnify').click(function() {
-			canvasObject.setScale(1);
-			jQuery(this).hide();
-			jQuery('#magnify > .zout').show();
-	});
-
-	jQuery('> .zout', '#magnify').click(function() {
-			canvasObject.setScale(scaleFactor);
-			jQuery(this).hide();
-			jQuery('#magnify > .zin').show();
-	});
-});
+<script type="text/javascript">
+window.imagemap = {
+	scaleFactor: '{scaleFactor}',
+	defaultAttributeset: {<f:format.raw>
+		{attributes}
+	</f:format.raw>},
+	existingFields: [
+		<f:for each="{data.map.areas}" as="area" iteration="iterator">{<f:format.raw>
+			shape: '<f:format.case mode="capital">{area.attributes.shape}</f:format.case>',
+			coords: '{area.attributes.coords}',
+			alt: '{area.attributes.alt}',
+			link: '{area.value}',
+			color: '{area.attributes.color}',
+			prepend: 0,
+			attribute: </f:format.raw>{<f:format.raw>{attributes}</f:format.raw>}
+		}<f:if condition="{iterator.isLast}"><f:else>,
+		</f:else></f:if></f:for>
+	]
+};
 </script>
 
 <div id="root">
@@ -75,13 +34,9 @@ jQuery(document).ready(function() {
 			<span class="zout" title="{f:translate(id: 'imagemap.form.zoomout', extensionName: 'imagemap')}"><core:icon identifier="extensions-imagemap-zoomout" size="default" /></span>
 		</div>
 		<div id="picture">
-			<div id="image">{image -> f:format.raw()}</div>
+			<div id="image">{data.image -> f:format.raw()}</div>
 			<div id="canvas" class="canvas"><!-- --></div>
 		</div>
-	</div>
-
-	<div id="actions">
-
 	</div>
 
 	<div id="areaForms">

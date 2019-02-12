@@ -60,15 +60,15 @@ class ConvertingTest extends \TYPO3\TestingFramework\Core\Unit\UnitTestCase
     {
         $supposed = [
             'name' => 'map',
-            '@' => ['name' => 'test'],
-            '#' => [['name' => 'area', '@' => ['shape' => 'rect', 'coords' => '0,0,1,1']]],
+            'attributes' => ['name' => 'test'],
+            'areas' => [['name' => 'area', 'attributes' => ['shape' => 'rect', 'coords' => '0,0,1,1']]],
         ];
         $this->assertEquals(
             $supposed,
             $this->mapper->map2array('<map name="test"><area shape="rect" coords="0,0,1,1" /></map>'),
             'Map is not converted as supposed'
         );
-        $supposed['#'][0]['value'] = '1';
+        $supposed['areas'][0]['value'] = '1';
         $this->assertEquals(
             $supposed,
             $this->mapper->map2array('<map name="test"><area shape="rect" coords="0,0,1,1">1</area></map>'),
@@ -84,7 +84,7 @@ class ConvertingTest extends \TYPO3\TestingFramework\Core\Unit\UnitTestCase
         $this->assertEquals('<map />', $this->mapper->array2map([]), 'Empty Map-creation fails.');
         $this->assertEquals(
             '<map name="test" />',
-            $this->mapper->array2map(['name' => 'map', '@' => ['name' => 'test']]),
+            $this->mapper->array2map(['name' => 'map', 'attributes' => ['name' => 'test']]),
             'Map without areas is not created as supposed'
         );
         $this->assertEquals(
@@ -101,8 +101,8 @@ class ConvertingTest extends \TYPO3\TestingFramework\Core\Unit\UnitTestCase
     {
         $inputArray = [
             'name' => 'map',
-            '@' => ['name' => 'test'],
-            '#' => [['name' => 'area', '@' => ['shape' => 'rect', 'coords' => '0,0,1,1', 'id' => '1']]],
+            'attributes' => ['name' => 'test'],
+            'areas' => [['name' => 'area', 'attributes' => ['shape' => 'rect', 'coords' => '0,0,1,1', 'id' => '1']]],
         ];
 
         $inputString = '<map name="test"><area shape="rect" coords="0,0,1,1" id="1" /></map>';

@@ -28,18 +28,16 @@ class AjaxController
         \TYPO3\CMS\Core\Http\ServerRequest $request,
         \TYPO3\CMS\Core\Http\Response $response
     ) {
-        $view = GeneralUtility::makeInstance(\Evoweb\Imagemap\View\Tceform::class);
-        $view->init();
-
         $parameters = $request->getQueryParams()['P'];
         $parameters['fieldConf'] = unserialize(stripslashes($request->getQueryParams()['config']));
-        $parameters['pObj'] = GeneralUtility::makeInstance(\TYPO3\CMS\Backend\Form\NodeFactory::class);
-        $parameters['pObj']->initDefaultBEMode();
-        $GLOBALS['BE_USER']->setAndSaveSessionData('imagemap.value', $parameters['value']);
 
-        $view->setTCEForm($parameters['pObj']);
+        $view = GeneralUtility::makeInstance(\Evoweb\Imagemap\View\Tceform::class);
+        $view->init();
+        $view->setTCEForm(GeneralUtility::makeInstance(\TYPO3\CMS\Backend\Form\NodeFactory::class));
         $view->setFormName($parameters['itemFormElName']);
         $view->setWizardConf($parameters['fieldConf']['config']['wizards']);
+
+        $GLOBALS['BE_USER']->setAndSaveSessionData('imagemap.value', $parameters['value']);
 
         try {
             $data = GeneralUtility::makeInstance(
@@ -55,6 +53,7 @@ class AjaxController
         }
 
         $response->getBody()->write($view->renderContent());
+
         return $response;
     }
 }

@@ -12,12 +12,10 @@ namespace Evoweb\Imagemap\DataProcessing;
  * LICENSE.txt file that was distributed with this source code.
  */
 
-use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
-
 class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcessorInterface
 {
     /**
-     * @var ContentObjectRenderer
+     * @var \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer
      */
     public $cObj;
 
@@ -64,7 +62,7 @@ class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcess
     /**
      * Process data of a record to resolve imagemap
      *
-     * @param ContentObjectRenderer $cObj The data of the content element or page
+     * @param \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer $cObj The data of the content element or page
      * @param array $contentObjectConfiguration The configuration of Content Object
      * @param array $processorConfiguration The configuration of this processor
      * @param array $processedData Key/value store of processed data (e.g. to be passed to a Fluid View)
@@ -72,7 +70,7 @@ class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcess
      * @return array the processed data as key/value store
      */
     public function process(
-        ContentObjectRenderer $cObj,
+        \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer $cObj,
         array $contentObjectConfiguration,
         array $processorConfiguration,
         array $processedData

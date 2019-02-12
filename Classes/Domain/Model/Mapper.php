@@ -32,9 +32,9 @@ class Mapper
     public function generateMap(
         ContentObjectRenderer &$cObj,
         $name,
-        $mapping = null,
+        $mapping = '',
         $whitelist = [],
-        $xhtml = null,
+        $xhtml = false,
         $conf = null
     ) {
         if (is_array($whitelist)) {
@@ -42,26 +42,24 @@ class Mapper
         }
         $mapArray = self::map2array($mapping);
 
-        $mapArray['@']['name'] = $this->createValidNameAttribute($name);
-        // use id-attribute if XHTML is required see issue #2525
+        $mapArray['attributes']['name'] = $this->createValidNameAttribute($name);
         // name-attribute is still required due to browser compatibility ;(
         if ($xhtml) {
-            $mapArray['@']['id'] = $mapArray['@']['name'];
+            $mapArray['attributes']['id'] = $mapArray['attributes']['name'];
         }
 
-        if (!is_array($conf) || !array_key_exists('area.', $conf)) {
+        if (!is_array($conf) || !isset($conf['area.'])) {
             $conf = ['area.' => []];
         }
 
-        if (is_array($mapArray['#'])) {
-            foreach ($mapArray['#'] as $nodeData) {
-                list($key, $node) = $nodeData;
-                if (!$node['value'] && !$node['@']['href']) {
+        if (is_array($mapArray['areas'])) {
+            foreach ($mapArray['areas'] as $key => $node) {
+                if (!$node['value'] && !$node['attributes']['href']) {
                     continue;
                 }
 
                 $reg = ['area-href' => $node['value']];
-                foreach ($node['@'] as $ak => $av) {
+                foreach ($node['attributes'] as $ak => $av) {
                     $reg['area-' . $ak] = htmlspecialchars($av);
                 }
 
@@ -69,30 +67,36 @@ class Mapper
                 $tmp = self::map2array(
                     $cObj->typolink(
                         '-',
-                        $this->getTypolinkSetup(($node['value'] ? $node['value'] : $node['@']['href']), $conf['area.'])
+                        $this->getTypolinkSetup(
+                            $node['value'] ? $node['value'] : $node['attributes']['href'],
+                            $conf['area.']
+                        )
                     ),
                     'a'
                 );
                 $cObj->cObjGetSingle('RESTORE_REGISTER', $reg);
 
-                if (is_array($tmp['@'])) {
-                    unset($mapArray['#'][$key]['@']['href']);
-                    $mapArray['#'][$key]['@'] = array_merge(
-                        array_filter($tmp['@']),
-                        array_filter($mapArray['#'][$key]['@'])
+                if (is_array($tmp['attributes'])) {
+                    unset($mapArray['areas'][$key]['attributes']['href']);
+                    $mapArray['areas'][$key]['attributes'] = array_merge(
+                        array_filter($tmp['attributes']),
+                        array_filter($mapArray['areas'][$key]['attributes'])
                     );
 
                     if (is_array($whitelist)) {
-                        $mapArray['#'][$key]['@'] = array_intersect_key($mapArray['#'][$key]['@'], $whitelist);
+                        $mapArray['areas'][$key]['attributes'] = array_intersect_key(
+                            $mapArray['areas'][$key]['attributes'],
+                            $whitelist
+                        );
                     }
                     // Remove empty attributes
-                    $mapArray['#'][$key]['@'] = array_filter($mapArray['#'][$key]['@']);
+                    $mapArray['areas'][$key]['attributes'] = array_filter($mapArray['areas'][$key]['attributes']);
                 }
-                unset($mapArray['#'][$key]['value']);
+                unset($mapArray['areas'][$key]['value']);
             }
         }
 
-        return (self::isEmptyMap($mapArray) ? '' : self::array2map($mapArray));
+        return self::isEmptyMap($mapArray) ? '' : self::array2map($mapArray);
     }
 
     /**
@@ -145,8 +149,8 @@ class Mapper
      * @return array transformed Array keys:
      *  'name'~Tagname,
      *  'value'~Tagvalue,
-     *  '@'~Sub-Array with Attributes,
-     *  '#'~Sub-Array with Childnodes
+     *  'attributes'~Sub-Array with Attributes,
+     *  'areas'~Sub-Array with Childnodes
      */
     public static function map2array($value, $baseTag = 'map')
     {
@@ -163,9 +167,9 @@ class Mapper
         }
 
         if (self::nodeHasAttributes($xml)) {
-            $ret['@'] = self::getAttributesFromXMLNode($xml);
+            $ret['attributes'] = self::getAttributesFromXMLNode($xml);
         }
-        $ret['#'] = [];
+        $ret['areas'] = [];
         foreach ($xml->children() as $subNode) {
             $newChild = [];
             $newChild['name'] = $subNode->getName();
@@ -173,12 +177,12 @@ class Mapper
                 $newChild['value'] = (string)$subNode;
             }
             if (self::nodeHasAttributes($subNode)) {
-                $newChild['@'] = self::getAttributesFromXMLNode($subNode);
+                $newChild['attributes'] = self::getAttributesFromXMLNode($subNode);
             }
-            $ret['#'][] = $newChild;
+            $ret['areas'][] = $newChild;
         }
-        if (!count($ret['#'])) {
-            unset($ret['#']);
+        if (!count($ret['areas'])) {
+            unset($ret['areas']);
         }
         return $ret;
     }
@@ -197,13 +201,13 @@ class Mapper
             $value['name'] = 'map';
         }
         $ret = null;
-        if (!$value['#'] && !$value['value']) {
-            $ret = '<' . $value['name'] . self::implodeXMLAttributes($value['@']) . ' />';
+        if (!$value['areas'] && !$value['value']) {
+            $ret = '<' . $value['name'] . self::implodeXMLAttributes($value['attributes']) . ' />';
         } else {
-            $ret = '<' . $value['name'] . self::implodeXMLAttributes($value['@']) . '>';
-            if (is_array($value['#'])) {
-                foreach ($value['#'] as $subNode) {
-                    $ret .= self::array2map($subNode[1], $level + 1);
+            $ret = '<' . $value['name'] . self::implodeXMLAttributes($value['attributes']) . '>';
+            if (is_array($value['areas'])) {
+                foreach ($value['areas'] as $subNode) {
+                    $ret .= self::array2map($subNode, $level + 1);
                 }
             }
             $ret .= $value['value'];
@@ -308,6 +312,6 @@ class Mapper
     public static function isEmptyMap($map)
     {
         $arr = is_array($map) ? $map : self::map2array($map);
-        return !isset($arr['#']) || count($arr['#']) == 0;
+        return !isset($arr['areas']) || count($arr['areas']) == 0;
     }
 }

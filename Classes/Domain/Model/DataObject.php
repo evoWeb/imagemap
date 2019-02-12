@@ -140,7 +140,7 @@ class DataObject
      *
      * @return \TYPO3\CMS\Core\Resource\File
      */
-    public function getImage($uid)
+    public function getImageFile($uid)
     {
         $imageField = $this->determineImageFieldName();
         /** @var \TYPO3\CMS\Core\Resource\FileRepository $fileRepository */
@@ -156,7 +156,7 @@ class DataObject
     public function hasValidImageFile()
     {
         $uid = (int) $this->getFieldValue('uid');
-        $image = $this->getImage($uid);
+        $image = $this->getImageFile($uid);
         return $uid && $image !== null && $image->exists();
     }
 
@@ -165,7 +165,7 @@ class DataObject
      *
      * @return string
      */
-    public function renderImage()
+    public function getImage()
     {
         $this->environment->initTSFE($this->getLivePid());
         $cObj = $this->getTypoScriptFrontendController()->cObj;
@@ -211,7 +211,7 @@ class DataObject
     public function renderThumbnail($confKey, $defaultMaxWH)
     {
         $maxSize = $this->environment->getExtConfValue($confKey, $defaultMaxWH);
-        $img = $this->renderImage();
+        $img = $this->getImage();
         $matches = [];
         if (preg_match('/width="(\d+)" height="(\d+)"/', $img, $matches)) {
             $width = intval($matches[1]);
@@ -244,7 +244,7 @@ class DataObject
     public function getThumbnailScale($confKey, $defaultMaxWH)
     {
         $maxSize = $this->environment->getExtConfValue($confKey, $defaultMaxWH);
-        $img = $this->renderImage();
+        $img = $this->getImage();
         $matches = [];
         $ret = 1;
         if (preg_match('/width="(\d+)" height="(\d+)"/', $img, $matches)) {
@@ -266,17 +266,18 @@ class DataObject
      */
     public function listAreas($template = '')
     {
-        if (!is_array($this->map['#'])) {
+        if (!is_array($this->map['areas'])) {
             return '';
         }
         $result = '';
-        foreach ($this->map['#'] as $area) {
+        foreach ($this->map['areas'] as $area) {
+            $attributes = $area['attributes'];
             $markers = [
-                '##coords##' => $area['@']['coords'],
-                '##shape##' => ucfirst($area['@']['shape']),
-                '##color##' => $this->attributize($area['@']['color']),
+                '##coords##' => $attributes['coords'],
+                '##shape##' => ucfirst($attributes['shape']),
+                '##color##' => $this->attributize($attributes['color']),
                 '##link##' => $this->attributize($area['value']),
-                '##alt##' => $this->attributize($area['@']['alt']),
+                '##alt##' => $this->attributize($attributes['alt']),
                 '##attributes##' => $this->listAttributesAsSet($area),
             ];
 
@@ -296,7 +297,7 @@ class DataObject
         $ret = [];
         foreach ($relAttr as $key) {
             $ret[] = $key . ':\''
-                . $this->attributize(array_key_exists($key, $area['@']) ? $area['@'][$key] : '') . '\'';
+                . $this->attributize(isset($area['attributes'][$key]) ? $area['attributes'][$key] : '') . '\'';
         }
         return implode(',', $ret);
     }
@@ -382,6 +383,14 @@ class DataObject
     public function getTable()
     {
         return $this->table;
+    }
+
+    /**
+     * @return array
+     */
+    public function getMap()
+    {
+        return $this->map;
     }
 
     /**
@@ -486,6 +495,14 @@ class DataObject
             $theField = $parts[2];
         }
         return ($GLOBALS['TCA'][$this->table]['columns'][$theField]['config']['type'] == 'flex');
+    }
+
+    /**
+     * @return Typo3Env
+     */
+    public function getEnvironment()
+    {
+        return $this->environment;
     }
 
     /**

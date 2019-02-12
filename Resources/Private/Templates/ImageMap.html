@@ -19,7 +19,7 @@
 												 title="{column.media.title}"
 												 usemap="#{imageMapName}"
 												 class="image-embed-item"/>
-								{imageMap}
+								{imageMap -> f:format.raw()}
 								<f:if condition="{column.media.description}">
 									<figcaption class="image-caption">
 										{column.media.description}
