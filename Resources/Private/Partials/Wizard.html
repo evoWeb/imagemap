@@ -10,7 +10,7 @@ var canvaseObject,
 jQuery(document).ready(function() {
 	var canvasObject = new canvasClass();
 	canvasObject.init('canvas', 'picture', 'areaForms');
-	{existingFields}
+	{existingFields -> f:format.raw()}
 
 	scaleFactor = canvasObject.initializeScaling(scaleFactor);
 	canvasObject.setScale(scaleFactor);
@@ -81,10 +81,7 @@ jQuery(document).ready(function() {
 	</div>
 
 	<div id="actions">
-		<input type="submit" id="addRect" value="{f:translate(id: 'imagemap.form.addrect', extensionName: 'imagemap')}" />
-		<input type="submit" id="addCirc" value="{f:translate(id: 'imagemap.form.addcirc', extensionName: 'imagemap')}" />
-		<input type="submit" id="addPoly" value="{f:translate(id: 'imagemap.form.addpoly', extensionName: 'imagemap')}" />
-		<input type="submit" id="submit" value="{f:translate(id: 'imagemap.form.submit', extensionName: 'imagemap')}" />
+
 	</div>
 
 	<div id="areaForms">
