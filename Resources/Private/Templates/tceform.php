@@ -1,8 +1,4 @@
 <?php
-$this->addExternalJS("templates/js/jquery-1.4.min.js");
-$this->addExternalJS("templates/js/jquery-ui-1.7.2.custom.min.js");
-$this->addExternalJS("templates/js/jquery.base64.js");
-$this->addExternalJS("templates/js/wizard.all.js.ycomp.js");
 
 $existingFields = $this->data->listAreas("\tcanvasObject.addArea(new area##shape##Class(),'##coords##','##alt##','##link##','##color##',0);\n");
 
@@ -32,7 +28,7 @@ function imagemapwizard_valueChanged(field) {
     jQuery.ajax();
 }
 ');
-$additionalWizardConf = array('fieldChangeFunc'=>array('imagemapwizard_valueChanged(field);'));
+$additionalWizardConf = ['fieldChangeFunc'=> ['imagemapwizard_valueChanged(field);']];
 ?>
 <div id="<?php echo $this->getId(); ?>" style="position:relative">
 
@@ -54,7 +50,6 @@ $additionalWizardConf = array('fieldChangeFunc'=>array('imagemapwizard_valueChan
 
     <?php
     if($this->data->hasDirtyState()) {
-        echo '<div class="imagemap_wiz_message" style="display:none;width:170px;height:70px;padding:20px 40px 10px 40px;position:absolute;z-index:999;background: url('.$this->getTplSubpath().'img/form-tooltip.png) no-repeat;">';
         $this->getLL('form.is_dirty',1);
         echo '<div class="imagemap_wiz_message_close" style="display:block;position:absolute;right:15px;top:15px;cursor:pointer">[x]</div></div>';
     }
