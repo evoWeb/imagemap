@@ -15,8 +15,18 @@ namespace Evoweb\Imagemap\Tests;
 use PHPUnit\Framework\MockObject\MockObject;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 
-class MappingsTest extends \TYPO3\TestingFramework\Core\Unit\UnitTestCase
+class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTestCase
 {
+    /**
+     * @var array
+     */
+    protected $testExtensionsToLoad = ['typo3conf/ext/imagemap'];
+
+    /**
+     * @var array
+     */
+    protected $coreExtensionsToLoad = ['extbase', 'fluid'];
+
     /**
      * @var \Evoweb\Imagemap\Domain\Model\Mapper
      */
@@ -24,6 +34,8 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Unit\UnitTestCase
 
     protected function setUp()
     {
+        parent::setUp();
+
         $this->mapper = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
             \Evoweb\Imagemap\Domain\Model\Mapper::class
         );

@@ -47,7 +47,7 @@ class ConvertingTest extends \TYPO3\TestingFramework\Core\Unit\UnitTestCase
             'Map to Array mappings fails to convert empty Maps'
         );
         $this->assertEquals(
-            ['name' => 'map', '@' => ['name' => 'test']],
+            ['name' => 'map', 'attributes' => ['name' => 'test']],
             $this->mapper->map2array('<map name="test"></map>'),
             'Map to Array fails to extract the Name-Attribute.'
         );

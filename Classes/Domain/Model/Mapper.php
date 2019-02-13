@@ -52,13 +52,13 @@ class Mapper
             $conf = ['area.' => []];
         }
 
-        if (is_array($mapArray['areas'])) {
+        if (isset($mapArray['areas']) && is_array($mapArray['areas'])) {
             foreach ($mapArray['areas'] as $key => $node) {
-                if (!$node['value'] && !$node['attributes']['href']) {
+                if ((!isset($node['value']) || !$node['value']) && !$node['attributes']['href']) {
                     continue;
                 }
 
-                $reg = ['area-href' => $node['value']];
+                $reg = ['area-href' => $node['value'] ?? ''];
                 foreach ($node['attributes'] as $ak => $av) {
                     $reg['area-' . $ak] = htmlspecialchars($av);
                 }
@@ -195,25 +195,27 @@ class Mapper
      *
      * @return string XML-String
      */
-    public static function array2map($value, $level = 0)
+    public static function array2map(array $value, $level = 0)
     {
-        if (!$value['name'] && $level == 0) {
+        if ($level == 0 && (!isset($value['name']) || !$value['name'])) {
             $value['name'] = 'map';
         }
-        $ret = null;
-        if (!$value['areas'] && !$value['value']) {
-            $ret = '<' . $value['name'] . self::implodeXMLAttributes($value['attributes']) . ' />';
+
+        if ((!isset($value['areas']) || !$value['areas']) && (!isset($value['value']) || !$value['value'])) {
+            $result = '<' . $value['name'] . self::implodeXMLAttributes($value['attributes'] ?? []) . ' />';
         } else {
-            $ret = '<' . $value['name'] . self::implodeXMLAttributes($value['attributes']) . '>';
-            if (is_array($value['areas'])) {
+            $result = '<' . $value['name'] . self::implodeXMLAttributes($value['attributes'] ?? []) . '>';
+            if (isset($value['areas']) && is_array($value['areas'])) {
                 foreach ($value['areas'] as $subNode) {
-                    $ret .= self::array2map($subNode, $level + 1);
+                    $result .= self::array2map($subNode, $level + 1);
                 }
             }
-            $ret .= $value['value'];
-            $ret .= '</' . $value['name'] . '>';
+            if (isset($value['value'])) {
+                $result .= $value['value'];
+            }
+            $result .= '</' . $value['name'] . '>';
         }
-        return $ret;
+        return $result;
     }
 
     /**
@@ -243,7 +245,9 @@ class Mapper
     protected static function getAttributesFromXMLNode($node, $attr = null)
     {
         $tmp = (array)$node->attributes();
-        return ($attr == null) ? $tmp['@attributes'] : (string)$tmp['@attributes'][$attr];
+        return isset($tmp['@attributes']) ?
+            (($attr == null) ? $tmp['@attributes'] : (string)$tmp['@attributes'][$attr]) :
+            '';
     }
 
     /**
@@ -265,15 +269,13 @@ class Mapper
      *
      * @return string
      */
-    protected static function implodeXMLAttributes($attributes)
+    protected static function implodeXMLAttributes(array $attributes)
     {
-        $ret = '';
-        if (is_array($attributes)) {
-            foreach ($attributes as $key => $value) {
-                $ret .= sprintf(' %s="%s"', $key, htmlspecialchars($value));
-            }
+        $result = '';
+        foreach ($attributes as $key => $value) {
+            $result .= sprintf(' %s="%s"', $key, htmlspecialchars($value));
         }
-        return $ret;
+        return $result;
     }
 
     /**
@@ -293,10 +295,10 @@ class Mapper
         }
         $match = true;
         foreach ($a as $key => $value) {
-            $match = $match && self::arraysMatch($a[$key], $b[$key]);
+            $match = $match && self::arraysMatch($a[$key] ?? [], $b[$key] ?? []);
         }
         foreach ($b as $key => $value) {
-            $match = $match && self::arraysMatch($b[$key], $a[$key]);
+            $match = $match && self::arraysMatch($b[$key] ?? [], $a[$key] ?? []);
         }
         return $match;
     }

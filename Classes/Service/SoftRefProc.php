@@ -37,7 +37,7 @@ class SoftRefProc extends \TYPO3\CMS\Core\Database\SoftReferenceIndex
 
         $zeroToken = $this->makeTokenID('setTypoLinkPartsElement:' . $idx) . ':0';
         $elements = [];
-        if (is_array($data['areas'])) {
+        if (isset($data['areas']) && is_array($data['areas'])) {
             foreach ($data['areas'] as $key => $value) {
                 $tmp = $this->findRef_typolink($value['value'], $spParams);
                 $linkData = $tmp['elements'][$zeroToken];
