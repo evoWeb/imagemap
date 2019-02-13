@@ -1,0 +1,33 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+			xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+			data-namespace-typo3-fluid="true">
+
+<div id="circForm" class="areaForm bgColor5">
+	<div id="MAPFORMID_main" class="basicOptions">
+		<div class="colorPreview ptr"><div></div></div>
+		<div class="field">
+			<label for="MAPFORMID_label"><f:translate id="imagemap.form.area.label" extensionName="imagemap"/>:</label>
+			<input type="text" id="MAPFORMID_label" value="..." />
+		</div>
+		<div class="field">
+			<label for="MAPFORMID_link"><f:translate id="imagemap.form.area.link" extensionName="imagemap"/>:</label>
+			<input type="text" id="MAPFORMID_link" value="..." />
+		</div>
+		<f:render partial="Imagemap/Controls" arguments="{returnUrl: returnUrl, formName: formName}"/>
+	</div>
+
+	<div id="MAPFORMID_more" class="moreOptions">
+		<f:render partial="Imagemap/ColorPicker" arguments="{attributeKeys: attributeKeys}"/>
+
+		<div class="positionOptions halfLine">
+			<span id="MAPFORMID_upd" class="ptr refresh" title="{f:translate(id: 'imagemap.form.area.refresh', extensionName: 'imagemap')}"><core:icon identifier="actions-system-refresh"/></span>
+			<label for="MAPFORMID_x" class="XYlabel XYlabel-first">X:</label><input type="text" class="formCoord" id="MAPFORMID_x" value="x" />
+			<label for="MAPFORMID_y" class="XYlabel">Y:</label><input type="text" class="formCoord" id="MAPFORMID_y" value="y" /><br class="cc"/>
+			<label for="MAPFORMID_radius" class="XYlabel XYlabel-first">R:</label><input type="text" class="formCoord" id="MAPFORMID_radius" value="r" />
+			<div class="cc"><!-- --></div>
+		</div>
+		<div class="cc"><!-- --></div>
+	</div>
+</div>
+
+</html>

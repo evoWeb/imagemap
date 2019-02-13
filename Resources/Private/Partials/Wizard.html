@@ -35,14 +35,14 @@ window.imagemap = {
 		</div>
 		<div id="picture">
 			<div id="image">{data.image -> f:format.raw()}</div>
-			<div id="canvas" class="canvas"><!-- --></div>
+			<div id="canvas" class="canvas"></div>
 		</div>
 	</div>
 
 	<div id="areaForms">
-		<f:render partial="RectForm" arguments="{_all}"/>
-		<f:render partial="CircForm" arguments="{_all}"/>
-		<f:render partial="PolyForm" arguments="{_all}"/>
+		<f:render partial="Imagemap/RectForm" arguments="{_all}"/>
+		<f:render partial="Imagemap/CircForm" arguments="{_all}"/>
+		<f:render partial="Imagemap/PolyForm" arguments="{_all}"/>
 	</div>
 
 	<span class="cc"><!-- --></span>

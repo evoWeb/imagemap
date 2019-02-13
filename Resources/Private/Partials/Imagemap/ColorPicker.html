@@ -1,0 +1,23 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
+
+<div class="colorpicker halfLine">
+	<div id="MAPFORMID_color" class="colors">
+		<div class="colorBox"><div></div></div>
+		<div class="colorPicker"></div>
+	</div>
+	<div id="MAPFORMID_stroke" class="colors">
+		<div class="strokeBox"><div></div></div>
+		<div class="strokePicker"></div>
+	</div>
+	<div id="MAPFORMID_attributes" class="attributes">
+		<f:for each="{attributeKeys}" as="key">
+			<div class="attribute">
+				<label for="MAPFORMID_{f:format.case(value: key, mode: 'lower')}">{f:format.case(value: key, mode: 'capital')}:</label>
+				<input type="text" id="MAPFORMID_{f:format.case(value: key, mode: 'lower')}" value="..." />
+				<br class="cc" />
+			</div>
+		</f:for>
+	</div>
+</div>
+
+</html>

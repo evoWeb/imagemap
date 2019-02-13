@@ -86,11 +86,11 @@ class PopupController
         }
 
         // Setting field-change functions:
-        $update = '';
+        $fieldChangeFunctions = '';
         if (isset($parameters['fieldChangeFunc']) && is_array($parameters['fieldChangeFunc'])) {
             unset($parameters['fieldChangeFunc']['alert']);
-            foreach ($parameters['fieldChangeFunc'] as $v) {
-                $update .= 'parent.opener.' . $v;
+            foreach ($parameters['fieldChangeFunc'] as $fieldChangeFunction) {
+                $fieldChangeFunctions .= 'parent.opener.' . $fieldChangeFunction;
             }
         }
 
@@ -115,7 +115,7 @@ class PopupController
                 var field = getParentField();
                 if (field) {
                     field.value = input;
-                    ' . $update . '
+                    ' . $fieldChangeFunctions . '
                 }
             }
 

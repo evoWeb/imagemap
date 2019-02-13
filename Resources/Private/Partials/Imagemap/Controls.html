@@ -1,0 +1,38 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+			xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+			xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+			data-namespace-typo3-fluid="true">
+
+<f:variable name="linkParameter" value="{
+	mode: 'wizard',
+	field: 'MAPFORMID_link',
+	P: {
+		returnUrl: returnUrl,
+		formName: formName,
+		itemName: 'MAPFORMID_link',
+		currentValue: 'MAPAREAVALUE_URL',
+		pid: data.pid,
+		fieldChangeFunc: {
+			focus: 'focus()',
+			callback: 'canvasObject.triggerAreaLinkUpdate(\"OBJID\")'
+		}
+	}
+}"/>
+<f:variable name="link"><be:moduleLink route="wizard_link" arguments="{linkParameter}"/></f:variable>
+<a href="#" id="MAPFORMID_linkwizard" onclick="this.blur(); vHWin = window.open('{link}', '', 'height=600,width=500,status=0,menubar=0,scrollbars=1'); vHWin.focus(); return false;">
+	<span title="{f:translate(id: 'imagemap.form.area.linkwizard', extensionName: 'imagemap')}"><core:icon identifier="extensions-imagemap-link"/></span>
+</a>
+<span id="MAPFORMID_up" class="ptr sortbtn upbtn" title="{f:translate(id: 'imagemap.form.area.up', extensionName: 'imagemap')}"><core:icon identifier="actions-move-up"/></span>
+<span id="MAPFORMID_down" class="ptr sortbtn downbtn" title="{f:translate(id: 'imagemap.form.area.down', extensionName: 'imagemap')}"><core:icon identifier="actions-move-down"/></span>
+<span id="MAPFORMID_undo" class="ptr undo" title="{f:translate(id: 'imagemap.form.area.undo', extensionName: 'imagemap')}"><core:icon identifier="actions-edit-undo"/></span>
+<span id="MAPFORMID_redo" class="ptr redo" title="{f:translate(id: 'imagemap.form.area.redo', extensionName: 'imagemap')}"><core:icon identifier="extensions-imagemap-redo"/></span>
+<span id="MAPFORMID_del" class="ptr" title="{f:translate(id: 'imagemap.form.area.remove', extensionName: 'imagemap')}"><core:icon identifier="actions-edit-delete"/></span>
+<f:if condition="{renderAddButton}">
+	<span id="MAPFORMID_add" class="ptr add" title="{f:translate(id: 'imagemap.form.poly.add', extensionName: 'imagemap')}"><core:icon identifier="extensions-imagemap-add"/></span>
+</f:if>
+<div class="arrow exp ptr">
+	<span class="ptr expUpDown down" title="{f:translate(id: 'imagemap.form.area.expand', extensionName: 'imagemap')}"><core:icon identifier="actions-view-list-expand"/></span>
+	<span class="ptr expUpDown up" title="{f:translate(id: 'imagemap.form.area.collapse', extensionName: 'imagemap')}"><core:icon identifier="actions-view-list-collapse"/></span>
+</div>
+
+</html>
