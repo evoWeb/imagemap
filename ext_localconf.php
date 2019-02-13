@@ -20,9 +20,6 @@ call_user_func(function () {
         ['source' => 'EXT:imagemap/Resources/Public/Icons/content-imagemap.svg']
     );
     $icons = [
-        'add' => 'EXT:imagemap/Resources/Public/Icons/add.gif',
-        'redo' => 'EXT:imagemap/Resources/Public/Icons/arrow_redo.png',
-        'link' => 'EXT:imagemap/Resources/Public/Icons/link_edit.png',
         'zoomin' => 'EXT:imagemap/Resources/Public/Icons/magnifier_zoom_in.png',
         'zoomout' => 'EXT:imagemap/Resources/Public/Icons/magnifier_zoom_out.png',
     ];

@@ -20,15 +20,15 @@
 }"/>
 <f:variable name="link"><be:moduleLink route="wizard_link" arguments="{linkParameter}"/></f:variable>
 <a href="#" id="MAPFORMID_linkwizard" onclick="this.blur(); vHWin = window.open('{link}', '', 'height=600,width=500,status=0,menubar=0,scrollbars=1'); vHWin.focus(); return false;">
-	<span title="{f:translate(id: 'imagemap.form.area.linkwizard', extensionName: 'imagemap')}"><core:icon identifier="extensions-imagemap-link"/></span>
+	<span title="{f:translate(id: 'imagemap.form.area.linkwizard', extensionName: 'imagemap')}"><core:icon identifier="actions-wizard-link"/></span>
 </a>
 <span id="MAPFORMID_up" class="ptr sortbtn upbtn" title="{f:translate(id: 'imagemap.form.area.up', extensionName: 'imagemap')}"><core:icon identifier="actions-move-up"/></span>
 <span id="MAPFORMID_down" class="ptr sortbtn downbtn" title="{f:translate(id: 'imagemap.form.area.down', extensionName: 'imagemap')}"><core:icon identifier="actions-move-down"/></span>
 <span id="MAPFORMID_undo" class="ptr undo" title="{f:translate(id: 'imagemap.form.area.undo', extensionName: 'imagemap')}"><core:icon identifier="actions-edit-undo"/></span>
-<span id="MAPFORMID_redo" class="ptr redo" title="{f:translate(id: 'imagemap.form.area.redo', extensionName: 'imagemap')}"><core:icon identifier="extensions-imagemap-redo"/></span>
-<span id="MAPFORMID_del" class="ptr" title="{f:translate(id: 'imagemap.form.area.remove', extensionName: 'imagemap')}"><core:icon identifier="actions-edit-delete"/></span>
+<span id="MAPFORMID_redo" class="ptr redo" title="{f:translate(id: 'imagemap.form.area.redo', extensionName: 'imagemap')}"><core:icon identifier="actions-edit-redo"/></span>
+<span id="MAPFORMID_del" class="ptr" title="{f:translate(id: 'imagemap.form.area.remove', extensionName: 'imagemap')}"><core:icon identifier="actions-delete"/></span>
 <f:if condition="{renderAddButton}">
-	<span id="MAPFORMID_add" class="ptr add" title="{f:translate(id: 'imagemap.form.poly.add', extensionName: 'imagemap')}"><core:icon identifier="extensions-imagemap-add"/></span>
+	<span id="MAPFORMID_add" class="ptr add" title="{f:translate(id: 'imagemap.form.poly.add', extensionName: 'imagemap')}"><core:icon identifier="actions-add"/></span>
 </f:if>
 <div class="arrow exp ptr">
 	<span class="ptr expUpDown down" title="{f:translate(id: 'imagemap.form.area.expand', extensionName: 'imagemap')}"><core:icon identifier="actions-view-list-expand"/></span>
