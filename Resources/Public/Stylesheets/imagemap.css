@@ -5,12 +5,12 @@
 	overflow: visible;
 }
 
-.cc {
-	clear: both;
+.disabled span {
+	opacity: 0.6;
 }
 
-.ptr {
-	cursor: pointer;
+.cc {
+	clear: both;
 }
 
 #pic {
@@ -39,9 +39,6 @@
 #magnify .zin, #magnify .zout {
 	height: 32px;
 	width: 32px;
-}
-
-#image {
 }
 
 #boundingbox {
@@ -79,7 +76,6 @@
 
 #areaForms {
 	margin: 20px 4px 50px 4px;
-	width: 600px;
 	float: left;
 	clear: left;
 }
@@ -90,70 +86,60 @@
 	float: left;
 	clear: left;
 	margin-bottom: 10px;
-	border: 1px solid gray;
 }
 
-.areaForm .formCoord {
-	width: 35px;
-	text-align: right;
-	margin-right: 5px;
-	float: left;
-}
 
-.arrow {
-	position: absolute;
-	right: 0;
-	top: 0;
-	border-left: 1px solid grey;
-	height: 32px;
-	padding: 8px 10px;
-}
-
-.basicOptions {
+.basicOptions .form-control {
+	width: 50%;
+	min-width: auto;
 }
 
 .basicOptions .colorPreview {
 	border: 1px solid #000;
 	float: left;
-	margin: 3px 5px;
 }
 
 .basicOptions .colorPreview div {
-	width: 24px;
-	height: 24px;
+	width: 16px;
+	height: 16px;
 	border: 2px solid #fff;
-}
-
-.basicOptions .field {
-	display: inline-block;
-	margin: 4px 5px 4px 0;
-}
-
-.basicOptions label {
-	padding: 0 0 3px 0;
-	margin: 0;
-}
-
-.basicOptions input {
-	height: 24px;
-	padding: 2px 0;
-}
-
-.basicOptions .add {
-	padding: 3px 2px 1px 2px;
 }
 
 
 .moreOptions {
-	padding: 10px 0 10px 0;
-	border-top: 1px dashed gray;
+	border: 1px solid #bbb;
+	border-top: none;
+	padding: 6px;
 }
 
-.moreOptions .attributes {
-	padding: 5px 0;
+.moreOptions .form-control {
+	width: 50%;
+	min-width: auto;
 }
 
-.moreOptions .attributes .attribute {
+.moreOptions .colorBox {
+	display: none;
+}
+
+.moreOptions .colorpicker {
+	display: inline-block;
+	width: 242px;
+	border: 1px solid #000;
+	margin-left: 25px;
+}
+
+.moreOptions .colorPickerCell {
+	float: left;
+	width: 15px;
+	height: 15px;
+	margin: 0;
+	border: 1px solid white;
+	cursor: pointer;
+	font-size: 1px;
+	line-height: 1px;
+}
+
+.moreOptions .attribute {
 	padding: 1px 0;
 }
 
@@ -171,53 +157,12 @@
 	padding: 2px 0;
 }
 
-.moreOptions .halfLine {
-	float: left;
-	width: 230px;
-	padding-right: 10px;
-}
-
-.moreOptions .colorBox {
-	border: 1px solid #000;
-	float: left;
-}
-
-.moreOptions .colorBox div {
-	width: 20px;
-	height: 20px;
-	border: 2px solid #fff;
-}
-
-.moreOptions .colorPicker {
-	width: 172px;
-	border: 1px solid #000;
-	float: left;
-	margin-left: 5px;
-}
-
-.moreOptions .colorPickerCell {
-	float: left;
-	width: 10px;
-	height: 10px;
-	margin: 0;
-	border: 1px solid white;
-	cursor: pointer;
-	font-size: 1px;
-	line-height: 1px;
-}
-
-.positionOptions .refresh {
-	float: right;
-}
-
-.XYlabel {
-	float: left;
-	width: 30px;
+.moreOptions .positionOptions {
+	display: inline-block;
+	margin: 0 6px;
+	width: 250px;
 }
 
 .coordOpt {
 	float: left;
 }
-
-
-

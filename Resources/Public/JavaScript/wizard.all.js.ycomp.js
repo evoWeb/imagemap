@@ -1092,9 +1092,9 @@ var canvasClass = Class.extend({
 		return {w: this.imageOrigW, h: this.imageOrigH}
 	},
 	fixSortbtnVisibility: function () {
-		jQuery(this.formsId + " > div > .basicOptions > .sortbtn").css("visibility", "visible");
-		jQuery(this.formsId + " > div:first > .basicOptions > .upbtn").css("visibility", "hidden");
-		jQuery(this.formsId + " > div:last > .basicOptions > .downbtn").css("visibility", "hidden")
+		jQuery(this.formsId + " .sortbtn").removeClass("disabled");
+		jQuery(this.formsId + " > div:first .upbtn").addClass("disabled");
+		jQuery(this.formsId + " > div:last .downbtn").addClass("disabled")
 	},
 	persistanceXML: function () {
 		var a = "";
@@ -1282,8 +1282,8 @@ var areaClass = Class.extend({
 	},
 	updateColor: function (b, a) {
 		this.setColor(b);
-		jQuery("#" + this.getFormId() + "_main > .colorPreview > div").css("backgroundColor", b);
-		jQuery("#" + this.getFormId() + "_color > .colorBox > div").css("backgroundColor", b);
+		jQuery("#" + this.getFormId() + "_main .colorPreview > div").css("backgroundColor", b);
+		jQuery("#" + this.getFormId() + "_color .colorBox > div").css("backgroundColor", b);
 		if (a == 1) {
 			this.getCanvas().updateCanvas(this.getId())
 		}
@@ -1313,7 +1313,7 @@ var areaClass = Class.extend({
 		jQuery("#" + this.getFormId() + "_del").data("area", this).click(function (a) {
 			jQuery(this).data("area").remove()
 		});
-		jQuery("#" + this.getFormId() + " > .basicOptions > .exp > .expUpDown").parent().data("obj", this).data("rel", "#" + this.getFormId() + " > .moreOptions").click(function (a) {
+		jQuery("#" + this.getFormId() + " > .basicOptions .expUpDown").parent().data("obj", this).data("rel", "#" + this.getFormId() + " > .moreOptions").click(function (a) {
 			a.stopPropagation();
 			if (!jQuery(this).data("obj").isMoreOptionsVisible()) {
 				jQuery(this).data("obj").applyAdditionalAreaActions();
@@ -1325,7 +1325,7 @@ var areaClass = Class.extend({
 		});
 		jQuery("#" + this.getFormId() + " > .basicOptions > .colorPreview > div").data("target", this).click(function (b) {
 			var a = jQuery(this).data("target");
-			var c = jQuery("#" + a.getFormId() + " > .basicOptions > .exp > .expUpDown:visible").parent();
+			var c = jQuery("#" + a.getFormId() + " > .basicOptions .expUpDown:visible").parent();
 			jQuery(c).trigger("click")
 		});
 		jQuery("#" + this.getFormId() + "_link").data("obj", this).change(function (b) {
@@ -1339,15 +1339,27 @@ var areaClass = Class.extend({
 			a.pushUndoableAction()
 		});
 		jQuery("#" + this.getFormId() + "_up").data("obj", this).click(function (a) {
+			if ($(this).hasClass('disabled')) {
+				return;
+			}
 			jQuery(this).data("obj").getCanvas().areaUp(jQuery(this).data("obj").getId())
 		});
 		jQuery("#" + this.getFormId() + "_down").data("obj", this).click(function (a) {
+			if ($(this).hasClass('disabled')) {
+				return;
+			}
 			jQuery(this).data("obj").getCanvas().areaDown(jQuery(this).data("obj").getId())
 		});
 		jQuery("#" + this.getFormId() + "_undo").data("obj", this).click(function (a) {
+			if ($(this).hasClass('disabled')) {
+				return;
+			}
 			jQuery(this).data("obj").performUndo()
 		});
 		jQuery("#" + this.getFormId() + "_redo").data("obj", this).click(function (a) {
+			if ($(this).hasClass('disabled')) {
+				return;
+			}
 			jQuery(this).data("obj").performRedo()
 		});
 		this.applyBasicTypeActions();
@@ -1361,14 +1373,14 @@ var areaClass = Class.extend({
 		this.refreshExpandButtons()
 	},
 	updateStatesFromForm: function () {
-		this.setLink(jQuery("<div/>").text(jQuery("#" + this.getFormId() + "_link").attr("value")).html());
-		this.setLabel(jQuery("<div/>").text(jQuery("#" + this.getFormId() + "_label").attr("value")).html());
+		this.setLink(jQuery("<div/>").text(jQuery("#" + this.getFormId() + "_link").val()).html());
+		this.setLabel(jQuery("<div/>").text(jQuery("#" + this.getFormId() + "_label").val()).html());
 		var a = this;
 		if (typeof this._attr != "object") {
 			return
 		}
 		jQuery.each(this._attr, function (b, c) {
-			a._attr[b] = jQuery("<div/>").text(jQuery("#" + a.getFormId() + "_" + b).attr("value")).html()
+			a._attr[b] = jQuery("<div/>").text(jQuery("#" + a.getFormId() + "_" + b).val()).html()
 		})
 	},
 	getCommonFormUpdateFields: function () {
@@ -1410,11 +1422,11 @@ var areaClass = Class.extend({
 		this._moreOptionsInitFlag = true
 	},
 	refreshExpandButtons: function () {
-		jQuery("#" + this.getFormId() + " > .basicOptions > .exp > .expUpDown").hide();
+		jQuery("#" + this.getFormId() + " .expUpDown").hide();
 		if (this.isMoreOptionsVisible()) {
-			jQuery("#" + this.getFormId() + " > .basicOptions > .exp > .up").show()
+			jQuery("#" + this.getFormId() + " .up").show()
 		} else {
-			jQuery("#" + this.getFormId() + " > .basicOptions > .exp > .down").show()
+			jQuery("#" + this.getFormId() + " .down").show()
 		}
 	},
 	toogleMoreOptionsFlag: function () {
@@ -1489,8 +1501,16 @@ var areaClass = Class.extend({
 	restoreFromUndoOject: function (a) {
 	},
 	changeUndoBtnStates: function () {
-		jQuery("#" + this.getFormId() + "_undo").css("visibility", (this._undoStack.length ? "visible" : "hidden"));
-		jQuery("#" + this.getFormId() + "_redo").css("visibility", (this._redoStack.length ? "visible" : "hidden"))
+		if (this._undoStack.length) {
+			jQuery("#" + this.getFormId() + "_undo").removeClass('disabled');
+		} else {
+			jQuery("#" + this.getFormId() + "_undo").addClass('disabled');
+		}
+		if (this._redoStack.length) {
+			jQuery("#" + this.getFormId() + "_redo").removeClass('disabled')
+		} else {
+			jQuery("#" + this.getFormId() + "_redo").addClass('disabled')
+		}
 	}
 });
 var areaCircleClass = areaClass.extend({

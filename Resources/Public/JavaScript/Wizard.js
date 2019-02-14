@@ -1,15 +1,16 @@
-define(['jquery', 'jquery-ui/sortable', 'jquery-ui/draggable'], function($) {
-	$(document).ready(function() {
-		var defaultAttributeset = window.imagemap.defaultAttributeset,
+define(['jquery', 'jquery-ui/sortable', 'jquery-ui/draggable'], function ($) {
+	$(document).ready(function () {
+		var defaultAttributeSet = window.imagemap.defaultAttributeset,
 			canvasObject = new canvasClass(),
-			scaleFactor = window.imagemap.scaleFactor;
+			scaleFactor = window.imagemap.scaleFactor,
+			zoomOut = $('> .zout', '#magnify'),
+			zoomIn = $('> .zin', '#magnify');
 
 		canvasObject.init('canvas', 'picture', 'areaForms');
 		scaleFactor = canvasObject.initializeScaling(scaleFactor);
 		canvasObject.setScale(scaleFactor);
 
 		window.imagemap.existingFields.forEach(function (configuration) {
-			console.log(configuration);
 			canvasObject.addArea(
 				new window['area' + configuration.shape + 'Class'](),
 				configuration.coords,
@@ -22,53 +23,53 @@ define(['jquery', 'jquery-ui/sortable', 'jquery-ui/draggable'], function($) {
 		});
 
 		if (scaleFactor < 1) {
-			$('#magnify > .zout').hide();
+			zoomOut.hide();
 		} else {
-			$('#magnify > .zin').hide();
-			$('#magnify > .zout').hide();
+			zoomIn.hide();
+			zoomOut.hide();
 		}
 
-		$('#addRect').click(function() {
-			canvasObject.addArea(new areaRectClass(), '', '', '', '', 1, defaultAttributeset);
+		zoomIn.click(function () {
+			canvasObject.setScale(1);
+			$(this).hide();
+			zoomOut.show();
+		});
+
+		zoomOut.click(function () {
+			canvasObject.setScale(scaleFactor);
+			$(this).hide();
+			zoomIn.show();
+		});
+
+		$('#addRect').click(function () {
+			canvasObject.addArea(new areaRectClass(), '', '', '', '', 1, defaultAttributeSet);
 			return false;
 		});
 
-		$('#addPoly').click(function() {
-			canvasObject.addArea(new areaPolyClass(), '', '', '', '', 1, defaultAttributeset);
+		$('#addPoly').click(function () {
+			canvasObject.addArea(new areaPolyClass(), '', '', '', '', 1, defaultAttributeSet);
 			return false;
 		});
 
-		$('#addCirc').click(function() {
-			canvasObject.addArea(new areaCircleClass(), '', '', '', '', 1, defaultAttributeset);
+		$('#addCirc').click(function () {
+			canvasObject.addArea(new areaCircleClass(), '', '', '', '', 1, defaultAttributeSet);
 			return false;
 		});
 
-		$('#submit').click(function() {
+		$('#submit').click(function () {
 			setValue('<map>' + canvasObject.persistanceXML() + '\n</map>');
 			close();
 		});
 
 		$('#canvas')
-			.mousedown(function(e){
+			.mousedown(function (e) {
 				return canvasObject.mousedown(e);
-			}).mouseup(function(e){
-			return canvasObject.mouseup(e);
-		}).mousemove(function(e){
-			return canvasObject.mousemove(e);
-		}).dblclick(function(e){
-			return canvasObject.dblclick(e);
-		});
-
-		$('> .zin', '#magnify').click(function() {
-			canvasObject.setScale(1);
-			$(this).hide();
-			$('#magnify > .zout').show();
-		});
-
-		$('> .zout', '#magnify').click(function() {
-			canvasObject.setScale(scaleFactor);
-			$(this).hide();
-			$('#magnify > .zin').show();
-		});
+			}).mouseup(function (e) {
+				return canvasObject.mouseup(e);
+			}).mousemove(function (e) {
+				return canvasObject.mousemove(e);
+			}).dblclick(function (e) {
+				return canvasObject.dblclick(e);
+			});
 	});
 });

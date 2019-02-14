@@ -12,16 +12,16 @@
 				<target>Ajouter un élément Imagemap.</target>
 			</trans-unit>
 			<trans-unit id="imagemap.form.addrect" xml:space="preserve" approved="yes">
-				<source>Add Rect-Area</source>
-				<target>Ajout Zone-Rect</target>
+				<source>Rect-Area</source>
+				<target>Zone-Rect</target>
 			</trans-unit>
 			<trans-unit id="imagemap.form.addcirc" xml:space="preserve" approved="yes">
-				<source>Add Circ-Area</source>
-				<target>Ajout Zone-Circ</target>
+				<source>Circ-Area</source>
+				<target>Zone-Circ</target>
 			</trans-unit>
 			<trans-unit id="imagemap.form.addpoly" xml:space="preserve" approved="yes">
-				<source>Add Poly-Area</source>
-				<target>Ajout Zone-Poly</target>
+				<source>Poly-Area</source>
+				<target>Zone-Poly</target>
 			</trans-unit>
 			<trans-unit id="imagemap.form.submit" xml:space="preserve" approved="yes">
 				<source>Apply &amp; Close</source>

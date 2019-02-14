@@ -10,13 +10,13 @@
 				<source>Adds a Imagemap element.</source>
 			</trans-unit>
 			<trans-unit id="imagemap.form.addrect" xml:space="preserve">
-				<source>Add Rect-Area</source>
+				<source>Rect-Area</source>
 			</trans-unit>
 			<trans-unit id="imagemap.form.addcirc" xml:space="preserve">
-				<source>Add Circ-Area</source>
+				<source>Circ-Area</source>
 			</trans-unit>
 			<trans-unit id="imagemap.form.addpoly" xml:space="preserve">
-				<source>Add Poly-Area</source>
+				<source>Poly-Area</source>
 			</trans-unit>
 			<trans-unit id="imagemap.form.submit" xml:space="preserve">
 				<source>Apply &amp; Close</source>
