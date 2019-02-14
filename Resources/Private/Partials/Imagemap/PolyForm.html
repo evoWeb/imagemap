@@ -16,19 +16,26 @@
 		<f:render partial="Imagemap/ColorPicker" arguments="{attributeKeys: attributeKeys}"/>
 
 		<div class="positionOptions">
-			<span id="MAPFORMID_upd" class="refresh" title="{f:translate(id: 'imagemap.form.area.refresh', extensionName: 'imagemap')}"><core:icon identifier="actions-system-refresh"/></span>
 			POLYCOORDS
+
+			<span id="MAPFORMID_upd" class="refresh" title="{f:translate(id: 'imagemap.form.area.refresh', extensionName: 'imagemap')}"><core:icon identifier="actions-system-refresh"/></span>
 		</div>
 	</div>
 </div>
 
 <div id="polyCoords" class="noIdWrap">
-	<div>
-		<label for="MAPFORMID_xvN" class="XYlabel">XvN:</label><input type="text" class="formCoord" id="MAPFORMID_xvN" value="vX" />
-		<label for="MAPFORMID_yvN" class="XYlabel">YvN:</label><input type="text" class="formCoord" id="MAPFORMID_yvN" value="vY" />
-		<span id="MAPFORMID_beforevN" class="coordOpt addCoord" title="{f:translate(id: 'imagemap.form.poly.addEdgeBefore', extensionName: 'imagemap')}"><core:icon identifier="actions-view-go-up"/></span>
-		<span id="MAPFORMID_aftervN" class="coordOpt addCoord" title="{f:translate(id: 'imagemap.form.poly.addEdgeAfter', extensionName: 'imagemap')}"><core:icon identifier="actions-view-go-down"/></span>
-		<span id="MAPFORMID_rmvN" class="coordOpt rmCoord" title="{f:translate(id: 'imagemap.form.poly.removeEdge', extensionName: 'imagemap')}"><core:icon identifier="actions-close"/></span>
+	<div class="input-group clearfix">
+		<label for="MAPFORMID_xvN" class="input-group-addon">XvN:</label>
+		<input type="text" class="form-control" id="MAPFORMID_xvN" value="vX" />
+
+		<label for="MAPFORMID_yvN" class="input-group-addon">YvN:</label>
+		<input type="text" class="form-control" id="MAPFORMID_yvN" value="vY" />
+
+		<div class="input-group-btn">
+			<span id="MAPFORMID_beforevN" class="btn btn-default addCoord" title="{f:translate(id: 'imagemap.form.poly.addEdgeBefore', extensionName: 'imagemap')}"><core:icon identifier="actions-view-go-up"/></span>
+			<span id="MAPFORMID_aftervN" class="btn btn-default addCoord" title="{f:translate(id: 'imagemap.form.poly.addEdgeAfter', extensionName: 'imagemap')}"><core:icon identifier="actions-view-go-down"/></span>
+			<span id="MAPFORMID_rmvN" class="btn btn-default rmCoord" title="{f:translate(id: 'imagemap.form.poly.removeEdge', extensionName: 'imagemap')}"><core:icon identifier="actions-close"/></span>
+		</div>
 	</div>
 </div>
 

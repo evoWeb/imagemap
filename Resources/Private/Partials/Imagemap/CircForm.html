@@ -16,11 +16,19 @@
 		<f:render partial="Imagemap/ColorPicker" arguments="{attributeKeys: attributeKeys}"/>
 
 		<div class="positionOptions">
+			<div class="input-group clearfix">
+				<label for="MAPFORMID_x" class="input-group-addon">X:</label>
+				<input type="text" class="form-control" id="MAPFORMID_x" value="x" />
+				<label for="MAPFORMID_y" class="input-group-addon">Y:</label>
+				<input type="text" class="form-control" id="MAPFORMID_y" value="y" />
+			</div>
+
+			<div class="input-group">
+				<label for="MAPFORMID_radius" class="input-group-addon">R:</label>
+				<input type="text" class="form-control" id="MAPFORMID_radius" value="r" />
+			</div>
+
 			<span id="MAPFORMID_upd" class="refresh" title="{f:translate(id: 'imagemap.form.area.refresh', extensionName: 'imagemap')}"><core:icon identifier="actions-system-refresh"/></span>
-			<label for="MAPFORMID_x" class="XYlabel XYlabel-first">X:</label><input type="text" class="formCoord" id="MAPFORMID_x" value="x" />
-			<label for="MAPFORMID_y" class="XYlabel">Y:</label><input type="text" class="formCoord" id="MAPFORMID_y" value="y" />
-			<br class="cc"/>
-			<label for="MAPFORMID_radius" class="XYlabel XYlabel-first">R:</label><input type="text" class="formCoord" id="MAPFORMID_radius" value="r" />
 		</div>
 	</div>
 </div>
