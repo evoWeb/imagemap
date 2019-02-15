@@ -1305,7 +1305,14 @@ var areaClass = Class.extend({
 	},
 	applyBasicAreaActions: function () {
 		this._moreOptionsInitFlag = false;
-		jQuery("#" + this.getFormId() + "_upd").data("area", this).click(function (b) {
+		jQuery("#" + this.getFormId() + " .positionOptions input").data("area", this).on('keyup', function (e) {
+			var key = e.charCode || e.keyCode || 0;
+			if (!(
+				(key >= 48 && key <= 57)
+				|| (key >= 96 && key <= 105)
+			)) {
+				return;
+			}
 			var a = jQuery(this).data("area");
 			a.pushUndoableAction();
 			a.updateCoordsFromForm()
@@ -1313,7 +1320,7 @@ var areaClass = Class.extend({
 		jQuery("#" + this.getFormId() + "_del").data("area", this).click(function (a) {
 			jQuery(this).data("area").remove()
 		});
-		jQuery("#" + this.getFormId() + " > .basicOptions .expUpDown").parent().data("obj", this).data("rel", "#" + this.getFormId() + " > .moreOptions").click(function (a) {
+		jQuery("#" + this.getFormId() + " .basicOptions .expUpDown").parent().data("obj", this).data("rel", "#" + this.getFormId() + " > .moreOptions").click(function (a) {
 			a.stopPropagation();
 			if (!jQuery(this).data("obj").isMoreOptionsVisible()) {
 				jQuery(this).data("obj").applyAdditionalAreaActions();
@@ -1323,7 +1330,7 @@ var areaClass = Class.extend({
 			}
 			jQuery(this).data("obj").toogleMoreOptionsFlag()
 		});
-		jQuery("#" + this.getFormId() + " > .basicOptions > .colorPreview > div").data("target", this).click(function (b) {
+		jQuery("#" + this.getFormId() + " .basicOptions .colorPreview > div").data("target", this).click(function (b) {
 			var a = jQuery(this).data("target");
 			var c = jQuery("#" + a.getFormId() + " > .basicOptions .expUpDown:visible").parent();
 			jQuery(c).trigger("click")
