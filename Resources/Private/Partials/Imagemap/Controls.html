@@ -3,7 +3,8 @@
 			data-namespace-typo3-fluid="true">
 
 <div class="input-group-btn">
-	<a href="#" id="MAPFORMID_linkwizard" class="btn btn-default" onclick="this.blur(); vHWin = window.open(this.getAttribute('data-wizardUrl'), '', 'height=600,width=500,status=0,menubar=0,scrollbars=1'); vHWin.focus(); return false;">
+	<a href="#" id="MAPFORMID_linkwizard" class="btn btn-default"
+			onclick="var area = jQuery(this).parents('.areaForm').data('area'); area.getCanvas().openPopup(this, area);">
 		<span title="{f:translate(id: 'imagemap.form.area.linkwizard', extensionName: 'imagemap')}"><core:icon identifier="actions-wizard-link"/></span>
 	</a>
 	<span id="MAPFORMID_up" class="btn btn-default sortbtn upbtn" title="{f:translate(id: 'imagemap.form.area.up', extensionName: 'imagemap')}"><core:icon identifier="actions-move-up"/></span>

@@ -72,18 +72,18 @@ class AjaxController
     ) {
         $parameters = $request->getQueryParams();
         $linkParameters = [
-            'act' => 'page',
+            'act' => strpos($parameters['currentValue'], 'http') !== false ? 'url' : 'page',
             'mode' => 'wizard',
-            'field' => 'MAPFORMID_link',
+            'field' => $parameters['objectId'] . '_link',
             'P' => [
                 'returnUrl' => $parameters['returnUrl'],
                 'formName' => $parameters['formName'],
-                'itemName' => 'MAPFORMID_link',
-                'currentValue' => 'MAPAREAVALUE_URL',
+                'itemName' => $parameters['objectId'] . '_link',
+                'currentValue' => $parameters['currentValue'],
                 'pid' => $parameters['pid'],
                 'fieldChangeFunc' => [
                     'focus' => 'focus()',
-                    'callback' => 'canvasObject.triggerAreaLinkUpdate("' . $parameters['objectId'] . '")'
+                    'callback' => 'imagemap.canvasObject.triggerAreaLinkUpdate("' . $parameters['objectId'] . '")'
                 ]
             ]
         ];

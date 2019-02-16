@@ -1025,19 +1025,6 @@ var canvasClass = Class.extend({
 		} else {
 			jQuery(this.formsId).append(g.formMarkup())
 		}
-		$.ajax({
-			url: TYPO3.settings.ajaxUrls['imagemap_browse_link'],
-			method: 'GET',
-			context: g,
-			data: {
-				returnUrl: window.imagemap.browseLink.returnUrl,
-				formName: window.imagemap.browseLink.formName,
-				pid: window.imagemap.browseLink.pid,
-				objectId: g.getId(),
-			}
-		}).done(function (response) {
-			$('#' + g.getId() + '_linkwizard')[0].setAttribute('data-wizardUrl', response.url);
-		});
 		jQuery(this.formsId).data("parent", this).sortable({
 			distance: 3, start: function (h) {
 				jQuery("#" + jQuery(h.target).attr("id") + " > .sortbtn").css("visibility", "hidden");
@@ -1047,12 +1034,30 @@ var canvasClass = Class.extend({
 				jQuery(this).data("parent").fixSortbtnVisibility()
 			}
 		});
+		jQuery('#' + g.getId()).data('area', g);
 		this.areaObjects[g.getId()].applyBasicAreaActions();
 		this.updateForm(g.getId());
 		this.addCanvasLayer(g.getId());
 		this.updateCanvas(g.getId());
 		this.updateCanvasLayerOrder();
 		this.fixSortbtnVisibility()
+	},
+	openPopup: function (link, area) {
+		link.blur();
+		$.ajax({
+			url: TYPO3.settings.ajaxUrls['imagemap_browse_link'],
+			method: 'GET',
+			context: area,
+			data: {
+				returnUrl: window.imagemap.browseLink.returnUrl,
+				formName: window.imagemap.browseLink.formName,
+				pid: window.imagemap.browseLink.pid,
+				objectId: area.getId(),
+				currentValue: area.getLink()
+			}
+		}).done(function (response) {
+			var vHWin = window.open(response.url, '', 'height=600,width=500,status=0,menubar=0,scrollbars=1'); vHWin.focus()
+		});
 	},
 	removeArea: function (b) {
 		var a = new Array();
@@ -1155,7 +1160,6 @@ var canvasClass = Class.extend({
 	},
 	refreshForm: function (a) {
 		this.areaObjects[a].updateStatesFromForm();
-		jQuery("#" + this.areaObjects[a].getFormId()).replaceWith(this.areaObjects[a].formMarkup().replace(/OBJID/g, a));
 		this.areaObjects[a].applyBasicAreaActions(jQuery("#" + a));
 		this.updateForm(this.areaObjects[a].getId())
 	},

@@ -7,8 +7,8 @@
 		<div class="input-group-addon">
 			<div class="input-group-text colorPreview"><div></div></div>
 		</div>
-		<input type="text" id="MAPFORMID_label" value="..." class="form-control" placeholder="{f:translate(id: 'imagemap.form.area.label', extensionName: 'imagemap')}" />
-		<input type="text" id="MAPFORMID_link" value="..." class="form-control" placeholder="{f:translate(id: 'imagemap.form.area.link', extensionName: 'imagemap')}" />
+		<input type="text" id="MAPFORMID_label" data-formengine-input-name="MAPFORMID_label" value="..." class="form-control" placeholder="{f:translate(id: 'imagemap.form.area.label', extensionName: 'imagemap')}" />
+		<input type="text" id="MAPFORMID_link" data-formengine-input-name="MAPFORMID_link" value="..." class="form-control" placeholder="{f:translate(id: 'imagemap.form.area.link', extensionName: 'imagemap')}" />
 		<f:render partial="Imagemap/Controls" arguments="{returnUrl: returnUrl, formName: formName, renderAddButton: 1}"/>
 	</div>
 

@@ -9,6 +9,7 @@ define(['jquery', 'jquery-ui/sortable', 'jquery-ui/draggable'], function ($) {
 		canvasObject.init('canvas', 'picture', 'areaForms');
 		scaleFactor = canvasObject.initializeScaling(scaleFactor);
 		canvasObject.setScale(scaleFactor);
+		window.imagemap.canvasObject = canvasObject;
 
 		window.imagemap.existingFields.forEach(function (configuration) {
 			canvasObject.addArea(
