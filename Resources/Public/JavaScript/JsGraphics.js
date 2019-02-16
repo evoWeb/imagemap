@@ -996,14 +996,15 @@ var canvasClass = Class.extend({
 		var b = this;
 		jQuery.each(jQuery(this.formsId + " > div"), function (f, g) {
 			var e = b.areaObjects[jQuery(this).attr("id")].hitOnObjectEdge(a, d, 3);
-			if (e != -1) {
+			if (e !== -1) {
 				if (b.areaObjects[jQuery(this).attr("id")].edgeWasHit(e)) {
 					b.updateCanvas(jQuery(this).attr("id"));
 					b.updateForm(jQuery(this).attr("id"))
 				}
 			}
-			var e = b.areaObjects[jQuery(this).attr("id")].hitOnObjectBorder(a, d, 5);
-			if (e != -1) {
+
+			e = b.areaObjects[jQuery(this).attr("id")].hitOnObjectBorder(a, d, 5);
+			if (e !== -1) {
 				if (b.areaObjects[jQuery(this).attr("id")].borderWasHit(e, a, d)) {
 					b.updateCanvas(jQuery(this).attr("id"));
 					b.updateForm(jQuery(this).attr("id"))
@@ -1012,7 +1013,7 @@ var canvasClass = Class.extend({
 		})
 	},
 	addArea: function (g, f, c, e, d, b, a) {
-		if (f == "") {
+		if (f === "") {
 			f = g.getStartupCoords(this.getCenterCoords(), this.getDimensions())
 		}
 		g.init(this, this.getNextId(), f, c, e, d, a);
@@ -1020,10 +1021,23 @@ var canvasClass = Class.extend({
 		this.areaObjects[g.getId()] = g;
 		this.areaObjectList.push(g.getId());
 		if (b) {
-			jQuery(this.formsId).prepend(g.formMarkup().replace(/OBJID/g, g.getId()))
+			jQuery(this.formsId).prepend(g.formMarkup())
 		} else {
-			jQuery(this.formsId).append(g.formMarkup().replace(/OBJID/g, g.getId()))
+			jQuery(this.formsId).append(g.formMarkup())
 		}
+		$.ajax({
+			url: TYPO3.settings.ajaxUrls['imagemap_browse_link'],
+			method: 'GET',
+			context: g,
+			data: {
+				returnUrl: window.imagemap.browseLink.returnUrl,
+				formName: window.imagemap.browseLink.formName,
+				pid: window.imagemap.browseLink.pid,
+				objectId: g.getId(),
+			}
+		}).done(function (response) {
+			$('#' + g.getId() + '_linkwizard')[0].setAttribute('data-wizardUrl', response.url);
+		});
 		jQuery(this.formsId).data("parent", this).sortable({
 			distance: 3, start: function (h) {
 				jQuery("#" + jQuery(h.target).attr("id") + " > .sortbtn").css("visibility", "hidden");
@@ -1146,6 +1160,8 @@ var canvasClass = Class.extend({
 		this.updateForm(this.areaObjects[a].getId())
 	},
 	triggerAreaLinkUpdate: function (a) {
+		console.log(this);
+		console.log(a);
 		this.refreshForm(a)
 	},
 	getNextId: function () {

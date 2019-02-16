@@ -12,6 +12,7 @@ namespace Evoweb\Imagemap\Controller;
  * LICENSE.txt file that was distributed with this source code.
  */
 
+use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class AjaxController
@@ -53,6 +54,44 @@ class AjaxController
         }
 
         $response->getBody()->write($view->renderContent());
+
+        return $response;
+    }
+
+    /**
+     * Processes the data send via ajax
+     *
+     * @param \TYPO3\CMS\Core\Http\ServerRequest $request
+     * @param \TYPO3\CMS\Core\Http\Response $response
+     *
+     * @return \TYPO3\CMS\Core\Http\Response
+     */
+    public function browseLinkAction(
+        \TYPO3\CMS\Core\Http\ServerRequest $request,
+        \TYPO3\CMS\Core\Http\Response $response
+    ) {
+        $parameters = $request->getQueryParams();
+        $linkParameters = [
+            'act' => 'page',
+            'mode' => 'wizard',
+            'field' => 'MAPFORMID_link',
+            'P' => [
+                'returnUrl' => $parameters['returnUrl'],
+                'formName' => $parameters['formName'],
+                'itemName' => 'MAPFORMID_link',
+                'currentValue' => 'MAPAREAVALUE_URL',
+                'pid' => $parameters['pid'],
+                'fieldChangeFunc' => [
+                    'focus' => 'focus()',
+                    'callback' => 'canvasObject.triggerAreaLinkUpdate("' . $parameters['objectId'] . '")'
+                ]
+            ]
+        ];
+
+        $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
+        $response->getBody()->write(json_encode([
+            'url' => (string)$uriBuilder->buildUriFromRoute('wizard_link', $linkParameters)
+        ]));
 
         return $response;
     }

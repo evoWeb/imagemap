@@ -1,26 +1,9 @@
 <html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
 			xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
-			xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
 			data-namespace-typo3-fluid="true">
 
-<f:variable name="linkParameter" value="{
-	mode: 'wizard',
-	field: 'MAPFORMID_link',
-	P: {
-		returnUrl: returnUrl,
-		formName: formName,
-		itemName: 'MAPFORMID_link',
-		currentValue: 'MAPAREAVALUE_URL',
-		pid: data.pid,
-		fieldChangeFunc: {
-			focus: 'focus()',
-			callback: 'canvasObject.triggerAreaLinkUpdate(\"OBJID\")'
-		}
-	}
-}"/>
-<f:variable name="link"><be:moduleLink route="wizard_link" arguments="{linkParameter}"/></f:variable>
 <div class="input-group-btn">
-	<a href="#" id="MAPFORMID_linkwizard" class="btn btn-default" onclick="this.blur(); vHWin = window.open('{link}', '', 'height=600,width=500,status=0,menubar=0,scrollbars=1'); vHWin.focus(); return false;">
+	<a href="#" id="MAPFORMID_linkwizard" class="btn btn-default" onclick="this.blur(); vHWin = window.open(this.getAttribute('data-wizardUrl'), '', 'height=600,width=500,status=0,menubar=0,scrollbars=1'); vHWin.focus(); return false;">
 		<span title="{f:translate(id: 'imagemap.form.area.linkwizard', extensionName: 'imagemap')}"><core:icon identifier="actions-wizard-link"/></span>
 	</a>
 	<span id="MAPFORMID_up" class="btn btn-default sortbtn upbtn" title="{f:translate(id: 'imagemap.form.area.up', extensionName: 'imagemap')}"><core:icon identifier="actions-move-up"/></span>
