@@ -78,7 +78,6 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
     {
         /** @var PageRenderer $pageRenderer */
         $pageRenderer = GeneralUtility::makeInstance(PageRenderer::class);
-        $pageRenderer->addJsFile('EXT:imagemap/Resources/Public/JavaScript/jquery.base64.js');
         $pageRenderer->addJsFile('EXT:imagemap/Resources/Public/JavaScript/JsGraphics.js');
 
         $resultArray['requireJsModules'] = [

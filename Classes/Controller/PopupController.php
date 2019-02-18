@@ -51,7 +51,6 @@ class PopupController
         $pageRenderer = $this->moduleTemplate->getPageRenderer();
         $pageRenderer->loadRequireJsModule('TYPO3/CMS/Imagemap/Wizard');
         $pageRenderer->addJsFile('EXT:core/Resources/Public/JavaScript/Contrib/jquery/jquery.min.js');
-        $pageRenderer->addJsFile('EXT:imagemap/Resources/Public/JavaScript/jquery.base64.js');
         $pageRenderer->addJsFile('EXT:imagemap/Resources/Public/JavaScript/JsGraphics.js');
         $pageRenderer->addCssFile('EXT:imagemap/Resources/Public/Stylesheets/imagemap.css');
     }
