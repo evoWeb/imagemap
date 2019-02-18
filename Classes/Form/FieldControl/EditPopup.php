@@ -35,10 +35,10 @@ class EditPopup extends AbstractNode
 
         $urlParameters = [
             'P' => [
-                'table' => $this->data['tableName'],
+                'tableName' => $this->data['tableName'],
+                'fieldName' => $this->data['fieldName'],
                 'uid' => $this->data['databaseRow']['uid'],
                 'pid' => $this->data['databaseRow']['pid'],
-                'field' => $this->data['fieldName'],
                 'formName' => 'editform',
                 'itemName' => $itemName,
                 'hmac' => GeneralUtility::hmac('editform' . $itemName, 'wizard_js'),

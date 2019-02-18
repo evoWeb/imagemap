@@ -2,9 +2,9 @@
 
 return [
     // @todo where is this used?
-    'imagemap_tceform_ajax' => [
+    'imagemap_tceform' => [
         'path' => '/imagemap/wizard',
-        'target' => \Evoweb\Imagemap\Controller\AjaxController::class . '::tceformAjaxAction'
+        'target' => \Evoweb\Imagemap\Controller\AjaxController::class . '::tceformAction'
     ],
     'imagemap_browse_link' => [
         'path' => '/imagemap/browse/link',

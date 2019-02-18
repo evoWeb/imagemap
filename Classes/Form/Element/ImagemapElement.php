@@ -12,7 +12,6 @@ namespace Evoweb\Imagemap\Form\Element;
  * LICENSE.txt file that was distributed with this source code.
  */
 
-use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElement
@@ -76,67 +75,23 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
      */
     protected function renderElementWithControl($resultArray, $data)
     {
-        /** @var PageRenderer $pageRenderer */
-        $pageRenderer = GeneralUtility::makeInstance(PageRenderer::class);
-        $pageRenderer->addJsFile('EXT:imagemap/Resources/Public/JavaScript/JsGraphics.js');
-
-        $resultArray['requireJsModules'] = [
-            'jquery-ui/sortable',
-            'jquery-ui/draggable'
-        ];
-
         $id = 'imagemap' . GeneralUtility::shortMD5(rand(1, 100000));
 
         $existingFields = $data->listAreas(
-            "\tcanvasObject.addArea(new area##shape##Class(),'##coords##','##alt##','##link##','##color##',0);" . LF
+            "canvasObject.addArea(new area##shape##Class(),'##coords##','##alt##','##link##','##color##',0);" . LF
         );
 
-        $pageRenderer->addJsInlineCode(
-            'imagemapwizard_valueChanged',
-            'function imagemapwizard_valueChanged(fieldId) {
-    jQuery.ajax({
-        url: \'../typo3conf/ext/imagemap/Classes/Module/Wizard.php\',
-        global: false,
-        type: \'POST\',
-        success: function(data, textStatus) {
-            if (textStatus == \'success\') {
-                jQuery(fieldId).html(data);
-            }
-        },
-        data: { 
-            context: \'tceform\',
-            P: {
-                itemFormElName: field.name,
-                table: \'' . $this->data['tableName'] . '\',
-                field: \'' . $this->data['fieldName'] . '\',
-                uid: ' . $this->data['databaseRow']['uid'] . ',
-                value: field.value
-            },
-            config: \'' . addslashes(serialize($this->data['parameterArray']['fieldConf'])) . '\'
-        }
-    });
-}'
-        );
-
-        $pageRenderer->addJsInlineCode(
-            'imagemapwizard_ready',
-            'jQuery(document).ready(function() {
-    var canvasObject = new previewCanvasClass();
-    canvasObject.init(\'' . $id . '-canvas\', \'' . $data->getThumbnailScale('previewImageMaxWH', 300) . '\');
-    ' . $existingFields . '
-    jQuery(\'.imagemap_wiz_message\')
-        .css({top: (canvasObject.getMaxH() / 2 - 35) + \'px\', left: \'20px\'})
-        .animate({left: \'60px\',opacity: \'show\'}, 750)
-        .animate({left: \'60px\'}, 6000)
-        .animate({left: \'20px\', opacity: \'hide\'}, 750);
-    jQuery(\'.imagemap_wiz_message_close\').click(function() {
-        jQuery(\'.imagemap_wiz_message\').animate(
-            {left: \'20px\', opacity: \'hide\'},
-            {duration: 250, queue: false}
-        );
-    });
-});'
-        );
+        $resultArray['requireJsModules']['imagemapFormElement'] = [
+            'TYPO3/CMS/Imagemap/FormElement' => 'function(canvasObject) {
+                jQuery(document).ready(function() {
+                    canvasObject.init(
+                        \'' . $id . '-canvas\',
+                        \''. $data->getThumbnailScale('previewImageMaxWH', 300) . '\'
+                    );
+                    ' . $existingFields . '
+                });
+            }'
+        ];
 
         $fieldControlResult = $this->renderFieldControl();
         $fieldControlHtml = $fieldControlResult['html'];

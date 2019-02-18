@@ -1349,17 +1349,16 @@ var canvasClass = Class.extend({
 	},
 	openPopup: function (link, area) {
 		link.blur();
+
+		var data = window.imagemap.browseLink;
+		data.objectId = area.getId();
+		data.currentValue = area.getLink();
+
 		$.ajax({
 			url: TYPO3.settings.ajaxUrls['imagemap_browse_link'],
 			method: 'GET',
 			context: area,
-			data: {
-				returnUrl: window.imagemap.browseLink.returnUrl,
-				formName: window.imagemap.browseLink.formName,
-				pid: window.imagemap.browseLink.pid,
-				objectId: area.getId(),
-				currentValue: area.getLink()
-			}
+			data: data
 		}).done(function (response) {
 			var vHWin = window.open(response.url, '', 'height=600,width=500,status=0,menubar=0,scrollbars=1'); vHWin.focus()
 		});

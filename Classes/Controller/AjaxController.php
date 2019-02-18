@@ -25,30 +25,30 @@ class AjaxController
      *
      * @return \TYPO3\CMS\Core\Http\Response
      */
-    public function tceformAjaxAction(
+    public function tceformAction(
         \TYPO3\CMS\Core\Http\ServerRequest $request,
         \TYPO3\CMS\Core\Http\Response $response
     ) {
         $parameters = $request->getQueryParams()['P'];
-        $parameters['fieldConf'] = unserialize(stripslashes($request->getQueryParams()['config']));
+        $config = $GLOBALS['TCA'][$parameters['tableName']]['columns'][$parameters['fieldName']]['config'];
 
         $view = GeneralUtility::makeInstance(\Evoweb\Imagemap\View\Tceform::class);
         $view->init();
         $view->setTCEForm(GeneralUtility::makeInstance(\TYPO3\CMS\Backend\Form\NodeFactory::class));
         $view->setFormName($parameters['itemFormElName']);
-        $view->setWizardConf($parameters['fieldConf']['config']['wizards']);
+        $view->setWizardConf($config['fieldConf']['config']['wizards']);
 
         $GLOBALS['BE_USER']->setAndSaveSessionData('imagemap.value', $parameters['value']);
 
         try {
             $data = GeneralUtility::makeInstance(
                 \Evoweb\Imagemap\Domain\Model\DataObject::class,
-                $parameters['table'],
-                $parameters['field'],
+                $parameters['tableName'],
+                $parameters['fieldName'],
                 $parameters['uid'],
                 $parameters['value']
             );
-            $data->setFieldConf($parameters['fieldConf']);
+            $data->setFieldConf($config['fieldConf']);
             $view->setData($data);
         } catch (\Exception $e) {
         }

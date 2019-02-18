@@ -1,10 +1,10 @@
-define(['jquery', 'jquery-ui/sortable', 'jquery-ui/draggable'], function ($) {
-	$(document).ready(function () {
+define(['jquery', 'jquery-ui/sortable', 'jquery-ui/draggable', 'TYPO3/CMS/Imagemap/JsGraphics'], function (jQuery) {
+	jQuery(document).ready(function () {
 		var defaultAttributeSet = window.imagemap.defaultAttributeset,
 			canvasObject = new canvasClass(),
 			scaleFactor = window.imagemap.scaleFactor,
-			zoomOut = $('> .zout', '#magnify'),
-			zoomIn = $('> .zin', '#magnify');
+			zoomOut = jQuery('> .zout', '#magnify'),
+			zoomIn = jQuery('> .zin', '#magnify');
 
 		canvasObject.init('canvas', 'picture', 'areaForms');
 		scaleFactor = canvasObject.initializeScaling(scaleFactor);
@@ -32,45 +32,45 @@ define(['jquery', 'jquery-ui/sortable', 'jquery-ui/draggable'], function ($) {
 
 		zoomIn.click(function () {
 			canvasObject.setScale(1);
-			$(this).hide();
+			jQuery(this).hide();
 			zoomOut.show();
 		});
 
 		zoomOut.click(function () {
 			canvasObject.setScale(scaleFactor);
-			$(this).hide();
+			jQuery(this).hide();
 			zoomIn.show();
 		});
 
-		$('#addRect').click(function () {
+		jQuery('#addRect').click(function () {
 			canvasObject.addArea(new areaRectClass(), '', '', '', '', 1, defaultAttributeSet);
 			return false;
 		});
 
-		$('#addPoly').click(function () {
+		jQuery('#addPoly').click(function () {
 			canvasObject.addArea(new areaPolyClass(), '', '', '', '', 1, defaultAttributeSet);
 			return false;
 		});
 
-		$('#addCirc').click(function () {
+		jQuery('#addCirc').click(function () {
 			canvasObject.addArea(new areaCircleClass(), '', '', '', '', 1, defaultAttributeSet);
 			return false;
 		});
 
-		$('#submit').click(function () {
+		jQuery('#submit').click(function () {
 			setValue('<map>' + canvasObject.persistanceXML() + '\n</map>');
 			close();
 		});
 
-		$('#canvas')
+		jQuery('#canvas')
 			.mousedown(function (e) {
 				return canvasObject.mousedown(e);
 			}).mouseup(function (e) {
-				return canvasObject.mouseup(e);
-			}).mousemove(function (e) {
-				return canvasObject.mousemove(e);
-			}).dblclick(function (e) {
-				return canvasObject.dblclick(e);
-			});
+			return canvasObject.mouseup(e);
+		}).mousemove(function (e) {
+			return canvasObject.mousemove(e);
+		}).dblclick(function (e) {
+			return canvasObject.dblclick(e);
+		});
 	});
 });
