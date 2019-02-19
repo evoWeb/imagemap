@@ -1,6 +1,6 @@
 <?php
 
-$existingFields = $this->data->listAreas("\tcanvasObject.addArea(new area##shape##Class(),'##coords##','##alt##','##link##','##color##',0);\n");
+$existingAreas = $this->data->listAreas("\tcanvasObject.addArea(new area##shape##Class(),'##coords##','##alt##','##link##','##color##',0);\n");
 
 $this->addInlineJS('
 jQuery.noConflict();
@@ -38,7 +38,7 @@ $additionalWizardConf = ['fieldChangeFunc'=> ['imagemapwizard_valueChanged(field
     <div class="imagemap_wiz" style="padding:5px;overflow:hidden;position:relative">
         <div id="<?php echo $this->getId(); ?>-canvas" style="position:relative;top:5px;left:5px;overflow:hidden;">
             <?php
-            echo $this->data->renderThumbnail('previewImageMaxWH',200);
+            echo $this->data->renderThumbnail('previewImageMaxWH', 400);
             ?>
         </div>
     </div>
@@ -57,8 +57,8 @@ $additionalWizardConf = ['fieldChangeFunc'=> ['imagemapwizard_valueChanged(field
     <script type="text/javascript">
         jQuery(document).ready(function(){
             canvasObject = new previewCanvasClass();
-            canvasObject.init("<?php echo $this->getId(); ?>-canvas","<?php echo $this->data->getThumbnailScale('previewImageMaxWH',200) ?>");
-            <?php echo $existingFields; ?>
+            canvasObject.init("<?php echo $this->getId(); ?>-canvas","<?php echo $this->data->getThumbnailScale('previewImageMaxWH', 400) ?>");
+            <?php echo $existingAreas; ?>
             jQuery(".imagemap_wiz_message").css({top: (canvasObject.getMaxH()/2-35)+"px", left: "20px"}).animate({left: "60px",opacity: "show"}, 750).animate({left: "60px"}, 6000).animate({left: "20px", opacity: "hide"}, 750);
             jQuery(".imagemap_wiz_message_close").click(function() {
                 jQuery(".imagemap_wiz_message").animate({left: "20px", opacity: "hide"}, {duration:250, queue:false});

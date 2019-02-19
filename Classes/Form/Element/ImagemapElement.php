@@ -77,21 +77,13 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
     {
         $id = 'imagemap' . GeneralUtility::shortMD5(rand(1, 100000));
 
-        $existingFields = $data->listAreas(
-            "canvasObject.addArea(new area##shape##Class(),'##coords##','##alt##','##link##','##color##',0);" . LF
-        );
+        $existingAreas = rtrim($data->listAreas(
+            '{"shape": "##shape##", "coords": "##coords##", '
+            . '"alt": "##alt##", "link": "##link##", "color": "##color##"},'
+        ), ',');
 
-        $resultArray['requireJsModules']['imagemapFormElement'] = [
-            'TYPO3/CMS/Imagemap/FormElement' => 'function(canvasObject) {
-                jQuery(document).ready(function() {
-                    canvasObject.init(
-                        \'' . $id . '-canvas\',
-                        \''. $data->getThumbnailScale('previewImageMaxWH', 300) . '\'
-                    );
-                    ' . $existingFields . '
-                });
-            }'
-        ];
+        $resultArray['requireJsModules']['imagemapElement'] = 'TYPO3/CMS/Imagemap/FormElement';
+        $resultArray['stylesheetFiles']['imagemapElement'] = 'EXT:imagemap/Resources/Public/Stylesheets/imagemap.css';
 
         $fieldControlResult = $this->renderFieldControl();
         $fieldControlHtml = $fieldControlResult['html'];
@@ -102,18 +94,14 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
         $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldWizardResult, false);
 
         $mainFieldHtml = [];
-        $mainFieldHtml[] = '<div class="form-control-wrap" style="max-width: 300px">';
+        $mainFieldHtml[] = '<div class="form-control-wrap imagemap-control">';
         $mainFieldHtml[] =    '<div class="form-wizards-wrap">';
-        $mainFieldHtml[] =      '<div class="form-wizards-element">';
-        $mainFieldHtml[] =          '
-<div id="' . $id . '" style="position: relative">
-    <div class="imagemap_wiz" style="padding: 5px; overflow: hidden; position: relative;">
-        <div id="' . $id . '-canvas" style="position: relative; top: 0; left: 0; overflow: hidden;">
-        ' . $data->renderThumbnail('previewImageMaxWH', 300) . '
-        </div>
-    </div>
-</div>
-        ';
+        $mainFieldHtml[] =      '<div class="form-wizards-element" id="' . $id . '">';
+        $mainFieldHtml[] =          '<div id="' . $id . '-canvas" class="canvas" data-thumbnail-scale="';
+        $mainFieldHtml[] =          $data->getThumbnailScale('previewImageMaxWH', 400);
+        $mainFieldHtml[] =          '" data-existing-areas=\'[' . $existingAreas . ']\'>';
+        $mainFieldHtml[] =              $data->renderThumbnail('previewImageMaxWH', 400);
+        $mainFieldHtml[] =          '</div>';
         $mainFieldHtml[] =      '</div>';
         if (!empty($fieldControlHtml)) {
             $mainFieldHtml[] =      '<div class="form-wizards-items-aside">';
@@ -124,7 +112,7 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
         }
         if (!empty($fieldWizardHtml)) {
             $mainFieldHtml[] = '<div class="form-wizards-items-bottom">';
-            $mainFieldHtml[] = $fieldWizardHtml;
+            $mainFieldHtml[] =     $fieldWizardHtml;
             $mainFieldHtml[] = '</div>';
         }
         $mainFieldHtml[] =    '</div>';

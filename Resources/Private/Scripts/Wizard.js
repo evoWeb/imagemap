@@ -11,7 +11,7 @@ define(['jquery', 'jquery-ui/sortable', 'jquery-ui/draggable', 'TYPO3/CMS/Imagem
 		canvasObject.setScale(scaleFactor);
 		window.imagemap.canvasObject = canvasObject;
 
-		window.imagemap.existingFields.forEach(function (configuration) {
+		window.imagemap.existingAreas.forEach(function (configuration) {
 			canvasObject.addArea(
 				new window['area' + configuration.shape + 'Class'](),
 				configuration.coords,

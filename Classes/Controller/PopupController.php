@@ -77,7 +77,7 @@ class PopupController
                 $GLOBALS['BE_USER']->getSessionData('imagemap.value')
             );
             $this->view->assign('data', $data);
-            $this->view->assign('scaleFactor', $data->getEnvironment()->getExtConfValue('imageMaxWH', 700));
+            $this->view->assign('scaleFactor', $data->getEnvironment()->getExtConfValue('imageMaxWH', 800));
             $this->view->assign('formName', 'imagemap' . GeneralUtility::shortMD5(rand(1, 100000)));
             $this->view->assign('returnUrl', GeneralUtility::linkThisScript());
         } catch (\Exception $e) {

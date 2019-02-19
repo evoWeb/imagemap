@@ -1,16 +1,28 @@
+.imagemap-control {
+    max-width: 400px;
+
+    .form-wizards-element {
+        position: relative;
+        padding: 5px;
+        overflow: hidden;
+    }
+
+    .canvas {
+        overflow: hidden;
+        position: relative;
+        top: 0;
+        left: 0;
+    }
+}
+
 #root {
     display: block;
     position: relative;
-    float: left;
-    overflow: visible;
+    overflow: hidden;
 }
 
 .disabled span {
-    opacity: 0.6;
-}
-
-.cc {
-    clear: both;
+    opacity: 0.3;
 }
 
 #pic {

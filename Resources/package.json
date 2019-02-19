@@ -33,6 +33,7 @@
   },
   "scripts": {
     "build": "gulp default",
-    "styles": "gulp styles"
+    "styles": "gulp styles",
+    "babel": "gulp babel"
   }
 }

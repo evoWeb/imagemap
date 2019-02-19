@@ -11,7 +11,7 @@ window.imagemap = {
 	defaultAttributeset: {<f:format.raw>
 		{attributes}
 	</f:format.raw>},
-	existingFields: [
+	existingAreas: [
 		<f:for each="{data.map.areas}" as="area" iteration="iterator">{<f:format.raw>
 			shape: '<f:format.case mode="capital">{area.attributes.shape}</f:format.case>',
 			coords: '{area.attributes.coords}',
