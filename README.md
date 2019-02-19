@@ -14,3 +14,5 @@ composer require evoweb/imagemap
 
 Download and install the extension with the extension manger module or directly from the
 [TER](https://typo3.org/extensions/repository/view/imagemap).
+
+For build of resources use https://github.com/Automattic/node-canvas#installation

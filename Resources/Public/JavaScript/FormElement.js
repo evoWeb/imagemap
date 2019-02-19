@@ -1,25 +1,2 @@
-define(['jquery', 'jquery-ui/sortable', 'jquery-ui/draggable', 'TYPO3/CMS/Imagemap/JsGraphics'], function (jQuery) {
-    window.imagemapwizard_valueChanged = function (fieldId) {
-        jQuery.ajax({
-            url: TYPO3.settings.ajaxUrls['imagemap_tceform'],
-            global: false,
-            type: 'POST',
-            data: {
-                context: 'tceform',
-                P: {
-                    itemFormElName: field.name,
-                    tableName: 'tt_content',
-                    fieldName: 'tx_imagemap_links',
-                    uid: 'uid',
-                    value: field.value
-                }
-            }
-        }).done(function (data, textStatus) {
-            if (textStatus === 'success') {
-                jQuery(fieldId).html(data);
-            }
-        });
-    };
-
-    return new previewCanvasClass();
-});
+define(["jquery","jquery-ui/sortable","jquery-ui/draggable","TYPO3/CMS/Imagemap/JsGraphics"],function(t){return window.imagemapwizard_valueChanged=function(i){t.ajax({url:TYPO3.settings.ajaxUrls.imagemap_tceform,global:!1,type:"POST",data:{context:"tceform",P:{itemFormElName:field.name,tableName:"tt_content",fieldName:"tx_imagemap_links",uid:"uid",value:field.value}}}).done(function(e,a){"success"===a&&t(i).html(e)})},new previewCanvasClass});
+//# sourceMappingURL=FormElement.js.map

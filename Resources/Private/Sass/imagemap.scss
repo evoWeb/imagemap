@@ -1,0 +1,175 @@
+#root {
+    display: block;
+    position: relative;
+    float: left;
+    overflow: visible;
+}
+
+.disabled span {
+    opacity: 0.6;
+}
+
+.cc {
+    clear: both;
+}
+
+#pic {
+    position: relative;
+    float: left;
+    overflow: visible;
+}
+
+#picture {
+    float: left;
+    position: relative;
+    overflow: hidden;
+    padding: 4px;
+    margin-right: 35px;
+    background: #ffffff;
+}
+
+#magnify {
+    position: absolute;
+    right: 0;
+    top: 10px;
+    cursor: pointer;
+    width: 32px;
+
+    .zin, .zout {
+        height: 32px;
+        width: 32px;
+    }
+}
+
+
+#boundingbox {
+    z-index: 101;
+    position: absolute;
+    left: -4px;
+    top: -4px;
+}
+
+#canvas, .canvas {
+    position: absolute;
+    display: block;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+}
+
+#canvas {
+    z-index: 100;
+    left: 4px;
+    top: 4px;
+}
+
+.point {
+    width: 5px;
+    height: 5px;
+    background: #ffffff;
+    border: 1px solid #000000;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+
+#areaForms {
+    margin: 20px 4px 50px 4px;
+    float: left;
+    clear: left;
+}
+
+.areaForm {
+    position: relative;
+    width: 100%;
+    float: left;
+    clear: left;
+    margin-bottom: 10px;
+}
+
+.basicOptions {
+    .form-control {
+        width: 50%;
+        min-width: auto;
+    }
+
+    .colorPreview {
+        border: 1px solid #000;
+        float: left;
+
+        div {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #fff;
+        }
+    }
+}
+
+.moreOptions {
+    border: 1px solid #bbb;
+    border-top: none;
+    padding: 6px;
+    overflow: hidden;
+
+    .input-group {
+        float: left;
+        width: 5em;
+        min-width: auto;
+        margin-bottom: 0.7em;
+    }
+
+    .form-control {
+        width: 4em;
+        min-width: auto;
+    }
+
+    .colorBox {
+        display: none;
+    }
+
+    .colorpicker {
+        display: block;
+        float: left;
+        width: 210px;
+        border: 1px solid #000;
+        margin-left: 25px;
+    }
+
+    .colorPickerCell {
+        float: left;
+        width: 16px;
+        height: 16px;
+        margin: 0;
+        border: 1px solid white;
+        cursor: pointer;
+        font-size: 1px;
+        line-height: 1px;
+    }
+
+    .attribute {
+        padding: 1px 0;
+
+        label {
+            display: block;
+            float: left;
+            width: 90px;
+            clear: left;
+            padding: 2px 0;
+        }
+
+        input {
+            display: block;
+            float: left;
+            padding: 2px 0;
+        }
+    }
+
+    .positionOptions {
+        display: block;
+        float: left;
+        margin-left: 31px;
+        width: 230px;
+    }
+}

@@ -1,0 +1,38 @@
+{
+  "name": "imagemap",
+  "description": "Bundles all resources for the usage",
+  "version": "9.1.0",
+  "license": "GPL-2.0+",
+  "repository": "https://github.com/evoWeb/sf_register.git",
+  "homepage": "http://www.evoweb.de/",
+  "author": {
+    "name": "Sebastian Fischer",
+    "email": "typo3@evoweb.de"
+  },
+  "dependencies": {
+    "fabric": "^2.6.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.3.3",
+    "@babel/plugin-proposal-class-properties": "^7.3.3",
+    "@babel/preset-env": "^7.3.1",
+    "@babel/register": "^7.0.0",
+    "gulp": "^4.0.0",
+    "gulp-babel": "^8.0.0",
+    "gulp-autoprefixer": "^6.0.0",
+    "gulp-cli": "^2.0.1",
+    "gulp-sass": "^4.0.2",
+    "gulp-sourcemaps": "^2.6.4",
+    "gulp-uglify": "^3.0.1",
+    "sass": "^1.17.0"
+  },
+  "babel": {
+    "presets": [
+      "@babel/preset-env"
+    ]
+  },
+  "scripts": {
+    "build": "gulp default",
+    "styles": "gulp styles"
+  }
+}
