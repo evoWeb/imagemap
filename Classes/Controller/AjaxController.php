@@ -15,6 +15,7 @@ namespace Evoweb\Imagemap\Controller;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
+use TYPO3\CMS\Core\Http\Response;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class AjaxController
@@ -23,14 +24,10 @@ class AjaxController
      * Processes the data send via ajax
      *
      * @param ServerRequestInterface $request
-     * @param ResponseInterface $response
      *
      * @return ResponseInterface
      */
-    public function tceformAction(
-        ServerRequestInterface $request,
-        ResponseInterface $response
-    ) {
+    public function tceformAction(ServerRequestInterface $request): ResponseInterface {
         $parameters = $request->getQueryParams()['P'];
         $config = $GLOBALS['TCA'][$parameters['tableName']]['columns'][$parameters['fieldName']]['config'];
 
@@ -55,6 +52,10 @@ class AjaxController
         } catch (\Exception $e) {
         }
 
+        $response = new Response('php://temp', 200, [
+            'Content-Type' => 'application/json; charset=utf-8',
+            'X-JSON' => 'true'
+        ]);
         $response->getBody()->write($view->renderContent());
 
         return $response;
@@ -68,10 +69,7 @@ class AjaxController
      *
      * @return ResponseInterface
      */
-    public function browseLinkAction(
-        ServerRequestInterface $request,
-        ResponseInterface $response
-    ) {
+    public function browseLinkAction(ServerRequestInterface $request): ResponseInterface {
         $parameters = $request->getQueryParams();
         $linkParameters = [
             'act' => strpos($parameters['currentValue'], 'http') !== false ? 'url' : 'page',
@@ -91,6 +89,10 @@ class AjaxController
         ];
 
         $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
+        $response = new Response('php://temp', 200, [
+            'Content-Type' => 'application/json; charset=utf-8',
+            'X-JSON' => 'true'
+        ]);
         $response->getBody()->write(json_encode([
             'url' => (string)$uriBuilder->buildUriFromRoute('wizard_link', $linkParameters)
         ]));

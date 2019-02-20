@@ -14,6 +14,7 @@ namespace Evoweb\Imagemap\Controller;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use TYPO3\CMS\Core\Http\Response;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class PopupController
@@ -60,14 +61,10 @@ class PopupController
      * Default action just renders the Wizard with the default view.
      *
      * @param ServerRequestInterface $request
-     * @param ResponseInterface $response
      *
      * @return ResponseInterface
      */
-    public function mainAction(
-        ServerRequestInterface $request,
-        ResponseInterface $response
-    ) {
+    public function mainAction(ServerRequestInterface $request): ResponseInterface {
         $parameters = $request->getQueryParams()['P'];
 
         try {
@@ -130,6 +127,7 @@ class PopupController
             ->setTitle($this->getLanguageService()->getLL('imagemap.title'))
             ->header($this->getLanguageService()->getLL('imagemap.title'));
 
+        $response = new Response;
         $response->getBody()->write($this->moduleTemplate->renderContent());
 
         return $response;
