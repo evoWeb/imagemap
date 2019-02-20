@@ -64,7 +64,8 @@ class PopupController
      *
      * @return ResponseInterface
      */
-    public function mainAction(ServerRequestInterface $request): ResponseInterface {
+    public function mainAction(ServerRequestInterface $request): ResponseInterface
+    {
         $parameters = $request->getQueryParams()['P'];
 
         try {
