@@ -4,3 +4,4 @@
 .Build/Web/**
 composer.*
 !composer.json
+Resources/node_modules/*
