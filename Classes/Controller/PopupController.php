@@ -12,6 +12,7 @@ namespace Evoweb\Imagemap\Controller;
  * LICENSE.txt file that was distributed with this source code.
  */
 
+use Evoweb\Imagemap\Domain\Model\DataObject;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Core\Http\Response;
@@ -68,65 +69,30 @@ class PopupController
     {
         $parameters = $request->getQueryParams()['P'];
 
+        if (isset($parameters['fieldChangeFunc']) && is_array($parameters['fieldChangeFunc'])) {
+            unset($parameters['fieldChangeFunc']['alert']);
+        }
+
         try {
+            /** @var DataObject $data */
             $data = GeneralUtility::makeInstance(
-                \Evoweb\Imagemap\Domain\Model\DataObject::class,
+                DataObject::class,
                 $parameters['tableName'],
                 $parameters['fieldName'],
                 $parameters['uid'],
-                $GLOBALS['BE_USER']->getSessionData('imagemap.value')
+                $this->getBackendUser()->getSessionData('imagemap.value')
             );
-            $this->view->assign('data', $data);
-            $this->view->assign('scaleFactor', $data->getEnvironment()->getExtConfValue('imageMaxWH', 800));
-            $this->view->assign('formName', 'imagemap' . GeneralUtility::shortMD5(rand(1, 100000)));
-            $this->view->assign('returnUrl', GeneralUtility::linkThisScript());
+            $this->moduleTemplate->getView()
+                ->assign('parameters', $parameters)
+                ->assign('data', $data)
+                ->assign('scaleFactor', $data->getEnvironment()->getExtConfValue('imageMaxWH', 800))
+                ->assign('formName', 'imagemap' . GeneralUtility::shortMD5(rand(1, 100000)))
+                ->assign('returnUrl', GeneralUtility::linkThisScript());
         } catch (\Exception $e) {
         }
 
-        // Setting field-change functions:
-        $fieldChangeFunctions = '';
-        if (isset($parameters['fieldChangeFunc']) && is_array($parameters['fieldChangeFunc'])) {
-            unset($parameters['fieldChangeFunc']['alert']);
-            foreach ($parameters['fieldChangeFunc'] as $fieldChangeFunction) {
-                $fieldChangeFunctions .= 'parent.opener.' . $fieldChangeFunction;
-            }
-        }
-
-        $this->moduleTemplate->addJavaScriptCode(
-            'popup_checkreference',
-            '
-            var formName = \'' . $parameters['formName'] . '\',
-                fieldName = \'' . $parameters['itemName'] . '\';
-
-            function getParentField() {
-                if (parent.opener 
-                    && parent.opener.document 
-                    && parent.opener.document[formName]
-                    && parent.opener.document[formName][fieldName]) {
-                    return parent.opener.document[formName][fieldName];
-                } else {
-                    close();
-                }
-            }
-
-            function setValue(input) {
-                var field = getParentField();
-                if (field) {
-                    field.value = input;
-                    ' . $fieldChangeFunctions . '
-                }
-            }
-
-            function getValue() {
-                var field = getParentField();
-                return field.value;
-            }
-            '
-        );
-
-        $this->moduleTemplate
-            ->setTitle($this->getLanguageService()->getLL('imagemap.title'))
-            ->header($this->getLanguageService()->getLL('imagemap.title'));
+        $title = $this->getLanguageService()->getLL('imagemap.title');
+        $this->moduleTemplate->setTitle($title)->header($title);
 
         $response = new Response;
         $response->getBody()->write($this->moduleTemplate->renderContent());
@@ -135,12 +101,22 @@ class PopupController
     }
 
     /**
+     * Returns an instance of Backend User Authentication
+     *
+     * @return \TYPO3\CMS\Core\Authentication\BackendUserAuthentication|null
+     */
+    protected function getBackendUser()
+    {
+        return $GLOBALS['BE_USER'] ?? null;
+    }
+
+    /**
      * Returns an instance of LanguageService
      *
-     * @return \TYPO3\CMS\Core\Localization\LanguageService
+     * @return \TYPO3\CMS\Core\Localization\LanguageService|null
      */
     protected function getLanguageService()
     {
-        return $GLOBALS['LANG'];
+        return $GLOBALS['LANG'] ?? null;
     }
 }

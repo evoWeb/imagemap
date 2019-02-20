@@ -12,6 +12,7 @@ namespace Evoweb\Imagemap\Form\Element;
  * LICENSE.txt file that was distributed with this source code.
  */
 
+use Evoweb\Imagemap\Domain\Model\DataObject;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElement
@@ -39,15 +40,13 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
         ],
     ];
 
-    /**
-     * @return array
-     */
-    public function render()
+    public function render(): array
     {
-        $GLOBALS['BE_USER']->setAndSaveSessionData('imagemap.value', null);
+        $this->getBackendUser()->setAndSaveSessionData('imagemap.value', null);
 
+        /** @var DataObject $data */
         $data = GeneralUtility::makeInstance(
-            \Evoweb\Imagemap\Domain\Model\DataObject::class,
+            DataObject::class,
             $this->data['tableName'],
             $this->data['fieldName'],
             $this->data['databaseRow']['uid'],
@@ -57,7 +56,7 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
 
         $resultArray = $this->initializeResultArray();
         if (!$data->hasValidImageFile()) {
-            $resultArray['html'] = $GLOBALS['LANG']->sL(
+            $resultArray['html'] = $this->getLanguageService()->sL(
                 'LLL:EXT:imagemap/Resources/Private/Language/locallang.xlf:form.no_image'
             );
         } else {
@@ -67,13 +66,7 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
         return $resultArray;
     }
 
-    /**
-     * @param array $resultArray
-     * @param \Evoweb\Imagemap\Domain\Model\DataObject $data
-     *
-     * @return array
-     */
-    protected function renderElementWithControl($resultArray, $data)
+    protected function renderElementWithControl(array $resultArray, DataObject $data): array
     {
         $id = 'imagemap' . GeneralUtility::shortMD5(rand(1, 100000));
 
@@ -121,20 +114,29 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
             value="' . htmlspecialchars($data->getCurrentData()) . '" />';
         $mainFieldHtml[] = '</div>';
 
-        $fullElement = implode(LF, $mainFieldHtml);
+        $html = implode(LF, $mainFieldHtml);
 
-        $resultArray['html'] = '<div class="formengine-field-item t3js-formengine-field-item">'
-            . $fullElement . '</div>';
+        $resultArray['html'] = '<div class="formengine-field-item t3js-formengine-field-item">' . $html . '</div>';
         return $resultArray;
+    }
+
+    /**
+     * Returns an instance of Backend User Authentication
+     *
+     * @return \TYPO3\CMS\Core\Authentication\BackendUserAuthentication|null
+     */
+    protected function getBackendUser()
+    {
+        return $GLOBALS['BE_USER'] ?? null;
     }
 
     /**
      * Returns an instance of LanguageService
      *
-     * @return \TYPO3\CMS\Core\Localization\LanguageService
+     * @return \TYPO3\CMS\Core\Localization\LanguageService|null
      */
     protected function getLanguageService()
     {
-        return $GLOBALS['LANG'];
+        return $GLOBALS['LANG'] ?? null;
     }
 }

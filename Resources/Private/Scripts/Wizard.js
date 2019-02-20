@@ -1,17 +1,18 @@
 define(['jquery', 'jquery-ui/sortable', 'jquery-ui/draggable', 'TYPO3/CMS/Imagemap/JsGraphics'], function (jQuery) {
 	jQuery(document).ready(function () {
-		let defaultAttributeSet = window.imagemap.defaultAttributeset,
+		let configuration = window.imagemap,
+			defaultAttributeSet = configuration.defaultAttributeset,
 			canvasObject = new canvasClass(),
-			scaleFactor = window.imagemap.scaleFactor,
+			scaleFactor = configuration.scaleFactor,
 			zoomOut = jQuery('> .zout', '#magnify'),
 			zoomIn = jQuery('> .zin', '#magnify');
 
 		canvasObject.init('canvas', 'picture', 'areaForms');
 		scaleFactor = canvasObject.initializeScaling(scaleFactor);
 		canvasObject.setScale(scaleFactor);
-		window.imagemap.canvasObject = canvasObject;
+		configuration.canvasObject = canvasObject;
 
-		window.imagemap.existingAreas.forEach(function (configuration) {
+		configuration.existingAreas.forEach(function (configuration) {
 			canvasObject.addArea(
 				new window['area' + configuration.shape + 'Class'](),
 				configuration.coords,
@@ -58,19 +59,34 @@ define(['jquery', 'jquery-ui/sortable', 'jquery-ui/draggable', 'TYPO3/CMS/Imagem
 		});
 
 		jQuery('#submit').click(function () {
-			setValue('<map>' + canvasObject.persistanceXML() + '\n</map>');
+			let field = checkReference();
+			if (field) {
+				$(field, parent.opener.document).val('<map>' + canvasObject.persistanceXML() + '</map>');
+			}
 			close();
 		});
 
 		jQuery('#canvas')
 			.mousedown(function (e) {
 				return canvasObject.mousedown(e);
-			}).mouseup(function (e) {
+			})
+			.mouseup(function (e) {
 			return canvasObject.mouseup(e);
-		}).mousemove(function (e) {
+		})
+			.mousemove(function (e) {
 			return canvasObject.mousemove(e);
-		}).dblclick(function (e) {
+		})
+			.dblclick(function (e) {
 			return canvasObject.dblclick(e);
 		});
+
+		function checkReference() {
+			let selector = 'input[name="' + configuration.itemName + '"]';
+			if (window.opener && window.opener.document && window.opener.document.querySelector(selector)) {
+				return window.opener.document.querySelector(selector);
+			} else {
+				close();
+			}
+		};
 	});
 });

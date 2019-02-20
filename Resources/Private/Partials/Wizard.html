@@ -7,7 +7,13 @@
 
 <script type="text/javascript">
 window.imagemap = {
+	itemName: '{parameters.itemName}',
 	scaleFactor: '{scaleFactor}',
+	fieldChangeFunc: [
+		<f:for each="{parameters.fieldChangeFunc}" as="fieldChangeFunc">
+		'parent.opener.{fieldChangeFunc -> f:format.raw()}'
+		</f:for>
+	],
 	defaultAttributeset: {<f:format.raw>
 		{attributes}
 	</f:format.raw>},
