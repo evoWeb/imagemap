@@ -12,6 +12,8 @@ namespace Evoweb\Imagemap\Controller;
  * LICENSE.txt file that was distributed with this source code.
  */
 
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class PopupController
@@ -57,14 +59,14 @@ class PopupController
     /**
      * Default action just renders the Wizard with the default view.
      *
-     * @param \TYPO3\CMS\Core\Http\ServerRequest $request
-     * @param \TYPO3\CMS\Core\Http\Response $response
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
      *
-     * @return \TYPO3\CMS\Core\Http\Response
+     * @return ResponseInterface
      */
     public function mainAction(
-        \TYPO3\CMS\Core\Http\ServerRequest $request,
-        \TYPO3\CMS\Core\Http\Response $response
+        ServerRequestInterface $request,
+        ResponseInterface $response
     ) {
         $parameters = $request->getQueryParams()['P'];
 

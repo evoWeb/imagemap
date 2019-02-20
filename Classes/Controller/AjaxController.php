@@ -12,6 +12,8 @@ namespace Evoweb\Imagemap\Controller;
  * LICENSE.txt file that was distributed with this source code.
  */
 
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -20,14 +22,14 @@ class AjaxController
     /**
      * Processes the data send via ajax
      *
-     * @param \TYPO3\CMS\Core\Http\ServerRequest $request
-     * @param \TYPO3\CMS\Core\Http\Response $response
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
      *
-     * @return \TYPO3\CMS\Core\Http\Response
+     * @return ResponseInterface
      */
     public function tceformAction(
-        \TYPO3\CMS\Core\Http\ServerRequest $request,
-        \TYPO3\CMS\Core\Http\Response $response
+        ServerRequestInterface $request,
+        ResponseInterface $response
     ) {
         $parameters = $request->getQueryParams()['P'];
         $config = $GLOBALS['TCA'][$parameters['tableName']]['columns'][$parameters['fieldName']]['config'];
@@ -61,14 +63,14 @@ class AjaxController
     /**
      * Processes the data send via ajax
      *
-     * @param \TYPO3\CMS\Core\Http\ServerRequest $request
-     * @param \TYPO3\CMS\Core\Http\Response $response
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
      *
-     * @return \TYPO3\CMS\Core\Http\Response
+     * @return ResponseInterface
      */
     public function browseLinkAction(
-        \TYPO3\CMS\Core\Http\ServerRequest $request,
-        \TYPO3\CMS\Core\Http\Response $response
+        ServerRequestInterface $request,
+        ResponseInterface $response
     ) {
         $parameters = $request->getQueryParams();
         $linkParameters = [
