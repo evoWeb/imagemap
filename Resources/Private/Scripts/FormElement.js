@@ -3,7 +3,7 @@ define(['jquery', 'jquery-ui/sortable', 'jquery-ui/draggable', 'TYPO3/CMS/Imagem
 		let control = $('.imagemap-control:eq(0)'),
 			canvas = control.find('.canvas:eq(0)'),
 			existingAreas = canvas.data('existing-areas'),
-			field = control.find('input').first(),
+			hiddenField = control.find('input').first(),
 
 			canvasObject = new previewCanvasClass();
 			canvasObject.init(canvas.attr('id'), canvas.data('thumbnail-scale'));
@@ -19,7 +19,7 @@ define(['jquery', 'jquery-ui/sortable', 'jquery-ui/draggable', 'TYPO3/CMS/Imagem
 			);
 		});
 
-		field.on('change', function () {
+		hiddenField.on('change', function () {
 			jQuery.ajax({
 				url: TYPO3.settings.ajaxUrls['imagemap_tceform'],
 				global: false,
@@ -27,16 +27,16 @@ define(['jquery', 'jquery-ui/sortable', 'jquery-ui/draggable', 'TYPO3/CMS/Imagem
 				data: {
 					context: 'tceform',
 					P: {
-						itemFormElName: field.name,
+						itemFormElName: hiddenField.attr('name'),
 						tableName: 'tt_content',
 						fieldName: 'tx_imagemap_links',
 						uid: 'uid',
-						value: field.value
+						value: hiddenField.val()
 					}
 				}
 			}).done(function (data, textStatus) {
 				if (textStatus === 'success') {
-					jQuery(fieldId).html(data);
+					canvas.html(data);
 				}
 			});
 		});
