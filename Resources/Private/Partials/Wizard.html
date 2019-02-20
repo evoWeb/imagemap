@@ -10,8 +10,8 @@ window.imagemap = {
 	itemName: '{parameters.itemName}',
 	scaleFactor: '{scaleFactor}',
 	fieldChangeFunc: [
-		<f:for each="{parameters.fieldChangeFunc}" as="fieldChangeFunc">
-		'parent.opener.{fieldChangeFunc -> f:format.raw()}'
+		<f:for each="{parameters.fieldChangeFunc}" as="fieldChangeFunc" iteration="iterator">
+		"parent.opener.{fieldChangeFunc -> f:format.raw()}"<f:if condition="{iterator.isLast}"><f:then>,</f:then></f:if>
 		</f:for>
 	],
 	defaultAttributeset: {<f:format.raw>
