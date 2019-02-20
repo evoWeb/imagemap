@@ -104,26 +104,13 @@ class DataObject
         if (!is_array($this->row)) {
             return null;
         }
-        $isFlex = $this->isFlexField($field);
-        $parts = [];
-        if ($isFlex) {
-            $parts = explode(':', $field);
-            $dbField = $parts[2];
-        } else {
-            $dbField = $field;
-        }
 
+        $dbField = $field;
         if (!array_key_exists($dbField, $this->row)) {
             return null;
         }
 
         $data = $this->row[$dbField];
-        if ($isFlex) {
-            $xml = GeneralUtility::xml2array($data);
-            $tools = GeneralUtility::makeInstance(\TYPO3\CMS\Core\Configuration\FlexForm\FlexFormTools::class);
-            $data = $tools->getArrayValueByPath($parts[3], $xml);
-        }
-
         if ($listNum == -1) {
             return $data;
         } else {
@@ -371,9 +358,6 @@ class DataObject
     protected function determineImageFieldName()
     {
         $imgField = $this->getFieldConf('config/userImage/field') ?? 'image';
-        if ($this->isFlexField($this->mapField)) {
-            $imgField = preg_replace('/\/[^\/]+\/(v\S+)$/', '/' . $imgField . '/\1', $this->mapField);
-        }
         return $imgField;
     }
 
@@ -427,15 +411,7 @@ class DataObject
             $this->modifiedFlag = true;
         }
 
-        if ($this->isFlexField($this->mapField)) {
-            $tools = GeneralUtility::makeInstance(\TYPO3\CMS\Core\Configuration\FlexForm\FlexFormTools::class);
-            $parts = explode(':', $this->mapField);
-            $data = GeneralUtility::xml2array($this->row[$parts[2]]);
-            $tools->setArrayValueByPath($parts[3], $data, $value);
-            $this->row[$parts[2]] = $tools->flexArray2Xml($data);
-        } else {
-            $this->row[$this->mapField] = $value;
-        }
+        $this->row[$this->mapField] = $value;
     }
 
     /**
@@ -443,12 +419,6 @@ class DataObject
      */
     public function getCurrentData()
     {
-        if ($this->isFlexField($this->mapField)) {
-            $tools = GeneralUtility::makeInstance(\TYPO3\CMS\Core\Configuration\FlexForm\FlexFormTools::class);
-            $parts = explode(':', $this->mapField);
-            $data = GeneralUtility::xml2array($this->row[$parts[2]]);
-            return $tools->getArrayValueByPath($parts[3], $data);
-        }
         return $this->row[$this->mapField];
     }
 
@@ -480,21 +450,6 @@ class DataObject
         }
         $tools = GeneralUtility::makeInstance(\TYPO3\CMS\Core\Configuration\FlexForm\FlexFormTools::class);
         return $tools->getArrayValueByPath($subKey, $this->fieldConf);
-    }
-
-    /**
-     * @param string $field
-     *
-     * @return bool
-     */
-    protected function isFlexField($field)
-    {
-        $theField = $field;
-        if (stristr($field, ':')) {
-            $parts = explode(':', $field);
-            $theField = $parts[2];
-        }
-        return ($GLOBALS['TCA'][$this->table]['columns'][$theField]['config']['type'] == 'flex');
     }
 
     /**

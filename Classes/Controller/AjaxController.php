@@ -32,6 +32,7 @@ class AjaxController
         $parameters = $request->getQueryParams()['P'];
         $config = $GLOBALS['TCA'][$parameters['tableName']]['columns'][$parameters['fieldName']]['config'];
 
+        /** @var \Evoweb\Imagemap\View\Tceform $view */
         $view = GeneralUtility::makeInstance(\Evoweb\Imagemap\View\Tceform::class);
         $view->init();
         $view->setTCEForm(GeneralUtility::makeInstance(\TYPO3\CMS\Backend\Form\NodeFactory::class));

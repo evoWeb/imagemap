@@ -116,14 +116,12 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
             $mainFieldHtml[] = '</div>';
         }
         $mainFieldHtml[] =    '</div>';
+        $mainFieldHtml[] =  '<input type="hidden" 
+            name="' . $this->data['parameterArray']['itemFormElName'] . '" 
+            value="' . htmlspecialchars($data->getCurrentData()) . '" />';
         $mainFieldHtml[] = '</div>';
 
-        $mainFieldHtml[] = '<input type="hidden" 
-            name="' . $this->data['parameterArray']['itemFormElName'] . '" 
-            value="' . htmlspecialchars($data->getCurrentData()) . '"
-            onchange="' . 'imagemapwizard_valueChanged(\'#' . $id . '\');" />';
-        $mainFieldHtml = implode(LF, $mainFieldHtml);
-        $fullElement = $mainFieldHtml;
+        $fullElement = implode(LF, $mainFieldHtml);
 
         $resultArray['html'] = '<div class="formengine-field-item t3js-formengine-field-item">'
             . $fullElement . '</div>';
