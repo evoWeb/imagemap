@@ -15,9 +15,9 @@
 				<source>Rect-Area</source>
 				<target>Zone-Rect</target>
 			</trans-unit>
-			<trans-unit id="imagemap.form.addcirc" xml:space="preserve" approved="yes">
-				<source>Circ-Area</source>
-				<target>Zone-Circ</target>
+			<trans-unit id="imagemap.form.addcircle" xml:space="preserve" approved="yes">
+				<source>Circle-Area</source>
+				<target>Zone-Circle</target>
 			</trans-unit>
 			<trans-unit id="imagemap.form.addpoly" xml:space="preserve" approved="yes">
 				<source>Poly-Area</source>

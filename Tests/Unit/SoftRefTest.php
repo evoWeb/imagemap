@@ -15,15 +15,15 @@ namespace Evoweb\Imagemap\Tests;
 class SoftRefTest extends \TYPO3\TestingFramework\Core\Unit\UnitTestCase
 {
     /**
-     * @var \Evoweb\Imagemap\Service\SoftRefProc
+     * @var \Evoweb\Imagemap\Service\SoftRefProc|\PHPUnit\Framework\MockObject\MockObject
      */
     protected $processor;
 
     protected function setUp()
     {
-        $this->processor = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
-            \Evoweb\Imagemap\Service\SoftRefProc::class
-        );
+        $this->processor = $this->getMockBuilder(\Evoweb\Imagemap\Service\SoftRefProc::class)
+            ->setMethods(['getTypoLinkParts'])
+            ->getMock();
     }
 
     protected function tearDown()
@@ -55,17 +55,22 @@ class SoftRefTest extends \TYPO3\TestingFramework\Core\Unit\UnitTestCase
      */
     public function basicSoftRefsWork()
     {
+        $this->processor
+            ->expects($this->any())
+            ->method('getTypoLinkParts')
+            ->will($this->returnCallback([$this, 'areaCallback']));
+
         $mapContent = '<map><area coords="0,0,100,100" shape="rect">t3://page?uid=1</area></map>';
         $result = $this->processor->findRef('', '', '', $mapContent, '', [], '');
 
         $this->assertEquals(1, count($result['elements']), 'Wrong Reference-Count found');
 
-        $elem = array_pop($result['elements']);
-        $this->assertEquals('t3://page?uid=1', $elem['matchString'], 'Wrong Reference found');
-        $this->assertEquals('string', $elem['subst']['type'], 'Wrong Reference-Type found');
-        $this->assertEquals('t3://page?uid=1', $elem['subst']['tokenValue'], 'Wrong token value found');
+        $element = array_pop($result['elements']);
+        $this->assertEquals('t3://page?uid=1', $element['matchString'], 'Wrong Reference found');
+        $this->assertEquals('string', $element['subst']['type'], 'Wrong Reference-Type found');
+        $this->assertEquals('t3://page?uid=1', $element['subst']['tokenValue'], 'Wrong token value found');
         $this->assertContains(
-            '{softref:' . $elem['subst']['tokenID'] . '}',
+            '{softref:' . $element['subst']['tokenID'] . '}',
             $result['content'],
             'Token not found in parsed content'
         );
@@ -76,27 +81,44 @@ class SoftRefTest extends \TYPO3\TestingFramework\Core\Unit\UnitTestCase
      */
     public function multipleSoftRefsWork()
     {
+        $this->processor
+            ->expects($this->any())
+            ->method('getTypoLinkParts')
+            ->will($this->returnCallback([$this, 'areaCallback']));
+
         $mapContent = '<map><area>t3://page?uid=1</area><area>t3://page?uid=2</area><area>t3://page?uid=3</area></map>';
         $result = $this->processor->findRef('', '', '', $mapContent, '', [], '');
 
         $this->assertEquals(3, count($result['elements']), 'Wrong Reference-Count found');
 
         $supposed = [
-            ['t3://page?uid=1', 'string', 'pages:1'],
-            ['t3://page?uid=2', 'string', 'pages:2'],
-            ['t3://page?uid=3', 'string', 'pages:3'],
+            't3://page?uid=1',
+            't3://page?uid=2',
+            't3://page?uid=3',
         ];
-        $i = 0;
-        foreach ($result['elements'] as $token => $elem) {
-            $this->assertEquals($supposed[$i][0], $elem['matchString'], 'Wrong Reference found');
-            $this->assertEquals($supposed[$i][1], $elem['subst']['type'], 'Wrong Reference-Type found');
-            $this->assertEquals($supposed[$i][0], $elem['subst']['tokenValue'], 'Wrong token value found');
+        $index = 0;
+        foreach ($result['elements'] as $token => $element) {
+            $this->assertEquals('string', $element['subst']['type'], 'Wrong Reference-Type found');
+            $this->assertEquals($supposed[$index], $element['matchString'], 'Wrong Reference found');
+            $this->assertEquals($supposed[$index], $element['subst']['tokenValue'], 'Wrong token value found');
             $this->assertContains(
-                '{softref:' . $elem['subst']['tokenID'] . '}',
+                '{softref:' . $element['subst']['tokenID'] . '}',
                 $result['content'],
-                'Token (' . $i . ') not found in parsed content'
+                'Token (' . $index . ') not found in parsed content'
             );
-            $i++;
+            $index++;
         }
+    }
+
+    public function areaCallback($typolinkValue)
+    {
+        return [
+            'target' => '',
+            'class' => '',
+            'title' => '',
+            'additionalParams' => '',
+            'LINK_TYPE' => 'url',
+            'url' => $typolinkValue,
+        ];
     }
 }

@@ -33,28 +33,33 @@ class SoftRefProc extends \TYPO3\CMS\Core\Database\SoftReferenceIndex
         /** @var \Evoweb\Imagemap\Domain\Model\Mapper $mapper */
         $mapper = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\Evoweb\Imagemap\Domain\Model\Mapper::class);
         $data = $mapper->map2array($content);
-        $idx = 0;
 
-        $zeroToken = $this->makeTokenID('setTypoLinkPartsElement:' . $idx) . ':0';
         $elements = [];
         if (isset($data['areas']) && is_array($data['areas'])) {
+            $index = 0;
+            $zeroToken = $this->makeTokenID('setTypoLinkPartsElement:' . $index) . ':0';
             foreach ($data['areas'] as $key => $value) {
-                $tmp = $this->findRef_typolink($value['value'], $spParams);
-                $linkData = $tmp['elements'][$zeroToken];
+                $retVal = $this->findRef_typolink($value['value'], $spParams);
+                $element = $retVal['elements'][$zeroToken];
 
-                $newToken = $this->makeTokenID('setTypoLinkPartsElement:' . $idx);
-                $data['areas'][$key]['value'] = str_replace($linkData['subst']['tokenID'], $newToken, $tmp['content']);
-                $linkData['subst']['tokenID'] = $newToken;
-                $elements[$newToken . ':' . $idx] = $linkData;
-                $idx++;
+                $indexToken = $this->makeTokenID('setTypoLinkPartsElement:' . $index);
+                $data['areas'][$key]['value'] = str_replace(
+                    $element['subst']['tokenID'],
+                    $indexToken,
+                    $retVal['content']
+                );
+                $element['subst']['tokenID'] = $indexToken;
+                $elements[$indexToken . ':' . $index] = $element;
+                $index++;
             }
             reset($elements);
             reset($data['areas']);
         }
 
-        return [
+        $resultArray = [
             'content' => $mapper->array2map($data),
             'elements' => $elements
         ];
+        return $resultArray;
     }
 }

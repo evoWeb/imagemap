@@ -12,8 +12,8 @@
 			<trans-unit id="imagemap.form.addrect" xml:space="preserve">
 				<source>Rect-Area</source>
 			</trans-unit>
-			<trans-unit id="imagemap.form.addcirc" xml:space="preserve">
-				<source>Circ-Area</source>
+			<trans-unit id="imagemap.form.addcircle" xml:space="preserve">
+				<source>Circle-Area</source>
 			</trans-unit>
 			<trans-unit id="imagemap.form.addpoly" xml:space="preserve">
 				<source>Poly-Area</source>

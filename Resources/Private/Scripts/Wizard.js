@@ -43,50 +43,39 @@ define(['jquery', 'jquery-ui/sortable', 'jquery-ui/draggable', 'TYPO3/CMS/Imagem
 			zoomIn.show();
 		});
 
-		jQuery('#addRect').click(function () {
+		jQuery('#addRect').on('click', function () {
 			canvasObject.addArea(new areaRectClass(), '', '', '', '', 1, defaultAttributeSet);
 			return false;
 		});
 
-		jQuery('#addPoly').click(function () {
+		jQuery('#addPoly').on('click', function () {
 			canvasObject.addArea(new areaPolyClass(), '', '', '', '', 1, defaultAttributeSet);
 			return false;
 		});
 
-		jQuery('#addCirc').click(function () {
+		jQuery('#addCircle').on('click', function () {
 			canvasObject.addArea(new areaCircleClass(), '', '', '', '', 1, defaultAttributeSet);
 			return false;
 		});
 
-		jQuery('#submit').click(function () {
-			let field = checkReference();
-			if (field) {
-				$(field, parent.opener.document).val('<map>' + canvasObject.persistanceXML() + '</map>');
-			}
+		jQuery('#submit').on('click', function () {
+			jQuery('input[name="' + configuration.itemName + '"]', window.opener.document)
+				.val('<map>' + canvasObject.persistanceXML() + '</map>');
 			close();
 		});
 
 		jQuery('#canvas')
-			.mousedown(function (e) {
+			.on('mousedown', function (e) {
 				return canvasObject.mousedown(e);
 			})
-			.mouseup(function (e) {
+			.on('mouseup', function (e) {
 			return canvasObject.mouseup(e);
 		})
-			.mousemove(function (e) {
+			.on('mousemove', function (e) {
 			return canvasObject.mousemove(e);
 		})
-			.dblclick(function (e) {
+			.on('dblclick', function (e) {
 			return canvasObject.dblclick(e);
 		});
-
-		function checkReference() {
-			let selector = 'input[name="' + configuration.itemName + '"]';
-			if (window.opener && window.opener.document && window.opener.document.querySelector(selector)) {
-				return window.opener.document.querySelector(selector);
-			} else {
-				close();
-			}
-		};
 	});
 });
