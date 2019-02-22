@@ -1,5 +1,5 @@
 <?php
-namespace Evoweb\Imagemap\Service;
+namespace Evoweb\Imagemap\Database;
 
 /**
  * This file is developed by evoWeb.
@@ -12,7 +12,7 @@ namespace Evoweb\Imagemap\Service;
  * LICENSE.txt file that was distributed with this source code.
  */
 
-class SoftRefProc extends \TYPO3\CMS\Core\Database\SoftReferenceIndex
+class SoftRefParser extends \TYPO3\CMS\Core\Database\SoftReferenceIndex
 {
     /**
      * Just overrides the method which normally catches all softref-types
@@ -30,6 +30,8 @@ class SoftRefProc extends \TYPO3\CMS\Core\Database\SoftReferenceIndex
      */
     public function findRef($table, $field, $uid, $content, $spKey, $spParams, $structurePath = '')
     {
+        $this->tokenID_basePrefix = $table . ':' . $uid . ':' . $field . ':' . $structurePath . ':' . $spKey;
+
         /** @var \Evoweb\Imagemap\Domain\Model\Mapper $mapper */
         $mapper = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\Evoweb\Imagemap\Domain\Model\Mapper::class);
         $data = $mapper->map2array($content);

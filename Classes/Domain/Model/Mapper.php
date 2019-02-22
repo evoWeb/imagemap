@@ -125,7 +125,7 @@ class Mapper
     /**
      * Encapsulates the creation of a valid typolink-conf array
      *
-     * @param string $param the paramater which is used for the link-generation
+     * @param string $param the parameter which is used for the link-generation
      * @param array $conf
      *
      * @return array typolink-conf array
@@ -140,17 +140,17 @@ class Mapper
     }
 
     /**
-     * Convert XML into a lightweight Array, keep Attributes, Values etc,
-     * is limited to one level (no recursion) since this is enough for the imagemap
+     * Convert XML into an array, keep attributes, values etc,
+     * is limited to one level (no recursion) since this is enough for the image maps
      *
      * @param string $value the XML-map
      * @param string $baseTag the Root-Tag of the resulting Array
      *
      * @return array transformed Array keys:
-     *  'name'~Tagname,
-     *  'value'~Tagvalue,
-     *  'attributes'~Sub-Array with Attributes,
-     *  'areas'~Sub-Array with Childnodes
+     *  'name' string tag name
+     *  'value' string tag value
+     *  'attributes' array with attributes
+     *  'areas' array with child nodes
      */
     public static function map2array($value, $baseTag = 'map')
     {

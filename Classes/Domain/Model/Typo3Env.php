@@ -36,46 +36,46 @@ class Typo3Env
      *
      * @param int $pid The pid if the page which is simulated
      */
-    public function initTSFE($pid = 1)
+    public function initializeTSFE($pid = 1)
     {
-        // initialize time tracker
         if (!is_object($GLOBALS['TT'])) {
             $GLOBALS['TT'] = GeneralUtility::makeInstance(\TYPO3\CMS\Core\TimeTracker\TimeTracker::class);
             $GLOBALS['TT']->start();
         }
 
-        // initialize TSFE
         if (!is_object($GLOBALS['TSFE'])) {
-            $GLOBALS['TSFE'] = GeneralUtility::makeInstance(
+            /** @var \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController $controller */
+            $controller = GeneralUtility::makeInstance(
                 \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController::class,
                 $GLOBALS['TYPO3_CONF_VARS'],
                 $pid,
                 0
             );
-            $GLOBALS['TSFE']->connectToDB();
-            $GLOBALS['TSFE']->initFEuser();
-            $GLOBALS['TSFE']->determineId();
-            $GLOBALS['TSFE']->initTemplate();
-            $GLOBALS['TSFE']->getConfigArray();
-            $GLOBALS['TSFE']->newCObj();
+            $GLOBALS['TSFE'] = $controller;
+            $controller->connectToDB();
+            $controller->initFEuser();
+            $controller->determineId();
+            $controller->initTemplate();
+            $controller->getConfigArray();
+            $controller->newCObj();
         }
     }
 
     /**
      * Stack variable to store environment-settings
      */
-    protected $envStack = [];
+    protected $environmentStack = [];
 
     /**
      * Store relevant data - just to be sure that nothing gets lost
      * during FE-simulation and it really sucks that this is needed
      *
-     * @see popEnv()
+     * @see popEnvironment()
      */
-    public function pushEnv()
+    public function pushEnvironment()
     {
         array_push(
-            $this->envStack,
+            $this->environmentStack,
             ['workDir' => getcwd(), 'BE_USER' => $GLOBALS['BE_USER'], 'TCA' => $GLOBALS['TCA']]
         );
     }
@@ -86,10 +86,10 @@ class Typo3Env
      *
      * @param string $backPath
      */
-    public function setEnv($backPath = '')
+    public function prepareEnvironment($backPath = '')
     {
         if ($this->BE_USER == null) {
-            $this->initMyBackendUser();
+            $this->initializeMyBackendUser();
         }
         if ($backPath && is_dir($backPath)) {
             chdir($backPath);
@@ -98,13 +98,13 @@ class Typo3Env
     }
 
     /**
-     * closes Frontend-like-Rendering
+     * finish Frontend-like-Rendering
      * and it also really sucks that this is needed
      */
-    public function popEnv()
+    public function popEnvironment()
     {
-        if (is_array($this->envStack) && count($this->envStack)) {
-            $env = array_pop($this->envStack);
+        if (is_array($this->environmentStack) && count($this->environmentStack)) {
+            $env = array_pop($this->environmentStack);
 
             if ($env['TCA'] && is_array($env['TCA'])) {
                 $GLOBALS['TCA'] = $env['TCA'];
@@ -131,7 +131,7 @@ class Typo3Env
      */
     public function resetEnableColumns($table, $newConf = null)
     {
-        if (!is_array($this->envStack) || !count($this->envStack)) {
+        if (!is_array($this->environmentStack) || !count($this->environmentStack)) {
             return false;
         }
         if (!in_array($table, array_keys($GLOBALS['TCA']))) {
@@ -142,9 +142,9 @@ class Typo3Env
     }
 
     /**
-     * lazyload the feBEUSER
+     * lazy load the FrontendBackendUserAuthentication
      */
-    protected function initMyBackendUser()
+    protected function initializeMyBackendUser()
     {
         $this->BE_USER = GeneralUtility::makeInstance(\TYPO3\CMS\Backend\FrontendBackendUserAuthentication::class);
         $this->BE_USER->OS = TYPO3_OS;

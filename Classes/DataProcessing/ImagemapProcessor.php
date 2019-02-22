@@ -53,7 +53,7 @@ class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcess
 
     public function __construct()
     {
-        if ($GLOBALS['TSFE']->config['config']['xhtmlDoctype'] !== '') {
+        if ($this->getTypoScriptFrontendController()->config['config']['xhtmlDoctype'] !== '') {
             // remove target attribute to have xhtml-strict output
             $this->attributes = array_diff($this->attributes, ['target']);
         }
@@ -89,7 +89,7 @@ class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcess
                 $mapName,
                 $cObj->getData($processorConfiguration['data'], $cObj->data),
                 $this->attributes,
-                $GLOBALS['TSFE']->config['config']['xhtmlDoctype'] !== '',
+                $this->getTypoScriptFrontendController()->config['config']['xhtmlDoctype'] !== '',
                 $processorConfiguration
             );
             if (!$mapper->isEmptyMap($map) || $cObj->getData('register:keepUsemapMarker', $cObj->data)) {
@@ -98,5 +98,15 @@ class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcess
             }
         }
         return $processedData;
+    }
+
+    /**
+     * Returns global frontend controller
+     *
+     * @return \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController
+     */
+    protected function getTypoScriptFrontendController()
+    {
+        return $GLOBALS['TSFE'];
     }
 }

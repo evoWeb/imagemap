@@ -75,7 +75,7 @@ class DataObject
         $this->table = $table;
 
         if (!in_array($field, array_keys($GLOBALS['TCA'][$table]['columns']))) {
-            throw new \Exception('field (' . $field . ') unknow for table in TCA');
+            throw new \Exception('field (' . $field . ') unknown for table in TCA');
         }
         $this->mapField = $field;
 
@@ -154,7 +154,7 @@ class DataObject
      */
     public function getImage()
     {
-        $this->environment->initTSFE($this->getLivePid());
+        $this->environment->initializeTSFE($this->getLivePid());
         $cObj = $this->getTypoScriptFrontendController()->cObj;
 
         $conf = [
@@ -166,22 +166,18 @@ class DataObject
         ];
 
         // render like in FE with WS-preview etc...
-        $this->environment->pushEnv();
-        $this->environment->setEnv(PATH_site);
+        $this->environment->pushEnvironment();
+        $this->environment->prepareEnvironment(PATH_site);
         $this->environment->resetEnableColumns('pages');
         $this->environment->resetEnableColumns($this->table);
         $cObj->cObjGetSingle('LOAD_REGISTER', ['keepUsemapMarker' => '1']);
         $result = $cObj->cObjGetSingle('CONTENT', $conf);
-        $this->environment->popEnv();
+        $this->environment->popEnvironment();
 
         // extract the image
         $matches = [];
         if (!preg_match('/(<img[^>]+usemap="#[^"]+"[^>]*\/>)/', $result, $matches)) {
-            return 'No Image rendered from TSFE. :(<br/>
-                Has the page some kind of special doktype or has it access-restrictions?<br/>
-                There are lot\'s of things which can go wrong since normally nobody creates
-                frontend-output in the backend ;)<br/>
-                Error was:' . $this->environment->getLastError();
+            return 'No Image rendered from TSFE. :(<br/>Error was:' . $this->environment->getLastError();
         }
         $result = str_replace('src="', 'src="' . $this->environment->getBackPath(), $matches[1]);
         return $result;

@@ -1,8 +1,8 @@
 <?php
 
 call_user_func(function () {
-    $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['GLOBAL']['softRefParser']['tx_imagemap'] =
-        \Evoweb\Imagemap\Service\SoftRefProc::class;
+    $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['GLOBAL']['softRefParser']['tx_imagemap_softrefparser'] =
+        \Evoweb\Imagemap\Database\SoftRefParser::class;
 
     /**
      * Page TypoScript for new content element wizards

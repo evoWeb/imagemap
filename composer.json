@@ -1,7 +1,7 @@
 {
 	"name": "evoweb/imagemap",
 	"type": "typo3-cms-extension",
-	"description": "Image map",
+	"description": "Image map based on EXT:imagemap_wizard by Tolleiv Nietsch",
 	"homepage": "http://www.evoweb.de/",
 
 	"license": [

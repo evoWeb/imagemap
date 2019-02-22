@@ -15,13 +15,13 @@ namespace Evoweb\Imagemap\Tests;
 class SoftRefTest extends \TYPO3\TestingFramework\Core\Unit\UnitTestCase
 {
     /**
-     * @var \Evoweb\Imagemap\Service\SoftRefProc|\PHPUnit\Framework\MockObject\MockObject
+     * @var \Evoweb\Imagemap\Database\SoftRefParser|\PHPUnit\Framework\MockObject\MockObject
      */
     protected $processor;
 
     protected function setUp()
     {
-        $this->processor = $this->getMockBuilder(\Evoweb\Imagemap\Service\SoftRefProc::class)
+        $this->processor = $this->getMockBuilder(\Evoweb\Imagemap\Database\SoftRefParser::class)
             ->setMethods(['getTypoLinkParts'])
             ->getMock();
     }
