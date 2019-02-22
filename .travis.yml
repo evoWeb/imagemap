@@ -92,7 +92,7 @@ jobs:
     - stage: test
       php: 7.2
       env:
-        - TYPO3_VERSION="dev-master as 10.0.0" TESTING_FRAMEWORK="~4.10.0" DB_DRIVER="pdo_sqlite"
+        - TYPO3_VERSION="dev-master as 10.0.0" TESTING_FRAMEWORK="~5.0.5" DB_DRIVER="pdo_sqlite"
 
     - stage: publish in ter
       if: tag IS present
