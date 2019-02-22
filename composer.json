@@ -23,7 +23,7 @@
 		"sjbr/static-info-tables": "^6.7"
 	},
 	"require-dev": {
-		"typo3/testing-framework": "~4.11.3"
+		"typo3/testing-framework": "~4.10.0"
 	},
 
 	"autoload": {

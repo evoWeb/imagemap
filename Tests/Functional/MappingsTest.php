@@ -35,6 +35,8 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
     protected function setUp()
     {
         parent::setUp();
+        $this->importDataSet(__DIR__ . '/Fixtures/pages.xml');
+        $this->importDataSet(__DIR__ . '/Fixtures/sys_template.xml');
 
         $this->mapper = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
             \Evoweb\Imagemap\Domain\Model\Mapper::class
@@ -122,15 +124,16 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
         $cObj = $this->getMockBuilder(ContentObjectRenderer::class)
             ->setMethods(['typoLink', 'LOAD_REGISTER'])
             ->getMock();
-        $cObj->expects($this->atLeastOnce())->method('typoLink')->will(
-            $this->returnValue('<a href="http://www.foo.org" title="tt">text</a>')
-        );
+        $cObj
+            ->expects($this->atLeastOnce())
+            ->method('typoLink')
+            ->will($this->returnValue('<a href="http://www.foo.org" title="tt">text</a>'));
 
         $input = '<map><area shape="rect">1</area></map>';
         $output = '<map name="test"><area href="http://www.foo.org" title="tt" shape="rect" /></map>';
         $this->assertEquals(
             $output,
-            $this->mapper->generateMap($cObj, 'test', $input),
+            $this->mapper->generateMap($cObj, 'test', $input, ['href', 'title', 'shape']),
             'Generator Output looks not as supposed'
         );
     }
@@ -144,16 +147,17 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
         $cObj = $this->getMockBuilder(ContentObjectRenderer::class)
             ->setMethods(['typoLink', 'LOAD_REGISTER'])
             ->getMock();
-        $cObj->expects($this->atLeastOnce())->method('typoLink')->will(
-            $this->returnValue('<a href="http://www.foo.org" title="tt">text</a>')
-        );
+        $cObj
+            ->expects($this->atLeastOnce())
+            ->method('typoLink')
+            ->will($this->returnValue('<a href="http://www.foo.org" title="tt">text</a>'));
 
         $input = '<map><area shape="rect" title="individual title" xyz="1">1</area></map>';
         $output = '<map name="test"><area href="http://www.foo.org" '
             . 'title="individual title" shape="rect" xyz="1" /></map>';
         $this->assertEquals(
             $output,
-            $this->mapper->generateMap($cObj, 'test', $input),
+            $this->mapper->generateMap($cObj, 'test', $input, ['href', 'title', 'shape', 'xyz']),
             'Individual Attributes are lost after Generation'
         );
     }
@@ -167,15 +171,16 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
         $cObj = $this->getMockBuilder(ContentObjectRenderer::class)
             ->setMethods(['typoLink', 'LOAD_REGISTER'])
             ->getMock();
-        $cObj->expects($this->atLeastOnce())->method('typoLink')->will(
-            $this->returnValue('<a href="http://www.foo.org" title="tt">text</a>')
-        );
+        $cObj
+            ->expects($this->atLeastOnce())
+            ->method('typoLink')
+            ->will($this->returnValue('<a href="http://www.foo.org" title="tt">text</a>'));
 
         $input = '<map><area shape="rect" title="individual title" xyz="">1</area></map>';
         $output = '<map name="test"><area href="http://www.foo.org" title="individual title" shape="rect" /></map>';
         $this->assertEquals(
             $output,
-            $this->mapper->generateMap($cObj, 'test', $input),
+            $this->mapper->generateMap($cObj, 'test', $input, ['href', 'title', 'shape', 'xyz']),
             'Empty Attribute should be removed during Generation'
         );
     }
@@ -213,16 +218,17 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
         $cObj = $this->getMockBuilder(ContentObjectRenderer::class)
             ->setMethods(['typoLink', 'LOAD_REGISTER'])
             ->getMock();
-        $cObj->expects($this->atLeastOnce())->method('typoLink')->will(
-            $this->returnValue('<a href="http://www.foo.org">text</a>')
-        );
+        $cObj
+            ->expects($this->atLeastOnce())
+            ->method('typoLink')
+            ->will($this->returnValue('<a href="http://www.foo.org">text</a>'));
 
         // stupid href-value but this proves that the typoLink-function is really used
         $input = '<map><area href="1" shape="rect" /></map>';
         $output = '<map name="test"><area href="http://www.foo.org" shape="rect" /></map>';
         $this->assertEquals(
             $output,
-            $this->mapper->generateMap($cObj, 'test', $input),
+            $this->mapper->generateMap($cObj, 'test', $input, ['href', 'shape']),
             'Href-Attribute is not recognized for the area-link creation.'
         );
     }
