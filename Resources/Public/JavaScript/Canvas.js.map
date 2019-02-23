@@ -1,0 +1,1 @@
+{"version":3,"sources":["Canvas.js"],"names":["define"],"mappings":"AAAAA,OAAAA,CAAAA,UAAAA,SAAAA","file":"Canvas.js","sourcesContent":["define(['fabric'], (fabric) => {\n\n});\n"]}

@@ -1,10 +1,11 @@
 'use strict';
 
 import gulp from 'gulp';
-import sass from 'gulp-sass';
 import autoPrefixer from 'gulp-autoprefixer';
-import sourcemaps from 'gulp-sourcemaps';
 import babel from 'gulp-babel';
+import concat from 'gulp-concat';
+import sass from 'gulp-sass';
+import sourcemaps from 'gulp-sourcemaps';
 import uglify from 'gulp-uglify';
 
 const dirs = {
@@ -12,10 +13,31 @@ const dirs = {
 	dest: 'Public'
 };
 
-const javascriptPaths = {
-	src: `${dirs.src}/Scripts/*.js`,
-	dest: `${dirs.dest}/JavaScript/`
-};
+const javascriptPaths = [
+	{
+		src: `${dirs.src}/Scripts/FormElement.js`,
+		dest: `${dirs.dest}/JavaScript/`,
+		name: 'FormElement.js'
+	},
+	{
+		src: `${dirs.src}/Scripts/Wizard.js`,
+		dest: `${dirs.dest}/JavaScript/`,
+		name: 'Wizard.js'
+	},
+	{
+		src: [
+			// `node_modules/fabric/dist/fabric.js`,
+			`${dirs.src}/Scripts/Canvas.js`
+		],
+		dest: `${dirs.dest}/JavaScript/`,
+		name: 'Canvas.js'
+	}/*,
+	{
+		src: `node_modules/fabric/dist/fabric.js`,
+		dest: `${dirs.dest}/JavaScript/`,
+		name: 'Fabric.js'
+	}*/
+];
 
 const sassPaths = {
 	src: `${dirs.src}/Sass/*.scss`,
@@ -31,19 +53,31 @@ let stylesTask = () => {
 		.pipe(gulp.dest(sassPaths.dest));
 };
 
-let babelTask = () => {
-	return gulp.src(javascriptPaths.src)
-		.pipe(sourcemaps.init())
-		.pipe(babel({
-			presets: [
-				['@babel/env', {
-					modules: false
-				}]
-			]
-		}))
-		.pipe(uglify())
-		.pipe(sourcemaps.write('.'))
-		.pipe(gulp.dest(javascriptPaths.dest));
+let babelTask = (done) => {
+	let tasks = javascriptPaths.map((paths) => {
+		let buildJavascript = () => {
+			return gulp.src(paths.src)
+				.pipe(sourcemaps.init())
+				.pipe(concat(paths.name))
+				.pipe(babel({
+					compact: false,
+					presets: [
+						['@babel/env', {modules: false}]
+					],
+				}))
+				.pipe(uglify())
+				.pipe(sourcemaps.write('.'))
+				.pipe(gulp.dest(paths.dest));
+		};
+
+		buildJavascript.displayName = `${paths.name}`;
+		return buildJavascript;
+	});
+
+	return gulp.series(...tasks, (seriesDone) => {
+		seriesDone();
+		done();
+	})();
 };
 
 exports.babel = babelTask;
