@@ -12,7 +12,7 @@ namespace Evoweb\Imagemap\Tests;
  * LICENSE.txt file that was distributed with this source code.
  */
 
-class SoftRefTest extends \TYPO3\TestingFramework\Core\Unit\UnitTestCase
+class SoftRefParserTest extends \TYPO3\TestingFramework\Core\Unit\UnitTestCase
 {
     /**
      * @var \Evoweb\Imagemap\Database\SoftRefParser|\PHPUnit\Framework\MockObject\MockObject
@@ -41,11 +41,11 @@ class SoftRefTest extends \TYPO3\TestingFramework\Core\Unit\UnitTestCase
         foreach ($emptyStrings as $str) {
             $result = $this->processor->findRef('', '', '', $str, '', [], '');
             $this->assertEquals(true, is_array($result), 'array expected');
-            $this->assertEquals(true, isset($result['content']), ' \'content\'-part in array expected');
+            $this->assertEquals(true, isset($result['content']), '"content"-part in array expected');
             $this->assertEquals(
                 true,
                 isset($result['elements']) && is_array($result['elements']),
-                ' \'elements\'-part in array  as sub-array expected'
+                '"elements"-part in array as sub-array expected'
             );
         }
     }
@@ -58,7 +58,7 @@ class SoftRefTest extends \TYPO3\TestingFramework\Core\Unit\UnitTestCase
         $this->processor
             ->expects($this->any())
             ->method('getTypoLinkParts')
-            ->will($this->returnCallback([$this, 'areaCallback']));
+            ->will($this->returnCallback([$this, 'getTypoLinkPartsCallback']));
 
         $mapContent = '<map><area coords="0,0,100,100" shape="rect">t3://page?uid=1</area></map>';
         $result = $this->processor->findRef('', '', '', $mapContent, '', [], '');
@@ -84,7 +84,7 @@ class SoftRefTest extends \TYPO3\TestingFramework\Core\Unit\UnitTestCase
         $this->processor
             ->expects($this->any())
             ->method('getTypoLinkParts')
-            ->will($this->returnCallback([$this, 'areaCallback']));
+            ->will($this->returnCallback([$this, 'getTypoLinkPartsCallback']));
 
         $mapContent = '<map><area>t3://page?uid=1</area><area>t3://page?uid=2</area><area>t3://page?uid=3</area></map>';
         $result = $this->processor->findRef('', '', '', $mapContent, '', [], '');
@@ -110,7 +110,7 @@ class SoftRefTest extends \TYPO3\TestingFramework\Core\Unit\UnitTestCase
         }
     }
 
-    public function areaCallback($typolinkValue)
+    public function getTypoLinkPartsCallback($typolinkValue)
     {
         return [
             'target' => '',

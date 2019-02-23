@@ -12,7 +12,6 @@ namespace Evoweb\Imagemap\Controller;
  * LICENSE.txt file that was distributed with this source code.
  */
 
-use Evoweb\Imagemap\Domain\Model\DataObject;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Core\Http\Response;
@@ -74,9 +73,9 @@ class PopupController
         }
 
         try {
-            /** @var DataObject $data */
+            /** @var \Evoweb\Imagemap\Domain\Model\Data $data */
             $data = GeneralUtility::makeInstance(
-                DataObject::class,
+                \Evoweb\Imagemap\Domain\Model\Data::class,
                 $parameters['tableName'],
                 $parameters['fieldName'],
                 $parameters['uid'],

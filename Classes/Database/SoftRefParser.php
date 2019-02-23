@@ -32,8 +32,8 @@ class SoftRefParser extends \TYPO3\CMS\Core\Database\SoftReferenceIndex
     {
         $this->tokenID_basePrefix = $table . ':' . $uid . ':' . $field . ':' . $structurePath . ':' . $spKey;
 
-        /** @var \Evoweb\Imagemap\Domain\Model\Mapper $mapper */
-        $mapper = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\Evoweb\Imagemap\Domain\Model\Mapper::class);
+        /** @var \Evoweb\Imagemap\Utility\Mapper $mapper */
+        $mapper = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\Evoweb\Imagemap\Utility\Mapper::class);
         $data = $mapper->map2array($content);
 
         $elements = [];

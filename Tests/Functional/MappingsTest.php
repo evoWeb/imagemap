@@ -12,9 +12,6 @@ namespace Evoweb\Imagemap\Tests;
  * LICENSE.txt file that was distributed with this source code.
  */
 
-use PHPUnit\Framework\MockObject\MockObject;
-use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
-
 class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTestCase
 {
     /**
@@ -23,24 +20,25 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
     protected $testExtensionsToLoad = ['typo3conf/ext/imagemap'];
 
     /**
-     * @var array
-     */
-    protected $coreExtensionsToLoad = ['extbase', 'fluid'];
-
-    /**
-     * @var \Evoweb\Imagemap\Domain\Model\Mapper
+     * @var \Evoweb\Imagemap\Utility\Mapper
      */
     protected $mapper;
+
+    /**
+     * @var \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer|\PHPUnit\Framework\MockObject\MockObject
+     */
+    protected $cObj;
 
     protected function setUp()
     {
         parent::setUp();
-        $this->importDataSet(__DIR__ . '/Fixtures/pages.xml');
-        $this->importDataSet(__DIR__ . '/Fixtures/sys_template.xml');
+        $this->importDataSet(__DIR__ . '/../Fixtures/pages.xml');
+        $this->importDataSet(__DIR__ . '/../Fixtures/sys_template.xml');
 
-        $this->mapper = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
-            \Evoweb\Imagemap\Domain\Model\Mapper::class
-        );
+        $this->mapper = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\Evoweb\Imagemap\Utility\Mapper::class);
+        $this->cObj = $this->getMockBuilder(\TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer::class)
+            ->setMethods(['typoLink', 'LOAD_REGISTER'])
+            ->getMock();
     }
 
     protected function tearDown()
@@ -53,21 +51,19 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
      */
     public function creatingEmptyMap()
     {
-        /** @var ContentObjectRenderer|MockObject $cObj */
-        $cObj = $this->getMockBuilder(ContentObjectRenderer::class)
-            ->setMethods(['typoLink', 'LOAD_REGISTER'])
-            ->getMock();
-        $cObj->expects($this->never())->method('typoLink');
+        $this->cObj
+            ->expects($this->never())
+            ->method('typoLink');
 
         $supposedOutput = '';
         $this->assertEquals(
             $supposedOutput,
-            $this->mapper->generateMap($cObj, 'testname'),
+            $this->mapper->generateMap($this->cObj, 'testname'),
             'Empty Map is not created as supposed'
         );
         $this->assertEquals(
             $supposedOutput,
-            $this->mapper->generateMap($cObj, 'testname', []),
+            $this->mapper->generateMap($this->cObj, 'testname', []),
             'Empty Map is not created as supposed'
         );
     }
@@ -77,15 +73,10 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
      */
     public function emptyMapNameDoesntHurt()
     {
-        /** @var ContentObjectRenderer|MockObject $cObj */
-        $cObj = $this->getMockBuilder(ContentObjectRenderer::class)
-            ->setMethods(['typoLink', 'LOAD_REGISTER'])
-            ->getMock();
-
         $input = '<map></map>';
         $this->assertEquals(
             '',
-            $this->mapper->generateMap($cObj, '', $input),
+            $this->mapper->generateMap($this->cObj, '', $input),
             'Empty Map-Name inputs are not processed as supposed'
         );
     }
@@ -95,12 +86,6 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
      */
     public function creatingValidMapNames()
     {
-        /** @var ContentObjectRenderer|MockObject $cObj */
-        $cObj = $this->getMockBuilder(ContentObjectRenderer::class)
-            ->setMethods(['typoLink', 'LOAD_REGISTER'])
-            ->getMock();
-        $cObj->expects($this->never())->method('typoLink');
-
         $strings = ['test name', 'test näme', 'ÄÖÜ..', '1234', 'おはようございます'];
 
         $regExAttr = '/^[a-zA-Z][a-zA-Z0-9\-_]+[a-zA-Z0-9]$/i';
@@ -108,9 +93,8 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
             $this->assertEquals(
                 1,
                 preg_match($regExAttr, $this->mapper->createValidNameAttribute($string)),
-                'Attribute (' . $key . ') is not cleaned as supposed...[' . $this->mapper->createValidNameAttribute(
-                    $string
-                ) . ']'
+                'Attribute (' . $key . ') is not cleaned as supposed...['
+                . $this->mapper->createValidNameAttribute($string) . ']'
             );
         }
     }
@@ -120,11 +104,7 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
      */
     public function creatingSimpleRectMap()
     {
-        /** @var ContentObjectRenderer|MockObject $cObj */
-        $cObj = $this->getMockBuilder(ContentObjectRenderer::class)
-            ->setMethods(['typoLink', 'LOAD_REGISTER'])
-            ->getMock();
-        $cObj
+        $this->cObj
             ->expects($this->atLeastOnce())
             ->method('typoLink')
             ->will($this->returnValue('<a href="http://www.foo.org" title="tt">text</a>'));
@@ -133,7 +113,7 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
         $output = '<map name="test"><area href="http://www.foo.org" title="tt" shape="rect" /></map>';
         $this->assertEquals(
             $output,
-            $this->mapper->generateMap($cObj, 'test', $input, ['href', 'title', 'shape']),
+            $this->mapper->generateMap($this->cObj, 'test', $input, ['href', 'title', 'shape']),
             'Generator Output looks not as supposed'
         );
     }
@@ -143,11 +123,7 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
      */
     public function creatingMapGeneratorKeepsIndividualAttributes()
     {
-        /** @var ContentObjectRenderer|MockObject $cObj */
-        $cObj = $this->getMockBuilder(ContentObjectRenderer::class)
-            ->setMethods(['typoLink', 'LOAD_REGISTER'])
-            ->getMock();
-        $cObj
+        $this->cObj
             ->expects($this->atLeastOnce())
             ->method('typoLink')
             ->will($this->returnValue('<a href="http://www.foo.org" title="tt">text</a>'));
@@ -157,7 +133,7 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
             . 'title="individual title" shape="rect" xyz="1" /></map>';
         $this->assertEquals(
             $output,
-            $this->mapper->generateMap($cObj, 'test', $input, ['href', 'title', 'shape', 'xyz']),
+            $this->mapper->generateMap($this->cObj, 'test', $input, ['href', 'title', 'shape', 'xyz']),
             'Individual Attributes are lost after Generation'
         );
     }
@@ -167,11 +143,7 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
      */
     public function creatingMapRemovesEmptyAttributes()
     {
-        /** @var ContentObjectRenderer|MockObject $cObj */
-        $cObj = $this->getMockBuilder(ContentObjectRenderer::class)
-            ->setMethods(['typoLink', 'LOAD_REGISTER'])
-            ->getMock();
-        $cObj
+        $this->cObj
             ->expects($this->atLeastOnce())
             ->method('typoLink')
             ->will($this->returnValue('<a href="http://www.foo.org" title="tt">text</a>'));
@@ -180,7 +152,7 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
         $output = '<map name="test"><area href="http://www.foo.org" title="individual title" shape="rect" /></map>';
         $this->assertEquals(
             $output,
-            $this->mapper->generateMap($cObj, 'test', $input, ['href', 'title', 'shape', 'xyz']),
+            $this->mapper->generateMap($this->cObj, 'test', $input, ['href', 'title', 'shape', 'xyz']),
             'Empty Attribute should be removed during Generation'
         );
     }
@@ -190,13 +162,10 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
      */
     public function creatingMapGeneratorAcceptsAttributeWhitelist()
     {
-        /** @var ContentObjectRenderer|MockObject $cObj */
-        $cObj = $this->getMockBuilder(ContentObjectRenderer::class)
-            ->setMethods(['typoLink', 'LOAD_REGISTER'])
-            ->getMock();
-        $cObj->expects($this->atLeastOnce())->method('typoLink')->will(
-            $this->returnValue('<a href="http://www.foo.org" title="tt">text</a>')
-        );
+        $this->cObj
+            ->expects($this->atLeastOnce())
+            ->method('typoLink')
+            ->will($this->returnValue('<a href="http://www.foo.org" title="tt">text</a>'));
 
         $whitelist = ['href', 'shape'];
 
@@ -204,7 +173,7 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
         $output = '<map name="test"><area href="http://www.foo.org" shape="rect" /></map>';
         $this->assertEquals(
             $output,
-            $this->mapper->generateMap($cObj, 'test', $input, $whitelist),
+            $this->mapper->generateMap($this->cObj, 'test', $input, $whitelist),
             'Individual Attributes are lost after Generation'
         );
     }
@@ -214,11 +183,7 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
      */
     public function creatingMapUsingHrefAttrIfNoValueExists()
     {
-        /** @var ContentObjectRenderer|MockObject $cObj */
-        $cObj = $this->getMockBuilder(ContentObjectRenderer::class)
-            ->setMethods(['typoLink', 'LOAD_REGISTER'])
-            ->getMock();
-        $cObj
+        $this->cObj
             ->expects($this->atLeastOnce())
             ->method('typoLink')
             ->will($this->returnValue('<a href="http://www.foo.org">text</a>'));
@@ -228,7 +193,7 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
         $output = '<map name="test"><area href="http://www.foo.org" shape="rect" /></map>';
         $this->assertEquals(
             $output,
-            $this->mapper->generateMap($cObj, 'test', $input, ['href', 'shape']),
+            $this->mapper->generateMap($this->cObj, 'test', $input, ['href', 'shape']),
             'Href-Attribute is not recognized for the area-link creation.'
         );
     }
@@ -238,23 +203,18 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
      */
     public function xhtmlSwitchWorks()
     {
-        /** @var ContentObjectRenderer|MockObject $cObj */
-        $cObj = $this->getMockBuilder(ContentObjectRenderer::class)
-            ->setMethods(['typoLink', 'LOAD_REGISTER'])
-            ->getMock();
-
         $input = '<map><area href="1" shape="rect" /></map>';
         $name = 'testname';
         $htmlOutput = '<map name="' . $name . '"><area href="1" shape="rect" /></map>';
         $xhtmlOutput = '<map  id="' . $name . '" name="' . $name . '"><area href="1" shape="rect" /></map>';
         $this->assertEquals(
             true,
-            $this->mapper->compareMaps($htmlOutput, $this->mapper->generateMap($cObj, $name, $input, [], false)),
+            $this->mapper->compareMaps($htmlOutput, $this->mapper->generateMap($this->cObj, $name, $input, [], false)),
             ' HTML mapname is not generated as supposed'
         );
         $this->assertEquals(
             true,
-            $this->mapper->compareMaps($xhtmlOutput, $this->mapper->generateMap($cObj, $name, $input, [], true)),
+            $this->mapper->compareMaps($xhtmlOutput, $this->mapper->generateMap($this->cObj, $name, $input, [], true)),
             ' XHTML mapname is not generated as supposed'
         );
     }

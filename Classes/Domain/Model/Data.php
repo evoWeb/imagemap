@@ -14,10 +14,10 @@ namespace Evoweb\Imagemap\Domain\Model;
 
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class DataObject
+class Data
 {
     /**
-     * @var \Evoweb\Imagemap\Domain\Model\Typo3Env
+     * @var \Evoweb\Imagemap\Service\Environment
      */
     protected $environment;
 
@@ -86,11 +86,11 @@ class DataObject
         $this->liveRow = $this->row;
 
         \TYPO3\CMS\Backend\Utility\BackendUtility::fixVersioningPid($table, $this->liveRow);
-        $this->map = GeneralUtility::makeInstance(\Evoweb\Imagemap\Domain\Model\Mapper::class)->map2array(
+        $this->map = GeneralUtility::makeInstance(\Evoweb\Imagemap\Utility\Mapper::class)->map2array(
             $this->getFieldValue($this->mapField)
         );
 
-        $this->environment = GeneralUtility::makeInstance(\Evoweb\Imagemap\Domain\Model\Typo3Env::class);
+        $this->environment = GeneralUtility::makeInstance(\Evoweb\Imagemap\Service\Environment::class);
     }
 
     /**
@@ -403,7 +403,7 @@ class DataObject
     public function useCurrentData($value)
     {
         $cur = $this->getCurrentData();
-        if (!GeneralUtility::makeInstance(\Evoweb\Imagemap\Domain\Model\Mapper::class)->compareMaps($cur, $value)) {
+        if (!GeneralUtility::makeInstance(\Evoweb\Imagemap\Utility\Mapper::class)->compareMaps($cur, $value)) {
             $this->modifiedFlag = true;
         }
 
@@ -449,7 +449,7 @@ class DataObject
     }
 
     /**
-     * @return Typo3Env
+     * @return \Evoweb\Imagemap\Service\Environment
      */
     public function getEnvironment()
     {

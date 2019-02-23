@@ -1,5 +1,5 @@
 <?php
-namespace Evoweb\Imagemap\Domain\Model;
+namespace Evoweb\Imagemap\Service;
 
 /**
  * This file is developed by evoWeb.
@@ -14,7 +14,7 @@ namespace Evoweb\Imagemap\Domain\Model;
 
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class Typo3Env
+class Environment
 {
     /**
      * @var string
@@ -171,30 +171,12 @@ class Typo3Env
      *
      * @return string the BACKPATH
      */
-    public static function getBackPath()
+    public function getBackPath()
     {
         return preg_replace(
             '/([^\/]+)\//',
             '..',
             str_replace([PATH_site, basename(PATH_thisScript)], ['', ''], PATH_thisScript)
-        );
-    }
-
-    /**
-     * Find extension BACKPATH,
-     * used to include resources from an extension (usually this is only used with imagemap)
-     * but it has a more generic functionality - YAGNI rules :P
-     *
-     * @param string $extKey - the source extension
-     *
-     * @return string the Extensions BACKPATH
-     */
-    public static function getExtBackPath($extKey = 'imagemap')
-    {
-        return self::getBackPath() . str_replace(
-            PATH_site,
-            '',
-            \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath($extKey)
         );
     }
 
@@ -206,7 +188,7 @@ class Typo3Env
      *
      * @return mixed either the config value or the default value
      */
-    public static function getExtConfValue($confKey, $default)
+    public function getExtConfValue($confKey, $default)
     {
         $conf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['imagemap']);
         return is_array($conf) && isset($conf[$confKey]) ? $conf[$confKey] : $default;

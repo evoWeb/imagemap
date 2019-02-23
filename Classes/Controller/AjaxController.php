@@ -43,7 +43,7 @@ class AjaxController
 
         try {
             $data = GeneralUtility::makeInstance(
-                \Evoweb\Imagemap\Domain\Model\DataObject::class,
+                \Evoweb\Imagemap\Domain\Model\Data::class,
                 $parameters['tableName'],
                 $parameters['fieldName'],
                 $parameters['uid'],

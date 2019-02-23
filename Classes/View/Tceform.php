@@ -37,7 +37,7 @@ class Tceform
     protected $inlineJs = '';
 
     /**
-     * @var \Evoweb\Imagemap\Domain\Model\DataObject
+     * @var \Evoweb\Imagemap\Domain\Model\Data
      */
     protected $data;
 
@@ -59,9 +59,9 @@ class Tceform
     /**
      * Sets the relates Data-Model-Object
      *
-     * @param \Evoweb\Imagemap\Domain\Model\DataObject Data-Object
+     * @param \Evoweb\Imagemap\Domain\Model\Data Data-Object
      */
-    public function setData(\Evoweb\Imagemap\Domain\Model\DataObject $data)
+    public function setData(\Evoweb\Imagemap\Domain\Model\Data $data)
     {
         $this->data = $data;
     }

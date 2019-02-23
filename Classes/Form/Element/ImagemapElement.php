@@ -12,7 +12,7 @@ namespace Evoweb\Imagemap\Form\Element;
  * LICENSE.txt file that was distributed with this source code.
  */
 
-use Evoweb\Imagemap\Domain\Model\DataObject;
+use Evoweb\Imagemap\Domain\Model\Data;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElement
@@ -44,9 +44,9 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
     {
         $this->getBackendUser()->setAndSaveSessionData('imagemap.value', null);
 
-        /** @var DataObject $data */
+        /** @var Data $data */
         $data = GeneralUtility::makeInstance(
-            DataObject::class,
+            Data::class,
             $this->data['tableName'],
             $this->data['fieldName'],
             $this->data['databaseRow']['uid'],
@@ -66,7 +66,7 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
         return $resultArray;
     }
 
-    protected function renderElementWithControl(array $resultArray, DataObject $data): array
+    protected function renderElementWithControl(array $resultArray, Data $data): array
     {
         $id = 'imagemap' . GeneralUtility::shortMD5(rand(1, 100000));
 

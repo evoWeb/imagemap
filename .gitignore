@@ -2,6 +2,7 @@
 .Build/bin/**
 .Build/vendor/**
 .Build/Web/**
+var/*
 composer.*
 !composer.json
 Resources/node_modules/*

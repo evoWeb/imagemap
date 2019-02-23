@@ -1,5 +1,5 @@
 <?php
-namespace Evoweb\Imagemap\Domain\Model;
+namespace Evoweb\Imagemap\Utility;
 
 /**
  * This file is developed by evoWeb.
@@ -12,15 +12,12 @@ namespace Evoweb\Imagemap\Domain\Model;
  * LICENSE.txt file that was distributed with this source code.
  */
 
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
-
 class Mapper
 {
     /**
      * Generate a HTML-Imagemap using Typolink etc..
      *
-     * @param ContentObjectRenderer $cObj cObj cObject we used for genenerating the Links
+     * @param \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer $cObj cObject we used for generating the Links
      * @param string $name Name of the generated map
      * @param string $mapping mapping the XML_pseudo-imagemap
      * @param array $whitelist
@@ -30,7 +27,7 @@ class Mapper
      * @return string the valid HTML-imagemap (hopefully valid)
      */
     public function generateMap(
-        ContentObjectRenderer &$cObj,
+        \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer &$cObj,
         $name,
         $mapping = '',
         $whitelist = [],
@@ -40,7 +37,7 @@ class Mapper
         if (is_array($whitelist)) {
             $whitelist = array_flip($whitelist);
         }
-        $mapArray = self::map2array($mapping);
+        $mapArray = $this->map2array($mapping);
 
         $mapArray['attributes']['name'] = $this->createValidNameAttribute($name);
         // name-attribute is still required due to browser compatibility ;(
@@ -64,7 +61,7 @@ class Mapper
                 }
 
                 $cObj->cObjGetSingle('LOAD_REGISTER', $reg);
-                $tmp = self::map2array(
+                $tmp = $this->map2array(
                     $cObj->typolink(
                         '-',
                         $this->getTypolinkSetup(
@@ -96,7 +93,7 @@ class Mapper
             }
         }
 
-        return self::isEmptyMap($mapArray) ? '' : self::array2map($mapArray);
+        return $this->isEmptyMap($mapArray) ? '' : $this->array2map($mapArray);
     }
 
     /**
@@ -109,7 +106,7 @@ class Mapper
     public function createValidNameAttribute($value)
     {
         if (!preg_match('/\S+/', $value)) {
-            $value = GeneralUtility::shortMD5(rand(0, 100));
+            $value = \TYPO3\CMS\Core\Utility\GeneralUtility::shortMD5(rand(0, 100));
         }
 
         // replace any special character with an dash and remove trailing dashes
@@ -152,7 +149,7 @@ class Mapper
      *  'attributes' array with attributes
      *  'areas' array with child nodes
      */
-    public static function map2array($value, $baseTag = 'map')
+    public function map2array($value, $baseTag = 'map')
     {
         if (!is_string($value) || !strlen($value)) {
             $value = '<map></map>';
@@ -166,8 +163,8 @@ class Mapper
             return $ret;
         }
 
-        if (self::nodeHasAttributes($xml)) {
-            $ret['attributes'] = self::getAttributesFromXMLNode($xml);
+        if ($this->nodeHasAttributes($xml)) {
+            $ret['attributes'] = $this->getAttributesFromXMLNode($xml);
         }
         $ret['areas'] = [];
         foreach ($xml->children() as $subNode) {
@@ -176,8 +173,8 @@ class Mapper
             if ((string)$subNode) {
                 $newChild['value'] = (string)$subNode;
             }
-            if (self::nodeHasAttributes($subNode)) {
-                $newChild['attributes'] = self::getAttributesFromXMLNode($subNode);
+            if ($this->nodeHasAttributes($subNode)) {
+                $newChild['attributes'] = $this->getAttributesFromXMLNode($subNode);
             }
             $ret['areas'][] = $newChild;
         }
@@ -195,19 +192,19 @@ class Mapper
      *
      * @return string XML-String
      */
-    public static function array2map(array $value, $level = 0)
+    public function array2map(array $value, $level = 0)
     {
         if ($level == 0 && (!isset($value['name']) || !$value['name'])) {
             $value['name'] = 'map';
         }
 
         if ((!isset($value['areas']) || !$value['areas']) && (!isset($value['value']) || !$value['value'])) {
-            $result = '<' . $value['name'] . self::implodeXMLAttributes($value['attributes'] ?? []) . ' />';
+            $result = '<' . $value['name'] . $this->implodeXMLAttributes($value['attributes'] ?? []) . ' />';
         } else {
-            $result = '<' . $value['name'] . self::implodeXMLAttributes($value['attributes'] ?? []) . '>';
+            $result = '<' . $value['name'] . $this->implodeXMLAttributes($value['attributes'] ?? []) . '>';
             if (isset($value['areas']) && is_array($value['areas'])) {
                 foreach ($value['areas'] as $subNode) {
-                    $result .= self::array2map($subNode, $level + 1);
+                    $result .= $this->array2map($subNode, $level + 1);
                 }
             }
             if (isset($value['value'])) {
@@ -228,9 +225,9 @@ class Mapper
      */
     public function compareMaps($map1, $map2)
     {
-        $arrayMap1 = self::map2array($map1);
-        $arrayMap2 = self::map2array($map2);
-        return self::arraysMatch($arrayMap1, $arrayMap2);
+        $arrayMap1 = $this->map2array($map1);
+        $arrayMap2 = $this->map2array($map2);
+        return $this->arraysMatch($arrayMap1, $arrayMap2);
     }
 
     /**
@@ -242,7 +239,7 @@ class Mapper
      * @return mixed Extracted attribute(s)
      *
      */
-    protected static function getAttributesFromXMLNode($node, $attr = null)
+    protected function getAttributesFromXMLNode($node, $attr = null)
     {
         $tmp = (array)$node->attributes();
         return isset($tmp['@attributes']) ?
@@ -257,9 +254,9 @@ class Mapper
      *
      * @return bool
      */
-    protected static function nodeHasAttributes($node)
+    protected function nodeHasAttributes($node)
     {
-        return is_array(self::getAttributesFromXMLNode($node));
+        return is_array($this->getAttributesFromXMLNode($node));
     }
 
     /**
@@ -269,7 +266,7 @@ class Mapper
      *
      * @return string
      */
-    protected static function implodeXMLAttributes(array $attributes)
+    protected function implodeXMLAttributes(array $attributes)
     {
         $result = '';
         foreach ($attributes as $key => $value) {
@@ -288,17 +285,17 @@ class Mapper
      *
      * @return bool determine whether elements match of not
      */
-    protected static function arraysMatch($a, $b)
+    protected function arraysMatch($a, $b)
     {
         if (!is_array($a) || !is_array($b)) {
             return $a == $b;
         }
         $match = true;
         foreach ($a as $key => $value) {
-            $match = $match && self::arraysMatch($a[$key] ?? [], $b[$key] ?? []);
+            $match = $match && $this->arraysMatch($a[$key] ?? [], $b[$key] ?? []);
         }
         foreach ($b as $key => $value) {
-            $match = $match && self::arraysMatch($b[$key] ?? [], $a[$key] ?? []);
+            $match = $match && $this->arraysMatch($b[$key] ?? [], $a[$key] ?? []);
         }
         return $match;
     }
@@ -311,9 +308,9 @@ class Mapper
      *
      * @return bool determine whether the valued passed the test or not
      */
-    public static function isEmptyMap($map)
+    public function isEmptyMap($map)
     {
-        $arr = is_array($map) ? $map : self::map2array($map);
+        $arr = is_array($map) ? $map : $this->map2array($map);
         return !isset($arr['areas']) || count($arr['areas']) == 0;
     }
 }

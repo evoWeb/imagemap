@@ -15,15 +15,15 @@ namespace Evoweb\Imagemap\Tests;
 class ConvertingTest extends \TYPO3\TestingFramework\Core\Unit\UnitTestCase
 {
     /**
-     * @var \Evoweb\Imagemap\Domain\Model\Mapper
+     * @var \Evoweb\Imagemap\Utility\Mapper|\PHPUnit\Framework\MockObject\MockObject
      */
     protected $mapper;
 
     protected function setUp()
     {
-        $this->mapper = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
-            \Evoweb\Imagemap\Domain\Model\Mapper::class
-        );
+        $this->mapper = $this->getMockBuilder(\Evoweb\Imagemap\Utility\Mapper::class)
+            ->setMethods(['dummy'])
+            ->getMock();
     }
 
     protected function tearDown()

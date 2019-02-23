@@ -81,8 +81,8 @@ class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcess
                 $processorConfiguration['name.']
             );
 
-            /* @var $mapper \Evoweb\Imagemap\Domain\Model\Mapper */
-            $mapper = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\Evoweb\Imagemap\Domain\Model\Mapper::class);
+            /* @var $mapper \Evoweb\Imagemap\Utility\Mapper */
+            $mapper = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\Evoweb\Imagemap\Utility\Mapper::class);
             $mapName = $mapper->createValidNameAttribute($mapName);
             $map = $mapper->generateMap(
                 $cObj,
