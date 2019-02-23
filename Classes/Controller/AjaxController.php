@@ -1,4 +1,6 @@
 <?php
+declare(strict_types = 1);
+
 namespace Evoweb\Imagemap\Controller;
 
 /**
@@ -43,8 +45,8 @@ class AjaxController
                 $parameters['value']
             );
 
-            $config = $GLOBALS['TCA'][$parameters['tableName']]['columns'][$parameters['fieldName']]['config'];
-            $data->setFieldConf($config['fieldConf']);
+            $config = $GLOBALS['TCA'][$parameters['tableName']]['columns'][$parameters['fieldName']];
+            $data->setFieldConf($config);
 
             if (!$data->hasValidImageFile()) {
                 $content = $this->getLanguageService()->sL(
