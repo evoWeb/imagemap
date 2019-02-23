@@ -84,9 +84,9 @@ class Data
         if (!in_array($field, array_keys($GLOBALS['TCA'][$table]['columns']))) {
             throw new \Exception('field (' . $field . ') unknown for table in TCA');
         }
+        $this->mapField = $field;
 
         $this->mapper = GeneralUtility::makeInstance(\Evoweb\Imagemap\Utility\Mapper::class);
-        $this->mapField = $field;
 
         $this->row = \TYPO3\CMS\Backend\Utility\BackendUtility::getRecordWSOL($table, $uid);
         if ($currentValue) {
@@ -95,7 +95,7 @@ class Data
         $this->liveRow = $this->row;
         \TYPO3\CMS\Backend\Utility\BackendUtility::fixVersioningPid($table, $this->liveRow);
 
-        $this->map = $this->mapper->map2array($this->getFieldValue($this->mapField));
+        $this->map = $this->mapper->map2array($this->getFieldValue($field));
 
         $this->environment = GeneralUtility::makeInstance(\Evoweb\Imagemap\Service\Environment::class);
     }
@@ -254,7 +254,7 @@ class Data
                     'shape' => ucfirst($attributes['shape']),
                     'coords' => $attributes['coords'],
                     'alt' => $this->convertToAttributeValue($attributes['alt']),
-                    'link' => $this->convertToAttributeValue($area['value']),
+                    'link' => isset($area['value']) ? $this->convertToAttributeValue($area['value']) : '',
                     'color' => $this->convertToAttributeValue($attributes['color']),
                     'attributes' => $this->listAttributesAsSet($area),
                 ];
@@ -267,9 +267,9 @@ class Data
 
     protected function listAttributesAsSet(array $area): array
     {
-        $relAttr = $this->getAttributeKeys();
+        $attributeKeys = $this->getAttributeKeys();
         $result = [];
-        foreach ($relAttr as $key) {
+        foreach ($attributeKeys as $key) {
             $result[$key] = $this->convertToAttributeValue(
                 isset($area['attributes'][$key]) ? $area['attributes'][$key] : ''
             );
@@ -333,12 +333,22 @@ class Data
         return $this->table;
     }
 
-    /**
-     * @return array
-     */
-    public function getMap()
+    public function getMap(): array
     {
         return $this->map;
+    }
+
+    /**
+     * @param string|array $map
+     */
+    public function setMap($map)
+    {
+        if (is_array($map)) {
+            $this->map = $map;
+        }
+        if (is_string($map)) {
+            $this->mapper->map2array($map);
+        }
     }
 
     public function getMapField(): string

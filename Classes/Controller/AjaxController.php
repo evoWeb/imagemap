@@ -44,6 +44,7 @@ class AjaxController
                 $parameters['uid'],
                 $parameters['value']
             );
+            $data->setMap($parameters['value']);
 
             $config = $GLOBALS['TCA'][$parameters['tableName']]['columns'][$parameters['fieldName']];
             $data->setFieldConf($config);
