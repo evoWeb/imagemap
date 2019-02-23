@@ -48,14 +48,11 @@ class AjaxController
             $config = $GLOBALS['TCA'][$parameters['tableName']]['columns'][$parameters['fieldName']];
             $data->setFieldConf($config);
 
-            if (!$data->hasValidImageFile()) {
-                $content = $this->getLanguageService()->sL(
-                    'LLL:EXT:imagemap/Resources/Private/Language/locallang.xlf:form.no_image'
-                );
-            } else {
-                $content = 'output of tceform.php here';
+            $content = '';
+            if ($data->hasValidImageFile()) {
+                $content = $data->getAreas();
             }
-            $response->getBody()->write(json_encode([$content]));
+            $response->getBody()->write(json_encode($content));
         } catch (\Exception $e) {
         }
 

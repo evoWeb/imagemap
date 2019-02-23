@@ -72,10 +72,7 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
     {
         $id = 'imagemap' . GeneralUtility::shortMD5(rand(1, 100000));
 
-        $existingAreas = rtrim($data->listAreas(
-            '{"shape": "##shape##", "coords": "##coords##", '
-            . '"alt": "##alt##", "link": "##link##", "color": "##color##"},'
-        ), ',');
+        $existingAreas = json_encode($data->getAreas());
 
         $resultArray['requireJsModules']['imagemapElement'] = 'TYPO3/CMS/Imagemap/FormElement';
         $resultArray['stylesheetFiles']['imagemapElement'] = 'EXT:imagemap/Resources/Public/Stylesheets/imagemap.css';
@@ -94,7 +91,7 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
         $mainFieldHtml[] =      '<div class="form-wizards-element" id="' . $id . '">';
         $mainFieldHtml[] =          '<div id="' . $id . '-canvas" class="canvas" data-thumbnail-scale="';
         $mainFieldHtml[] =          $data->getThumbnailScale('previewImageMaxWH', 400);
-        $mainFieldHtml[] =          '" data-existing-areas=\'[' . $existingAreas . ']\'>';
+        $mainFieldHtml[] =          '" data-existing-areas=\'' . $existingAreas . '\'>';
         $mainFieldHtml[] =              $data->renderThumbnail('previewImageMaxWH', 400);
         $mainFieldHtml[] =          '</div>';
         $mainFieldHtml[] =      '</div>';

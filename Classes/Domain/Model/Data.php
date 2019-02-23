@@ -244,37 +244,37 @@ class Data
         return (float)$result;
     }
 
-    public function listAreas(string $template = ''): string
+    public function getAreas(): array
     {
-        $result = '';
+        $result = [];
         if (is_array($this->map['areas'])) {
             foreach ($this->map['areas'] as $area) {
                 $attributes = $area['attributes'];
                 $markers = [
-                    '##coords##' => $attributes['coords'],
-                    '##shape##' => ucfirst($attributes['shape']),
-                    '##color##' => $this->convertToAttributeValue($attributes['color']),
-                    '##link##' => $this->convertToAttributeValue($area['value']),
-                    '##alt##' => $this->convertToAttributeValue($attributes['alt']),
-                    '##attributes##' => $this->listAttributesAsSet($area),
+                    'shape' => ucfirst($attributes['shape']),
+                    'coords' => $attributes['coords'],
+                    'alt' => $this->convertToAttributeValue($attributes['alt']),
+                    'link' => $this->convertToAttributeValue($area['value']),
+                    'color' => $this->convertToAttributeValue($attributes['color']),
+                    'attributes' => $this->listAttributesAsSet($area),
                 ];
 
-                $result .= str_replace(array_keys($markers), array_values($markers), $template);
+                $result[] = $markers;
             }
         }
         return $result;
     }
 
-    protected function listAttributesAsSet(array $area): string
+    protected function listAttributesAsSet(array $area): array
     {
         $relAttr = $this->getAttributeKeys();
         $result = [];
         foreach ($relAttr as $key) {
-            $result[] = $key . ':\''
-                . $this->convertToAttributeValue(isset($area['attributes'][$key]) ? $area['attributes'][$key] : '')
-                . '\'';
+            $result[$key] = $this->convertToAttributeValue(
+                isset($area['attributes'][$key]) ? $area['attributes'][$key] : ''
+            );
         }
-        return implode(',', $result);
+        return $result;
     }
 
     public function emptyAttributeSet(): string
