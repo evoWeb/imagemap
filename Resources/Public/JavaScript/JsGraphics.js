@@ -1355,11 +1355,11 @@ var canvasClass = Class.extend({
 		data.currentValue = area.getLink();
 
 		$.ajax({
-			url: TYPO3.settings.ajaxUrls['imagemap_browse_link'],
-			method: 'GET',
+			url: TYPO3.settings.ajaxUrls['imagemap_browselink_url'],
 			context: area,
 			data: data
 		}).done(function (response) {
+			console.log(response);
 			var vHWin = window.open(response.url, '', 'height=600,width=500,status=0,menubar=0,scrollbars=1'); vHWin.focus()
 		});
 	},

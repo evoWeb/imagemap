@@ -20,16 +20,14 @@ define(['jquery', 'jquery-ui/sortable', 'jquery-ui/draggable', 'TYPO3/CMS/Imagem
 		$control.find('input').on('imagemap:changed', function () {
 			let $field = $(this);
 			$.ajax({
-				url: TYPO3.settings.ajaxUrls['imagemap_tceform'],
-				global: false,
-				type: 'POST',
+				url: window.TYPO3.settings.ajaxUrls['imagemap_preview_rerender'],
+				method: 'POST',
 				data: {
-					context: 'tceform',
 					P: {
 						itemFormElName: $field.attr('name'),
 						tableName: 'tt_content',
 						fieldName: 'tx_imagemap_links',
-						uid: 'uid',
+						uid: $field.attr('name').replace('data[tt_content][', '').replace('][tx_imagemap_links]', ''),
 						value: $field.val()
 					}
 				}

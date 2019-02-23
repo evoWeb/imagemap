@@ -27,21 +27,14 @@ class AjaxController
      *
      * @return ResponseInterface
      */
-    public function tceformAction(ServerRequestInterface $request): ResponseInterface
+    public function rerenderPreviewAction(ServerRequestInterface $request): ResponseInterface
     {
-        $parameters = $request->getQueryParams()['P'];
-        $config = $GLOBALS['TCA'][$parameters['tableName']]['columns'][$parameters['fieldName']]['config'];
-
-        /** @var \Evoweb\Imagemap\View\Tceform $view */
-        $view = GeneralUtility::makeInstance(\Evoweb\Imagemap\View\Tceform::class);
-        $view->init();
-        $view->setTCEForm(GeneralUtility::makeInstance(\TYPO3\CMS\Backend\Form\NodeFactory::class));
-        $view->setFormName($parameters['itemFormElName']);
-        $view->setWizardConf($config['fieldConf']['config']['wizards']);
-
-        $GLOBALS['BE_USER']->setAndSaveSessionData('imagemap.value', $parameters['value']);
+        $response = new Response('php://temp', 200, ['Content-Type' => 'application/json; charset=utf-8']);
+        $parameters = $request->getParsedBody()['P'];
+        $this->getBackendUser()->setAndSaveSessionData('imagemap.value', $parameters['value']);
 
         try {
+            /** @var \Evoweb\Imagemap\Domain\Model\Data $data */
             $data = GeneralUtility::makeInstance(
                 \Evoweb\Imagemap\Domain\Model\Data::class,
                 $parameters['tableName'],
@@ -49,13 +42,20 @@ class AjaxController
                 $parameters['uid'],
                 $parameters['value']
             );
+
+            $config = $GLOBALS['TCA'][$parameters['tableName']]['columns'][$parameters['fieldName']]['config'];
             $data->setFieldConf($config['fieldConf']);
-            $view->setData($data);
+
+            if (!$data->hasValidImageFile()) {
+                $content = $this->getLanguageService()->sL(
+                    'LLL:EXT:imagemap/Resources/Private/Language/locallang.xlf:form.no_image'
+                );
+            } else {
+                $content = 'output of tceform.php here';
+            }
+            $response->getBody()->write($content);
         } catch (\Exception $e) {
         }
-
-        $response = new Response;
-        $response->getBody()->write($view->renderContent());
 
         return $response;
     }
@@ -67,7 +67,7 @@ class AjaxController
      *
      * @return ResponseInterface
      */
-    public function browseLinkAction(ServerRequestInterface $request): ResponseInterface
+    public function browselinkUrlAction(ServerRequestInterface $request): ResponseInterface
     {
         $parameters = $request->getQueryParams();
         $linkParameters = [
@@ -88,11 +88,31 @@ class AjaxController
         ];
 
         $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
-        $response = new Response;
+        $response = new Response('php://temp', 200, ['Content-Type' => 'application/json; charset=utf-8']);
         $response->getBody()->write(json_encode([
             'url' => (string)$uriBuilder->buildUriFromRoute('wizard_link', $linkParameters)
         ]));
 
         return $response;
+    }
+
+    /**
+     * Returns an instance of Backend User Authentication
+     *
+     * @return \TYPO3\CMS\Core\Authentication\BackendUserAuthentication|null
+     */
+    protected function getBackendUser()
+    {
+        return $GLOBALS['BE_USER'] ?? null;
+    }
+
+    /**
+     * Returns an instance of LanguageService
+     *
+     * @return \TYPO3\CMS\Core\Localization\LanguageService|null
+     */
+    protected function getLanguageService()
+    {
+        return $GLOBALS['LANG'] ?? null;
     }
 }
