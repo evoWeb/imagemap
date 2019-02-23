@@ -1528,6 +1528,12 @@ var previewCanvasClass = Class.extend({
 		}
 		this.updateCanvas()
 	},
+	removeAreas: function () {
+		this.canvasVectors.clear();
+		this.areaCount = 0;
+		this.areaObjects = {};
+		this.areaObjectList = [];
+	},
 	updateCanvas: function () {
 		this.canvasVectors.clear();
 		var a = this;

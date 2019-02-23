@@ -6,13 +6,13 @@ define(['jquery', 'jquery-ui/sortable', 'jquery-ui/draggable', 'TYPO3/CMS/Imagem
 
 		canvasObject.init($canvas.attr('id'), $canvas.data('thumbnail-scale'));
 
-		$canvas.data('existing-areas').forEach((configuration) => {
+		$canvas.data('existing-areas').forEach((area) => {
 			canvasObject.addArea(
-				new window['area' + configuration.shape + 'Class'](),
-				configuration.coords,
-				configuration.alt,
-				configuration.link,
-				configuration.color,
+				new window['area' + area.shape + 'Class'](),
+				area.coords,
+				area.alt,
+				area.link,
+				area.color,
 				0
 			);
 		});
@@ -33,7 +33,17 @@ define(['jquery', 'jquery-ui/sortable', 'jquery-ui/draggable', 'TYPO3/CMS/Imagem
 				}
 			}).done((data, textStatus) => {
 				if (textStatus === 'success') {
-					$canvas.html(data);
+					canvasObject.removeAreas();
+					data.forEach((area) => {
+						canvasObject.addArea(
+							new window['area' + area.shape + 'Class'](),
+							area.coords,
+							area.alt,
+							area.link,
+							area.color,
+							0
+						);
+					});
 				}
 			});
 		});
