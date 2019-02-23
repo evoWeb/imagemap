@@ -27,10 +27,10 @@ const javascriptPaths = [
 	{
 		src: [
 			// `node_modules/fabric/dist/fabric.js`,
-			`${dirs.src}/Scripts/Canvas.js`
+			`${dirs.src}/Scripts/AreaEditor.js`
 		],
 		dest: `${dirs.dest}/JavaScript/`,
-		name: 'Canvas.js'
+		name: 'AreaEditor.js'
 	}/*,
 	{
 		src: `node_modules/fabric/dist/fabric.js`,

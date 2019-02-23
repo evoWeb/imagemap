@@ -1,27 +1,29 @@
-define(['jquery', 'jquery-ui/sortable', 'jquery-ui/draggable', 'TYPO3/CMS/Imagemap/JsGraphics'], function ($) {
+define(['jquery', 'TYPO3/CMS/Imagemap/AreaEditor', 'jquery-ui/sortable', 'jquery-ui/draggable'], function ($, AreaEditor) {
 	$(document).ready(function () {
 		let configuration = window.imagemap,
 			defaultAttributeSet = configuration.defaultAttributeset,
-			canvasObject = new canvasClass(),
 			scaleFactor = configuration.scaleFactor,
 			$zoomOut = $('> .zout', '#magnify'),
-			$zoomIn = $('> .zin', '#magnify');
+			$zoomIn = $('> .zin', '#magnify'),
+			areaEditor = new AreaEditor('canvas', 'picture', 'areaForms');
 
-		canvasObject.init('canvas', 'picture', 'areaForms');
-		scaleFactor = canvasObject.initializeScaling(scaleFactor);
-		canvasObject.setScale(scaleFactor);
-		configuration.canvasObject = canvasObject;
+		scaleFactor = areaEditor.initializeScaling(scaleFactor);
+		areaEditor.setScale(scaleFactor);
+		configuration.areaEditor = areaEditor;
 
-		configuration.existingAreas.forEach(function (configuration) {
-			canvasObject.addArea(
-				new window['area' + configuration.shape + 'Class'](),
-				configuration.coords,
-				configuration.alt,
-				configuration.link,
-				configuration.color,
-				configuration.prepend,
-				configuration.attribute
-			);
+		configuration.existingAreas.forEach((configuration) => {
+			let {left, top, width, height} = configuration.coords.split(',');
+			let area = new window.fabric[configuration.shape]({
+				...configuration,
+				originX: 'left',
+				originY: 'top',
+				top: top,
+				left: left,
+				width: width,
+				height: height,
+				fill: configuration.color,
+			});
+			areaEditor.add(area);
 		});
 
 		if (scaleFactor < 1) {
@@ -32,41 +34,45 @@ define(['jquery', 'jquery-ui/sortable', 'jquery-ui/draggable', 'TYPO3/CMS/Imagem
 		}
 
 		$zoomIn.click(function () {
-			canvasObject.setScale(1);
+			areaEditor.setScale(1);
 			$(this).hide();
 			$zoomOut.show();
 		});
 
 		$zoomOut.click(function () {
-			canvasObject.setScale(scaleFactor);
+			areaEditor.setScale(scaleFactor);
 			$(this).hide();
 			$zoomIn.show();
 		});
 
+		function addArea (shape) {
+			areaEditor.add(new window['area' + shape + 'Class'](), '', '', '', '', 1, defaultAttributeSet);
+		}
+
 		$('#addRect').on('click', function () {
-			canvasObject.addArea(new areaRectClass(), '', '', '', '', 1, defaultAttributeSet);
+			addArea('Rect');
 		});
 
 		$('#addPoly').on('click', function () {
-			canvasObject.addArea(new areaPolyClass(), '', '', '', '', 1, defaultAttributeSet);
+			addArea('Poly');
 		});
 
 		$('#addCircle').on('click', function () {
-			canvasObject.addArea(new areaCircleClass(), '', '', '', '', 1, defaultAttributeSet);
+			addArea('Circle');
 		});
 
 		$('#submit').on('click', function () {
 			let $field = window.opener.$('input[name="' + configuration.itemName + '"]');
 			$field
-				.val('<map>' + canvasObject.persistanceXML() + '</map>')
+				.val('<map>' + areaEditor.persistanceXML() + '</map>')
 				.trigger('imagemap:changed');
 			close();
 		});
 
 		$('#canvas')
-			.on('mousedown', canvasObject.mousedown.bind(canvasObject))
-			.on('mouseup', canvasObject.mouseup.bind(canvasObject))
-			.on('mousemove', canvasObject.mousemove.bind(canvasObject))
-			.on('dblclick', canvasObject.dblclick.bind(canvasObject));
+			.on('mousedown', areaEditor.mousedown.bind(areaEditor))
+			.on('mouseup', areaEditor.mouseup.bind(areaEditor))
+			.on('mousemove', areaEditor.mousemove.bind(areaEditor))
+			.on('dblclick', areaEditor.dblclick.bind(areaEditor));
 	});
 });

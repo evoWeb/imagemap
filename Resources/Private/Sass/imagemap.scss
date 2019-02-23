@@ -31,18 +31,10 @@
     overflow: visible;
 }
 
-#picture {
-    float: left;
-    position: relative;
-    overflow: hidden;
-    padding: 4px;
-    margin-right: 35px;
-    background: #ffffff;
-}
-
 #magnify {
+    z-index: 150;
     position: absolute;
-    right: 0;
+    right: 10px;
     top: 10px;
     cursor: pointer;
     width: 32px;
@@ -53,15 +45,15 @@
     }
 }
 
-
-#boundingbox {
-    z-index: 101;
-    position: absolute;
-    left: -4px;
-    top: -4px;
+#picture {
+    float: left;
+    position: relative;
+    overflow: hidden;
+    padding: 4px;
+    background: #ffffff;
 }
 
-#canvas, .canvas {
+#canvas, .canvas-container, .canvas {
     position: absolute;
     display: block;
     width: 100%;
@@ -72,8 +64,6 @@
 
 #canvas {
     z-index: 100;
-    left: 4px;
-    top: 4px;
 }
 
 .point {
