@@ -1,11 +1,11 @@
-define(['jquery', 'jquery-ui/sortable', 'jquery-ui/draggable', 'TYPO3/CMS/Imagemap/JsGraphics'], function (jQuery) {
-	jQuery(document).ready(function () {
+define(['jquery', 'jquery-ui/sortable', 'jquery-ui/draggable', 'TYPO3/CMS/Imagemap/JsGraphics'], function ($) {
+	$(document).ready(function () {
 		let configuration = window.imagemap,
 			defaultAttributeSet = configuration.defaultAttributeset,
 			canvasObject = new canvasClass(),
 			scaleFactor = configuration.scaleFactor,
-			zoomOut = jQuery('> .zout', '#magnify'),
-			zoomIn = jQuery('> .zin', '#magnify');
+			$zoomOut = $('> .zout', '#magnify'),
+			$zoomIn = $('> .zin', '#magnify');
 
 		canvasObject.init('canvas', 'picture', 'areaForms');
 		scaleFactor = canvasObject.initializeScaling(scaleFactor);
@@ -25,57 +25,48 @@ define(['jquery', 'jquery-ui/sortable', 'jquery-ui/draggable', 'TYPO3/CMS/Imagem
 		});
 
 		if (scaleFactor < 1) {
-			zoomOut.hide();
+			$zoomOut.hide();
 		} else {
-			zoomIn.hide();
-			zoomOut.hide();
+			$zoomIn.hide();
+			$zoomOut.hide();
 		}
 
-		zoomIn.click(function () {
+		$zoomIn.click(function () {
 			canvasObject.setScale(1);
-			jQuery(this).hide();
-			zoomOut.show();
+			$(this).hide();
+			$zoomOut.show();
 		});
 
-		zoomOut.click(function () {
+		$zoomOut.click(function () {
 			canvasObject.setScale(scaleFactor);
-			jQuery(this).hide();
-			zoomIn.show();
+			$(this).hide();
+			$zoomIn.show();
 		});
 
-		jQuery('#addRect').on('click', function () {
+		$('#addRect').on('click', function () {
 			canvasObject.addArea(new areaRectClass(), '', '', '', '', 1, defaultAttributeSet);
-			return false;
 		});
 
-		jQuery('#addPoly').on('click', function () {
+		$('#addPoly').on('click', function () {
 			canvasObject.addArea(new areaPolyClass(), '', '', '', '', 1, defaultAttributeSet);
-			return false;
 		});
 
-		jQuery('#addCircle').on('click', function () {
+		$('#addCircle').on('click', function () {
 			canvasObject.addArea(new areaCircleClass(), '', '', '', '', 1, defaultAttributeSet);
-			return false;
 		});
 
-		jQuery('#submit').on('click', function () {
-			jQuery('input[name="' + configuration.itemName + '"]', window.opener.document)
-				.val('<map>' + canvasObject.persistanceXML() + '</map>');
+		$('#submit').on('click', function () {
+			let $field = window.opener.$('input[name="' + configuration.itemName + '"]');
+			$field
+				.val('<map>' + canvasObject.persistanceXML() + '</map>')
+				.trigger('imagemap:changed');
 			close();
 		});
 
-		jQuery('#canvas')
-			.on('mousedown', function (e) {
-				return canvasObject.mousedown(e);
-			})
-			.on('mouseup', function (e) {
-			return canvasObject.mouseup(e);
-		})
-			.on('mousemove', function (e) {
-			return canvasObject.mousemove(e);
-		})
-			.on('dblclick', function (e) {
-			return canvasObject.dblclick(e);
-		});
+		$('#canvas')
+			.on('mousedown', canvasObject.mousedown.bind(canvasObject))
+			.on('mouseup', canvasObject.mouseup.bind(canvasObject))
+			.on('mousemove', canvasObject.mousemove.bind(canvasObject))
+			.on('dblclick', canvasObject.dblclick.bind(canvasObject));
 	});
 });
