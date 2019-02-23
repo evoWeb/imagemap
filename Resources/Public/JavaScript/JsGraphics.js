@@ -1884,7 +1884,7 @@ var areaCircleClass = areaClass.extend({
 			this.drawEdge(a, this.getX(1), this.getY(1) + this.getRadius(1))
 		}
 	}, formMarkup: function (a) {
-		return this.getCanvas().getFormBlueprint("circForm").replace(/MAPFORMID/g, this.getFormId()).replace(/MAPAREAVALUE_URL/g, escape(this.getLink())).replace(/MAPAREAVALUE/g, this.getLink())
+		return this.getCanvas().getFormBlueprint("circForm").replace(/MAPFORMID/g, this.getFormId()).replace(/MAPAREAVALUE_URL/g, escape(this.getLink())).replace(/MAPAREAVALUE/g, this.getLink()).replace(/hide/g, '')
 	}, formUpdate: function () {
 		var a = this.getFormId() + '_x="' + this.getX(0) + '";' + this.getFormId() + '_y="' + this.getY(0) + '";' + this.getFormId() + '_radius="' + this.getRadius(0) + '";';
 		a = a + this.getCommonFormUpdateFields();
@@ -2007,7 +2007,7 @@ var areaPolyClass = areaClass.extend({
 			this.drawEdge(c, this.applyScale(this._coords[e].x, 1), this.applyScale(this._coords[e].y, 1))
 		}
 	}, formMarkup: function (a) {
-		return this.getCanvas().getFormBlueprint("polyForm").replace(/MAPFORMID/g, this.getFormId()).replace(/MAPAREAVALUE_URL/g, escape(this.getLink())).replace(/MAPAREAVALUE/g, this.getLink()).replace(/POLYCOORDS/g, this.coordMarkup())
+		return this.getCanvas().getFormBlueprint("polyForm").replace(/MAPFORMID/g, this.getFormId()).replace(/MAPAREAVALUE_URL/g, escape(this.getLink())).replace(/MAPAREAVALUE/g, this.getLink()).replace(/POLYCOORDS/g, this.coordMarkup()).replace(/hide/g, '')
 	}, coordMarkup: function () {
 		var a = "";
 		var c = this.getCanvas().getFormBlueprint("polyCoords");
@@ -2154,7 +2154,7 @@ var areaRectClass = areaClass.extend({
 		this.drawEdge(a, this.getRightX(1), this.getBottomY(1));
 		this.drawEdge(a, this.getLeftX(1), this.getBottomY(1))
 	}, formMarkup: function (a) {
-		return this.getCanvas().getFormBlueprint("rectForm").replace(/MAPFORMID/g, this.getFormId()).replace(/MAPAREAVALUE_URL/g, escape(this.getLink())).replace(/MAPAREAVALUE/g, this.getLink())
+		return this.getCanvas().getFormBlueprint("rectForm").replace(/MAPFORMID/g, this.getFormId()).replace(/MAPAREAVALUE_URL/g, escape(this.getLink())).replace(/MAPAREAVALUE/g, this.getLink()).replace(/hide/g, '')
 	}, formUpdate: function () {
 		var a = this.getFormId() + '_x1="' + this.getLeftX(0) + '";' + this.getFormId() + '_y1="' + this.getTopY(0) + '";' + this.getFormId() + '_x2="' + this.getRightX(0) + '";' + this.getFormId() + '_y2="' + this.getBottomY(0) + '";';
 		a = a + this.getCommonFormUpdateFields();
