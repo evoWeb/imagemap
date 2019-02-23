@@ -49,7 +49,7 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
             Data::class,
             $this->data['tableName'],
             $this->data['fieldName'],
-            $this->data['databaseRow']['uid'],
+            (int)$this->data['databaseRow']['uid'],
             $this->data['parameterArray']['itemFormElValue']
         );
         $data->setFieldConf($this->data['parameterArray']['fieldConf']);

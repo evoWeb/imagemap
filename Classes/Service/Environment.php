@@ -22,9 +22,9 @@ class Environment
     protected $lastError = '';
 
     /**
-     * @var null
+     * @var \TYPO3\CMS\Backend\FrontendBackendUserAuthentication
      */
-    protected $BE_USER = null;
+    protected $BE_USER;
 
     /**
      * @var null
@@ -32,11 +32,18 @@ class Environment
     protected $BE_USER_GLOBAL = null;
 
     /**
+     * Stack variable to store environment-settings
+     *
+     * @var array
+     */
+    protected $environmentStack = [];
+
+    /**
      * Initialize TSFE so that the Frontend-Stuff can also be used in the Backend
      *
      * @param int $pid The pid if the page which is simulated
      */
-    public function initializeTSFE($pid = 1)
+    public function initializeTSFE(int $pid = 1)
     {
         if (!is_object($GLOBALS['TT'])) {
             $GLOBALS['TT'] = GeneralUtility::makeInstance(\TYPO3\CMS\Core\TimeTracker\TimeTracker::class);
@@ -61,16 +68,21 @@ class Environment
         }
     }
 
-    /**
-     * Stack variable to store environment-settings
-     */
-    protected $environmentStack = [];
+    protected function initializeMyBackendUser()
+    {
+        $this->BE_USER = GeneralUtility::makeInstance(\TYPO3\CMS\Backend\FrontendBackendUserAuthentication::class);
+        $this->BE_USER->setBeUserByUid($GLOBALS['BE_USER']->user['uid']);
+        $this->BE_USER->unpack_uc('');
+        if ($this->BE_USER->user['uid']) {
+            $this->BE_USER->fetchGroupData();
+        } else {
+            $this->BE_USER = null;
+        }
+    }
 
     /**
-     * Store relevant data - just to be sure that nothing gets lost
-     * during FE-simulation and it really sucks that this is needed
-     *
-     * @see popEnvironment()
+     * Store relevant data
+     * Just to be sure that nothing gets lost during FE-simulation
      */
     public function pushEnvironment()
     {
@@ -81,8 +93,7 @@ class Environment
     }
 
     /**
-     * prepares Frontend-like-Rendering
-     * and it really sucks that this is needed
+     * Prepares Frontend-like-Rendering
      *
      * @param string $backPath
      */
@@ -98,8 +109,7 @@ class Environment
     }
 
     /**
-     * finish Frontend-like-Rendering
-     * and it also really sucks that this is needed
+     * Restore environment
      */
     public function popEnvironment()
     {
@@ -121,46 +131,28 @@ class Environment
     }
 
     /**
-     * reset/clear enableColumns - used to enable preview of access-restricted
-     * elements - use only with stored Env!!!!!
+     * Reset/clear enableColumns
+     * used to enable preview of access-restricted elements
      *
      * @param string $table
-     * @param null $newConf
+     * @param array $enableColumns
+     */
+    public function resetEnableColumns(string $table, array $enableColumns = [])
+    {
+        if (is_array($this->environmentStack)
+            && count($this->environmentStack)
+            && isset($GLOBALS['TCA'][$table])
+        ) {
+            $GLOBALS['TCA'][$table]['ctrl']['enablecolumns'] = $enableColumns;
+        }
+    }
+
+    /**
+     * Get last error
      *
-     * @return bool
+     * @return string
      */
-    public function resetEnableColumns($table, $newConf = null)
-    {
-        if (!is_array($this->environmentStack) || !count($this->environmentStack)) {
-            return false;
-        }
-        if (!in_array($table, array_keys($GLOBALS['TCA']))) {
-            return false;
-        }
-        $GLOBALS['TCA'][$table]['ctrl']['enablecolumns'] = $newConf;
-        return true;
-    }
-
-    /**
-     * lazy load the FrontendBackendUserAuthentication
-     */
-    protected function initializeMyBackendUser()
-    {
-        $this->BE_USER = GeneralUtility::makeInstance(\TYPO3\CMS\Backend\FrontendBackendUserAuthentication::class);
-        $this->BE_USER->OS = TYPO3_OS;
-        $this->BE_USER->setBeUserByUid($GLOBALS['BE_USER']->user['uid']);
-        $this->BE_USER->unpack_uc('');
-        if ($this->BE_USER->user['uid']) {
-            $this->BE_USER->fetchGroupData();
-        } else {
-            $this->BE_USER = null;
-        }
-    }
-
-    /**
-     * Enables external debugging ...
-     */
-    public function getLastError()
+    public function getLastError(): string
     {
         return $this->lastError;
     }
@@ -171,7 +163,7 @@ class Environment
      *
      * @return string the BACKPATH
      */
-    public function getBackPath()
+    public function getBackPath(): string
     {
         return preg_replace(
             '/([^\/]+)\//',
@@ -184,11 +176,11 @@ class Environment
      * Get the value out of the Extension-Configuration determined by the submitted key
      *
      * @param string $confKey the extension configuration key
-     * @param string $default when every the extension configuration doesn't contain a valid value
+     * @param mixed $default when every the extension configuration doesn't contain a valid value
      *
      * @return mixed either the config value or the default value
      */
-    public function getExtConfValue($confKey, $default)
+    public function getExtConfValue(string $confKey, $default)
     {
         $conf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['imagemap']);
         return is_array($conf) && isset($conf[$confKey]) ? $conf[$confKey] : $default;

@@ -53,7 +53,7 @@ class AjaxController
             } else {
                 $content = 'output of tceform.php here';
             }
-            $response->getBody()->write($content);
+            $response->getBody()->write(json_encode([$content]));
         } catch (\Exception $e) {
         }
 

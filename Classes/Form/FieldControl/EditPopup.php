@@ -12,17 +12,16 @@ namespace Evoweb\Imagemap\Form\FieldControl;
  * LICENSE.txt file that was distributed with this source code.
  */
 
-use TYPO3\CMS\Backend\Form\AbstractNode;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class EditPopup extends AbstractNode
+class EditPopup extends \TYPO3\CMS\Backend\Form\AbstractNode
 {
     /**
      * Edit popup control
      *
      * @return array As defined by FieldControl class
      */
-    public function render()
+    public function render(): array
     {
         $options = $this->data['renderData']['fieldControlOptions'];
 

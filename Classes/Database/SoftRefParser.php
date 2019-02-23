@@ -28,7 +28,7 @@ class SoftRefParser extends \TYPO3\CMS\Core\Database\SoftReferenceIndex
      *
      * @return array the Array which describes what references we found and where ...
      */
-    public function findRef($table, $field, $uid, $content, $spKey, $spParams, $structurePath = '')
+    public function findRef($table, $field, $uid, $content, $spKey, $spParams, $structurePath = ''): array
     {
         $this->tokenID_basePrefix = $table . ':' . $uid . ':' . $field . ':' . $structurePath . ':' . $spKey;
 

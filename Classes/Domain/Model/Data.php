@@ -49,12 +49,17 @@ class Data
     /**
      * @var bool
      */
-    protected $modifiedFlag = false;
+    protected $modified = false;
 
     /**
      * @var array
      */
     protected $fieldConf;
+
+    /**
+     * @var \Evoweb\Imagemap\Utility\Mapper
+     */
+    protected $mapper;
 
     /**
      * @var array
@@ -65,9 +70,9 @@ class Data
      * @param string $table
      * @param string $field
      * @param int $uid
-     * @param $currentValue
+     * @param mixed $currentValue
      */
-    public function __construct($table, $field, $uid, $currentValue = null)
+    public function __construct(string $table, string $field, int $uid, $currentValue = null)
     {
         if (!in_array($table, array_keys($GLOBALS['TCA']))) {
             throw new \Exception('table (' . $table . ') not defined in TCA');
@@ -77,18 +82,18 @@ class Data
         if (!in_array($field, array_keys($GLOBALS['TCA'][$table]['columns']))) {
             throw new \Exception('field (' . $field . ') unknown for table in TCA');
         }
+
+        $this->mapper = GeneralUtility::makeInstance(\Evoweb\Imagemap\Utility\Mapper::class);
         $this->mapField = $field;
 
-        $this->row = \TYPO3\CMS\Backend\Utility\BackendUtility::getRecordWSOL($table, intval($uid));
+        $this->row = \TYPO3\CMS\Backend\Utility\BackendUtility::getRecordWSOL($table, $uid);
         if ($currentValue) {
             $this->useCurrentData($currentValue);
         }
         $this->liveRow = $this->row;
-
         \TYPO3\CMS\Backend\Utility\BackendUtility::fixVersioningPid($table, $this->liveRow);
-        $this->map = GeneralUtility::makeInstance(\Evoweb\Imagemap\Utility\Mapper::class)->map2array(
-            $this->getFieldValue($this->mapField)
-        );
+
+        $this->map = $this->mapper->map2array($this->getFieldValue($this->mapField));
 
         $this->environment = GeneralUtility::makeInstance(\Evoweb\Imagemap\Service\Environment::class);
     }
@@ -97,20 +102,18 @@ class Data
      * @param string $field
      * @param int $listNum
      *
-     * @return string
+     * @return mixed
      */
-    public function getFieldValue($field, $listNum = -1)
+    public function getFieldValue(string $field, int $listNum = -1)
     {
         if (!is_array($this->row)) {
             return null;
         }
-
-        $dbField = $field;
-        if (!array_key_exists($dbField, $this->row)) {
+        if (!array_key_exists($field, $this->row)) {
             return null;
         }
 
-        $data = $this->row[$dbField];
+        $data = $this->row[$field];
         if ($listNum == -1) {
             return $data;
         } else {
@@ -127,7 +130,7 @@ class Data
      *
      * @return \TYPO3\CMS\Core\Resource\File
      */
-    public function getImageFile($uid)
+    public function getImageFile(int $uid)
     {
         $imageField = $this->determineImageFieldName();
         /** @var \TYPO3\CMS\Core\Resource\FileRepository $fileRepository */
@@ -137,22 +140,17 @@ class Data
         return $fileReference ? $fileReference->getOriginalFile() : null;
     }
 
-    /**
-     * @return bool
-     */
-    public function hasValidImageFile()
+    public function hasValidImageFile(): bool
     {
-        $uid = (int) $this->getFieldValue('uid');
-        $image = $this->getImageFile($uid);
+        $uid = $this->getFieldValue('uid');
+        $image = $this->getImageFile((int) $uid);
         return $uid && $image !== null && $image->exists();
     }
 
     /**
-     * Renders the image within a frontend-like context
-     *
-     * @return string
+     * Renders the image within a frontend context
      */
-    public function getImage()
+    public function getImage(): string
     {
         $this->environment->initializeTSFE($this->getLivePid());
         $cObj = $this->getTypoScriptFrontendController()->cObj;
@@ -191,12 +189,14 @@ class Data
      *
      * @return string
      */
-    public function renderThumbnail($confKey, $defaultMaxWH)
+    public function renderThumbnail(string $confKey, $defaultMaxWH): string
     {
-        $maxSize = $this->environment->getExtConfValue($confKey, $defaultMaxWH);
-        $img = $this->getImage();
+        $image = $this->getImage();
         $matches = [];
-        if (preg_match('/width="(\d+)" height="(\d+)"/', $img, $matches)) {
+        $result = '';
+        if (preg_match('/width="(\d+)" height="(\d+)"/', $image, $matches)) {
+            $maxSize = $this->environment->getExtConfValue($confKey, $defaultMaxWH);
+
             $width = intval($matches[1]);
             $height = intval($matches[2]);
             if (($width > $maxSize) && ($width >= $height)) {
@@ -206,14 +206,13 @@ class Data
                 $width = ($maxSize / $height) * $width;
                 $height = $maxSize;
             }
-            return preg_replace(
+            $result = preg_replace(
                 '/width="(\d+)" height="(\d+)"/',
                 'width="' . $width . '" height="' . $height . '"',
-                $img
+                $image
             );
-        } else {
-            return '';
         }
+        return $result;
     }
 
     /**
@@ -224,102 +223,82 @@ class Data
      *
      * @return float
      */
-    public function getThumbnailScale($confKey, $defaultMaxWH)
+    public function getThumbnailScale(string $confKey, $defaultMaxWH): float
     {
-        $maxSize = $this->environment->getExtConfValue($confKey, $defaultMaxWH);
-        $img = $this->getImage();
+        $image = $this->getImage();
         $matches = [];
-        $ret = 1;
-        if (preg_match('/width="(\d+)" height="(\d+)"/', $img, $matches)) {
+        $result = 1;
+        if (preg_match('/width="(\d+)" height="(\d+)"/', $image, $matches)) {
+            $maxSize = $this->environment->getExtConfValue($confKey, $defaultMaxWH);
+
             $width = intval($matches[1]);
             $height = intval($matches[2]);
             if (($width > $maxSize) && ($width >= $height)) {
-                $ret = ($maxSize / $width);
+                $result = ($maxSize / $width);
             } elseif ($height > $maxSize) {
-                $ret = ($maxSize / $height);
+                $result = ($maxSize / $height);
             }
         }
-        return $ret;
+        return (float)$result;
     }
 
-    /**
-     * @param string $template
-     *
-     * @return string
-     */
-    public function listAreas($template = '')
+    public function listAreas(string $template = ''): string
     {
-        if (!is_array($this->map['areas'])) {
-            return '';
-        }
         $result = '';
-        foreach ($this->map['areas'] as $area) {
-            $attributes = $area['attributes'];
-            $markers = [
-                '##coords##' => $attributes['coords'],
-                '##shape##' => ucfirst($attributes['shape']),
-                '##color##' => $this->attributize($attributes['color']),
-                '##link##' => $this->attributize($area['value']),
-                '##alt##' => $this->attributize($attributes['alt']),
-                '##attributes##' => $this->listAttributesAsSet($area),
-            ];
+        if (is_array($this->map['areas'])) {
+            foreach ($this->map['areas'] as $area) {
+                $attributes = $area['attributes'];
+                $markers = [
+                    '##coords##' => $attributes['coords'],
+                    '##shape##' => ucfirst($attributes['shape']),
+                    '##color##' => $this->convertToAttributeValue($attributes['color']),
+                    '##link##' => $this->convertToAttributeValue($area['value']),
+                    '##alt##' => $this->convertToAttributeValue($attributes['alt']),
+                    '##attributes##' => $this->listAttributesAsSet($area),
+                ];
 
-            $result .= str_replace(array_keys($markers), array_values($markers), $template);
+                $result .= str_replace(array_keys($markers), array_values($markers), $template);
+            }
         }
         return $result;
     }
 
-    /**
-     * @param array $area
-     *
-     * @return string
-     */
-    protected function listAttributesAsSet($area)
+    protected function listAttributesAsSet(array $area): string
     {
         $relAttr = $this->getAttributeKeys();
-        $ret = [];
+        $result = [];
         foreach ($relAttr as $key) {
-            $ret[] = $key . ':\''
-                . $this->attributize(isset($area['attributes'][$key]) ? $area['attributes'][$key] : '') . '\'';
+            $result[] = $key . ':\''
+                . $this->convertToAttributeValue(isset($area['attributes'][$key]) ? $area['attributes'][$key] : '')
+                . '\'';
         }
-        return implode(',', $ret);
+        return implode(',', $result);
     }
 
-    /**
-     * @return string
-     */
-    public function emptyAttributeSet()
+    public function emptyAttributeSet(): string
     {
-        $relAttr = $this->getAttributeKeys();
-        $ret = [];
-        foreach ($relAttr as $key) {
+        $attributeKeys = $this->getAttributeKeys();
+        $result = [];
+        foreach ($attributeKeys as $key) {
             if ($key) {
-                $ret[] = $key . ':\'\'';
+                $result[] = $key . ':\'\'';
             }
         }
-        return implode(',', $ret);
+        return implode(',', $result);
     }
 
-    /**
-     * @param string $v
-     *
-     * @return string
-     */
-    protected function attributize($v)
+    protected function convertToAttributeValue(string $value): string
     {
-        $attr = preg_replace(
+        $attribute = preg_replace(
             '/([^\\\\])\\\\\\\\\'/',
             '\1\\\\\\\\\\\'',
-            str_replace('\'', '\\\'', $v)
+            str_replace('\'', '\\\'', $value)
         );
 
-        return $attr;
+        return $attribute;
     }
 
-    /**
-     * @return array
-     */
-    public function getAttributeKeys()
+    public function getAttributeKeys(): array
     {
         $keys = GeneralUtility::trimExplode(
             ',',
@@ -330,37 +309,24 @@ class Data
         return array_filter($keys);
     }
 
-    /**
-     * @return int
-     */
-    protected function getLivePid()
+    protected function getLivePid(): int
     {
         return (int) ($this->row['pid'] > 0 ? $this->row['pid'] : $this->liveRow['pid']);
     }
 
-    /**
-     * @return int
-     */
-    protected function getLiveUid()
+    protected function getLiveUid(): int
     {
-        return ($GLOBALS['BE_USER']->workspace === 0 || $this->row['t3ver_oid'] == 0) ?
+        return (int)($GLOBALS['BE_USER']->workspace === 0 || $this->row['t3ver_oid'] == 0) ?
             $this->row['uid'] :
             $this->row['t3ver_oid'];
     }
 
-    /**
-     * @return string
-     */
-    protected function determineImageFieldName()
+    protected function determineImageFieldName(): string
     {
-        $imgField = $this->getFieldConf('config/userImage/field') ?? 'image';
-        return $imgField;
+        return $this->getFieldConf('config/userImage/field') ?? 'image';
     }
 
-    /**
-     * @return string
-     */
-    public function getTable()
+    public function getTable(): string
     {
         return $this->table;
     }
@@ -373,38 +339,28 @@ class Data
         return $this->map;
     }
 
-    /**
-     * @return string
-     */
-    public function getMapField()
+    public function getMapField(): string
     {
         return $this->mapField;
     }
 
-    /**
-     * @return array
-     */
-    public function getRow()
+    public function getRow(): array
     {
         return $this->row;
     }
 
-    /**
-     * @return int
-     */
-    public function getUid()
+    public function getUid(): int
     {
         return (int) $this->row['uid'];
     }
 
     /**
-     * @param $value
+     * @param mixed $value
      */
     public function useCurrentData($value)
     {
-        $cur = $this->getCurrentData();
-        if (!GeneralUtility::makeInstance(\Evoweb\Imagemap\Utility\Mapper::class)->compareMaps($cur, $value)) {
-            $this->modifiedFlag = true;
+        if (!$this->mapper->compareMaps($this->getCurrentData(), $value)) {
+            $this->modified = true;
         }
 
         $this->row[$this->mapField] = $value;
@@ -418,49 +374,39 @@ class Data
         return $this->row[$this->mapField];
     }
 
-    /**
-     * @return boolean
-     */
-    public function hasDirtyState()
+    public function hasDirtyState(): bool
     {
-        return $this->modifiedFlag;
+        return $this->modified;
     }
 
-    /**
-     * @param array $fieldConf
-     */
-    public function setFieldConf($fieldConf)
+    public function setFieldConf(array $fieldConf)
     {
         $this->fieldConf = $fieldConf;
     }
 
     /**
-     * @param string $subKey
+     * @param string $path
      *
-     * @return array
+     * @return mixed
      */
-    public function getFieldConf($subKey = null)
+    public function getFieldConf(string $path = null)
     {
-        if ($subKey == null) {
+        if ($path === null) {
             return $this->fieldConf;
         }
-        $tools = GeneralUtility::makeInstance(\TYPO3\CMS\Core\Configuration\FlexForm\FlexFormTools::class);
-        return $tools->getArrayValueByPath($subKey, $this->fieldConf);
+        return \TYPO3\CMS\Core\Utility\ArrayUtility::getValueByPath($this->fieldConf, $path, '/');
     }
 
-    /**
-     * @return \Evoweb\Imagemap\Service\Environment
-     */
-    public function getEnvironment()
+    public function getEnvironment(): \Evoweb\Imagemap\Service\Environment
     {
         return $this->environment;
     }
 
     /**
-     * @return \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController
+     * @return \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController|null
      */
     protected function getTypoScriptFrontendController()
     {
-        return $GLOBALS['TSFE'];
+        return $GLOBALS['TSFE'] ?? null;
     }
 }

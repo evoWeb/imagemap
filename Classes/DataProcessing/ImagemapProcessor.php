@@ -103,10 +103,10 @@ class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcess
     /**
      * Returns global frontend controller
      *
-     * @return \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController
+     * @return \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController|null
      */
     protected function getTypoScriptFrontendController()
     {
-        return $GLOBALS['TSFE'];
+        return $GLOBALS['TSFE'] ?? null;
     }
 }

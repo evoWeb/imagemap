@@ -13,6 +13,9 @@ $tempColumns = [
         'config' => [
             'type' => 'input',
             'renderType' => 'imagemap',
+            'userImage' => [
+                'field' => 'image'
+            ],
             'fieldControl' => [
                 'imagemap' => [
                     'renderType' => 'imagemapPopup',

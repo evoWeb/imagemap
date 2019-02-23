@@ -17,23 +17,23 @@ class Mapper
     /**
      * Generate a HTML-Imagemap using Typolink etc..
      *
-     * @param \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer $cObj cObject we used for generating the Links
+     * @param \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer $cObj we used for generating the Links
      * @param string $name Name of the generated map
      * @param string $mapping mapping the XML_pseudo-imagemap
      * @param array $whitelist
-     * @param boolean $xhtml
+     * @param bool $xhtml
      * @param array $conf
      *
-     * @return string the valid HTML-imagemap (hopefully valid)
+     * @return string the valid HTML-imagemap
      */
     public function generateMap(
         \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer &$cObj,
-        $name,
-        $mapping = '',
-        $whitelist = [],
-        $xhtml = false,
-        $conf = null
-    ) {
+        string $name,
+        string $mapping = '',
+        array $whitelist = [],
+        bool $xhtml = false,
+        array $conf = null
+    ): string {
         if (is_array($whitelist)) {
             $whitelist = array_flip($whitelist);
         }
@@ -103,16 +103,14 @@ class Mapper
      *
      * @return string transformed value
      */
-    public function createValidNameAttribute($value)
+    public function createValidNameAttribute(string $value): string
     {
         if (!preg_match('/\S+/', $value)) {
             $value = \TYPO3\CMS\Core\Utility\GeneralUtility::shortMD5(rand(0, 100));
         }
 
         // replace any special character with an dash and remove trailing dashes
-        $name = preg_replace('/[^a-zA-Z0-9\-_]/i', '-', $value);
-        $name = rtrim($name, '-');
-
+        $name = rtrim(preg_replace('/[^a-zA-Z0-9\-_]/i', '-', $value), '-');
         while (!preg_match('/^[a-zA-Z]{3}/', $name)) {
             $name = chr(rand(97, 122)) . $name;
         }
@@ -127,13 +125,13 @@ class Mapper
      *
      * @return array typolink-conf array
      */
-    protected function getTypolinkSetup($param, $conf = null)
+    protected function getTypolinkSetup(string $param, array $conf = null): array
     {
-        $ret = ['parameter.' => ['wrap' => $param]];
+        $result = ['parameter.' => ['wrap' => $param]];
         if (is_array($conf) && array_key_exists('typolink.', $conf) && is_array($conf['typolink.'])) {
-            $ret = array_merge($ret, $conf['typolink.']);
+            $result = array_merge($result, $conf['typolink.']);
         }
-        return $ret;
+        return $result;
     }
 
     /**
@@ -149,24 +147,24 @@ class Mapper
      *  'attributes' array with attributes
      *  'areas' array with child nodes
      */
-    public function map2array($value, $baseTag = 'map')
+    public function map2array($value, $baseTag = 'map'): array
     {
+        $result = ['name' => $baseTag];
+
         if (!is_string($value) || !strlen($value)) {
             $value = '<map></map>';
         }
-        $ret = ['name' => $baseTag];
         if (!($xml = @simplexml_load_string($value))) {
-            return $ret;
+            return $result;
         }
-
         if (!($xml->getName() == $baseTag)) {
-            return $ret;
+            return $result;
+        }
+        if ($this->nodeHasAttributes($xml)) {
+            $result['attributes'] = $this->getAttributesFromXMLNode($xml);
         }
 
-        if ($this->nodeHasAttributes($xml)) {
-            $ret['attributes'] = $this->getAttributesFromXMLNode($xml);
-        }
-        $ret['areas'] = [];
+        $result['areas'] = [];
         foreach ($xml->children() as $subNode) {
             $newChild = [];
             $newChild['name'] = $subNode->getName();
@@ -176,12 +174,12 @@ class Mapper
             if ($this->nodeHasAttributes($subNode)) {
                 $newChild['attributes'] = $this->getAttributesFromXMLNode($subNode);
             }
-            $ret['areas'][] = $newChild;
+            $result['areas'][] = $newChild;
         }
-        if (!count($ret['areas'])) {
-            unset($ret['areas']);
+        if (!count($result['areas'])) {
+            unset($result['areas']);
         }
-        return $ret;
+        return $result;
     }
 
     /**
@@ -192,7 +190,7 @@ class Mapper
      *
      * @return string XML-String
      */
-    public function array2map(array $value, $level = 0)
+    public function array2map(array $value, int $level = 0): string
     {
         if ($level == 0 && (!isset($value['name']) || !$value['name'])) {
             $value['name'] = 'map';
@@ -223,38 +221,39 @@ class Mapper
      *
      * @return bool determines whether the maps match or not
      */
-    public function compareMaps($map1, $map2)
+    public function compareMaps(string $map1, string $map2): bool
     {
-        $arrayMap1 = $this->map2array($map1);
-        $arrayMap2 = $this->map2array($map2);
-        return $this->arraysMatch($arrayMap1, $arrayMap2);
+        return $this->arraysMatch(
+            $this->map2array($map1),
+            $this->map2array($map2)
+        );
     }
 
     /**
      * Encapsulate the extraction of Attributes out of the SimpleXML-Structure
      *
      * @param \SimpleXMLElement $node
-     * @param string $attr determines if a single of (if empty) all attributes should be extracted
+     * @param string $name determines if a single attributes should be extracted
      *
      * @return mixed Extracted attribute(s)
      *
      */
-    protected function getAttributesFromXMLNode($node, $attr = null)
+    protected function getAttributesFromXMLNode($node, string $name = null)
     {
-        $tmp = (array)$node->attributes();
-        return isset($tmp['@attributes']) ?
-            (($attr == null) ? $tmp['@attributes'] : (string)$tmp['@attributes'][$attr]) :
+        $attributes = (array)$node->attributes();
+        return isset($attributes['@attributes']) ?
+            ($name === null ? $attributes['@attributes'] : (string)$attributes['@attributes'][$name]) :
             '';
     }
 
     /**
-     * Check whether a node has any attributes or not
+     * Check if a node has any attributes or not
      *
      * @param \SimpleXMLElement $node
      *
      * @return bool
      */
-    protected function nodeHasAttributes($node)
+    protected function nodeHasAttributes($node): bool
     {
         return is_array($this->getAttributesFromXMLNode($node));
     }
@@ -266,7 +265,7 @@ class Mapper
      *
      * @return string
      */
-    protected function implodeXMLAttributes(array $attributes)
+    protected function implodeXMLAttributes(array $attributes): string
     {
         $result = '';
         foreach ($attributes as $key => $value) {
@@ -285,11 +284,12 @@ class Mapper
      *
      * @return bool determine whether elements match of not
      */
-    protected function arraysMatch($a, $b)
+    protected function arraysMatch($a, $b): bool
     {
         if (!is_array($a) || !is_array($b)) {
             return $a == $b;
         }
+
         $match = true;
         foreach ($a as $key => $value) {
             $match = $match && $this->arraysMatch($a[$key] ?? [], $b[$key] ?? []);
@@ -301,14 +301,14 @@ class Mapper
     }
 
     /**
-     * check whether a given string is a valid imagemap
+     * Check whether a given string is a valid imagemap
      * the check is not very robust so far but it resolves all required situations (see unit-tests)
      *
      * @param array|string $map the value which is supposed to be a imagemap
      *
      * @return bool determine whether the valued passed the test or not
      */
-    public function isEmptyMap($map)
+    public function isEmptyMap($map): bool
     {
         $arr = is_array($map) ? $map : $this->map2array($map);
         return !isset($arr['areas']) || count($arr['areas']) == 0;

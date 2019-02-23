@@ -63,7 +63,7 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
         );
         $this->assertEquals(
             $supposedOutput,
-            $this->mapper->generateMap($this->cObj, 'testname', []),
+            $this->mapper->generateMap($this->cObj, 'testname', ''),
             'Empty Map is not created as supposed'
         );
     }
