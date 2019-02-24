@@ -27,10 +27,10 @@ const javascriptPaths = [
 	{
 		src: [
 			// `node_modules/fabric/dist/fabric.js`,
-			`${dirs.src}/Scripts/AreaEditor.js`
+			`${dirs.src}/Scripts/Imagemap.js`
 		],
 		dest: `${dirs.dest}/JavaScript/`,
-		name: 'AreaEditor.js'
+		name: 'Imagemap.js'
 	}/*,
 	{
 		src: `node_modules/fabric/dist/fabric.js`,
@@ -65,7 +65,7 @@ let babelTask = (done) => {
 						['@babel/env', {modules: false}]
 					],
 				}))
-				.pipe(uglify())
+				//.pipe(uglify())
 				.pipe(sourcemaps.write('.'))
 				.pipe(gulp.dest(paths.dest));
 		};

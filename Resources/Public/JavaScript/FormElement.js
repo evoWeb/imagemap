@@ -1,2 +1,35 @@
-define(["jquery","jquery-ui/sortable","jquery-ui/draggable","TYPO3/CMS/Imagemap/JsGraphics"],function(t){t(document).ready(function(){var a=t(".imagemap-control:eq(0)"),e=a.find(".canvas"),n=new previewCanvasClass;n.init(e.attr("id"),e.data("thumbnail-scale")),e.data("existing-areas").forEach(function(a){n.addArea(new window["area"+a.shape+"Class"],a.coords,a.alt,a.link,a.color,0)}),a.find("input").on("imagemap:changed",function(){var a=t(this);t.ajax({url:window.TYPO3.settings.ajaxUrls.imagemap_preview_rerender,method:"POST",data:{P:{itemFormElName:a.attr("name"),tableName:"tt_content",fieldName:"tx_imagemap_links",uid:a.attr("name").replace("data[tt_content][","").replace("][tx_imagemap_links]",""),value:a.val()}}}).done(function(a,e){"success"===e&&(n.removeAreas(),a.forEach(function(a){n.addArea(new window["area"+a.shape+"Class"],a.coords,a.alt,a.link,a.color,0)}))})})})});
+define(['jquery', 'jquery-ui/sortable', 'jquery-ui/draggable', 'TYPO3/CMS/Imagemap/JsGraphics'], function ($) {
+  $(document).ready(function () {
+    var $control = $('.imagemap-control:eq(0)'),
+        $canvas = $control.find('.canvas'),
+        canvasObject = new previewCanvasClass();
+    canvasObject.init($canvas.attr('id'), $canvas.data('thumbnail-scale'));
+    $canvas.data('existing-areas').forEach(function (area) {
+      canvasObject.addArea(new window['area' + area.shape + 'Class'](), area.coords, area.alt, area.link, area.color, 0);
+    });
+    $control.find('input').on('imagemap:changed', function () {
+      var $field = $(this);
+      $.ajax({
+        url: window.TYPO3.settings.ajaxUrls['imagemap_preview_rerender'],
+        method: 'POST',
+        data: {
+          P: {
+            itemFormElName: $field.attr('name'),
+            tableName: 'tt_content',
+            fieldName: 'tx_imagemap_links',
+            uid: $field.attr('name').replace('data[tt_content][', '').replace('][tx_imagemap_links]', ''),
+            value: $field.val()
+          }
+        }
+      }).done(function (data, textStatus) {
+        if (textStatus === 'success') {
+          canvasObject.removeAreas();
+          data.forEach(function (area) {
+            canvasObject.addArea(new window['area' + area.shape + 'Class'](), area.coords, area.alt, area.link, area.color, 0);
+          });
+        }
+      });
+    });
+  });
+});
 //# sourceMappingURL=FormElement.js.map

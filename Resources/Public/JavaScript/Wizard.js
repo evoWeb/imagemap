@@ -1,2 +1,90 @@
-function _objectSpread(n){for(var e=1;e<arguments.length;e++){var i=null!=arguments[e]?arguments[e]:{},t=Object.keys(i);"function"==typeof Object.getOwnPropertySymbols&&(t=t.concat(Object.getOwnPropertySymbols(i).filter(function(e){return Object.getOwnPropertyDescriptor(i,e).enumerable}))),t.forEach(function(e){_defineProperty(n,e,i[e])})}return n}function _defineProperty(e,n,i){return n in e?Object.defineProperty(e,n,{value:i,enumerable:!0,configurable:!0,writable:!0}):e[n]=i,e}define(["jquery","TYPO3/CMS/Imagemap/AreaEditor","jquery-ui/sortable","jquery-ui/draggable"],function(r,l){r(document).ready(function(){var e=window.imagemap,n=e.defaultAttributeset,i=e.scaleFactor,t=r("> .zout","#magnify"),o=r("> .zin","#magnify"),a=new l("canvas","picture","areaForms");function c(e){a.add(new window["area"+e+"Class"],"","","","",1,n)}i=a.initializeScaling(i),a.setScale(i),e.areaEditor=a,e.existingAreas.forEach(function(e){var n=e.coords.split(","),i=n.left,t=n.top,o=n.width,c=n.height,r=new window.fabric[e.shape](_objectSpread({},e,{originX:"left",originY:"top",top:t,left:i,width:o,height:c,fill:e.color}));a.add(r)}),i<1||o.hide(),t.hide(),o.click(function(){a.setScale(1),r(this).hide(),t.show()}),t.click(function(){a.setScale(i),r(this).hide(),o.show()}),r("#addRect").on("click",function(){c("Rect")}),r("#addPoly").on("click",function(){c("Poly")}),r("#addCircle").on("click",function(){c("Circle")}),r("#submit").on("click",function(){window.opener.$('input[name="'+e.itemName+'"]').val("<map>"+a.persistanceXML()+"</map>").trigger("imagemap:changed"),close()}),r("#canvas").on("mousedown",a.mousedown.bind(a)).on("mouseup",a.mouseup.bind(a)).on("mousemove",a.mousemove.bind(a)).on("dblclick",a.dblclick.bind(a))})});
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+define(['jquery', 'TYPO3/CMS/Imagemap/Imagemap', 'jquery-ui/sortable', 'jquery-ui/draggable'], function ($, Imagemap) {
+  $(document).ready(function () {
+    var configuration = window.imagemap,
+        defaultAttributeSet = configuration.defaultAttributeset,
+        areaEditor = new Imagemap.AreaEditor('canvas', 'picture', 'areaForms');
+    configuration.areaEditor = areaEditor;
+
+    var initializeScaleFactor = function initializeScaleFactor(scaleFactor) {
+      var $zoomOut = $('> .zout', '#magnify'),
+          $zoomIn = $('> .zin', '#magnify');
+      scaleFactor = areaEditor.initializeScaling(scaleFactor);
+      areaEditor.setScale(scaleFactor);
+
+      if (scaleFactor < 1) {
+        $zoomIn.show();
+        $zoomOut.hide();
+      } else {
+        $zoomIn.hide();
+        $zoomOut.hide();
+      }
+
+      $zoomIn.click(function () {
+        areaEditor.setScale(1);
+        $zoomIn.hide();
+        $zoomOut.show();
+      });
+      $zoomOut.click(function () {
+        areaEditor.setScale(scaleFactor);
+        $zoomOut.hide();
+        $zoomIn.show();
+      });
+    };
+
+    var initializeAreas = function initializeAreas(areas) {
+      areas.forEach(function (configuration) {
+        var _configuration$coords = configuration.coords.split(','),
+            left = _configuration$coords.left,
+            top = _configuration$coords.top,
+            width = _configuration$coords.width,
+            height = _configuration$coords.height;
+
+        var area = new Imagemap[configuration.shape](_objectSpread({}, configuration, {
+          originX: 'left',
+          originY: 'top',
+          top: top,
+          left: left,
+          width: width,
+          height: height,
+          fill: configuration.color
+        }));
+        areaEditor.add(area);
+      });
+    };
+
+    var initializeEvents = function initializeEvents() {
+      var addArea = function addArea(shape) {
+        areaEditor.add(new Imagemap[shape](), '', '', '', '', 1, defaultAttributeSet);
+      };
+
+      $('#addRect').on('click', function () {
+        addArea('Rect');
+      });
+      $('#addPoly').on('click', function () {
+        addArea('Poly');
+      });
+      $('#addCircle').on('click', function () {
+        addArea('Circle');
+      });
+      $('#submit').on('click', function () {
+        var $field = window.opener.$('input[name="' + configuration.itemName + '"]');
+        $field.val('<map>' + areaEditor.persistanceXML() + '</map>').trigger('imagemap:changed');
+        close();
+      });
+      /*$('#canvas')
+      	.on('mousedown', areaEditor.mousedown.bind(areaEditor))
+      	.on('mouseup', areaEditor.mouseup.bind(areaEditor))
+      	.on('mousemove', areaEditor.mousemove.bind(areaEditor))
+      	.on('dblclick', areaEditor.dblclick.bind(areaEditor));*/
+    };
+
+    initializeScaleFactor(configuration.scaleFactor);
+    initializeAreas(configuration.existingAreas);
+    initializeEvents();
+  });
+});
 //# sourceMappingURL=Wizard.js.map

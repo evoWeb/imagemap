@@ -1,4 +1,10 @@
 define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
+	let imagemap = imagemap || {};
+
+	class Rect extends fabric.Rect {
+	}
+	imagemap.Rect = Rect;
+
 	class AreaEditor extends fabric.Canvas {
 		constructor(canvas, picture, form) {
 			super (canvas, picture, form);
@@ -49,5 +55,7 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 			console.log();
 		}
 	}
-	return AreaEditor;
+	imagemap.AreaEditor = AreaEditor;
+
+	return imagemap;
 });
