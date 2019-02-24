@@ -1,12 +1,13 @@
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 define(['jquery', 'TYPO3/CMS/Imagemap/Imagemap', 'jquery-ui/sortable', 'jquery-ui/draggable'], function ($, Imagemap) {
   $(document).ready(function () {
     var configuration = window.imagemap,
-        defaultAttributeSet = configuration.defaultAttributeset,
-        areaEditor = new Imagemap.AreaEditor('canvas', 'picture', 'areaForms');
+        $image = $('#image img'),
+        areaEditor = new Imagemap.AreaEditor('canvas', {
+      width: parseInt($image.css('width')),
+      height: parseInt($image.css('height')),
+      top: parseInt($image.css('height')) * -1,
+      form: 'areaForms'
+    });
     configuration.areaEditor = areaEditor;
 
     var initializeScaleFactor = function initializeScaleFactor(scaleFactor) {
@@ -37,38 +38,40 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Imagemap', 'jquery-ui/sortable', 'jquery-u
 
     var initializeAreas = function initializeAreas(areas) {
       areas.forEach(function (configuration) {
-        var _configuration$coords = configuration.coords.split(','),
-            left = _configuration$coords.left,
-            top = _configuration$coords.top,
-            width = _configuration$coords.width,
-            height = _configuration$coords.height;
+        switch (configuration.shape) {
+          case 'rect':
+            areaEditor.addRect(configuration);
+            break;
 
-        var area = new Imagemap[configuration.shape](_objectSpread({}, configuration, {
-          originX: 'left',
-          originY: 'top',
-          top: top,
-          left: left,
-          width: width,
-          height: height,
-          fill: configuration.color
-        }));
-        areaEditor.add(area);
+          case 'circle':
+            areaEditor.addCircle(configuration);
+            break;
+
+          case 'poly':
+            areaEditor.addPoly(configuration);
+            break;
+        }
       });
     };
 
     var initializeEvents = function initializeEvents() {
-      var addArea = function addArea(shape) {
-        areaEditor.add(new Imagemap[shape](), '', '', '', '', 1, defaultAttributeSet);
-      };
-
       $('#addRect').on('click', function () {
-        addArea('Rect');
-      });
-      $('#addPoly').on('click', function () {
-        addArea('Poly');
+        areaEditor.addRect({
+          color: '#ff0',
+          coords: parseInt($image.css('width')) / 2 - 50 + ',' + (parseInt($image.css('height')) / 2 - 50) + ',' + (parseInt($image.css('width')) / 2 + 50) + ',' + (parseInt($image.css('height')) / 2 + 50)
+        });
       });
       $('#addCircle').on('click', function () {
-        addArea('Circle');
+        areaEditor.addCircle({
+          color: '#ff0',
+          coords: parseInt($image.css('width')) / 2 - 50 + ',' + (parseInt($image.css('height')) / 2 - 50) + ',50'
+        });
+      });
+      $('#addPoly').on('click', function () {
+        areaEditor.addPoly({
+          color: '#ff0',
+          coords: parseInt($image.css('width')) / 2 + ',' + (parseInt($image.css('height')) / 2 - 50) + ',' + (parseInt($image.css('width')) / 2 + 50) + ',' + (parseInt($image.css('height')) / 2 + 50) + ',' + (parseInt($image.css('width')) / 2 - 50) + ',' + (parseInt($image.css('height')) / 2 + 50)
+        });
       });
       $('#submit').on('click', function () {
         var $field = window.opener.$('input[name="' + configuration.itemName + '"]');

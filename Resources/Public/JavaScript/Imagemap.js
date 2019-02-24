@@ -1,10 +1,22 @@
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
@@ -30,10 +42,63 @@ define(['TYPO3/CMS/Imagemap/Fabric'], function (fabric) {
       return _possibleConstructorReturn(this, _getPrototypeOf(Rect).apply(this, arguments));
     }
 
+    _createClass(Rect, [{
+      key: "persistanceXML",
+      value: function persistanceXML() {
+        return '<area shape="rect" coords="' + this.getLeftX(0) + "," + this.getTopY(0) + "," + this.getRightX(0) + "," + this.getBottomY(0) + '" ' + this.getAdditionalAttributeXML() + ">" + this.getLink() + "</area>";
+      }
+    }]);
+
     return Rect;
   }(fabric.Rect);
 
   imagemap.Rect = Rect;
+
+  var Circle =
+  /*#__PURE__*/
+  function (_fabric$Circle) {
+    _inherits(Circle, _fabric$Circle);
+
+    function Circle() {
+      _classCallCheck(this, Circle);
+
+      return _possibleConstructorReturn(this, _getPrototypeOf(Circle).apply(this, arguments));
+    }
+
+    _createClass(Circle, [{
+      key: "persistanceXML",
+      value: function persistanceXML() {
+        return '<area shape="circle" coords="' + this.getX(0) + "," + this.getY(0) + "," + this.getRadius(0) + '" ' + this.getAdditionalAttributeXML() + ">" + this.getLink() + "</area>";
+      }
+    }]);
+
+    return Circle;
+  }(fabric.Circle);
+
+  imagemap.Circle = Circle;
+
+  var Polygon =
+  /*#__PURE__*/
+  function (_fabric$Polygon) {
+    _inherits(Polygon, _fabric$Polygon);
+
+    function Polygon() {
+      _classCallCheck(this, Polygon);
+
+      return _possibleConstructorReturn(this, _getPrototypeOf(Polygon).apply(this, arguments));
+    }
+
+    _createClass(Polygon, [{
+      key: "persistanceXML",
+      value: function persistanceXML() {
+        return '<area shape="poly" coords="' + this.joinCoords() + '" ' + this.getAdditionalAttributeXML() + ">" + this.getLink() + "</area>";
+      }
+    }]);
+
+    return Polygon;
+  }(fabric.Polygon);
+
+  imagemap.Polygon = Polygon;
 
   var AreaEditor =
   /*#__PURE__*/
@@ -49,59 +114,146 @@ define(['TYPO3/CMS/Imagemap/Fabric'], function (fabric) {
     _createClass(AreaEditor, [{
       key: "initializeScaling",
       value: function initializeScaling(scaling) {
-        var width = parseInt(scaling) / this.imageOrigW,
-            height = parseInt(scaling) / this.imageOrigH;
+        var width = parseInt(scaling) / this.width,
+            height = parseInt(scaling) / this.height;
         return width > height ? height : width;
       }
     }, {
       key: "setScale",
       value: function setScale(scaling) {
         this.scaleFactor = scaling > 1 ? 1 : scaling;
-        jQuery(this.pictureId + " > #image > img").width(this.getMaxW());
-        jQuery(this.pictureId + " > #image > img").height(this.getMaxH());
-        jQuery(this.pictureId).width(this.getMaxW());
-        jQuery(this.pictureId).height(this.getMaxH());
-        var that = this;
-        jQuery.each(this.areaObjectList, function (d, c) {
-          that.areaObjects[c].setScale(that.scaleFactor);
-          that.updateCanvas(c);
-        });
-        jQuery(this.canvasId).width(this.getMaxW()).height(this.getMaxH());
       }
     }, {
-      key: "getMaxW",
-      value: function getMaxW() {
-        return this.scaleFactor * this.imageOrigW;
+      key: "getMaxWidth",
+      value: function getMaxWidth() {
+        return this.scaleFactor * this.width;
       }
     }, {
-      key: "getMaxH",
-      value: function getMaxH() {
-        return this.scaleFactor * this.imageOrigH;
+      key: "getMaxHeight",
+      value: function getMaxHeight() {
+        return this.scaleFactor * this.height;
       }
     }, {
-      key: "persistanceXML",
-      value: function persistanceXML() {
-        return '';
+      key: "addRect",
+      value: function addRect(configuration) {
+        var _configuration$coords = configuration.coords.split(','),
+            _configuration$coords2 = _slicedToArray(_configuration$coords, 4),
+            left = _configuration$coords2[0],
+            top = _configuration$coords2[1],
+            right = _configuration$coords2[2],
+            bottom = _configuration$coords2[3];
+
+        var area = new imagemap.Rect(_objectSpread({}, configuration, {
+          left: parseInt(left),
+          top: parseInt(top),
+          width: parseInt(right - left),
+          height: parseInt(bottom - top),
+          borderColor: configuration.color,
+          stroke: configuration.color,
+          strokeWidth: 1,
+          fill: this.hexToRgbA(configuration.color, 0.2)
+        }));
+        this.add(area);
+      }
+    }, {
+      key: "addCircle",
+      value: function addCircle(configuration) {
+        var _configuration$coords3 = configuration.coords.split(','),
+            _configuration$coords4 = _slicedToArray(_configuration$coords3, 3),
+            left = _configuration$coords4[0],
+            top = _configuration$coords4[1],
+            radius = _configuration$coords4[2];
+
+        var area = new imagemap.Circle(_objectSpread({}, configuration, {
+          left: parseInt(left),
+          top: parseInt(top),
+          radius: parseInt(radius),
+          borderColor: configuration.color,
+          stroke: configuration.color,
+          strokeWidth: 1,
+          fill: this.hexToRgbA(configuration.color, 0.2)
+        }));
+        this.add(area);
+      }
+    }, {
+      key: "addPoly",
+      value: function addPoly(configuration) {
+        var coordsXY = configuration.coords.split(','),
+            left = 100000,
+            top = 100000,
+            i = 0,
+            points = [];
+
+        if (coordsXY.length % 2) {
+          throw new Error('Bad coords count');
+        }
+
+        for (; i < coordsXY.length; i = i + 2) {
+          var xy = {
+            x: parseInt(coordsXY[i]),
+            y: parseInt(coordsXY[i + 1])
+          };
+          points.push(xy);
+          left = Math.min(left, xy.x);
+          top = Math.min(top, xy.y);
+        }
+
+        var area = new imagemap.Polygon(points, _objectSpread({}, configuration, {
+          top: top,
+          left: left,
+          borderColor: configuration.color,
+          stroke: configuration.color,
+          strokeWidth: 1,
+          fill: this.hexToRgbA(configuration.color, 0.2)
+        }));
+        this.add(area);
+      }
+    }, {
+      key: "hexToRgbA",
+      value: function hexToRgbA(hex, alpha) {
+        var chars, r, g, b, result;
+
+        if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
+          chars = hex.substring(1).split('');
+
+          if (chars.length === 3) {
+            chars = [chars[0], chars[0], chars[1], chars[1], chars[2], chars[2]];
+          }
+
+          r = parseInt(chars[0] + chars[1], 16);
+          g = parseInt(chars[2] + chars[3], 16);
+          b = parseInt(chars[4] + chars[5], 16);
+
+          if (alpha) {
+            result = 'rgba(' + [r, g, b, alpha].join(', ') + ')';
+          } else {
+            result = 'rgb(' + [r, g, b].join(', ') + ')';
+          }
+
+          return result;
+        }
+
+        throw new Error('Bad Hex');
       }
     }, {
       key: "mousedown",
-      value: function mousedown() {
-        console.log();
+      value: function mousedown(event) {
+        console.log(event);
       }
     }, {
       key: "mouseup",
-      value: function mouseup() {
-        console.log();
+      value: function mouseup(event) {
+        console.log(event);
       }
     }, {
       key: "mousemove",
-      value: function mousemove() {
-        console.log();
+      value: function mousemove(event) {
+        console.log(event);
       }
     }, {
       key: "dblclick",
-      value: function dblclick() {
-        console.log();
+      value: function dblclick(event) {
+        console.log(event);
       }
     }]);
 

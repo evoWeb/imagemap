@@ -1,8 +1,13 @@
 define(['jquery', 'TYPO3/CMS/Imagemap/Imagemap', 'jquery-ui/sortable', 'jquery-ui/draggable'], function ($, Imagemap) {
 	$(document).ready(function () {
 		let configuration = window.imagemap,
-			defaultAttributeSet = configuration.defaultAttributeset,
-			areaEditor = new Imagemap.AreaEditor('canvas', 'picture', 'areaForms');
+			$image = $('#image img'),
+			areaEditor = new Imagemap.AreaEditor('canvas', {
+				width: parseInt($image.css('width')),
+				height: parseInt($image.css('height')),
+				top: parseInt($image.css('height')) * -1,
+				form: 'areaForms'
+			});
 
 		configuration.areaEditor = areaEditor;
 
@@ -36,36 +41,45 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Imagemap', 'jquery-ui/sortable', 'jquery-u
 
 		let initializeAreas = (areas) => {
 			areas.forEach((configuration) => {
-				let {left, top, width, height} = configuration.coords.split(',');
-				let area = new Imagemap[configuration.shape]({
-					...configuration,
-					originX: 'left',
-					originY: 'top',
-					top: top,
-					left: left,
-					width: width,
-					height: height,
-					fill: configuration.color,
-				});
-				areaEditor.add(area);
+				switch (configuration.shape) {
+					case 'rect':
+						areaEditor.addRect(configuration);
+						break;
+
+					case 'circle':
+						areaEditor.addCircle(configuration);
+						break;
+
+					case 'poly':
+						areaEditor.addPoly(configuration);
+						break;
+				}
 			});
 		};
 
 		let initializeEvents = () => {
-			let addArea = (shape) => {
-				areaEditor.add(new Imagemap[shape](), '', '', '', '', 1, defaultAttributeSet);
-			};
-
 			$('#addRect').on('click', function () {
-				addArea('Rect');
-			});
-
-			$('#addPoly').on('click', function () {
-				addArea('Poly');
+				areaEditor.addRect({
+					color: '#ff0',
+					coords: (parseInt($image.css('width')) / 2 - 50) + ',' + (parseInt($image.css('height')) / 2 - 50)
+						+ ',' + (parseInt($image.css('width')) / 2 + 50) + ',' + (parseInt($image.css('height')) / 2 + 50),
+				});
 			});
 
 			$('#addCircle').on('click', function () {
-				addArea('Circle');
+				areaEditor.addCircle({
+					color: '#ff0',
+					coords: (parseInt($image.css('width')) / 2 - 50) + ',' + (parseInt($image.css('height')) / 2 - 50) + ',50',
+				});
+			});
+
+			$('#addPoly').on('click', function () {
+				areaEditor.addPoly({
+					color: '#ff0',
+					coords: (parseInt($image.css('width')) / 2) + ',' + (parseInt($image.css('height')) / 2 - 50)
+						+ ',' + (parseInt($image.css('width')) / 2 + 50) + ',' + (parseInt($image.css('height')) / 2 + 50)
+						+ ',' + (parseInt($image.css('width')) / 2 - 50) + ',' + (parseInt($image.css('height')) / 2 + 50)
+				});
 			});
 
 			$('#submit').on('click', function () {

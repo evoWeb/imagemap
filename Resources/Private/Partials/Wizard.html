@@ -19,7 +19,7 @@ window.imagemap = {
 	</f:format.raw>},
 	existingAreas: [
 		<f:for each="{data.map.areas}" as="area" iteration="iterator">{<f:format.raw>
-			shape: '<f:format.case mode="capital">{area.attributes.shape}</f:format.case>',
+			shape: '{area.attributes.shape}',
 			coords: '{area.attributes.coords}',
 			alt: '{area.attributes.alt}',
 			link: '{area.value}',
