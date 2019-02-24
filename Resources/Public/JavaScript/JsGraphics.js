@@ -1516,6 +1516,9 @@ var previewCanvasClass = Class.extend({
 		this.areaObjects = new Array();
 		this.areaObjectList = new Array()
 	},
+	setScale: function (b) {
+		this.scale = b;
+	},
 	addArea: function (f, e, b, d, c, a) {
 		f.init(this, this.getNextId(), e, b, d, c, {});
 		f.disableEdges();

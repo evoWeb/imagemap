@@ -76,11 +76,11 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Imagemap', 'jquery-ui/sortable', 'jquery-u
 				close();
 			});
 
-			/*$('#canvas')
+			$('#canvas')
 				.on('mousedown', areaEditor.mousedown.bind(areaEditor))
 				.on('mouseup', areaEditor.mouseup.bind(areaEditor))
 				.on('mousemove', areaEditor.mousemove.bind(areaEditor))
-				.on('dblclick', areaEditor.dblclick.bind(areaEditor));*/
+				.on('dblclick', areaEditor.dblclick.bind(areaEditor));
 		};
 
 		initializeScaleFactor(configuration.scaleFactor);
