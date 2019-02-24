@@ -41,16 +41,7 @@ define(['jquery', 'jquery-ui/sortable', 'jquery-ui/draggable', 'TYPO3/CMS/Imagem
 				}).done((data, textStatus) => {
 					if (textStatus === 'success') {
 						areaEditor.removeAreas();
-						data.forEach((area) => {
-							areaEditor.addArea(
-								new window['area' + area.shape + 'Class'](),
-								area.coords,
-								area.alt,
-								area.link,
-								area.color,
-								0
-							);
-						});
+						initializeAreas(data);
 					}
 				});
 			});
