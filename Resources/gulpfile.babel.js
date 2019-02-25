@@ -13,35 +13,32 @@ const dirs = {
 	dest: 'Public'
 };
 
-const javascriptPaths = [
-	{
+const sassPaths = {
+	src: `${dirs.src}/Sass/*.scss`,
+	dest: `${dirs.dest}/Stylesheets/`
+};
+
+const javascriptPaths = {
+	'Fabric.js': {
+		src: `node_modules/fabric/dist/fabric.js`,
+		dest: `${dirs.dest}/JavaScript/`,
+		name: 'Fabric.js'
+	},
+	'Imagemap.js': {
+		src: `${dirs.src}/Scripts/Imagemap.js`,
+		dest: `${dirs.dest}/JavaScript/`,
+		name: 'Imagemap.js'
+	},
+	'FormElement.js': {
 		src: `${dirs.src}/Scripts/FormElement.js`,
 		dest: `${dirs.dest}/JavaScript/`,
 		name: 'FormElement.js'
 	},
-	{
+	'Wizard.js': {
 		src: `${dirs.src}/Scripts/Wizard.js`,
 		dest: `${dirs.dest}/JavaScript/`,
 		name: 'Wizard.js'
-	},
-	{
-		src: [
-			// `node_modules/fabric/dist/fabric.js`,
-			`${dirs.src}/Scripts/Imagemap.js`
-		],
-		dest: `${dirs.dest}/JavaScript/`,
-		name: 'Imagemap.js'
-	}/*,
-	{
-		src: `node_modules/fabric/dist/fabric.js`,
-		dest: `${dirs.dest}/JavaScript/`,
-		name: 'Fabric.js'
-	}*/
-];
-
-const sassPaths = {
-	src: `${dirs.src}/Sass/*.scss`,
-	dest: `${dirs.dest}/Stylesheets/`
+	}
 };
 
 let stylesTask = () => {
@@ -54,24 +51,31 @@ let stylesTask = () => {
 };
 
 let babelTask = (done) => {
-	let tasks = javascriptPaths.map((paths) => {
-		let buildJavascript = () => {
-			return gulp.src(paths.src)
-				.pipe(sourcemaps.init())
-				.pipe(concat(paths.name))
-				.pipe(babel({
-					compact: false,
-					presets: [
-						['@babel/env', {modules: false}]
-					],
-				}))
-				//.pipe(uglify())
-				.pipe(sourcemaps.write('.'))
-				.pipe(gulp.dest(paths.dest));
-		};
+	let position = process.argv.indexOf('--file'),
+		file = position > -1 ? process.argv[position + 1] : null;
 
-		buildJavascript.displayName = `${paths.name}`;
-		return buildJavascript;
+	let tasks = [];
+	Object.keys(javascriptPaths).map((key) => {
+		if (file == null || file === key) {
+			let paths = javascriptPaths[key];
+			let buildJavascript = () => {
+				return gulp.src(paths.src)
+					.pipe(sourcemaps.init())
+					.pipe(concat(paths.name))
+					.pipe(babel({
+						compact: false,
+						presets: [
+							['@babel/env', {modules: false}]
+						],
+					}))
+					//.pipe(uglify())
+					.pipe(sourcemaps.write('.'))
+					.pipe(gulp.dest(paths.dest));
+			};
+
+			buildJavascript.displayName = `${paths.name}`;
+			tasks.push(buildJavascript);
+		}
 	});
 
 	return gulp.series(...tasks, (seriesDone) => {

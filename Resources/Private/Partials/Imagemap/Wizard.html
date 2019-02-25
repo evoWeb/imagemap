@@ -43,8 +43,8 @@ window.imagemap = {
 
 	<div id="pic">
 		<div id="magnify">
-			<span class="zin" title="{f:translate(id: 'imagemap.form.zoomin', extensionName: 'imagemap')}"><core:icon identifier="extensions-imagemap-zoomin" size="default" /></span>
-			<span class="zout" title="{f:translate(id: 'imagemap.form.zoomout', extensionName: 'imagemap')}"><core:icon identifier="extensions-imagemap-zoomout" size="default" /></span>
+			<span class="zin hide" title="{f:translate(id: 'imagemap.form.zoomin', extensionName: 'imagemap')}"><core:icon identifier="extensions-imagemap-zoomin" size="default" /></span>
+			<span class="zout hide" title="{f:translate(id: 'imagemap.form.zoomout', extensionName: 'imagemap')}"><core:icon identifier="extensions-imagemap-zoomout" size="default" /></span>
 		</div>
 		<div id="picture">
 			<div id="image">{data.image -> f:format.raw()}</div>
@@ -52,13 +52,11 @@ window.imagemap = {
 		</div>
 	</div>
 
-	<form name="{formName}">
-	<div id="areaForms">
-		<f:render partial="Imagemap/RectForm" arguments="{_all}"/>
-		<f:render partial="Imagemap/CircForm" arguments="{_all}"/>
-		<f:render partial="Imagemap/PolyForm" arguments="{_all}"/>
-	</div>
-	</form>
+	<form name="{formName}" id="areaForms"></form>
 </div>
+
+<f:render partial="Imagemap/RectForm" arguments="{_all}"/>
+<f:render partial="Imagemap/CircForm" arguments="{_all}"/>
+<f:render partial="Imagemap/PolyForm" arguments="{_all}"/>
 
 </html>

@@ -17,11 +17,11 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Imagemap', 'jquery-ui/sortable', 'jquery-u
       areaEditor.setScale(scaleFactor);
 
       if (scaleFactor < 1) {
-        $zoomIn.show();
-        $zoomOut.hide();
+        $zoomIn.removeClass('hide');
+        $zoomOut.addClass('hide');
       } else {
-        $zoomIn.hide();
-        $zoomOut.hide();
+        $zoomIn.addClass('hide');
+        $zoomOut.addClass('hide');
       }
 
       $zoomIn.click(function () {

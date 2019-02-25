@@ -43,7 +43,7 @@ class PopupController
         $this->moduleTemplate = GeneralUtility::makeInstance(\TYPO3\CMS\Backend\Template\ModuleTemplate::class);
 
         $this->view = $this->moduleTemplate->getView();
-        $this->view->setTemplate('Popup/Module');
+        $this->view->setTemplate('Imagemap/Popup');
         $this->view->setTemplateRootPaths(array_merge(
             $this->view->getTemplateRootPaths(),
             ['EXT:imagemap/Resources/Private/Templates/']
