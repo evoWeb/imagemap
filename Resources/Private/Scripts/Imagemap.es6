@@ -2,33 +2,99 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 	let imagemap = imagemap || {};
 
 	class Rect extends fabric.Rect {
+		constructor(options) {
+			super(options);
+
+			this.form = null;
+			this.subForm = null;
+		}
+
+		fillForm() {
+
+		}
+
 		persistanceXML() {
-			return '<area shape="rect" coords="' + this.getLeftX(0) + "," + this.getTopY(0)
-				+ "," + this.getRightX(0) + "," + this.getBottomY(0)
-				+ '" ' + this.getAdditionalAttributeXML() + ">" + this.getLink() + "</area>"
+			let coords = this.left + ',' + this.top + ',' + (this.left + this.width) + ',' + (this.height + this.top);
+			return '<area shape="rect" coords="' + coords + '" ' + this.getAdditionalAttributeXML() + '>'
+				+ this.getLink() + '</area>'
 		}
 	}
-	imagemap.Rect = Rect;
 
 	class Circle extends fabric.Circle {
+		constructor(options) {
+			super(options);
+
+			this.form = null;
+			this.subForm = null;
+		}
+
 		persistanceXML() {
-			return '<area shape="circle" coords="' + this.getX(0) + "," + this.getY(0) + "," + this.getRadius(0)
-				+ '" ' + this.getAdditionalAttributeXML() + ">" + this.getLink() + "</area>";
+			let coords = this.left + ',' + this.top + ',' + this.radius;
+			return '<area shape="circle" coords="' + coords + '" ' + this.getAdditionalAttributeXML() + '>'
+				+ this.getLink() + '</area>';
 		}
 	}
-	imagemap.Circle = Circle;
 
 	class Polygon extends fabric.Polygon {
+		constructor(options) {
+			super(options);
+
+			this.form = null;
+			this.subForm = null;
+		}
+
 		persistanceXML() {
 			return '<area shape="poly" coords="' + this.joinCoords()
 				+ '" ' + this.getAdditionalAttributeXML() + ">" + this.getLink() + "</area>"
 		}
 	}
-	imagemap.Polygon = Polygon;
+
+	class AreaForm {
+		constructor(formElement) {
+			this.element = fabric.document.querySelector('#' + formElement);
+		}
+
+		getFormElement(selector) {
+			return new DOMParser().parseFromString(
+				this.element.querySelector(selector).innerHTML,
+				'text/html'
+			).body.firstChild;
+		}
+
+		addRectSubForm(area)
+		{
+			area.form = this;
+			area.subForm = this.getFormElement('#rectForm');
+
+			this.element.insertBefore(area.subForm, this.element.firstChild);
+			area.fillForm();
+		}
+
+		addCircleSubForm(area)
+		{
+			area.form = this;
+			area.subForm = this.getFormElement('#circForm');
+
+			this.element.insertBefore(area.subForm, this.element.firstChild);
+			area.fillForm();
+		}
+
+		addPolySubForm(area)
+		{
+			area.form = this;
+			area.subForm = this.getFormElement('#polyForm');
+			area.coordForm = this.getFormElement('#polyCoords');
+
+			this.element.insertBefore(area.subForm, this.element.firstChild);
+			area.fillForm();
+		}
+	}
 
 	class AreaEditor extends fabric.Canvas {
-		constructor(canvas, picture, form) {
-			super (canvas, picture, form);
+		constructor(canvas, form, options) {
+			super (canvas, options);
+
+			this.form = new AreaForm(form);
 		}
 
 		initializeScaling(scaling) {
@@ -48,7 +114,7 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 
 		addRect(configuration) {
 			let [left, top, right, bottom] = configuration.coords.split(',');
-			let area = new imagemap.Rect({
+			let area = new Rect({
 				...configuration,
 				left: parseInt(left),
 				top: parseInt(top),
@@ -59,12 +125,15 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 				strokeWidth: 1,
 				fill: this.hexToRgbA(configuration.color, 0.2)
 			});
+
+			this.form.addRectSubForm(area);
 			this.add(area);
+			console.log(area);
 		}
 
 		addCircle(configuration) {
 			let [left, top, radius] = configuration.coords.split(',');
-			let area = new imagemap.Circle({
+			let area = new Circle({
 				...configuration,
 				left: parseInt(left),
 				top: parseInt(top),
@@ -74,6 +143,8 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 				strokeWidth: 1,
 				fill: this.hexToRgbA(configuration.color, 0.2)
 			});
+
+			this.form.addCircleSubForm(area);
 			this.add(area);
 		}
 
@@ -96,7 +167,7 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 				top = Math.min(top, xy.y);
 			}
 
-			let area = new imagemap.Polygon(points, {
+			let area = new Polygon(points, {
 				...configuration,
 				top: top,
 				left: left,
@@ -105,6 +176,8 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 				strokeWidth: 1,
 				fill: this.hexToRgbA(configuration.color, 0.2)
 			});
+
+			this.form.addPolySubForm(area);
 			this.add(area);
 		}
 

@@ -1,33 +1,35 @@
 <html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
 			data-namespace-typo3-fluid="true">
 
-<div id="circForm" class="areaForm hide">
-	<div id="MAPFORMID_main" class="basicOptions input-group">
+<script type="text/template" id="circForm">
+<div id="MAPFORMID" class="areaForm">
+	<div id="main" class="basicOptions input-group">
 		<div class="input-group-addon">
 			<div class="input-group-text colorPreview"><div></div></div>
 		</div>
-		<input type="text" id="MAPFORMID_label" data-formengine-input-name="MAPFORMID_label" value="..." class="form-control" placeholder="{f:translate(id: 'imagemap.form.area.label', extensionName: 'imagemap')}" />
-		<input type="text" id="MAPFORMID_link" data-formengine-input-name="MAPFORMID_link" value="..." class="form-control" placeholder="{f:translate(id: 'imagemap.form.area.link', extensionName: 'imagemap')}" />
+		<input type="text" name="label" data-formengine-input-name="MAPFORMID_label" value="" class="form-control" placeholder="{f:translate(id: 'imagemap.form.area.label', extensionName: 'imagemap')}" />
+		<input type="text" name="link" data-formengine-input-name="MAPFORMID_link" value="" class="form-control" placeholder="{f:translate(id: 'imagemap.form.area.link', extensionName: 'imagemap')}" />
 		<f:render partial="Imagemap/Controls" arguments="{returnUrl: returnUrl, formName: formName}"/>
 	</div>
 
-	<div id="MAPFORMID_more" class="moreOptions">
+	<div class="more moreOptions hide">
 		<f:render partial="Imagemap/ColorPicker" arguments="{attributeKeys: attributeKeys}"/>
 
 		<div class="positionOptions">
 			<div class="input-group clearfix">
-				<label for="MAPFORMID_x" class="input-group-addon">X:</label>
-				<input type="text" class="form-control" id="MAPFORMID_x" value="x" />
-				<label for="MAPFORMID_y" class="input-group-addon">Y:</label>
-				<input type="text" class="form-control" id="MAPFORMID_y" value="y" />
+				<label for="x" class="input-group-addon">X:</label>
+				<input type="text" class="form-control" id="x" value="x" />
+				<label for="y" class="input-group-addon">Y:</label>
+				<input type="text" class="form-control" id="y" value="y" />
 			</div>
 
 			<div class="input-group">
-				<label for="MAPFORMID_radius" class="input-group-addon">R:</label>
-				<input type="text" class="form-control" id="MAPFORMID_radius" value="r" />
+				<label for="radius" class="input-group-addon">R:</label>
+				<input type="text" class="form-control" id="radius" value="r" />
 			</div>
 		</div>
 	</div>
 </div>
+</script>
 
 </html>

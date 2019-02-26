@@ -2,17 +2,18 @@
 			xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
 			data-namespace-typo3-fluid="true">
 
-<div id="polyForm" class="areaForm hide">
-	<div id="MAPFORMID_main" class="basicOptions input-group">
+<script type="text/template" id="polyForm">
+<div id="MAPFORMID" class="areaForm">
+	<div id="main" class="basicOptions input-group">
 		<div class="input-group-addon">
 			<div class="input-group-text colorPreview"><div></div></div>
 		</div>
-		<input type="text" id="MAPFORMID_label" data-formengine-input-name="MAPFORMID_label" value="..." class="form-control" placeholder="{f:translate(id: 'imagemap.form.area.label', extensionName: 'imagemap')}" />
-		<input type="text" id="MAPFORMID_link" data-formengine-input-name="MAPFORMID_link" value="..." class="form-control" placeholder="{f:translate(id: 'imagemap.form.area.link', extensionName: 'imagemap')}" />
+		<input type="text" id="label" data-formengine-input-name="MAPFORMID_label" value="" class="form-control" placeholder="{f:translate(id: 'imagemap.form.area.label', extensionName: 'imagemap')}" />
+		<input type="text" id="link" data-formengine-input-name="MAPFORMID_link" value="" class="form-control" placeholder="{f:translate(id: 'imagemap.form.area.link', extensionName: 'imagemap')}" />
 		<f:render partial="Imagemap/Controls" arguments="{returnUrl: returnUrl, formName: formName, renderAddButton: 1}"/>
 	</div>
 
-	<div id="MAPFORMID_more" class="moreOptions">
+	<div id="more" class="moreOptions hide">
 		<f:render partial="Imagemap/ColorPicker" arguments="{attributeKeys: attributeKeys}"/>
 
 		<div class="positionOptions">
@@ -20,21 +21,22 @@
 		</div>
 	</div>
 </div>
+</script>
 
-<div id="polyCoords" class="noIdWrap hide">
+<script type="text/template" id="polyCoords">
 	<div class="input-group clearfix">
-		<label for="MAPFORMID_xvN" class="input-group-addon">XvN:</label>
-		<input type="text" class="form-control" id="MAPFORMID_xvN" value="vX" />
+		<label for="xvN" class="input-group-addon">XvN:</label>
+		<input type="text" class="form-control" id="xvN" value="vX" />
 
-		<label for="MAPFORMID_yvN" class="input-group-addon">YvN:</label>
-		<input type="text" class="form-control" id="MAPFORMID_yvN" value="vY" />
+		<label for="yvN" class="input-group-addon">YvN:</label>
+		<input type="text" class="form-control" id="yvN" value="vY" />
 
 		<div class="input-group-btn">
-			<span id="MAPFORMID_beforevN" class="btn btn-default addCoord" title="{f:translate(id: 'imagemap.form.poly.addEdgeBefore', extensionName: 'imagemap')}"><core:icon identifier="actions-view-go-up"/></span>
-			<span id="MAPFORMID_aftervN" class="btn btn-default addCoord" title="{f:translate(id: 'imagemap.form.poly.addEdgeAfter', extensionName: 'imagemap')}"><core:icon identifier="actions-view-go-down"/></span>
-			<span id="MAPFORMID_rmvN" class="btn btn-default rmCoord" title="{f:translate(id: 'imagemap.form.poly.removeEdge', extensionName: 'imagemap')}"><core:icon identifier="actions-close"/></span>
+			<span id="beforevN" class="btn btn-default addCoord" title="{f:translate(id: 'imagemap.form.poly.addEdgeBefore', extensionName: 'imagemap')}"><core:icon identifier="actions-view-go-up"/></span>
+			<span id="aftervN" class="btn btn-default addCoord" title="{f:translate(id: 'imagemap.form.poly.addEdgeAfter', extensionName: 'imagemap')}"><core:icon identifier="actions-view-go-down"/></span>
+			<span id="rmvN" class="btn btn-default rmCoord" title="{f:translate(id: 'imagemap.form.poly.removeEdge', extensionName: 'imagemap')}"><core:icon identifier="actions-close"/></span>
 		</div>
 	</div>
-</div>
+</script>
 
 </html>

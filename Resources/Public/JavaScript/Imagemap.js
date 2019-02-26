@@ -36,56 +36,72 @@ define(['TYPO3/CMS/Imagemap/Fabric'], function (fabric) {
   function (_fabric$Rect) {
     _inherits(Rect, _fabric$Rect);
 
-    function Rect() {
+    function Rect(options) {
+      var _this;
+
       _classCallCheck(this, Rect);
 
-      return _possibleConstructorReturn(this, _getPrototypeOf(Rect).apply(this, arguments));
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Rect).call(this, options));
+      _this.form = null;
+      _this.subForm = null;
+      return _this;
     }
 
     _createClass(Rect, [{
+      key: "fillForm",
+      value: function fillForm() {}
+    }, {
       key: "persistanceXML",
       value: function persistanceXML() {
-        return '<area shape="rect" coords="' + this.getLeftX(0) + "," + this.getTopY(0) + "," + this.getRightX(0) + "," + this.getBottomY(0) + '" ' + this.getAdditionalAttributeXML() + ">" + this.getLink() + "</area>";
+        var coords = this.left + ',' + this.top + ',' + (this.left + this.width) + ',' + (this.height + this.top);
+        return '<area shape="rect" coords="' + coords + '" ' + this.getAdditionalAttributeXML() + '>' + this.getLink() + '</area>';
       }
     }]);
 
     return Rect;
   }(fabric.Rect);
 
-  imagemap.Rect = Rect;
-
   var Circle =
   /*#__PURE__*/
   function (_fabric$Circle) {
     _inherits(Circle, _fabric$Circle);
 
-    function Circle() {
+    function Circle(options) {
+      var _this2;
+
       _classCallCheck(this, Circle);
 
-      return _possibleConstructorReturn(this, _getPrototypeOf(Circle).apply(this, arguments));
+      _this2 = _possibleConstructorReturn(this, _getPrototypeOf(Circle).call(this, options));
+      _this2.form = null;
+      _this2.subForm = null;
+      return _this2;
     }
 
     _createClass(Circle, [{
       key: "persistanceXML",
       value: function persistanceXML() {
-        return '<area shape="circle" coords="' + this.getX(0) + "," + this.getY(0) + "," + this.getRadius(0) + '" ' + this.getAdditionalAttributeXML() + ">" + this.getLink() + "</area>";
+        var coords = this.left + ',' + this.top + ',' + this.radius;
+        return '<area shape="circle" coords="' + coords + '" ' + this.getAdditionalAttributeXML() + '>' + this.getLink() + '</area>';
       }
     }]);
 
     return Circle;
   }(fabric.Circle);
 
-  imagemap.Circle = Circle;
-
   var Polygon =
   /*#__PURE__*/
   function (_fabric$Polygon) {
     _inherits(Polygon, _fabric$Polygon);
 
-    function Polygon() {
+    function Polygon(options) {
+      var _this3;
+
       _classCallCheck(this, Polygon);
 
-      return _possibleConstructorReturn(this, _getPrototypeOf(Polygon).apply(this, arguments));
+      _this3 = _possibleConstructorReturn(this, _getPrototypeOf(Polygon).call(this, options));
+      _this3.form = null;
+      _this3.subForm = null;
+      return _this3;
     }
 
     _createClass(Polygon, [{
@@ -98,17 +114,63 @@ define(['TYPO3/CMS/Imagemap/Fabric'], function (fabric) {
     return Polygon;
   }(fabric.Polygon);
 
-  imagemap.Polygon = Polygon;
+  var AreaForm =
+  /*#__PURE__*/
+  function () {
+    function AreaForm(formElement) {
+      _classCallCheck(this, AreaForm);
+
+      this.element = fabric.document.querySelector('#' + formElement);
+    }
+
+    _createClass(AreaForm, [{
+      key: "getFormElement",
+      value: function getFormElement(selector) {
+        return new DOMParser().parseFromString(this.element.querySelector(selector).innerHTML, 'text/html').body.firstChild;
+      }
+    }, {
+      key: "addRectSubForm",
+      value: function addRectSubForm(area) {
+        area.form = this;
+        area.subForm = this.getFormElement('#rectForm');
+        this.element.insertBefore(area.subForm, this.element.firstChild);
+        area.fillForm();
+      }
+    }, {
+      key: "addCircleSubForm",
+      value: function addCircleSubForm(area) {
+        area.form = this;
+        area.subForm = this.getFormElement('#circForm');
+        this.element.insertBefore(area.subForm, this.element.firstChild);
+        area.fillForm();
+      }
+    }, {
+      key: "addPolySubForm",
+      value: function addPolySubForm(area) {
+        area.form = this;
+        area.subForm = this.getFormElement('#polyForm');
+        area.coordForm = this.getFormElement('#polyCoords');
+        this.element.insertBefore(area.subForm, this.element.firstChild);
+        area.fillForm();
+      }
+    }]);
+
+    return AreaForm;
+  }();
 
   var AreaEditor =
   /*#__PURE__*/
   function (_fabric$Canvas) {
     _inherits(AreaEditor, _fabric$Canvas);
 
-    function AreaEditor(canvas, picture, form) {
+    function AreaEditor(canvas, form, options) {
+      var _this4;
+
       _classCallCheck(this, AreaEditor);
 
-      return _possibleConstructorReturn(this, _getPrototypeOf(AreaEditor).call(this, canvas, picture, form));
+      _this4 = _possibleConstructorReturn(this, _getPrototypeOf(AreaEditor).call(this, canvas, options));
+      _this4.form = new AreaForm(form);
+      return _this4;
     }
 
     _createClass(AreaEditor, [{
@@ -143,7 +205,7 @@ define(['TYPO3/CMS/Imagemap/Fabric'], function (fabric) {
             right = _configuration$coords2[2],
             bottom = _configuration$coords2[3];
 
-        var area = new imagemap.Rect(_objectSpread({}, configuration, {
+        var area = new Rect(_objectSpread({}, configuration, {
           left: parseInt(left),
           top: parseInt(top),
           width: parseInt(right - left),
@@ -153,7 +215,9 @@ define(['TYPO3/CMS/Imagemap/Fabric'], function (fabric) {
           strokeWidth: 1,
           fill: this.hexToRgbA(configuration.color, 0.2)
         }));
+        this.form.addRectSubForm(area);
         this.add(area);
+        console.log(area);
       }
     }, {
       key: "addCircle",
@@ -164,7 +228,7 @@ define(['TYPO3/CMS/Imagemap/Fabric'], function (fabric) {
             top = _configuration$coords4[1],
             radius = _configuration$coords4[2];
 
-        var area = new imagemap.Circle(_objectSpread({}, configuration, {
+        var area = new Circle(_objectSpread({}, configuration, {
           left: parseInt(left),
           top: parseInt(top),
           radius: parseInt(radius),
@@ -173,6 +237,7 @@ define(['TYPO3/CMS/Imagemap/Fabric'], function (fabric) {
           strokeWidth: 1,
           fill: this.hexToRgbA(configuration.color, 0.2)
         }));
+        this.form.addCircleSubForm(area);
         this.add(area);
       }
     }, {
@@ -198,7 +263,7 @@ define(['TYPO3/CMS/Imagemap/Fabric'], function (fabric) {
           top = Math.min(top, xy.y);
         }
 
-        var area = new imagemap.Polygon(points, _objectSpread({}, configuration, {
+        var area = new Polygon(points, _objectSpread({}, configuration, {
           top: top,
           left: left,
           borderColor: configuration.color,
@@ -206,6 +271,7 @@ define(['TYPO3/CMS/Imagemap/Fabric'], function (fabric) {
           strokeWidth: 1,
           fill: this.hexToRgbA(configuration.color, 0.2)
         }));
+        this.form.addPolySubForm(area);
         this.add(area);
       }
     }, {
