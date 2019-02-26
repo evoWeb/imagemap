@@ -1,5 +1,5 @@
-define(['jquery', 'TYPO3/CMS/Imagemap/Imagemap', 'jquery-ui/sortable', 'jquery-ui/draggable'], function ($, Imagemap) {
-	$(document).ready(function () {
+define(['jquery', 'TYPO3/CMS/Imagemap/Imagemap', 'jquery-ui/sortable', 'jquery-ui/draggable'], ($, Imagemap) => {
+	$(document).ready(() => {
 		let configuration = window.imagemap,
 			$image = $('#image img'),
 			areaEditor = new Imagemap.AreaEditor('canvas', {
@@ -11,11 +11,12 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Imagemap', 'jquery-ui/sortable', 'jquery-u
 
 		configuration.areaEditor = areaEditor;
 
-		let initializeScaleFactor = (scaleFactor) => {
-			let $zoomOut = $('> .zout', '#magnify'),
-				$zoomIn = $('> .zin', '#magnify');
+		let initializeScaleFactor = () => {
+			let $magnify = $('#magnify'),
+				$zoomOut = $magnify.find('.zoomout'),
+				$zoomIn = $magnify.find('.zoomin'),
+				scaleFactor = areaEditor.initializeScaling($magnify.data('scale-factor'));
 
-			scaleFactor = areaEditor.initializeScaling(scaleFactor);
 			areaEditor.setScale(scaleFactor);
 
 			if (scaleFactor < 1) {
@@ -97,7 +98,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Imagemap', 'jquery-ui/sortable', 'jquery-u
 				.on('dblclick', areaEditor.dblclick.bind(areaEditor));
 		};
 
-		initializeScaleFactor(configuration.scaleFactor);
+		initializeScaleFactor();
 		initializeAreas(configuration.existingAreas);
 		initializeEvents();
 	});

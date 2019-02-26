@@ -10,10 +10,11 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Imagemap', 'jquery-ui/sortable', 'jquery-u
     });
     configuration.areaEditor = areaEditor;
 
-    var initializeScaleFactor = function initializeScaleFactor(scaleFactor) {
-      var $zoomOut = $('> .zout', '#magnify'),
-          $zoomIn = $('> .zin', '#magnify');
-      scaleFactor = areaEditor.initializeScaling(scaleFactor);
+    var initializeScaleFactor = function initializeScaleFactor() {
+      var $magnify = $('#magnify'),
+          $zoomOut = $magnify.find('.zoomout'),
+          $zoomIn = $magnify.find('.zoomin'),
+          scaleFactor = areaEditor.initializeScaling($magnify.data('scale-factor'));
       areaEditor.setScale(scaleFactor);
 
       if (scaleFactor < 1) {
@@ -81,7 +82,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Imagemap', 'jquery-ui/sortable', 'jquery-u
       $('#canvas').on('mousedown', areaEditor.mousedown.bind(areaEditor)).on('mouseup', areaEditor.mouseup.bind(areaEditor)).on('mousemove', areaEditor.mousemove.bind(areaEditor)).on('dblclick', areaEditor.dblclick.bind(areaEditor));
     };
 
-    initializeScaleFactor(configuration.scaleFactor);
+    initializeScaleFactor();
     initializeAreas(configuration.existingAreas);
     initializeEvents();
   });

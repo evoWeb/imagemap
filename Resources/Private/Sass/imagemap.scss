@@ -20,12 +20,6 @@
     opacity: 0.3;
 }
 
-#root {
-    display: block;
-    position: relative;
-    overflow: hidden;
-}
-
 #pic {
     position: relative;
     float: left;
@@ -40,7 +34,7 @@
     cursor: pointer;
     width: 32px;
 
-    .zin, .zout {
+    .zoomin, .zoomout {
         height: 32px;
         width: 32px;
     }

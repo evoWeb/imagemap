@@ -24,18 +24,18 @@ const javascriptPaths = {
 		dest: `${dirs.dest}/JavaScript/`,
 		name: 'Fabric.js'
 	},
-	'Imagemap.js': {
-		src: `${dirs.src}/Scripts/Imagemap.js`,
+	'Imagemap.es6': {
+		src: `${dirs.src}/Scripts/Imagemap.es6`,
 		dest: `${dirs.dest}/JavaScript/`,
 		name: 'Imagemap.js'
 	},
-	'FormElement.js': {
-		src: `${dirs.src}/Scripts/FormElement.js`,
+	'FormElement.es6': {
+		src: `${dirs.src}/Scripts/FormElement.es6`,
 		dest: `${dirs.dest}/JavaScript/`,
 		name: 'FormElement.js'
 	},
-	'Wizard.js': {
-		src: `${dirs.src}/Scripts/Wizard.js`,
+	'Wizard.es6': {
+		src: `${dirs.src}/Scripts/Wizard.es6`,
 		dest: `${dirs.dest}/JavaScript/`,
 		name: 'Wizard.js'
 	}
