@@ -2,34 +2,36 @@
 			data-namespace-typo3-fluid="true">
 
 <script type="text/template" id="rectForm">
-<div id="MAPFORMID" class="areaForm">
-	<div class="main basicOptions input-group">
+<div class="areaForm">
+	<div class="basicOptions input-group">
 		<div class="input-group-addon">
 			<div class="input-group-text colorPreview"><div></div></div>
 		</div>
-		<input type="text" id="label" data-formengine-input-name="MAPFORMID_label" value="" class="form-control" placeholder="{f:translate(id: 'imagemap.form.area.label', extensionName: 'imagemap')}" />
-		<input type="text" id="link" data-formengine-input-name="MAPFORMID_link" value="" class="form-control" placeholder="{f:translate(id: 'imagemap.form.area.link', extensionName: 'imagemap')}" />
+
+		<input type="text" id="label" class="t3js-field form-control" placeholder="{f:translate(id: 'imagemap.form.area.label', extensionName: 'imagemap')}" />
+		<input type="text" id="link" class="t3js-field form-control" placeholder="{f:translate(id: 'imagemap.form.area.link', extensionName: 'imagemap')}" />
+
 		<f:render partial="Imagemap/Controls" arguments="{returnUrl: returnUrl, formName: formName}"/>
 	</div>
 
-	<div class="more moreOptions hide">
+	<div class="moreOptions hide">
 		<f:render partial="Imagemap/ColorPicker" arguments="{attributeKeys: attributeKeys}"/>
 
 		<div class="positionOptions">
-			<div class="input-group clearfix">
-				<label for="x1" class="input-group-addon">X1:</label>
-				<input type="text" id="x1" class="form-control" value="x" />
+			<div class="input-group">
+				<label for="left" class="input-group-addon">X1:</label>
+				<input type="text" id="left" class="t3js-field form-control" value="x" />
 
-				<label for="y1" class="input-group-addon">Y1:</label>
-				<input type="text" id="y1" class="form-control" value="y" />
+				<label for="top" class="input-group-addon">Y1:</label>
+				<input type="text" id="top" class="t3js-field form-control" value="y" />
 			</div>
 
 			<div class="input-group">
-				<label for="x2" class="input-group-addon">X2:</label>
-				<input type="text" id="x2" class="form-control" value="x" />
+				<label for="right" class="input-group-addon">X2:</label>
+				<input type="text" id="right" class="t3js-field form-control" value="x" />
 
-				<label for="y2" class="input-group-addon">Y2:</label>
-				<input type="text" id="y2" class="form-control" value="y" />
+				<label for="bottom" class="input-group-addon">Y2:</label>
+				<input type="text" id="bottom" class="t3js-field form-control" value="y" />
 			</div>
 		</div>
 	</div>

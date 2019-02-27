@@ -50,9 +50,8 @@ define(['TYPO3/CMS/Imagemap/Fabric'], function (fabric) {
     _createClass(Rect, [{
       key: "postInitializeForm",
       value: function postInitializeForm() {
-        this.values();
+        this.setValues();
         this.addEvents();
-        console.log(this);
       }
     }, {
       key: "setValues",
@@ -64,11 +63,53 @@ define(['TYPO3/CMS/Imagemap/Fabric'], function (fabric) {
     }, {
       key: "addEvents",
       value: function addEvents() {
-        this.subForm.querySelector('#linkwizard').addEventListener('click', this.openLinkWizard);
+        this.subForm.querySelectorAll('.t3js-btn').forEach(function (button) {
+          button.addEventListener('click', this[button.id + 'Action'].bind(this));
+        }.bind(this));
       }
     }, {
-      key: "openLinkWizard",
-      value: function openLinkWizard() {}
+      key: "linkAction",
+      value: function linkAction() {// var area = jQuery(this).parents('.areaForm').data('area'); area.getCanvas().openPopup(this, area);
+      }
+    }, {
+      key: "upAction",
+      value: function upAction() {}
+    }, {
+      key: "downAction",
+      value: function downAction() {}
+    }, {
+      key: "undoAction",
+      value: function undoAction() {}
+    }, {
+      key: "redoAction",
+      value: function redoAction() {}
+    }, {
+      key: "deleteAction",
+      value: function deleteAction() {}
+    }, {
+      key: "expandAction",
+      value: function expandAction() {
+        this.showElement('.moreOptions');
+        this.hideElement('#expand');
+        this.showElement('#collaps');
+      }
+    }, {
+      key: "collapsAction",
+      value: function collapsAction() {
+        this.hideElement('.moreOptions');
+        this.hideElement('#collaps');
+        this.showElement('#expand');
+      }
+    }, {
+      key: "hideElement",
+      value: function hideElement(selector) {
+        this.subForm.querySelector(selector).classList.add('hide');
+      }
+    }, {
+      key: "showElement",
+      value: function showElement(selector) {
+        this.subForm.querySelector(selector).classList.remove('hide');
+      }
     }, {
       key: "persistanceXML",
       value: function persistanceXML() {
@@ -99,8 +140,8 @@ define(['TYPO3/CMS/Imagemap/Fabric'], function (fabric) {
     _createClass(Circle, [{
       key: "postInitializeForm",
       value: function postInitializeForm() {
-        this.values();
-        console.log(this);
+        this.setValues();
+        this.addEvents();
       }
     }, {
       key: "setValues",
@@ -108,6 +149,56 @@ define(['TYPO3/CMS/Imagemap/Fabric'], function (fabric) {
         this.subForm.querySelector('#link').value = this.link;
         this.subForm.querySelector('#label').value = this.alt;
         this.subForm.querySelector('.colorPreview > div').style.backgroundColor = this.color;
+      }
+    }, {
+      key: "addEvents",
+      value: function addEvents() {
+        this.subForm.querySelectorAll('.t3js-btn').forEach(function (button) {
+          button.addEventListener('click', this[button.id + 'Action'].bind(this));
+        }.bind(this));
+      }
+    }, {
+      key: "linkAction",
+      value: function linkAction() {// var area = jQuery(this).parents('.areaForm').data('area'); area.getCanvas().openPopup(this, area);
+      }
+    }, {
+      key: "upAction",
+      value: function upAction() {}
+    }, {
+      key: "downAction",
+      value: function downAction() {}
+    }, {
+      key: "undoAction",
+      value: function undoAction() {}
+    }, {
+      key: "redoAction",
+      value: function redoAction() {}
+    }, {
+      key: "deleteAction",
+      value: function deleteAction() {}
+    }, {
+      key: "expandAction",
+      value: function expandAction() {
+        this.showElement('.moreOptions');
+        this.hideElement('#expand');
+        this.showElement('#collaps');
+      }
+    }, {
+      key: "collapsAction",
+      value: function collapsAction() {
+        this.hideElement('.moreOptions');
+        this.hideElement('#collaps');
+        this.showElement('#expand');
+      }
+    }, {
+      key: "hideElement",
+      value: function hideElement(selector) {
+        this.subForm.querySelector(selector).classList.add('hide');
+      }
+    }, {
+      key: "showElement",
+      value: function showElement(selector) {
+        this.subForm.querySelector(selector).classList.remove('hide');
       }
     }, {
       key: "persistanceXML",
@@ -139,8 +230,8 @@ define(['TYPO3/CMS/Imagemap/Fabric'], function (fabric) {
     _createClass(Polygon, [{
       key: "postInitializeForm",
       value: function postInitializeForm() {
-        this.values();
-        console.log(this);
+        this.setValues();
+        this.addEvents();
       }
     }, {
       key: "setValues",
@@ -148,6 +239,59 @@ define(['TYPO3/CMS/Imagemap/Fabric'], function (fabric) {
         this.subForm.querySelector('#link').value = this.link;
         this.subForm.querySelector('#label').value = this.alt;
         this.subForm.querySelector('.colorPreview > div').style.backgroundColor = this.color;
+      }
+    }, {
+      key: "addEvents",
+      value: function addEvents() {
+        this.subForm.querySelectorAll('.t3js-btn').forEach(function (button) {
+          button.addEventListener('click', this[button.id + 'Action'].bind(this));
+        }.bind(this));
+      }
+    }, {
+      key: "linkAction",
+      value: function linkAction() {// var area = jQuery(this).parents('.areaForm').data('area'); area.getCanvas().openPopup(this, area);
+      }
+    }, {
+      key: "upAction",
+      value: function upAction() {}
+    }, {
+      key: "downAction",
+      value: function downAction() {}
+    }, {
+      key: "undoAction",
+      value: function undoAction() {}
+    }, {
+      key: "redoAction",
+      value: function redoAction() {}
+    }, {
+      key: "deleteAction",
+      value: function deleteAction() {}
+    }, {
+      key: "addAction",
+      value: function addAction() {}
+    }, {
+      key: "expandAction",
+      value: function expandAction() {
+        this.showElement('.moreOptions');
+        this.hideElement('#expand');
+        this.showElement('#collaps');
+      }
+    }, {
+      key: "collapsAction",
+      value: function collapsAction() {
+        this.hideElement('.moreOptions');
+        this.hideElement('#collaps');
+        this.showElement('#expand');
+      }
+    }, {
+      key: "hideElement",
+      value: function hideElement(selector) {
+        this.subForm.querySelector(selector).classList.add('hide');
+      }
+    }, {
+      key: "showElement",
+      value: function showElement(selector) {
+        this.subForm.querySelector(selector).classList.remove('hide');
       }
     }, {
       key: "persistanceXML",
@@ -174,24 +318,24 @@ define(['TYPO3/CMS/Imagemap/Fabric'], function (fabric) {
         return new DOMParser().parseFromString(this.element.querySelector(selector).innerHTML, 'text/html').body.firstChild;
       }
     }, {
-      key: "addRectSubForm",
-      value: function addRectSubForm(area) {
+      key: "addRect",
+      value: function addRect(area) {
         area.form = this;
         area.subForm = this.getFormElement('#rectForm');
         this.element.insertBefore(area.subForm, this.element.firstChild);
         area.postInitializeForm();
       }
     }, {
-      key: "addCircleSubForm",
-      value: function addCircleSubForm(area) {
+      key: "addCircle",
+      value: function addCircle(area) {
         area.form = this;
         area.subForm = this.getFormElement('#circForm');
         this.element.insertBefore(area.subForm, this.element.firstChild);
         area.postInitializeForm();
       }
     }, {
-      key: "addPolySubForm",
-      value: function addPolySubForm(area) {
+      key: "addPoly",
+      value: function addPoly(area) {
         area.form = this;
         area.subForm = this.getFormElement('#polyForm');
         area.coordForm = this.getFormElement('#polyCoords');
@@ -277,7 +421,7 @@ define(['TYPO3/CMS/Imagemap/Fabric'], function (fabric) {
           strokeWidth: 1,
           fill: this.hexToRgbA(configuration.color, 0.2)
         }));
-        this.form.addRectSubForm(area);
+        this.form.addRect(area);
         this.add(area);
       }
     }, {
@@ -298,7 +442,7 @@ define(['TYPO3/CMS/Imagemap/Fabric'], function (fabric) {
           strokeWidth: 1,
           fill: this.hexToRgbA(configuration.color, 0.2)
         }));
-        this.form.addCircleSubForm(area);
+        this.form.addCircle(area);
         this.add(area);
       }
     }, {
@@ -332,7 +476,7 @@ define(['TYPO3/CMS/Imagemap/Fabric'], function (fabric) {
           strokeWidth: 1,
           fill: this.hexToRgbA(configuration.color, 0.2)
         }));
-        this.form.addPolySubForm(area);
+        this.form.addPoly(area);
         this.add(area);
       }
     }, {

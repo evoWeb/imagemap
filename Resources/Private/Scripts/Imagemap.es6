@@ -10,9 +10,8 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 		}
 
 		postInitializeForm() {
-			this.values();
+			this.setValues();
 			this.addEvents();
-			console.log(this);
 		}
 
 		setValues() {
@@ -22,11 +21,48 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 		}
 
 		addEvents() {
-			this.subForm.querySelector('#linkwizard').addEventListener('click', this.openLinkWizard);
+			this.subForm.querySelectorAll('.t3js-btn').forEach(function (button) {
+				button.addEventListener('click', this[button.id + 'Action'].bind(this));
+			}.bind(this));
 		}
 
-		openLinkWizard() {
+		linkAction() {
+// var area = jQuery(this).parents('.areaForm').data('area'); area.getCanvas().openPopup(this, area);
+		}
 
+		upAction() {
+		}
+
+		downAction() {
+		}
+
+		undoAction() {
+		}
+
+		redoAction() {
+		}
+
+		deleteAction() {
+		}
+
+		expandAction() {
+			this.showElement('.moreOptions');
+			this.hideElement('#expand');
+			this.showElement('#collaps');
+		}
+
+		collapsAction() {
+			this.hideElement('.moreOptions');
+			this.hideElement('#collaps');
+			this.showElement('#expand');
+		}
+
+		hideElement(selector) {
+			this.subForm.querySelector(selector).classList.add('hide');
+		}
+
+		showElement(selector) {
+			this.subForm.querySelector(selector).classList.remove('hide');
 		}
 
 		persistanceXML() {
@@ -45,14 +81,59 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 		}
 
 		postInitializeForm() {
-			this.values();
-			console.log(this);
+			this.setValues();
+			this.addEvents();
 		}
 
 		setValues() {
 			this.subForm.querySelector('#link').value = this.link;
 			this.subForm.querySelector('#label').value = this.alt;
 			this.subForm.querySelector('.colorPreview > div').style.backgroundColor = this.color;
+		}
+
+		addEvents() {
+			this.subForm.querySelectorAll('.t3js-btn').forEach(function (button) {
+				button.addEventListener('click', this[button.id + 'Action'].bind(this));
+			}.bind(this));
+		}
+
+		linkAction() {
+// var area = jQuery(this).parents('.areaForm').data('area'); area.getCanvas().openPopup(this, area);
+		}
+
+		upAction() {
+		}
+
+		downAction() {
+		}
+
+		undoAction() {
+		}
+
+		redoAction() {
+		}
+
+		deleteAction() {
+		}
+
+		expandAction() {
+			this.showElement('.moreOptions');
+			this.hideElement('#expand');
+			this.showElement('#collaps');
+		}
+
+		collapsAction() {
+			this.hideElement('.moreOptions');
+			this.hideElement('#collaps');
+			this.showElement('#expand');
+		}
+
+		hideElement(selector) {
+			this.subForm.querySelector(selector).classList.add('hide');
+		}
+
+		showElement(selector) {
+			this.subForm.querySelector(selector).classList.remove('hide');
 		}
 
 		persistanceXML() {
@@ -71,14 +152,62 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 		}
 
 		postInitializeForm() {
-			this.values();
-			console.log(this);
+			this.setValues();
+			this.addEvents();
 		}
 
 		setValues() {
 			this.subForm.querySelector('#link').value = this.link;
 			this.subForm.querySelector('#label').value = this.alt;
 			this.subForm.querySelector('.colorPreview > div').style.backgroundColor = this.color;
+		}
+
+		addEvents() {
+			this.subForm.querySelectorAll('.t3js-btn').forEach(function (button) {
+				button.addEventListener('click', this[button.id + 'Action'].bind(this));
+			}.bind(this));
+		}
+
+		linkAction() {
+// var area = jQuery(this).parents('.areaForm').data('area'); area.getCanvas().openPopup(this, area);
+		}
+
+		upAction() {
+		}
+
+		downAction() {
+		}
+
+		undoAction() {
+		}
+
+		redoAction() {
+		}
+
+		deleteAction() {
+		}
+
+		addAction() {
+		}
+
+		expandAction() {
+			this.showElement('.moreOptions');
+			this.hideElement('#expand');
+			this.showElement('#collaps');
+		}
+
+		collapsAction() {
+			this.hideElement('.moreOptions');
+			this.hideElement('#collaps');
+			this.showElement('#expand');
+		}
+
+		hideElement(selector) {
+			this.subForm.querySelector(selector).classList.add('hide');
+		}
+
+		showElement(selector) {
+			this.subForm.querySelector(selector).classList.remove('hide');
 		}
 
 		persistanceXML() {
@@ -99,8 +228,7 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 			).body.firstChild;
 		}
 
-		addRectSubForm(area)
-		{
+		addRect(area) {
 			area.form = this;
 			area.subForm = this.getFormElement('#rectForm');
 
@@ -108,8 +236,7 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 			area.postInitializeForm();
 		}
 
-		addCircleSubForm(area)
-		{
+		addCircle(area) {
 			area.form = this;
 			area.subForm = this.getFormElement('#circForm');
 
@@ -117,8 +244,7 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 			area.postInitializeForm();
 		}
 
-		addPolySubForm(area)
-		{
+		addPoly(area) {
 			area.form = this;
 			area.subForm = this.getFormElement('#polyForm');
 			area.coordForm = this.getFormElement('#polyCoords');
@@ -181,7 +307,7 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 				fill: this.hexToRgbA(configuration.color, 0.2)
 			});
 
-			this.form.addRectSubForm(area);
+			this.form.addRect(area);
 			this.add(area);
 		}
 
@@ -198,7 +324,7 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 				fill: this.hexToRgbA(configuration.color, 0.2)
 			});
 
-			this.form.addCircleSubForm(area);
+			this.form.addCircle(area);
 			this.add(area);
 		}
 
@@ -231,7 +357,7 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 				fill: this.hexToRgbA(configuration.color, 0.2)
 			});
 
-			this.form.addPolySubForm(area);
+			this.form.addPoly(area);
 			this.add(area);
 		}
 
