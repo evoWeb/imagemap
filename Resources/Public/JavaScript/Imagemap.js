@@ -48,8 +48,27 @@ define(['TYPO3/CMS/Imagemap/Fabric'], function (fabric) {
     }
 
     _createClass(Rect, [{
-      key: "fillForm",
-      value: function fillForm() {}
+      key: "postInitializeForm",
+      value: function postInitializeForm() {
+        this.values();
+        this.addEvents();
+        console.log(this);
+      }
+    }, {
+      key: "setValues",
+      value: function setValues() {
+        this.subForm.querySelector('#link').value = this.link;
+        this.subForm.querySelector('#label').value = this.alt;
+        this.subForm.querySelector('.colorPreview > div').style.backgroundColor = this.color;
+      }
+    }, {
+      key: "addEvents",
+      value: function addEvents() {
+        this.subForm.querySelector('#linkwizard').addEventListener('click', this.openLinkWizard);
+      }
+    }, {
+      key: "openLinkWizard",
+      value: function openLinkWizard() {}
     }, {
       key: "persistanceXML",
       value: function persistanceXML() {
@@ -78,6 +97,19 @@ define(['TYPO3/CMS/Imagemap/Fabric'], function (fabric) {
     }
 
     _createClass(Circle, [{
+      key: "postInitializeForm",
+      value: function postInitializeForm() {
+        this.values();
+        console.log(this);
+      }
+    }, {
+      key: "setValues",
+      value: function setValues() {
+        this.subForm.querySelector('#link').value = this.link;
+        this.subForm.querySelector('#label').value = this.alt;
+        this.subForm.querySelector('.colorPreview > div').style.backgroundColor = this.color;
+      }
+    }, {
       key: "persistanceXML",
       value: function persistanceXML() {
         var coords = this.left + ',' + this.top + ',' + this.radius;
@@ -105,6 +137,19 @@ define(['TYPO3/CMS/Imagemap/Fabric'], function (fabric) {
     }
 
     _createClass(Polygon, [{
+      key: "postInitializeForm",
+      value: function postInitializeForm() {
+        this.values();
+        console.log(this);
+      }
+    }, {
+      key: "setValues",
+      value: function setValues() {
+        this.subForm.querySelector('#link').value = this.link;
+        this.subForm.querySelector('#label').value = this.alt;
+        this.subForm.querySelector('.colorPreview > div').style.backgroundColor = this.color;
+      }
+    }, {
       key: "persistanceXML",
       value: function persistanceXML() {
         return '<area shape="poly" coords="' + this.joinCoords() + '" ' + this.getAdditionalAttributeXML() + ">" + this.getLink() + "</area>";
@@ -134,7 +179,7 @@ define(['TYPO3/CMS/Imagemap/Fabric'], function (fabric) {
         area.form = this;
         area.subForm = this.getFormElement('#rectForm');
         this.element.insertBefore(area.subForm, this.element.firstChild);
-        area.fillForm();
+        area.postInitializeForm();
       }
     }, {
       key: "addCircleSubForm",
@@ -142,7 +187,7 @@ define(['TYPO3/CMS/Imagemap/Fabric'], function (fabric) {
         area.form = this;
         area.subForm = this.getFormElement('#circForm');
         this.element.insertBefore(area.subForm, this.element.firstChild);
-        area.fillForm();
+        area.postInitializeForm();
       }
     }, {
       key: "addPolySubForm",
@@ -151,7 +196,24 @@ define(['TYPO3/CMS/Imagemap/Fabric'], function (fabric) {
         area.subForm = this.getFormElement('#polyForm');
         area.coordForm = this.getFormElement('#polyCoords');
         this.element.insertBefore(area.subForm, this.element.firstChild);
-        area.fillForm();
+        area.postInitializeForm();
+      }
+    }, {
+      key: "openPopup",
+      value: function openPopup(link, area) {
+        link.blur();
+        var data = window.imagemap.browseLink;
+        data.objectId = area.getId();
+        data.currentValue = area.getLink();
+        $.ajax({
+          url: TYPO3.settings.ajaxUrls['imagemap_browselink_url'],
+          context: area,
+          data: data
+        }).done(function (response) {
+          console.log(response);
+          var vHWin = window.open(response.url, '', 'height=600,width=500,status=0,menubar=0,scrollbars=1');
+          vHWin.focus();
+        });
       }
     }]);
 
@@ -217,7 +279,6 @@ define(['TYPO3/CMS/Imagemap/Fabric'], function (fabric) {
         }));
         this.form.addRectSubForm(area);
         this.add(area);
-        console.log(area);
       }
     }, {
       key: "addCircle",

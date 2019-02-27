@@ -9,7 +9,23 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 			this.subForm = null;
 		}
 
-		fillForm() {
+		postInitializeForm() {
+			this.values();
+			this.addEvents();
+			console.log(this);
+		}
+
+		setValues() {
+			this.subForm.querySelector('#link').value = this.link;
+			this.subForm.querySelector('#label').value = this.alt;
+			this.subForm.querySelector('.colorPreview > div').style.backgroundColor = this.color;
+		}
+
+		addEvents() {
+			this.subForm.querySelector('#linkwizard').addEventListener('click', this.openLinkWizard);
+		}
+
+		openLinkWizard() {
 
 		}
 
@@ -28,6 +44,17 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 			this.subForm = null;
 		}
 
+		postInitializeForm() {
+			this.values();
+			console.log(this);
+		}
+
+		setValues() {
+			this.subForm.querySelector('#link').value = this.link;
+			this.subForm.querySelector('#label').value = this.alt;
+			this.subForm.querySelector('.colorPreview > div').style.backgroundColor = this.color;
+		}
+
 		persistanceXML() {
 			let coords = this.left + ',' + this.top + ',' + this.radius;
 			return '<area shape="circle" coords="' + coords + '" ' + this.getAdditionalAttributeXML() + '>'
@@ -41,6 +68,17 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 
 			this.form = null;
 			this.subForm = null;
+		}
+
+		postInitializeForm() {
+			this.values();
+			console.log(this);
+		}
+
+		setValues() {
+			this.subForm.querySelector('#link').value = this.link;
+			this.subForm.querySelector('#label').value = this.alt;
+			this.subForm.querySelector('.colorPreview > div').style.backgroundColor = this.color;
 		}
 
 		persistanceXML() {
@@ -67,7 +105,7 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 			area.subForm = this.getFormElement('#rectForm');
 
 			this.element.insertBefore(area.subForm, this.element.firstChild);
-			area.fillForm();
+			area.postInitializeForm();
 		}
 
 		addCircleSubForm(area)
@@ -76,7 +114,7 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 			area.subForm = this.getFormElement('#circForm');
 
 			this.element.insertBefore(area.subForm, this.element.firstChild);
-			area.fillForm();
+			area.postInitializeForm();
 		}
 
 		addPolySubForm(area)
@@ -86,7 +124,24 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 			area.coordForm = this.getFormElement('#polyCoords');
 
 			this.element.insertBefore(area.subForm, this.element.firstChild);
-			area.fillForm();
+			area.postInitializeForm();
+		}
+
+		openPopup(link, area) {
+			link.blur();
+
+			let data = window.imagemap.browseLink;
+			data.objectId = area.getId();
+			data.currentValue = area.getLink();
+
+			$.ajax({
+				url: TYPO3.settings.ajaxUrls['imagemap_browselink_url'],
+				context: area,
+				data: data
+			}).done(function (response) {
+				console.log(response);
+				let vHWin = window.open(response.url, '', 'height=600,width=500,status=0,menubar=0,scrollbars=1'); vHWin.focus()
+			});
 		}
 	}
 
@@ -128,7 +183,6 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 
 			this.form.addRectSubForm(area);
 			this.add(area);
-			console.log(area);
 		}
 
 		addCircle(configuration) {
