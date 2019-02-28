@@ -1,8 +1,8 @@
-define(['jquery', 'TYPO3/CMS/Imagemap/Imagemap', 'jquery-ui/sortable', 'jquery-ui/draggable'], function ($, Imagemap) {
+define(['jquery', 'TYPO3/CMS/Imagemap/AreaEditor', 'jquery-ui/sortable', 'jquery-ui/draggable'], function ($, AreaEditor) {
   $(document).ready(function () {
     var configuration = window.imagemap,
         $image = $('#image img'),
-        areaEditor = new Imagemap.AreaEditor('canvas', 'areasForm', {
+        areaEditor = new AreaEditor('canvas', 'areasForm', {
       canvas: {
         width: parseInt($image.css('width')),
         height: parseInt($image.css('height')),

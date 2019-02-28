@@ -1,4 +1,4 @@
-define(['jquery', 'jquery-ui/sortable', 'jquery-ui/draggable', 'TYPO3/CMS/Imagemap/JsGraphics'], function ($) {
+define(['jquery', 'TYPO3/CMS/Imagemap/AreaEditor', 'jquery-ui/sortable', 'jquery-ui/draggable', 'TYPO3/CMS/Imagemap/JsGraphics'], function ($, AreaEditor) {
   $(document).ready(function () {
     var $control = $('.imagemap-control:eq(0)'),
         $canvas = $control.find('.canvas'),
@@ -16,7 +16,7 @@ define(['jquery', 'jquery-ui/sortable', 'jquery-ui/draggable', 'TYPO3/CMS/Imagem
     };
 
     var initializeEvents = function initializeEvents() {
-      $control.find('input').on('imagemap:changed', function () {
+      $control.find('input[type=hidden]').on('imagemap:changed', function () {
         var $field = $(this);
         $.ajax({
           url: window.TYPO3.settings.ajaxUrls['imagemap_preview_rerender'],

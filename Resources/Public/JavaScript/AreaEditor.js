@@ -29,8 +29,6 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
 define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
-  var imagemap = imagemap || {};
-
   var Rect =
   /*#__PURE__*/
   function (_fabric$Rect) {
@@ -42,7 +40,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
       _classCallCheck(this, Rect);
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(Rect).call(this, options));
-      _this.form = null;
+      _this.id = fabric.Object.__uid++;
+      _this.editorForm = null;
       _this.subForm = null;
       return _this;
     }
@@ -85,7 +84,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
       }
     }, {
       key: "linkAction",
-      value: function linkAction() {// var area = jQuery(this).parents('.areaForm').data('area'); area.getCanvas().openPopup(this, area);
+      value: function linkAction(event) {
+        this.editorForm.openPopup(event.currentTarget, this);
       }
     }, {
       key: "upAction",
@@ -102,7 +102,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     }, {
       key: "deleteAction",
       value: function deleteAction() {
-        this.form.deleteArea(this);
+        this.editorForm.deleteArea(this);
         this.subForm.remove();
         delete this;
       }
@@ -181,7 +181,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
       _classCallCheck(this, Circle);
 
       _this2 = _possibleConstructorReturn(this, _getPrototypeOf(Circle).call(this, options));
-      _this2.form = null;
+      _this2.id = fabric.Object.__uid++;
+      _this2.editorForm = null;
       _this2.subForm = null;
       return _this2;
     }
@@ -208,7 +209,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
       }
     }, {
       key: "linkAction",
-      value: function linkAction() {// var area = jQuery(this).parents('.areaForm').data('area'); area.getCanvas().openPopup(this, area);
+      value: function linkAction(event) {
+        this.editorForm.openPopup(event.currentTarget, this);
       }
     }, {
       key: "upAction",
@@ -225,7 +227,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     }, {
       key: "deleteAction",
       value: function deleteAction() {
-        this.form.deleteArea(this);
+        this.editorForm.deleteArea(this);
         this.subForm.remove();
         delete this;
       }
@@ -304,7 +306,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
       _classCallCheck(this, Polygon);
 
       _this3 = _possibleConstructorReturn(this, _getPrototypeOf(Polygon).call(this, options));
-      _this3.form = null;
+      _this3.id = fabric.Object.__uid++;
+      _this3.editorForm = null;
       _this3.subForm = null;
       _this3.coordForm = null;
       return _this3;
@@ -332,7 +335,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
       }
     }, {
       key: "linkAction",
-      value: function linkAction() {// var area = jQuery(this).parents('.areaForm').data('area'); area.getCanvas().openPopup(this, area);
+      value: function linkAction(event) {
+        this.editorForm.openPopup(event.currentTarget, this);
       }
     }, {
       key: "upAction",
@@ -349,7 +353,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     }, {
       key: "deleteAction",
       value: function deleteAction() {
-        this.form.deleteArea(this);
+        this.editorForm.deleteArea(this);
         this.subForm.remove();
         this.coordForm.remove();
         delete this;
@@ -439,7 +443,6 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     }, {
       key: "addRect",
       value: function addRect(area) {
-        area.form = this;
         area.subForm = this.getFormElement('#rectForm');
         this.addArea(area);
         area.postInitializeForm();
@@ -447,7 +450,6 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     }, {
       key: "addCircle",
       value: function addCircle(area) {
-        area.form = this;
         area.subForm = this.getFormElement('#circForm');
         this.addArea(area);
         area.postInitializeForm();
@@ -455,7 +457,6 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     }, {
       key: "addPoly",
       value: function addPoly(area) {
-        area.form = this;
         area.subForm = this.getFormElement('#polyForm');
         area.coordForm = this.getFormElement('#polyCoords');
         this.addArea(area);
@@ -464,6 +465,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     }, {
       key: "addArea",
       value: function addArea(area) {
+        area.editorForm = this;
         this.areas.push(area);
         this.element.insertBefore(area.subForm, this.element.firstChild);
       }
@@ -484,14 +486,14 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
       value: function openPopup(link, area) {
         link.blur();
         var data = window.imagemap.browseLink;
-        data.objectId = area.getId();
+        data.objectId = area.id;
         data.currentValue = area.getLink();
+        console.log(area);
         $.ajax({
           url: TYPO3.settings.ajaxUrls['imagemap_browselink_url'],
           context: area,
           data: data
         }).done(function (response) {
-          console.log(response);
           var vHWin = window.open(response.url, '', 'height=600,width=500,status=0,menubar=0,scrollbars=1');
           vHWin.focus();
         });
@@ -522,7 +524,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
       this.canvas = new fabric.Canvas(canvas, options.canvas);
 
       if (!this.preview) {
-        this.form = new AreaForm(form, this);
+        this.editorForm = new AreaForm(form, this);
       }
     }
 
@@ -579,8 +581,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
 
         this.canvas.add(area);
 
-        if (this.form) {
-          this.form.addRect(area);
+        if (this.editorForm) {
+          this.editorForm.addRect(area);
         }
       }
     }, {
@@ -603,8 +605,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
 
         this.canvas.add(area);
 
-        if (this.form) {
-          this.form.addCircle(area);
+        if (this.editorForm) {
+          this.editorForm.addCircle(area);
         }
       }
     }, {
@@ -640,8 +642,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
         }));
         this.canvas.add(area);
 
-        if (this.form) {
-          this.form.addPoly(area);
+        if (this.editorForm) {
+          this.editorForm.addPoly(area);
         }
       }
     }, {
@@ -652,7 +654,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     }, {
       key: "toAreaXml",
       value: function toAreaXml() {
-        return this.form.toAreaXml();
+        return this.editorForm.toAreaXml();
       }
     }], [{
       key: "hexToRgbA",
@@ -698,7 +700,6 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     return AreaEditor;
   }();
 
-  imagemap.AreaEditor = AreaEditor;
-  return imagemap;
+  return AreaEditor;
 });
-//# sourceMappingURL=Imagemap.js.map
+//# sourceMappingURL=AreaEditor.js.map
