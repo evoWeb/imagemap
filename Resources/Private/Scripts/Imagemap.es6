@@ -26,9 +26,6 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 					case 'bottom':
 						field.value = this.height + this.top;
 						break;
-					case 'label':
-						field.value = this.alt ? this.alt : '';
-						break;
 					default:
 						field.value = this[field.id] ? this[field.id] : '';
 						break;
@@ -89,14 +86,37 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 
 		toAreaXml() {
-			let coords = this.left + ',' + this.top + ',' + (this.left + this.width) + ',' + (this.height + this.top);
 			return [
-				'<area shape="rect" ',
-				'coords="' + coords + '" ',
-				this.getAdditionalAttributeXML() + '>',
+				'<area shape="rect"',
+				' coords="' + this.getAreaCoords() + '"',
+				this.getAdditionalAttributes() + '>',
 				this.getLink(),
 				'</area>'
 			].join('');
+		}
+
+		getAreaCoords() {
+			return [this.left, this.top, (this.left + this.width), (this.height + this.top)].join(',');
+		}
+
+		getLink() {
+			return this.subForm.querySelector('#link').value;
+		}
+
+		getAdditionalAttributes() {
+			let result = [];
+
+			if (this.subForm.querySelector('#title').value) {
+				result.push('alt="' + this.subForm.querySelector('#title').value + '"');
+			}
+
+			if (this.subForm.querySelector('#color')) {
+				result.push('color="' + AreaEditor.rgbAToHex(
+					this.subForm.querySelector('#color').style.backgroundColor
+				) + '"');
+			}
+
+			return (result.length > 0 ? ' ' : '') + result.join(' ');
 		}
 	}
 
@@ -172,14 +192,37 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 
 		toAreaXml() {
-			let coords = this.left + ',' + this.top + ',' + this.radius;
 			return [
-				'<area shape="circle" ',
-				'coords="' + coords + '" ',
-				this.getAdditionalAttributeXML() + '>',
+				'<area shape="circle"',
+				' coords="' + this.getAreaCoords() + '"',
+				this.getAdditionalAttributes() + '>',
 				this.getLink(),
 				'</area>'
 			].join('');
+		}
+
+		getAreaCoords() {
+			return this.left + ',' + this.top + ',' + this.radius;
+		}
+
+		getLink() {
+			return this.subForm.querySelector('#link').value;
+		}
+
+		getAdditionalAttributes() {
+			let result = [];
+
+			if (this.subForm.querySelector('#title').value) {
+				result.push('alt="' + this.subForm.querySelector('#title').value + '"');
+			}
+
+			if (this.subForm.querySelector('#color')) {
+				result.push('color="' + AreaEditor.rgbAToHex(
+					this.subForm.querySelector('#color').style.backgroundColor
+				) + '"');
+			}
+
+			return (result.length > 0 ? ' ' : '') + result.join(' ');
 		}
 	}
 
@@ -260,14 +303,38 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 
 		toAreaXml() {
-			let coords = this.joinCoords();
+			let coords = this.getAreaCoords();
 			return [
-				'<area shape="poly" ',
-				'coords="' + coords + '" ',
-				this.getAdditionalAttributeXML() + '>',
+				'<area shape="poly"',
+				' coords="' + coords + '"',
+				this.getAdditionalAttributes() + '>',
 				this.getLink(),
 				'</area>'
 			].join('');
+		}
+
+		getAreaCoords() {
+
+		}
+
+		getLink() {
+			return this.subForm.querySelector('#link').value;
+		}
+
+		getAdditionalAttributes() {
+			let result = [];
+
+			if (this.subForm.querySelector('#title').value) {
+				result.push('alt="' + this.subForm.querySelector('#title').value + '"');
+			}
+
+			if (this.subForm.querySelector('#color')) {
+				result.push('color="' + AreaEditor.rgbAToHex(
+					this.subForm.querySelector('#color').style.backgroundColor
+				) + '"');
+			}
+
+			return (result.length > 0 ? ' ' : '') + result.join(' ');
 		}
 	}
 
@@ -342,6 +409,15 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 				let vHWin = window.open(response.url, '', 'height=600,width=500,status=0,menubar=0,scrollbars=1'); vHWin.focus()
 			});
 		}
+
+		toAreaXml() {
+			let xml = ['<map>'];
+			this.areas.forEach((area) => {
+				xml.push(area.toAreaXml());
+			});
+			xml.push('</map>');
+			return xml.join("\n");
+		}
 	}
 
 	class AreaEditor {
@@ -350,7 +426,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			this.initializeOptions(options);
 
 			this.canvas = new fabric.Canvas(canvas, options.canvas);
-			if (!options.preview) {
+			if (!this.preview) {
 				this.form = new AreaForm(form, this);
 			}
 		}
@@ -364,33 +440,33 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 
 		initializeScaling(scaling) {
-			let width = parseInt(scaling) / this.width,
-				height = parseInt(scaling) / this.height;
+			let width = parseInt(scaling) / this.canvas.width,
+				height = parseInt(scaling) / this.canvas.height;
 			return (width > height) ? height : width;
 		}
 		setScale(scaling) {
 			this.scaleFactor = scaling > 1 ? 1 : scaling;
 		}
 		getMaxWidth() {
-			return this.scaleFactor * this.width;
+			return this.scaleFactor * this.canvas.width;
 		}
 		getMaxHeight() {
-			return this.scaleFactor * this.height;
+			return this.scaleFactor * this.canvas.height;
 		}
 
 		addRect(configuration) {
-			let [left, top, right, bottom] = configuration.coords.split(',');
-			let area = new Rect({
-				...configuration,
-				left: parseInt(left),
-				top: parseInt(top),
-				width: right - left,
-				height: bottom - top,
-				borderColor: configuration.color,
-				stroke: configuration.color,
-				strokeWidth: 1,
-				fill: AreaEditor.hexToRgbA(configuration.color, 0.2)
-			});
+			let [left, top, right, bottom] = configuration.coords.split(','),
+				area = new Rect({
+					...configuration,
+					left: parseInt(left),
+					top: parseInt(top),
+					width: right - left,
+					height: bottom - top,
+					borderColor: configuration.color,
+					stroke: configuration.color,
+					strokeWidth: 1,
+					fill: AreaEditor.hexToRgbA(configuration.color, this.preview ? 0.001 : 0.2)
+				});
 
 			this.canvas.add(area);
 			if (this.form) {
@@ -399,17 +475,17 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 
 		addCircle(configuration) {
-			let [left, top, radius] = configuration.coords.split(',');
-			let area = new Circle({
-				...configuration,
-				left: parseInt(left),
-				top: parseInt(top),
-				radius: parseInt(radius),
-				borderColor: configuration.color,
-				stroke: configuration.color,
-				strokeWidth: 1,
-				fill: AreaEditor.hexToRgbA(configuration.color, 0.2)
-			});
+			let [left, top, radius] = configuration.coords.split(','),
+				area = new Circle({
+					...configuration,
+					left: parseInt(left),
+					top: parseInt(top),
+					radius: parseInt(radius),
+					borderColor: configuration.color,
+					stroke: configuration.color,
+					strokeWidth: 1,
+					fill: AreaEditor.hexToRgbA(configuration.color, this.preview ? 0.001 : 0.2)
+				});
 
 			this.canvas.add(area);
 			if (this.form) {
@@ -443,7 +519,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 				borderColor: configuration.color,
 				stroke: configuration.color,
 				strokeWidth: 1,
-				fill: AreaEditor.hexToRgbA(configuration.color, 0.2)
+				fill: AreaEditor.hexToRgbA(configuration.color, this.preview ? 0.001 : 0.2)
 			});
 
 			this.canvas.add(area);
@@ -474,24 +550,23 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			throw new Error('Bad Hex');
 		}
 
+		static rgbAToHex(rgba) {
+			let numbers = rgba.replace(/[^0-9,]*/g, '').split(',');
+
+			if (numbers.length < 3) {
+				throw new Error('Bad rgba');
+			}
+
+			let rgb = numbers[2] | (numbers[1] << 8) | (numbers[0] << 16);
+			return '#' + (0x1000000 + rgb).toString(16).slice(1).toUpperCase();
+		}
+
 		deleteArea(area) {
 			this.canvas.remove(area);
 		}
 
-		mousedown(event) {
-			console.log(event);
-		}
-
-		mouseup(event) {
-			console.log(event);
-		}
-
-		mousemove(event) {
-			console.log(event);
-		}
-
-		dblclick(event) {
-			console.log(event);
+		toAreaXml() {
+			return this.form.toAreaXml();
 		}
 	}
 	imagemap.AreaEditor = AreaEditor;

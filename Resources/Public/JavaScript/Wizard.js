@@ -77,11 +77,17 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Imagemap', 'jquery-ui/sortable', 'jquery-u
         });
       });
       $('#submit').on('click', function () {
+        console.log(areaEditor);
+        console.log(areaEditor.toAreaXml());
         var $field = window.opener.$('input[name="' + configuration.itemName + '"]');
-        $field.val('<map>' + areaEditor.persistanceXML() + '</map>').trigger('imagemap:changed');
+        $field.val(areaEditor.toAreaXml()).trigger('imagemap:changed');
         close();
       });
-      $('#canvas').on('mousedown', areaEditor.mousedown.bind(areaEditor)).on('mouseup', areaEditor.mouseup.bind(areaEditor)).on('mousemove', areaEditor.mousemove.bind(areaEditor)).on('dblclick', areaEditor.dblclick.bind(areaEditor));
+      /*$('#canvas')
+      	.on('mousedown', areaEditor.mousedown.bind(areaEditor))
+      	.on('mouseup', areaEditor.mouseup.bind(areaEditor))
+      	.on('mousemove', areaEditor.mousemove.bind(areaEditor))
+      	.on('dblclick', areaEditor.dblclick.bind(areaEditor));*/
     };
 
     initializeScaleFactor();
