@@ -1,4 +1,4 @@
-define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
+define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 	let imagemap = imagemap || {};
 
 	class Rect extends fabric.Rect {
@@ -15,9 +15,25 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 		}
 
 		setValues() {
-			this.subForm.querySelector('#link').value = this.link;
-			this.subForm.querySelector('#label').value = this.alt;
-			this.subForm.querySelector('.colorPreview > div').style.backgroundColor = this.color;
+			this.subForm.querySelectorAll('.t3js-field').forEach(function (field) {
+				switch (field.id) {
+					case 'color':
+						field.style.backgroundColor = this.color;
+						break;
+					case 'right':
+						field.value = this.width + this.left;
+						break;
+					case 'bottom':
+						field.value = this.height + this.top;
+						break;
+					case 'label':
+						field.value = this.alt ? this.alt : '';
+						break;
+					default:
+						field.value = this[field.id] ? this[field.id] : '';
+						break;
+				}
+			}.bind(this));
 		}
 
 		addEvents() {
@@ -43,6 +59,9 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 		}
 
 		deleteAction() {
+			this.form.deleteArea(this);
+			this.subForm.remove();
+			delete this;
 		}
 
 		expandAction() {
@@ -51,24 +70,33 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 			this.showElement('#collaps');
 		}
 
-		collapsAction() {
+		collapseAction() {
 			this.hideElement('.moreOptions');
 			this.hideElement('#collaps');
 			this.showElement('#expand');
 		}
 
+		getElement(selector) {
+			return this.subForm.querySelector(selector);
+		}
+
 		hideElement(selector) {
-			this.subForm.querySelector(selector).classList.add('hide');
+			this.getElement(selector).classList.add('hide');
 		}
 
 		showElement(selector) {
-			this.subForm.querySelector(selector).classList.remove('hide');
+			this.getElement(selector).classList.remove('hide');
 		}
 
-		persistanceXML() {
+		toAreaXml() {
 			let coords = this.left + ',' + this.top + ',' + (this.left + this.width) + ',' + (this.height + this.top);
-			return '<area shape="rect" coords="' + coords + '" ' + this.getAdditionalAttributeXML() + '>'
-				+ this.getLink() + '</area>'
+			return [
+				'<area shape="rect" ',
+				'coords="' + coords + '" ',
+				this.getAdditionalAttributeXML() + '>',
+				this.getLink(),
+				'</area>'
+			].join('');
 		}
 	}
 
@@ -114,6 +142,9 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 		}
 
 		deleteAction() {
+			this.form.deleteArea(this);
+			this.subForm.remove();
+			delete this;
 		}
 
 		expandAction() {
@@ -122,24 +153,33 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 			this.showElement('#collaps');
 		}
 
-		collapsAction() {
+		collapseAction() {
 			this.hideElement('.moreOptions');
 			this.hideElement('#collaps');
 			this.showElement('#expand');
 		}
 
+		getElement(selector) {
+			return this.subForm.querySelector(selector);
+		}
+
 		hideElement(selector) {
-			this.subForm.querySelector(selector).classList.add('hide');
+			this.getElement(selector).classList.add('hide');
 		}
 
 		showElement(selector) {
-			this.subForm.querySelector(selector).classList.remove('hide');
+			this.getElement(selector).classList.remove('hide');
 		}
 
-		persistanceXML() {
+		toAreaXml() {
 			let coords = this.left + ',' + this.top + ',' + this.radius;
-			return '<area shape="circle" coords="' + coords + '" ' + this.getAdditionalAttributeXML() + '>'
-				+ this.getLink() + '</area>';
+			return [
+				'<area shape="circle" ',
+				'coords="' + coords + '" ',
+				this.getAdditionalAttributeXML() + '>',
+				this.getLink(),
+				'</area>'
+			].join('');
 		}
 	}
 
@@ -149,6 +189,7 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 
 			this.form = null;
 			this.subForm = null;
+			this.coordForm = null;
 		}
 
 		postInitializeForm() {
@@ -185,6 +226,10 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 		}
 
 		deleteAction() {
+			this.form.deleteArea(this);
+			this.subForm.remove();
+			this.coordForm.remove();
+			delete this;
 		}
 
 		addAction() {
@@ -196,29 +241,41 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 			this.showElement('#collaps');
 		}
 
-		collapsAction() {
+		collapseAction() {
 			this.hideElement('.moreOptions');
 			this.hideElement('#collaps');
 			this.showElement('#expand');
 		}
 
+		getElement(selector) {
+			return this.subForm.querySelector(selector);
+		}
+
 		hideElement(selector) {
-			this.subForm.querySelector(selector).classList.add('hide');
+			this.getElement(selector).classList.add('hide');
 		}
 
 		showElement(selector) {
-			this.subForm.querySelector(selector).classList.remove('hide');
+			this.getElement(selector).classList.remove('hide');
 		}
 
-		persistanceXML() {
-			return '<area shape="poly" coords="' + this.joinCoords()
-				+ '" ' + this.getAdditionalAttributeXML() + ">" + this.getLink() + "</area>"
+		toAreaXml() {
+			let coords = this.joinCoords();
+			return [
+				'<area shape="poly" ',
+				'coords="' + coords + '" ',
+				this.getAdditionalAttributeXML() + '>',
+				this.getLink(),
+				'</area>'
+			].join('');
 		}
 	}
 
 	class AreaForm {
-		constructor(formElement) {
+		constructor(formElement, editor) {
 			this.element = fabric.document.querySelector('#' + formElement);
+			this.editor = editor;
+			this.areas = [];
 		}
 
 		getFormElement(selector) {
@@ -232,7 +289,7 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 			area.form = this;
 			area.subForm = this.getFormElement('#rectForm');
 
-			this.element.insertBefore(area.subForm, this.element.firstChild);
+			this.addArea(area);
 			area.postInitializeForm();
 		}
 
@@ -240,7 +297,7 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 			area.form = this;
 			area.subForm = this.getFormElement('#circForm');
 
-			this.element.insertBefore(area.subForm, this.element.firstChild);
+			this.addArea(area);
 			area.postInitializeForm();
 		}
 
@@ -249,8 +306,24 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 			area.subForm = this.getFormElement('#polyForm');
 			area.coordForm = this.getFormElement('#polyCoords');
 
-			this.element.insertBefore(area.subForm, this.element.firstChild);
+			this.addArea(area);
 			area.postInitializeForm();
+		}
+
+		addArea(area) {
+			this.areas.push(area);
+			this.element.insertBefore(area.subForm, this.element.firstChild);
+		}
+
+		deleteArea(area) {
+			let areas = [];
+			this.areas.forEach((currentArea) => {
+				if (area !== currentArea) {
+					areas.push(currentArea);
+				}
+			});
+			this.areas = areas;
+			this.editor.deleteArea(area);
 		}
 
 		openPopup(link, area) {
@@ -271,11 +344,23 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 		}
 	}
 
-	class AreaEditor extends fabric.Canvas {
+	class AreaEditor {
 		constructor(canvas, form, options) {
-			super (canvas, options);
+			this.preview = false;
+			this.initializeOptions(options);
 
-			this.form = new AreaForm(form);
+			this.canvas = new fabric.Canvas(canvas, options.canvas);
+			if (!options.preview) {
+				this.form = new AreaForm(form, this);
+			}
+		}
+
+		initializeOptions(options) {
+			for (let option in options) {
+				if (options.hasOwnProperty(option)) {
+					this[option] = options[option];
+				}
+			}
 		}
 
 		initializeScaling(scaling) {
@@ -299,16 +384,18 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 				...configuration,
 				left: parseInt(left),
 				top: parseInt(top),
-				width: parseInt(right - left),
-				height: parseInt(bottom - top),
+				width: right - left,
+				height: bottom - top,
 				borderColor: configuration.color,
 				stroke: configuration.color,
 				strokeWidth: 1,
-				fill: this.hexToRgbA(configuration.color, 0.2)
+				fill: AreaEditor.hexToRgbA(configuration.color, 0.2)
 			});
 
-			this.form.addRect(area);
-			this.add(area);
+			this.canvas.add(area);
+			if (this.form) {
+				this.form.addRect(area);
+			}
 		}
 
 		addCircle(configuration) {
@@ -321,11 +408,13 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 				borderColor: configuration.color,
 				stroke: configuration.color,
 				strokeWidth: 1,
-				fill: this.hexToRgbA(configuration.color, 0.2)
+				fill: AreaEditor.hexToRgbA(configuration.color, 0.2)
 			});
 
-			this.form.addCircle(area);
-			this.add(area);
+			this.canvas.add(area);
+			if (this.form) {
+				this.form.addCircle(area);
+			}
 		}
 
 		addPoly(configuration) {
@@ -354,14 +443,16 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 				borderColor: configuration.color,
 				stroke: configuration.color,
 				strokeWidth: 1,
-				fill: this.hexToRgbA(configuration.color, 0.2)
+				fill: AreaEditor.hexToRgbA(configuration.color, 0.2)
 			});
 
-			this.form.addPoly(area);
-			this.add(area);
+			this.canvas.add(area);
+			if (this.form) {
+				this.form.addPoly(area);
+			}
 		}
 
-		hexToRgbA(hex, alpha) {
+		static hexToRgbA(hex, alpha) {
 			let chars, r, g, b, result;
 			if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
 				chars = hex.substring(1).split('');
@@ -381,6 +472,10 @@ define(['TYPO3/CMS/Imagemap/Fabric'], (fabric) => {
 				return result;
 			}
 			throw new Error('Bad Hex');
+		}
+
+		deleteArea(area) {
+			this.canvas.remove(area);
 		}
 
 		mousedown(event) {
