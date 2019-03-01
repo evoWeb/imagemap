@@ -2,8 +2,6 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
@@ -15,6 +13,8 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -83,10 +83,15 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     function AreaFormElement() {
       _classCallCheck(this, AreaFormElement);
 
-      this.shape = '';
-      this.subForm = null;
-      this.coordForm = null;
-      this.editorForm = null;
+      _defineProperty(this, "shape", '');
+
+      _defineProperty(this, "subForm", null);
+
+      _defineProperty(this, "coordForm", null);
+
+      _defineProperty(this, "editorForm", null);
+
+      _defineProperty(this, "colors", ['990033', 'ff3366', 'cc0033', 'ff0033', 'ff9999', 'cc3366', 'ffccff', 'cc6699', '993366', '660033', 'cc3399', 'ff99cc', 'ff66cc', 'ff99ff', 'ff6699', 'cc0066', 'ff0066', 'ff3399', 'ff0099', 'ff33cc', 'ff00cc', 'ff66ff', 'ff33ff', 'ff00ff', 'cc0099', '990066', 'cc66cc', 'cc33cc', 'cc99ff', 'cc66ff', 'cc33ff', '993399', 'cc00cc', 'cc00ff', '9900cc', '990099', 'cc99cc', '996699', '663366', '660099', '9933cc', '660066', '9900ff', '9933ff', '9966cc', '330033', '663399', '6633cc', '6600cc', '9966ff', '330066', '6600ff', '6633ff', 'ccccff', '9999ff', '9999cc', '6666cc', '6666ff', '666699', '333366', '333399', '330099', '3300cc', '3300ff', '3333ff', '3333cc', '0066ff', '0033ff', '3366ff', '3366cc', '000066', '000033', '0000ff', '000099', '0033cc', '0000cc', '336699', '0066cc', '99ccff', '6699ff', '003366', '6699cc', '006699', '3399cc', '0099cc', '66ccff', '3399ff', '003399', '0099ff', '33ccff', '00ccff', '99ffff', '66ffff', '33ffff', '00ffff', '00cccc', '009999', '669999', '99cccc', 'ccffff', '33cccc', '66cccc', '339999', '336666', '006666', '003333', '00ffcc', '33ffcc', '33cc99', '00cc99', '66ffcc', '99ffcc', '00ff99', '339966', '006633', '336633', '669966', '66cc66', '99ff99', '66ff66', '339933', '99cc99', '66ff99', '33ff99', '33cc66', '00cc66', '66cc99', '009966', '009933', '33ff66', '00ff66', 'ccffcc', 'ccff99', '99ff66', '99ff33', '00ff33', '33ff33', '00cc33', '33cc33', '66ff33', '00ff00', '66cc33', '006600', '003300', '009900', '33ff00', '66ff00', '99ff00', '66cc00', '00cc00', '33cc00', '339900', '99cc66', '669933', '99cc33', '336600', '669900', '99cc00', 'ccff66', 'ccff33', 'ccff00', '999900', 'cccc00', 'cccc33', '333300', '666600', '999933', 'cccc66', '666633', '999966', 'cccc99', 'ffffcc', 'ffff99', 'ffff66', 'ffff33', 'ffff00', 'ffcc00', 'ffcc66', 'ffcc33', 'cc9933', '996600', 'cc9900', 'ff9900', 'cc6600', '993300', 'cc6633', '663300', 'ff9966', 'ff6633', 'ff9933', 'ff6600', 'cc3300', '996633', '330000', '663333', '996666', 'cc9999', '993333', 'cc6666', 'ffcccc', 'ff3333', 'cc3333', 'ff6666', '660000', '990000', 'cc0000', 'ff0000', 'ff3300', 'cc9966', 'ffcc99', 'ffffff', 'cccccc', '999999', '666666', '333333', '000000']);
     }
 
     _createClass(AreaFormElement, [{
@@ -94,6 +99,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
       value: function postAddToForm() {
         this.initializeValues();
         this.initializeButtons();
+        this.initializeColorPicker();
       }
     }, {
       key: "initializeValues",
@@ -126,6 +132,21 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
         }.bind(this));
       }
     }, {
+      key: "initializeColorPicker",
+      value: function initializeColorPicker() {
+        var _this2 = this;
+
+        var colorPicker = this.getElement('#colorPicker');
+        this.colors.forEach(function (color) {
+          var cell = document.createElement('div');
+          cell.id = color;
+          cell.style.backgroundColor = '#' + color;
+          cell.classList.add('colorPickerCell');
+          cell.addEventListener('click', _this2.colorPickerAction.bind(_this2));
+          colorPicker.appendChild(cell);
+        });
+      }
+    }, {
       key: "linkAction",
       value: function linkAction(event) {
         this.editorForm.openPopup(event.currentTarget, this);
@@ -156,6 +177,11 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
         this.hideElement('.moreOptions');
         this.hideElement('#collapse');
         this.showElement('#expand');
+      }
+    }, {
+      key: "colorPickerAction",
+      value: function colorPickerAction(event) {
+        this.getElement('#color').style.backgroundColor = event.currentTarget.style.backgroundColor;
       }
     }, {
       key: "getElement",
@@ -199,16 +225,16 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     _inherits(Rect, _Aggregation);
 
     function Rect(options) {
-      var _this2;
+      var _this3;
 
       _classCallCheck(this, Rect);
 
-      _this2 = _possibleConstructorReturn(this, _getPrototypeOf(Rect).call(this, options));
-      _this2.shape = 'rect';
-      _this2.id = fabric.Object.__uid++;
-      _this2.editorForm = null;
-      _this2.subForm = null;
-      return _this2;
+      _this3 = _possibleConstructorReturn(this, _getPrototypeOf(Rect).call(this, options));
+      _this3.shape = 'rect';
+      _this3.id = fabric.Object.__uid++;
+      _this3.editorForm = null;
+      _this3.subForm = null;
+      return _this3;
     }
 
     _createClass(Rect, [{
@@ -248,16 +274,16 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     _inherits(Circle, _Aggregation2);
 
     function Circle(options) {
-      var _this3;
+      var _this4;
 
       _classCallCheck(this, Circle);
 
-      _this3 = _possibleConstructorReturn(this, _getPrototypeOf(Circle).call(this, options));
-      _this3.shape = 'circle';
-      _this3.id = fabric.Object.__uid++;
-      _this3.editorForm = null;
-      _this3.subForm = null;
-      return _this3;
+      _this4 = _possibleConstructorReturn(this, _getPrototypeOf(Circle).call(this, options));
+      _this4.shape = 'circle';
+      _this4.id = fabric.Object.__uid++;
+      _this4.editorForm = null;
+      _this4.subForm = null;
+      return _this4;
     }
 
     _createClass(Circle, [{
@@ -297,17 +323,17 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     _inherits(Polygon, _Aggregation3);
 
     function Polygon(options) {
-      var _this4;
+      var _this5;
 
       _classCallCheck(this, Polygon);
 
-      _this4 = _possibleConstructorReturn(this, _getPrototypeOf(Polygon).call(this, options));
-      _this4.shape = 'poly';
-      _this4.id = fabric.Object.__uid++;
-      _this4.editorForm = null;
-      _this4.subForm = null;
-      _this4.coordForm = null;
-      return _this4;
+      _this5 = _possibleConstructorReturn(this, _getPrototypeOf(Polygon).call(this, options));
+      _this5.shape = 'poly';
+      _this5.id = fabric.Object.__uid++;
+      _this5.editorForm = null;
+      _this5.subForm = null;
+      _this5.coordForm = null;
+      return _this5;
     }
 
     _createClass(Polygon, [{
