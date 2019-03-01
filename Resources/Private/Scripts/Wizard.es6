@@ -95,8 +95,6 @@ define([
 			});
 
 			$('#submit').on('click', function () {
-				console.log(areaEditor);
-				console.log(areaEditor.toAreaXml());
 				let $field = window.opener.$('input[name="' + configuration.itemName + '"]');
 				$field
 					.val(areaEditor.toAreaXml())

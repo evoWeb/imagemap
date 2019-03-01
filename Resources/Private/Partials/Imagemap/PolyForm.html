@@ -16,10 +16,20 @@
 	</div>
 
 	<div class="moreOptions hide">
-		<f:render partial="Imagemap/ColorPicker" arguments="{attributeKeys: data.attributeKeys}"/>
+		<div id="colorPicker"></div>
 
-		<div class="positionOptions">
-			POLYCOORDS
+		<div class="additionalInformation">
+			<div id="attributes">
+				<f:for each="{data.attributeKeys}" as="key">
+					<div class="input-group">
+						<label for="{f:format.case(value: key, mode: 'lower')}" class="input-group-addon">{f:format.case(value: key, mode: 'capital')}:</label>
+						<input type="text" id="{f:format.case(value: key, mode: 'lower')}" class="t3js-field form-control" />
+					</div>
+				</f:for>
+			</div>
+
+			<div class="positionOptions">
+			</div>
 		</div>
 	</div>
 </div>
@@ -27,11 +37,11 @@
 
 <script type="text/template" id="polyCoords">
 	<div class="input-group">
-		<label for="x{count}" class="input-group-addon">X{count}:</label>
-		<input type="text" id="x{count}" class="t3js-field form-control" />
+		<label for="x_ID" class="input-group-addon">X_ID:</label>
+		<input type="text" id="x_ID" class="t3js-field form-control" />
 
-		<label for="y{count}" class="input-group-addon">Y{count}:</label>
-		<input type="text" id="y{count}" class="t3js-field form-control" />
+		<label for="y_ID" class="input-group-addon">Y_ID:</label>
+		<input type="text" id="y_ID" class="t3js-field form-control" />
 
 		<div class="input-group-btn">
 			<span id="addBefore" class="t3js-btn btn btn-default" title="{f:translate(id: 'imagemap.form.poly.addEdgeBefore', extensionName: 'imagemap')}"><core:icon identifier="actions-view-go-up"/></span>

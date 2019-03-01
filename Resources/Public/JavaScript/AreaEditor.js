@@ -112,9 +112,12 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     }, {
       key: "initializeHtmlElements",
       value: function initializeHtmlElements() {
-        Object.keys(this.htmlElements).forEach(function (key) {
+        var _arr = Object.keys(this.htmlElements);
+
+        for (var _i = 0; _i < _arr.length; _i++) {
+          key = _arr[_i];
           this[key] = this.getFormElement(this.htmlElements[key]);
-        }.bind(this));
+        }
       }
     }, {
       key: "initializeValues",
@@ -201,12 +204,18 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     }, {
       key: "colorPickerAction",
       value: function colorPickerAction(event) {
-        this.getElement('#color').style.backgroundColor = event.currentTarget.style.backgroundColor;
+        var color = event.currentTarget.style.backgroundColor;
+        this.getElement('#color').style.backgroundColor = color;
+        this.set('borderColor', color);
+        this.set('stroke', color);
+        this.set('fill', AreaEditor.hexToRgbA(AreaEditor.rgbAToHex(color), 0.2));
+        this.editorForm.editor.canvas.renderAll();
       }
     }, {
       key: "getFormElement",
       value: function getFormElement(selector) {
         var template = this.editorForm.element.querySelector(selector).innerHTML;
+        template.replace(/_ID/g, this.id);
         return new DOMParser().parseFromString(template, 'text/html').body.firstChild;
       }
     }, {
@@ -351,7 +360,10 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     }, {
       key: "getAreaCoords",
       value: function getAreaCoords() {
-        return this.left + ',' + this.top + ',' + this.radius;
+        var coords = this.getCoords(),
+            left = coords[0].x + this.radius,
+            top = coords[0].y + this.radius;
+        return left + ',' + top + ',' + this.radius;
       }
     }]);
 
@@ -436,7 +448,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
 
         var result = [];
         this.getElements('.t3js-field').forEach(function (field) {
-          if (_this7.ignoreAttributes.indexOf(field.id) < 0 || field.id.indexOf('x') === 0 || field.id.indexOf('y') === 0) {
+          if (_this7.ignoreAttributes.indexOf(field.id) < 0 || field.id.indexOf('x') !== 0 || field.id.indexOf('y') !== 0) {
             switch (field.id) {
               case 'color':
                 result.push(field.id + '="' + AreaEditor.rgbAToHex(field.style.backgroundColor) + '"');
@@ -578,6 +590,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
             right = _configuration$coords2[2],
             bottom = _configuration$coords2[3],
             area = new Rect(_objectSpread({}, configuration, {
+          hasRotatingPoint: false,
           left: parseInt(left),
           top: parseInt(top),
           width: right - left,
@@ -603,8 +616,9 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
             top = _configuration$coords4[1],
             radius = _configuration$coords4[2],
             area = new Circle(_objectSpread({}, configuration, {
-          left: parseInt(left),
-          top: parseInt(top),
+          hasRotatingPoint: false,
+          left: left - radius,
+          top: top - radius,
           radius: parseInt(radius),
           borderColor: configuration.color,
           stroke: configuration.color,
@@ -642,6 +656,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
         }
 
         var area = new Polygon(points, _objectSpread({}, configuration, {
+          hasRotatingPoint: false,
           top: top,
           left: left,
           borderColor: configuration.color,

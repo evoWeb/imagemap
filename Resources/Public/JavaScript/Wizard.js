@@ -77,8 +77,6 @@ define(['jquery', 'TYPO3/CMS/Imagemap/AreaEditor', 'jquery-ui/sortable', 'jquery
         });
       });
       $('#submit').on('click', function () {
-        console.log(areaEditor);
-        console.log(areaEditor.toAreaXml());
         var $field = window.opener.$('input[name="' + configuration.itemName + '"]');
         $field.val(areaEditor.toAreaXml()).trigger('imagemap:changed');
         close();

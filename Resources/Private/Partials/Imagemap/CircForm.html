@@ -14,20 +14,31 @@
 	</div>
 
 	<div class="moreOptions hide">
-		<f:render partial="Imagemap/ColorPicker" arguments="{attributeKeys: data.attributeKeys}"/>
+		<div id="colorPicker"></div>
 
-		<div class="positionOptions">
-			<div class="input-group">
-				<label for="left" class="input-group-addon">X:</label>
-				<input type="text" id="left" class="t3js-field form-control" value="x" />
-
-				<label for="top" class="input-group-addon">Y:</label>
-				<input type="text" id="top" class="t3js-field form-control" value="y" />
+		<div class="additionalInformation">
+			<div id="attributes">
+				<f:for each="{data.attributeKeys}" as="key">
+					<div class="input-group">
+						<label for="{f:format.case(value: key, mode: 'lower')}" class="input-group-addon">{f:format.case(value: key, mode: 'capital')}:</label>
+						<input type="text" id="{f:format.case(value: key, mode: 'lower')}" class="t3js-field form-control" />
+					</div>
+				</f:for>
 			</div>
 
-			<div class="input-group">
-				<label for="radius" class="input-group-addon">R:</label>
-				<input type="text" id="radius" class="t3js-field form-control" value="r" />
+			<div class="positionOptions">
+				<div class="input-group">
+					<label for="left" class="input-group-addon">X:</label>
+					<input type="text" id="left" class="t3js-field form-control" value="x" />
+
+					<label for="top" class="input-group-addon">Y:</label>
+					<input type="text" id="top" class="t3js-field form-control" value="y" />
+				</div>
+
+				<div class="input-group">
+					<label for="radius" class="input-group-addon">R:</label>
+					<input type="text" id="radius" class="t3js-field form-control" value="r" />
+				</div>
 			</div>
 		</div>
 	</div>
