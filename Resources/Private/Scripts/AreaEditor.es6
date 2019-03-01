@@ -196,8 +196,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		getAdditionalAttributes() {
 			let result = [];
 
-			if (this.subForm.querySelector('#title').value) {
-				result.push('alt="' + this.subForm.querySelector('#title').value + '"');
+			if (this.subForm.querySelector('#alt').value) {
+				result.push('alt="' + this.subForm.querySelector('#alt').value + '"');
 			}
 
 			if (this.subForm.querySelector('#color')) {

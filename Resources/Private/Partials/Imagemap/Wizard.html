@@ -28,7 +28,7 @@
 	<f:for each="{data.map.areas}" as="area" iteration="iterator">{
 		shape: '{area.attributes.shape}',
 		coords: '{area.attributes.coords}',
-		title: '{area.attributes.alt}',
+		alt: '{area.attributes.alt}',
 		link: '{area.value}',
 		color: '{area.attributes.color}',
 		attribute: <f:format.raw>{defaultAttributeset}</f:format.raw>
