@@ -1,19 +1,50 @@
 define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
-	class Rect extends fabric.Rect {
-		constructor(options) {
-			super(options);
+	let Aggregation = (baseClass, ...mixins) => {
+		class base extends baseClass {
+			constructor (...args) {
+				super(...args);
+				mixins.forEach((mixin) => {
+					copyProperties(this, (new mixin));
+				});
+			}
+		}
 
-			this.id = fabric.Object.__uid++;
-			this.editorForm = null;
+		// this function copies all properties and symbols, filtering out some special ones
+		let copyProperties = (target, source) => {
+			Object.getOwnPropertyNames(source)
+				.concat(Object.getOwnPropertySymbols(source))
+				.forEach((property) => {
+					if (!property.match(
+						/^(?:constructor|prototype|arguments|caller|name|bind|call|apply|toString|length)$/
+					)) {
+						Object.defineProperty(target, property, Object.getOwnPropertyDescriptor(source, property));
+					}
+				})
+		};
+
+		// outside constructor() to allow Aggregation(a, b, c).staticFunction() to be called etc.
+		mixins.forEach((mixin) => {
+			copyProperties(base.prototype, mixin.prototype);
+			copyProperties(base, mixin);
+		});
+
+		return base;
+	};
+
+	class AreaFormElement {
+		constructor() {
+			this.shape = '';
 			this.subForm = null;
+			this.coordForm = null;
+			this.editorForm = null;
 		}
 
-		postInitializeForm() {
-			this.setValues();
-			this.addEvents();
+		postAddToForm() {
+			this.initializeValues();
+			this.initializeButtons();
 		}
 
-		setValues() {
+		initializeValues() {
 			this.subForm.querySelectorAll('.t3js-field').forEach(function (field) {
 				switch (field.id) {
 					case 'color':
@@ -32,7 +63,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			}.bind(this));
 		}
 
-		addEvents() {
+		initializeButtons() {
 			this.subForm.querySelectorAll('.t3js-btn').forEach(function (button) {
 				button.addEventListener('click', this[button.id + 'Action'].bind(this));
 			}.bind(this));
@@ -48,12 +79,6 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		downAction() {
 		}
 
-		undoAction() {
-		}
-
-		redoAction() {
-		}
-
 		deleteAction() {
 			this.editorForm.deleteArea(this);
 			this.subForm.remove();
@@ -63,12 +88,12 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		expandAction() {
 			this.showElement('.moreOptions');
 			this.hideElement('#expand');
-			this.showElement('#collaps');
+			this.showElement('#collapse');
 		}
 
 		collapseAction() {
 			this.hideElement('.moreOptions');
-			this.hideElement('#collaps');
+			this.hideElement('#collapse');
 			this.showElement('#expand');
 		}
 
@@ -86,22 +111,45 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 
 		toAreaXml() {
 			return [
-				'<area shape="rect"',
+				'<area shape="' + this.shape + '"',
 				' coords="' + this.getAreaCoords() + '"',
 				this.getAdditionalAttributes() + '>',
 				this.getLink(),
 				'</area>'
 			].join('');
+		}
+
+		getAreaCoords() {
+		}
+
+		getAdditionalAttributes() {
+		}
+
+		getLink() {
+			return this.subForm.querySelector('#link').value;
+		}
+	}
+
+	class Rect extends Aggregation(fabric.Rect, AreaFormElement) {
+		constructor(options) {
+			super(options);
+
+			this.shape = 'rect';
+			this.id = fabric.Object.__uid++;
+			this.editorForm = null;
+			this.subForm = null;
+		}
+
+		undoAction() {
+		}
+
+		redoAction() {
 		}
 
 		getAreaCoords() {
 			return [this.left, this.top, (this.left + this.width), (this.height + this.top)].join(',');
 		}
 
-		getLink() {
-			return this.subForm.querySelector('#link').value;
-		}
-
 		getAdditionalAttributes() {
 			let result = [];
 
@@ -119,40 +167,14 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 	}
 
-	class Circle extends fabric.Circle {
+	class Circle extends Aggregation(fabric.Circle, AreaFormElement) {
 		constructor(options) {
 			super(options);
 
+			this.shape = 'circle';
 			this.id = fabric.Object.__uid++;
 			this.editorForm = null;
 			this.subForm = null;
-		}
-
-		postInitializeForm() {
-			this.setValues();
-			this.addEvents();
-		}
-
-		setValues() {
-			this.subForm.querySelector('#link').value = this.link;
-			this.subForm.querySelector('#label').value = this.alt;
-			this.subForm.querySelector('.colorPreview > div').style.backgroundColor = this.color;
-		}
-
-		addEvents() {
-			this.subForm.querySelectorAll('.t3js-btn').forEach(function (button) {
-				button.addEventListener('click', this[button.id + 'Action'].bind(this));
-			}.bind(this));
-		}
-
-		linkAction(event) {
-			this.editorForm.openPopup(event.currentTarget, this);
-		}
-
-		upAction() {
-		}
-
-		downAction() {
 		}
 
 		undoAction() {
@@ -161,52 +183,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		redoAction() {
 		}
 
-		deleteAction() {
-			this.editorForm.deleteArea(this);
-			this.subForm.remove();
-			delete this;
-		}
-
-		expandAction() {
-			this.showElement('.moreOptions');
-			this.hideElement('#expand');
-			this.showElement('#collaps');
-		}
-
-		collapseAction() {
-			this.hideElement('.moreOptions');
-			this.hideElement('#collaps');
-			this.showElement('#expand');
-		}
-
-		getElement(selector) {
-			return this.subForm.querySelector(selector);
-		}
-
-		hideElement(selector) {
-			this.getElement(selector).classList.add('hide');
-		}
-
-		showElement(selector) {
-			this.getElement(selector).classList.remove('hide');
-		}
-
-		toAreaXml() {
-			return [
-				'<area shape="circle"',
-				' coords="' + this.getAreaCoords() + '"',
-				this.getAdditionalAttributes() + '>',
-				this.getLink(),
-				'</area>'
-			].join('');
-		}
-
 		getAreaCoords() {
 			return this.left + ',' + this.top + ',' + this.radius;
-		}
-
-		getLink() {
-			return this.subForm.querySelector('#link').value;
 		}
 
 		getAdditionalAttributes() {
@@ -226,41 +204,21 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 	}
 
-	class Polygon extends fabric.Polygon {
+	class Polygon extends Aggregation(fabric.Polygon, AreaFormElement) {
 		constructor(options) {
 			super(options);
 
+			this.shape = 'poly';
 			this.id = fabric.Object.__uid++;
 			this.editorForm = null;
 			this.subForm = null;
 			this.coordForm = null;
 		}
 
-		postInitializeForm() {
-			this.setValues();
-			this.addEvents();
-		}
-
-		setValues() {
+		initializeValues() {
 			this.subForm.querySelector('#link').value = this.link;
-			this.subForm.querySelector('#label').value = this.alt;
-			this.subForm.querySelector('.colorPreview > div').style.backgroundColor = this.color;
-		}
-
-		addEvents() {
-			this.subForm.querySelectorAll('.t3js-btn').forEach(function (button) {
-				button.addEventListener('click', this[button.id + 'Action'].bind(this));
-			}.bind(this));
-		}
-
-		linkAction(event) {
-			this.editorForm.openPopup(event.currentTarget, this);
-		}
-
-		upAction() {
-		}
-
-		downAction() {
+			this.subForm.querySelector('#title').value = this.title;
+			this.subForm.querySelector('#color').style.backgroundColor = this.color;
 		}
 
 		undoAction() {
@@ -279,47 +237,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		addAction() {
 		}
 
-		expandAction() {
-			this.showElement('.moreOptions');
-			this.hideElement('#expand');
-			this.showElement('#collaps');
-		}
-
-		collapseAction() {
-			this.hideElement('.moreOptions');
-			this.hideElement('#collaps');
-			this.showElement('#expand');
-		}
-
-		getElement(selector) {
-			return this.subForm.querySelector(selector);
-		}
-
-		hideElement(selector) {
-			this.getElement(selector).classList.add('hide');
-		}
-
-		showElement(selector) {
-			this.getElement(selector).classList.remove('hide');
-		}
-
-		toAreaXml() {
-			let coords = this.getAreaCoords();
-			return [
-				'<area shape="poly"',
-				' coords="' + coords + '"',
-				this.getAdditionalAttributes() + '>',
-				this.getLink(),
-				'</area>'
-			].join('');
-		}
-
 		getAreaCoords() {
 
-		}
-
-		getLink() {
-			return this.subForm.querySelector('#link').value;
 		}
 
 		getAdditionalAttributes() {
@@ -357,14 +276,12 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			area.subForm = this.getFormElement('#rectForm');
 
 			this.addArea(area);
-			area.postInitializeForm();
 		}
 
 		addCircle(area) {
 			area.subForm = this.getFormElement('#circForm');
 
 			this.addArea(area);
-			area.postInitializeForm();
 		}
 
 		addPoly(area) {
@@ -372,13 +289,14 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			area.coordForm = this.getFormElement('#polyCoords');
 
 			this.addArea(area);
-			area.postInitializeForm();
 		}
 
 		addArea(area) {
 			area.editorForm = this;
 			this.areas.push(area);
 			this.element.insertBefore(area.subForm, this.element.firstChild);
+
+			area.postAddToForm();
 		}
 
 		deleteArea(area) {
@@ -398,7 +316,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			let data = window.imagemap.browseLink;
 			data.objectId = area.id;
 			data.currentValue = area.getLink();
-console.log(area);
+
 			$.ajax({
 				url: TYPO3.settings.ajaxUrls['imagemap_browselink_url'],
 				context: area,
