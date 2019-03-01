@@ -85,6 +85,11 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
 
       _defineProperty(this, "shape", '');
 
+      _defineProperty(this, "htmlElements", {
+        subForm: '',
+        coordForm: ''
+      });
+
       _defineProperty(this, "subForm", null);
 
       _defineProperty(this, "coordForm", null);
@@ -92,19 +97,29 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
       _defineProperty(this, "editorForm", null);
 
       _defineProperty(this, "colors", ['990033', 'ff3366', 'cc0033', 'ff0033', 'ff9999', 'cc3366', 'ffccff', 'cc6699', '993366', '660033', 'cc3399', 'ff99cc', 'ff66cc', 'ff99ff', 'ff6699', 'cc0066', 'ff0066', 'ff3399', 'ff0099', 'ff33cc', 'ff00cc', 'ff66ff', 'ff33ff', 'ff00ff', 'cc0099', '990066', 'cc66cc', 'cc33cc', 'cc99ff', 'cc66ff', 'cc33ff', '993399', 'cc00cc', 'cc00ff', '9900cc', '990099', 'cc99cc', '996699', '663366', '660099', '9933cc', '660066', '9900ff', '9933ff', '9966cc', '330033', '663399', '6633cc', '6600cc', '9966ff', '330066', '6600ff', '6633ff', 'ccccff', '9999ff', '9999cc', '6666cc', '6666ff', '666699', '333366', '333399', '330099', '3300cc', '3300ff', '3333ff', '3333cc', '0066ff', '0033ff', '3366ff', '3366cc', '000066', '000033', '0000ff', '000099', '0033cc', '0000cc', '336699', '0066cc', '99ccff', '6699ff', '003366', '6699cc', '006699', '3399cc', '0099cc', '66ccff', '3399ff', '003399', '0099ff', '33ccff', '00ccff', '99ffff', '66ffff', '33ffff', '00ffff', '00cccc', '009999', '669999', '99cccc', 'ccffff', '33cccc', '66cccc', '339999', '336666', '006666', '003333', '00ffcc', '33ffcc', '33cc99', '00cc99', '66ffcc', '99ffcc', '00ff99', '339966', '006633', '336633', '669966', '66cc66', '99ff99', '66ff66', '339933', '99cc99', '66ff99', '33ff99', '33cc66', '00cc66', '66cc99', '009966', '009933', '33ff66', '00ff66', 'ccffcc', 'ccff99', '99ff66', '99ff33', '00ff33', '33ff33', '00cc33', '33cc33', '66ff33', '00ff00', '66cc33', '006600', '003300', '009900', '33ff00', '66ff00', '99ff00', '66cc00', '00cc00', '33cc00', '339900', '99cc66', '669933', '99cc33', '336600', '669900', '99cc00', 'ccff66', 'ccff33', 'ccff00', '999900', 'cccc00', 'cccc33', '333300', '666600', '999933', 'cccc66', '666633', '999966', 'cccc99', 'ffffcc', 'ffff99', 'ffff66', 'ffff33', 'ffff00', 'ffcc00', 'ffcc66', 'ffcc33', 'cc9933', '996600', 'cc9900', 'ff9900', 'cc6600', '993300', 'cc6633', '663300', 'ff9966', 'ff6633', 'ff9933', 'ff6600', 'cc3300', '996633', '330000', '663333', '996666', 'cc9999', '993333', 'cc6666', 'ffcccc', 'ff3333', 'cc3333', 'ff6666', '660000', '990000', 'cc0000', 'ff0000', 'ff3300', 'cc9966', 'ffcc99', 'ffffff', 'cccccc', '999999', '666666', '333333', '000000']);
+
+      _defineProperty(this, "ignoreAttributes", ['link']);
     }
 
     _createClass(AreaFormElement, [{
       key: "postAddToForm",
       value: function postAddToForm() {
+        this.id = fabric.Object.__uid++;
         this.initializeValues();
         this.initializeButtons();
         this.initializeColorPicker();
       }
     }, {
+      key: "initializeHtmlElements",
+      value: function initializeHtmlElements() {
+        Object.keys(this.htmlElements).forEach(function (key) {
+          this[key] = this.getFormElement(this.htmlElements[key]);
+        }.bind(this));
+      }
+    }, {
       key: "initializeValues",
       value: function initializeValues() {
-        this.subForm.querySelectorAll('.t3js-field').forEach(function (field) {
+        this.getElements('.t3js-field').forEach(function (field) {
           switch (field.id) {
             case 'color':
               field.style.backgroundColor = this.color;
@@ -127,7 +142,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     }, {
       key: "initializeButtons",
       value: function initializeButtons() {
-        this.subForm.querySelectorAll('.t3js-btn').forEach(function (button) {
+        this.getElements('.t3js-btn').forEach(function (button) {
           button.addEventListener('click', this[button.id + 'Action'].bind(this));
         }.bind(this));
       }
@@ -162,6 +177,11 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
       value: function deleteAction() {
         this.editorForm.deleteArea(this);
         this.subForm.remove();
+
+        if (this.coordForm) {
+          this.coordForm.remove();
+        }
+
         delete this;
       }
     }, {
@@ -184,9 +204,20 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
         this.getElement('#color').style.backgroundColor = event.currentTarget.style.backgroundColor;
       }
     }, {
+      key: "getFormElement",
+      value: function getFormElement(selector) {
+        var template = this.editorForm.element.querySelector(selector).innerHTML;
+        return new DOMParser().parseFromString(template, 'text/html').body.firstChild;
+      }
+    }, {
       key: "getElement",
       value: function getElement(selector) {
         return this.subForm.querySelector(selector);
+      }
+    }, {
+      key: "getElements",
+      value: function getElements(selector) {
+        return this.subForm.querySelectorAll(selector);
       }
     }, {
       key: "hideElement",
@@ -208,11 +239,29 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
       value: function getAreaCoords() {}
     }, {
       key: "getAdditionalAttributes",
-      value: function getAdditionalAttributes() {}
+      value: function getAdditionalAttributes() {
+        var _this3 = this;
+
+        var result = [];
+        this.getElements('.t3js-field').forEach(function (field) {
+          if (_this3.ignoreAttributes.indexOf(field.id) < 0) {
+            switch (field.id) {
+              case 'color':
+                result.push(field.id + '="' + AreaEditor.rgbAToHex(field.style.backgroundColor) + '"');
+                break;
+
+              default:
+                result.push(field.id + '="' + field.value + '"');
+                break;
+            }
+          }
+        });
+        return (result.length > 0 ? ' ' : '') + result.join(' ');
+      }
     }, {
       key: "getLink",
       value: function getLink() {
-        return this.subForm.querySelector('#link').value;
+        return this.getElement('#link').value;
       }
     }]);
 
@@ -224,17 +273,28 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
   function (_Aggregation) {
     _inherits(Rect, _Aggregation);
 
-    function Rect(options) {
-      var _this3;
+    function Rect() {
+      var _getPrototypeOf3;
+
+      var _this4;
 
       _classCallCheck(this, Rect);
 
-      _this3 = _possibleConstructorReturn(this, _getPrototypeOf(Rect).call(this, options));
-      _this3.shape = 'rect';
-      _this3.id = fabric.Object.__uid++;
-      _this3.editorForm = null;
-      _this3.subForm = null;
-      return _this3;
+      for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+        args[_key3] = arguments[_key3];
+      }
+
+      _this4 = _possibleConstructorReturn(this, (_getPrototypeOf3 = _getPrototypeOf(Rect)).call.apply(_getPrototypeOf3, [this].concat(args)));
+
+      _defineProperty(_assertThisInitialized(_this4), "shape", 'rect');
+
+      _defineProperty(_assertThisInitialized(_this4), "htmlElements", {
+        subForm: '#rectForm'
+      });
+
+      _defineProperty(_assertThisInitialized(_this4), "ignoreAttributes", ['link', 'left', 'top', 'right', 'bottom']);
+
+      return _this4;
     }
 
     _createClass(Rect, [{
@@ -248,21 +308,6 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
       value: function getAreaCoords() {
         return [this.left, this.top, this.left + this.width, this.height + this.top].join(',');
       }
-    }, {
-      key: "getAdditionalAttributes",
-      value: function getAdditionalAttributes() {
-        var result = [];
-
-        if (this.subForm.querySelector('#alt').value) {
-          result.push('alt="' + this.subForm.querySelector('#alt').value + '"');
-        }
-
-        if (this.subForm.querySelector('#color')) {
-          result.push('color="' + AreaEditor.rgbAToHex(this.subForm.querySelector('#color').style.backgroundColor) + '"');
-        }
-
-        return (result.length > 0 ? ' ' : '') + result.join(' ');
-      }
     }]);
 
     return Rect;
@@ -273,17 +318,28 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
   function (_Aggregation2) {
     _inherits(Circle, _Aggregation2);
 
-    function Circle(options) {
-      var _this4;
+    function Circle() {
+      var _getPrototypeOf4;
+
+      var _this5;
 
       _classCallCheck(this, Circle);
 
-      _this4 = _possibleConstructorReturn(this, _getPrototypeOf(Circle).call(this, options));
-      _this4.shape = 'circle';
-      _this4.id = fabric.Object.__uid++;
-      _this4.editorForm = null;
-      _this4.subForm = null;
-      return _this4;
+      for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+        args[_key4] = arguments[_key4];
+      }
+
+      _this5 = _possibleConstructorReturn(this, (_getPrototypeOf4 = _getPrototypeOf(Circle)).call.apply(_getPrototypeOf4, [this].concat(args)));
+
+      _defineProperty(_assertThisInitialized(_this5), "shape", 'circle');
+
+      _defineProperty(_assertThisInitialized(_this5), "htmlElements", {
+        subForm: '#circForm'
+      });
+
+      _defineProperty(_assertThisInitialized(_this5), "ignoreAttributes", ['link', 'left', 'top', 'radius']);
+
+      return _this5;
     }
 
     _createClass(Circle, [{
@@ -297,21 +353,6 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
       value: function getAreaCoords() {
         return this.left + ',' + this.top + ',' + this.radius;
       }
-    }, {
-      key: "getAdditionalAttributes",
-      value: function getAdditionalAttributes() {
-        var result = [];
-
-        if (this.subForm.querySelector('#title').value) {
-          result.push('alt="' + this.subForm.querySelector('#title').value + '"');
-        }
-
-        if (this.subForm.querySelector('#color')) {
-          result.push('color="' + AreaEditor.rgbAToHex(this.subForm.querySelector('#color').style.backgroundColor) + '"');
-        }
-
-        return (result.length > 0 ? ' ' : '') + result.join(' ');
-      }
     }]);
 
     return Circle;
@@ -322,26 +363,53 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
   function (_Aggregation3) {
     _inherits(Polygon, _Aggregation3);
 
-    function Polygon(options) {
-      var _this5;
+    function Polygon() {
+      var _getPrototypeOf5;
+
+      var _this6;
 
       _classCallCheck(this, Polygon);
 
-      _this5 = _possibleConstructorReturn(this, _getPrototypeOf(Polygon).call(this, options));
-      _this5.shape = 'poly';
-      _this5.id = fabric.Object.__uid++;
-      _this5.editorForm = null;
-      _this5.subForm = null;
-      _this5.coordForm = null;
-      return _this5;
+      for (var _len5 = arguments.length, args = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
+        args[_key5] = arguments[_key5];
+      }
+
+      _this6 = _possibleConstructorReturn(this, (_getPrototypeOf5 = _getPrototypeOf(Polygon)).call.apply(_getPrototypeOf5, [this].concat(args)));
+
+      _defineProperty(_assertThisInitialized(_this6), "shape", 'poly');
+
+      _defineProperty(_assertThisInitialized(_this6), "htmlElements", {
+        subForm: '#polyForm',
+        coordForm: '#polyCoords'
+      });
+
+      _defineProperty(_assertThisInitialized(_this6), "ignoreAttributes", ['link', 'left', 'top']);
+
+      return _this6;
     }
 
     _createClass(Polygon, [{
       key: "initializeValues",
       value: function initializeValues() {
-        this.subForm.querySelector('#link').value = this.link;
-        this.subForm.querySelector('#title').value = this.title;
-        this.subForm.querySelector('#color').style.backgroundColor = this.color;
+        this.getElements('.t3js-field').forEach(function (field) {
+          switch (field.id) {
+            case 'color':
+              field.style.backgroundColor = this.color;
+              break;
+
+            case 'right':
+              field.value = this.width + this.left;
+              break;
+
+            case 'bottom':
+              field.value = this.height + this.top;
+              break;
+
+            default:
+              field.value = this[field.id] ? this[field.id] : '';
+              break;
+          }
+        }.bind(this)); // points
       }
     }, {
       key: "undoAction",
@@ -350,32 +418,36 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
       key: "redoAction",
       value: function redoAction() {}
     }, {
-      key: "deleteAction",
-      value: function deleteAction() {
-        this.editorForm.deleteArea(this);
-        this.subForm.remove();
-        this.coordForm.remove();
-        delete this;
-      }
+      key: "addBeforeAction",
+      value: function addBeforeAction() {}
     }, {
-      key: "addAction",
-      value: function addAction() {}
+      key: "addAfterAction",
+      value: function addAfterAction() {}
+    }, {
+      key: "removeAction",
+      value: function removeAction() {}
     }, {
       key: "getAreaCoords",
       value: function getAreaCoords() {}
     }, {
       key: "getAdditionalAttributes",
       value: function getAdditionalAttributes() {
+        var _this7 = this;
+
         var result = [];
+        this.getElements('.t3js-field').forEach(function (field) {
+          if (_this7.ignoreAttributes.indexOf(field.id) < 0 || field.id.indexOf('x') === 0 || field.id.indexOf('y') === 0) {
+            switch (field.id) {
+              case 'color':
+                result.push(field.id + '="' + AreaEditor.rgbAToHex(field.style.backgroundColor) + '"');
+                break;
 
-        if (this.subForm.querySelector('#title').value) {
-          result.push('alt="' + this.subForm.querySelector('#title').value + '"');
-        }
-
-        if (this.subForm.querySelector('#color')) {
-          result.push('color="' + AreaEditor.rgbAToHex(this.subForm.querySelector('#color').style.backgroundColor) + '"');
-        }
-
+              default:
+                result.push(field.id + '="' + field.value + '"');
+                break;
+            }
+          }
+        });
         return (result.length > 0 ? ' ' : '') + result.join(' ');
       }
     }]);
@@ -386,42 +458,23 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
   var AreaForm =
   /*#__PURE__*/
   function () {
+    /**
+     * @type {Array}
+     */
     function AreaForm(formElement, editor) {
       _classCallCheck(this, AreaForm);
 
-      this.element = fabric.document.querySelector('#' + formElement);
+      _defineProperty(this, "areas", []);
+
+      this.element = fabric.document.querySelector(formElement);
       this.editor = editor;
-      this.areas = [];
     }
 
     _createClass(AreaForm, [{
-      key: "getFormElement",
-      value: function getFormElement(selector) {
-        return new DOMParser().parseFromString(this.element.querySelector(selector).innerHTML, 'text/html').body.firstChild;
-      }
-    }, {
-      key: "addRect",
-      value: function addRect(area) {
-        area.subForm = this.getFormElement('#rectForm');
-        this.addArea(area);
-      }
-    }, {
-      key: "addCircle",
-      value: function addCircle(area) {
-        area.subForm = this.getFormElement('#circForm');
-        this.addArea(area);
-      }
-    }, {
-      key: "addPoly",
-      value: function addPoly(area) {
-        area.subForm = this.getFormElement('#polyForm');
-        area.coordForm = this.getFormElement('#polyCoords');
-        this.addArea(area);
-      }
-    }, {
       key: "addArea",
       value: function addArea(area) {
         area.editorForm = this;
+        area.initializeHtmlElements();
         this.areas.push(area);
         this.element.insertBefore(area.subForm, this.element.firstChild);
         area.postAddToForm();
@@ -538,7 +591,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
         this.canvas.add(area);
 
         if (this.editorForm) {
-          this.editorForm.addRect(area);
+          this.editorForm.addArea(area);
         }
       }
     }, {
@@ -562,7 +615,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
         this.canvas.add(area);
 
         if (this.editorForm) {
-          this.editorForm.addCircle(area);
+          this.editorForm.addArea(area);
         }
       }
     }, {
@@ -599,7 +652,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
         this.canvas.add(area);
 
         if (this.editorForm) {
-          this.editorForm.addPoly(area);
+          this.editorForm.addArea(area);
         }
       }
     }, {

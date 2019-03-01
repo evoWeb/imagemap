@@ -32,10 +32,37 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 	};
 
 	class AreaFormElement {
+		/**
+		 * @type {string}
+		 */
 		shape = '';
+
+		/**
+		 * @type {Object}
+		 */
+		htmlElements = {
+			subForm: '',
+			coordForm: ''
+		};
+
+		/**
+		 * @type {HTMLElement}
+		 */
 		subForm = null;
+
+		/**
+		 * @type {HTMLElement}
+		 */
 		coordForm = null;
+
+		/**
+		 * @type {AreaForm}
+		 */
 		editorForm = null;
+
+		/**
+		 * @type {string[]}
+		 */
 		colors = [
 			'990033', 'ff3366', 'cc0033', 'ff0033', 'ff9999', 'cc3366', 'ffccff', 'cc6699', '993366', '660033',
 			'cc3399', 'ff99cc', 'ff66cc', 'ff99ff', 'ff6699', 'cc0066', 'ff0066', 'ff3399', 'ff0099', 'ff33cc',
@@ -61,17 +88,29 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			'ffffff', 'cccccc', '999999', '666666', '333333', '000000'
 		];
 
-		constructor() {
-		}
+		/**
+		 * @type {string[]}
+		 */
+		ignoreAttributes = [
+			'link',
+		];
 
 		postAddToForm() {
+			this.id = fabric.Object.__uid++;
+
 			this.initializeValues();
 			this.initializeButtons();
 			this.initializeColorPicker();
 		}
 
+		initializeHtmlElements() {
+			Object.keys(this.htmlElements).forEach(function (key) {
+				this[key] = this.getFormElement(this.htmlElements[key]);
+			}.bind(this));
+		}
+
 		initializeValues() {
-			this.subForm.querySelectorAll('.t3js-field').forEach(function (field) {
+			this.getElements('.t3js-field').forEach(function (field) {
 				switch (field.id) {
 					case 'color':
 						field.style.backgroundColor = this.color;
@@ -90,7 +129,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 
 		initializeButtons() {
-			this.subForm.querySelectorAll('.t3js-btn').forEach(function (button) {
+			this.getElements('.t3js-btn').forEach(function (button) {
 				button.addEventListener('click', this[button.id + 'Action'].bind(this));
 			}.bind(this));
 		}
@@ -104,6 +143,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 				cell.style.backgroundColor = '#' + color;
 				cell.classList.add('colorPickerCell');
 				cell.addEventListener('click', this.colorPickerAction.bind(this));
+
 				colorPicker.appendChild(cell);
 			});
 		}
@@ -121,6 +161,9 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		deleteAction() {
 			this.editorForm.deleteArea(this);
 			this.subForm.remove();
+			if (this.coordForm) {
+				this.coordForm.remove();
+			}
 			delete this;
 		}
 
@@ -140,8 +183,17 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			this.getElement('#color').style.backgroundColor = event.currentTarget.style.backgroundColor;
 		}
 
+		getFormElement(selector) {
+			let template = this.editorForm.element.querySelector(selector).innerHTML;
+			return new DOMParser().parseFromString(template, 'text/html').body.firstChild;
+		}
+
 		getElement(selector) {
 			return this.subForm.querySelector(selector);
+		}
+
+		getElements(selector) {
+			return this.subForm.querySelectorAll(selector);
 		}
 
 		hideElement(selector) {
@@ -166,22 +218,44 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 
 		getAdditionalAttributes() {
+			let result = [];
+
+			this.getElements('.t3js-field').forEach((field) => {
+				if (this.ignoreAttributes.indexOf(field.id) < 0) {
+					switch (field.id) {
+						case 'color':
+							result.push(field.id + '="' + AreaEditor.rgbAToHex(field.style.backgroundColor) + '"');
+							break;
+
+						default:
+							result.push(field.id + '="' + field.value + '"');
+							break;
+					}
+				}
+			});
+
+			return (result.length > 0 ? ' ' : '') + result.join(' ');
 		}
 
 		getLink() {
-			return this.subForm.querySelector('#link').value;
+			return this.getElement('#link').value;
 		}
 	}
 
 	class Rect extends Aggregation(fabric.Rect, AreaFormElement) {
-		constructor(options) {
-			super(options);
+		shape = 'rect';
 
-			this.shape = 'rect';
-			this.id = fabric.Object.__uid++;
-			this.editorForm = null;
-			this.subForm = null;
-		}
+		htmlElements = {
+			subForm: '#rectForm'
+		};
+
+		ignoreAttributes = [
+			'link',
+			'left',
+			'top',
+			'right',
+			'bottom'
+		];
 
 		undoAction() {
 		}
@@ -192,33 +266,21 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		getAreaCoords() {
 			return [this.left, this.top, (this.left + this.width), (this.height + this.top)].join(',');
 		}
-
-		getAdditionalAttributes() {
-			let result = [];
-
-			if (this.subForm.querySelector('#alt').value) {
-				result.push('alt="' + this.subForm.querySelector('#alt').value + '"');
-			}
-
-			if (this.subForm.querySelector('#color')) {
-				result.push('color="' + AreaEditor.rgbAToHex(
-					this.subForm.querySelector('#color').style.backgroundColor
-				) + '"');
-			}
-
-			return (result.length > 0 ? ' ' : '') + result.join(' ');
-		}
 	}
 
 	class Circle extends Aggregation(fabric.Circle, AreaFormElement) {
-		constructor(options) {
-			super(options);
+		shape = 'circle';
 
-			this.shape = 'circle';
-			this.id = fabric.Object.__uid++;
-			this.editorForm = null;
-			this.subForm = null;
-		}
+		htmlElements = {
+			subForm: '#circForm'
+		};
+
+		ignoreAttributes = [
+			'link',
+			'left',
+			'top',
+			'radius'
+		];
 
 		undoAction() {
 		}
@@ -229,39 +291,41 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		getAreaCoords() {
 			return this.left + ',' + this.top + ',' + this.radius;
 		}
-
-		getAdditionalAttributes() {
-			let result = [];
-
-			if (this.subForm.querySelector('#title').value) {
-				result.push('alt="' + this.subForm.querySelector('#title').value + '"');
-			}
-
-			if (this.subForm.querySelector('#color')) {
-				result.push('color="' + AreaEditor.rgbAToHex(
-					this.subForm.querySelector('#color').style.backgroundColor
-				) + '"');
-			}
-
-			return (result.length > 0 ? ' ' : '') + result.join(' ');
-		}
 	}
 
 	class Polygon extends Aggregation(fabric.Polygon, AreaFormElement) {
-		constructor(options) {
-			super(options);
+		shape = 'poly';
 
-			this.shape = 'poly';
-			this.id = fabric.Object.__uid++;
-			this.editorForm = null;
-			this.subForm = null;
-			this.coordForm = null;
-		}
+		htmlElements = {
+			subForm: '#polyForm',
+			coordForm: '#polyCoords'
+		};
+
+		ignoreAttributes = [
+			'link',
+			'left',
+			'top'
+		];
 
 		initializeValues() {
-			this.subForm.querySelector('#link').value = this.link;
-			this.subForm.querySelector('#title').value = this.title;
-			this.subForm.querySelector('#color').style.backgroundColor = this.color;
+			this.getElements('.t3js-field').forEach(function (field) {
+				switch (field.id) {
+					case 'color':
+						field.style.backgroundColor = this.color;
+						break;
+					case 'right':
+						field.value = this.width + this.left;
+						break;
+					case 'bottom':
+						field.value = this.height + this.top;
+						break;
+					default:
+						field.value = this[field.id] ? this[field.id] : '';
+						break;
+				}
+			}.bind(this));
+
+			// points
 		}
 
 		undoAction() {
@@ -270,14 +334,13 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		redoAction() {
 		}
 
-		deleteAction() {
-			this.editorForm.deleteArea(this);
-			this.subForm.remove();
-			this.coordForm.remove();
-			delete this;
+		addBeforeAction() {
 		}
 
-		addAction() {
+		addAfterAction() {
+		}
+
+		removeAction() {
 		}
 
 		getAreaCoords() {
@@ -287,55 +350,41 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		getAdditionalAttributes() {
 			let result = [];
 
-			if (this.subForm.querySelector('#title').value) {
-				result.push('alt="' + this.subForm.querySelector('#title').value + '"');
-			}
+			this.getElements('.t3js-field').forEach((field) => {
+				if (this.ignoreAttributes.indexOf(field.id) < 0
+						|| field.id.indexOf('x') === 0
+						|| field.id.indexOf('y') === 0) {
+					switch (field.id) {
+						case 'color':
+							result.push(field.id + '="' + AreaEditor.rgbAToHex(field.style.backgroundColor) + '"');
+							break;
 
-			if (this.subForm.querySelector('#color')) {
-				result.push('color="' + AreaEditor.rgbAToHex(
-					this.subForm.querySelector('#color').style.backgroundColor
-				) + '"');
-			}
+						default:
+							result.push(field.id + '="' + field.value + '"');
+							break;
+					}
+				}
+			});
 
 			return (result.length > 0 ? ' ' : '') + result.join(' ');
 		}
 	}
 
 	class AreaForm {
+		/**
+		 * @type {Array}
+		 */
+		areas = [];
+
 		constructor(formElement, editor) {
-			this.element = fabric.document.querySelector('#' + formElement);
+			this.element = fabric.document.querySelector(formElement);
 			this.editor = editor;
-			this.areas = [];
-		}
-
-		getFormElement(selector) {
-			return new DOMParser().parseFromString(
-				this.element.querySelector(selector).innerHTML,
-				'text/html'
-			).body.firstChild;
-		}
-
-		addRect(area) {
-			area.subForm = this.getFormElement('#rectForm');
-
-			this.addArea(area);
-		}
-
-		addCircle(area) {
-			area.subForm = this.getFormElement('#circForm');
-
-			this.addArea(area);
-		}
-
-		addPoly(area) {
-			area.subForm = this.getFormElement('#polyForm');
-			area.coordForm = this.getFormElement('#polyCoords');
-
-			this.addArea(area);
 		}
 
 		addArea(area) {
 			area.editorForm = this;
+			area.initializeHtmlElements();
+
 			this.areas.push(area);
 			this.element.insertBefore(area.subForm, this.element.firstChild);
 
@@ -434,7 +483,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 
 			this.canvas.add(area);
 			if (this.editorForm) {
-				this.editorForm.addRect(area);
+				this.editorForm.addArea(area);
 			}
 		}
 
@@ -453,7 +502,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 
 			this.canvas.add(area);
 			if (this.editorForm) {
-				this.editorForm.addCircle(area);
+				this.editorForm.addArea(area);
 			}
 		}
 
@@ -488,7 +537,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 
 			this.canvas.add(area);
 			if (this.editorForm) {
-				this.editorForm.addPoly(area);
+				this.editorForm.addArea(area);
 			}
 		}
 

@@ -9,7 +9,7 @@ define([
 			$image = $('#image img'),
 			areaEditor = new AreaEditor(
 				'canvas',
-				'areasForm',
+				'#areasForm',
 				{
 					canvas: {
 						width: parseInt($image.css('width')),
