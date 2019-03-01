@@ -122,7 +122,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 						field.value = this.height + this.top;
 						break;
 					default:
-						field.value = this[field.id] ? this[field.id] : '';
+						field.value = this[field.id] ? this[field.id] : (this['attributes'][field.id] ? this['attributes'][field.id] : '');
 						break;
 				}
 			}.bind(this));

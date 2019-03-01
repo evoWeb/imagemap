@@ -31,7 +31,7 @@
 		alt: '{area.attributes.alt}',
 		link: '{area.value}',
 		color: '{area.attributes.color}',
-		attribute: <f:format.raw>{defaultAttributeset}</f:format.raw>
+		attributes: <f:format.raw><f:render section="attributes" arguments="{attributes: area.attributes, keys: data.attributeKeys}"/></f:format.raw>
 	}<f:if condition="{iterator.isLast}"><f:else>,
 	</f:else></f:if></f:for>
 ]
@@ -64,5 +64,9 @@ window.imagemap = {<f:format.raw>
 <f:render partial="Imagemap/CircForm" arguments="{_all}"/>
 <f:render partial="Imagemap/PolyForm" arguments="{_all}"/>
 </form>
+
+<f:section name="attributes">{
+	<f:for each="{keys}" as="key" iteration="iterator">{key}: "{attributes.{key}}"<f:if condition="{iterator.isLast}"><f:else>,</f:else></f:if></f:for>
+}</f:section>
 
 </html>
