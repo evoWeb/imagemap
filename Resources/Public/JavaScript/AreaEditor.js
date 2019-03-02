@@ -1,7 +1,5 @@
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
-
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
@@ -9,6 +7,8 @@ function _nonIterableRest() { throw new TypeError("Invalid attempt to destructur
 function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
 
 function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
 
@@ -87,8 +87,6 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     function AreaFormElement() {
       _classCallCheck(this, AreaFormElement);
 
-      _defineProperty(this, "shape", '');
-
       _defineProperty(this, "element", null);
 
       _defineProperty(this, "form", null);
@@ -99,20 +97,60 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
       value: function postAddToForm() {
         this.id = fabric.Object.__uid++;
         this.initializeElement();
-        this.initializeValues();
-        this.initializeButtons();
         this.initializeColorPicker();
+        this.initializeEvents();
+        this.initializeButtons();
+        this.updateValues();
       }
     }, {
       key: "initializeElement",
       value: function initializeElement() {
-        this.element = this.getFormElement('#' + this.shape + 'Form');
-        this.form.areaZone.insertBefore(this.element, this.form.areaZone.firstChild);
+        this.element = this.getFormElement('#' + this.constructor.name.toLowerCase() + 'Form');
+        this.form.areaZone.appendChild(this.element);
         this.form.initializeArrows();
       }
     }, {
-      key: "initializeValues",
-      value: function initializeValues() {
+      key: "initializeColorPicker",
+      value: function initializeColorPicker() {
+        var colorPicker = this.getElement('#colorPicker'),
+            values = ['00', '33', '66', '99', 'CC', 'FF'];
+
+        for (var b = 1; b < 6; b++) {
+          for (var g = 1; g < 5; g++) {
+            for (var r = 1; r < 6; r++) {
+              var color = values[b] + values[g] + values[r],
+                  cell = document.createElement('div');
+              cell.id = color;
+              cell.style.backgroundColor = '#' + color;
+              cell.classList.add('colorPickerCell');
+              cell.addEventListener('click', this.colorPickerAction.bind(this));
+              colorPicker.appendChild(cell);
+            }
+          }
+        }
+      }
+    }, {
+      key: "initializeEvents",
+      value: function initializeEvents() {
+        this.on('moved', this.moved.bind(this));
+      }
+    }, {
+      key: "initializeButtons",
+      value: function initializeButtons() {
+        this.getElements('.t3js-btn').forEach(function (button) {
+          button.addEventListener('click', this[button.id + 'Action'].bind(this));
+        }.bind(this));
+      }
+    }, {
+      key: "initializeArrows",
+      value: function initializeArrows() {
+        var areaZone = this.form.areaZone;
+        this.getElement('#up').classList[areaZone.firstChild !== this.element ? 'remove' : 'add']('disabled');
+        this.getElement('#down').classList[areaZone.lastChild !== this.element ? 'remove' : 'add']('disabled');
+      }
+    }, {
+      key: "updateValues",
+      value: function updateValues() {
         var that = this;
         this.getElements('.t3js-field').forEach(function (field) {
           switch (field.id) {
@@ -135,38 +173,9 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
         });
       }
     }, {
-      key: "initializeButtons",
-      value: function initializeButtons() {
-        this.getElements('.t3js-btn').forEach(function (button) {
-          button.addEventListener('click', this[button.id + 'Action'].bind(this));
-        }.bind(this));
-      }
-    }, {
-      key: "initializeColorPicker",
-      value: function initializeColorPicker() {
-        var colorPicker = this.getElement('#colorPicker'),
-            values = ['00', '33', '66', '99', 'CC', 'FF'];
-
-        for (var b = 0; b < 6; b++) {
-          for (var g = 0; g < 6; g++) {
-            for (var r = 0; r < 6; r++) {
-              var color = values[b] + values[g] + values[r],
-                  cell = document.createElement('div');
-              cell.id = color;
-              cell.style.backgroundColor = '#' + color;
-              cell.classList.add('colorPickerCell');
-              cell.addEventListener('click', this.colorPickerAction.bind(this));
-              colorPicker.appendChild(cell);
-            }
-          }
-        }
-      }
-    }, {
-      key: "initializeArrows",
-      value: function initializeArrows() {
-        var areaZone = this.form.areaZone;
-        this.getElement('#up').classList[areaZone.firstChild !== this.element ? 'remove' : 'add']('disabled');
-        this.getElement('#down').classList[areaZone.lastChild !== this.element ? 'remove' : 'add']('disabled');
+      key: "moved",
+      value: function moved(event) {
+        console.log(event);
       }
     }, {
       key: "linkAction",
@@ -175,10 +184,14 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
       }
     }, {
       key: "upAction",
-      value: function upAction() {}
+      value: function upAction() {
+        this.form.moveArea(this, -1);
+      }
     }, {
       key: "downAction",
-      value: function downAction() {}
+      value: function downAction() {
+        this.form.moveArea(this, 1);
+      }
     }, {
       key: "deleteAction",
       value: function deleteAction() {
@@ -240,7 +253,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     }, {
       key: "toAreaXml",
       value: function toAreaXml() {
-        return ['<area shape="' + this.shape + '"', ' coords="' + this.getAreaCoords() + '"', this.getAdditionalAttributes() + '>', this.getLink(), '</area>'].join('');
+        return ['<area shape="' + this.constructor.name.toLowerCase() + '"', ' coords="' + this.getAreaCoords() + '"', this.getAdditionalAttributes() + '>', this.getLink(), '</area>'].join('');
       }
     }, {
       key: "getAreaCoords",
@@ -280,21 +293,9 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     _inherits(Rect, _Aggregation);
 
     function Rect() {
-      var _getPrototypeOf3;
-
-      var _this2;
-
       _classCallCheck(this, Rect);
 
-      for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-        args[_key3] = arguments[_key3];
-      }
-
-      _this2 = _possibleConstructorReturn(this, (_getPrototypeOf3 = _getPrototypeOf(Rect)).call.apply(_getPrototypeOf3, [this].concat(args)));
-
-      _defineProperty(_assertThisInitialized(_this2), "shape", 'rect');
-
-      return _this2;
+      return _possibleConstructorReturn(this, _getPrototypeOf(Rect).apply(this, arguments));
     }
 
     _createClass(Rect, [{
@@ -319,21 +320,9 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     _inherits(Circle, _Aggregation2);
 
     function Circle() {
-      var _getPrototypeOf4;
-
-      var _this3;
-
       _classCallCheck(this, Circle);
 
-      for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
-        args[_key4] = arguments[_key4];
-      }
-
-      _this3 = _possibleConstructorReturn(this, (_getPrototypeOf4 = _getPrototypeOf(Circle)).call.apply(_getPrototypeOf4, [this].concat(args)));
-
-      _defineProperty(_assertThisInitialized(_this3), "shape", 'circle');
-
-      return _this3;
+      return _possibleConstructorReturn(this, _getPrototypeOf(Circle).apply(this, arguments));
     }
 
     _createClass(Circle, [{
@@ -361,21 +350,9 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     _inherits(Poly, _Aggregation3);
 
     function Poly() {
-      var _getPrototypeOf5;
-
-      var _this4;
-
       _classCallCheck(this, Poly);
 
-      for (var _len5 = arguments.length, args = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
-        args[_key5] = arguments[_key5];
-      }
-
-      _this4 = _possibleConstructorReturn(this, (_getPrototypeOf5 = _getPrototypeOf(Poly)).call.apply(_getPrototypeOf5, [this].concat(args)));
-
-      _defineProperty(_assertThisInitialized(_this4), "shape", 'poly');
-
-      return _this4;
+      return _possibleConstructorReturn(this, _getPrototypeOf(Poly).apply(this, arguments));
     }
 
     _createClass(Poly, [{
@@ -390,19 +367,19 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     }, {
       key: "initializeValues",
       value: function initializeValues() {
-        var _this5 = this;
+        var _this2 = this;
 
-        _get(_getPrototypeOf(Poly.prototype), "initializeValues", this).call(this);
+        _get(_getPrototypeOf(Poly.prototype), "updateValues", this).call(this);
 
         this.points.forEach(function (point, index) {
-          point.id = _this5.id + '_' + index;
+          point.id = _this2.id + '_' + index;
 
-          var element = _this5.getFormElement('#polyCoords', point.id);
+          var element = _this2.getFormElement('#polyCoords', point.id);
 
           element.querySelector('#x' + point.id).value = point.x;
           element.querySelector('#y' + point.id).value = point.y;
 
-          _this5.append(element);
+          _this2.append(element);
         });
       }
     }, {
@@ -491,6 +468,21 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
         this.editor.deleteArea(area);
       }
     }, {
+      key: "moveArea",
+      value: function moveArea(area, offset) {
+        var index = this.areas.indexOf(area),
+            newIndex = index + offset,
+            parent = area.element.parentNode;
+
+        if (newIndex > -1 && newIndex < this.areas.length) {
+          var removedArea = this.areas.splice(index, 1)[0];
+          this.areas.splice(newIndex, 0, removedArea);
+          parent.childNodes[index][offset < 0 ? 'after' : 'before'](parent.childNodes[newIndex]);
+        }
+
+        this.initializeArrows();
+      }
+    }, {
       key: "openPopup",
       value: function openPopup(link, area) {
         link.blur();
@@ -540,7 +532,9 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
       _defineProperty(this, "preview", false);
 
       this.initializeOptions(options);
-      this.canvas = new fabric.Canvas(canvas, options.canvas);
+      this.canvas = new fabric.Canvas(canvas, _objectSpread({}, options.canvas, {
+        selection: false
+      }));
 
       if (!this.preview) {
         this.form = new AreaForm(form, this);

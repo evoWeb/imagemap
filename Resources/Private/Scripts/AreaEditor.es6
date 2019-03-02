@@ -33,11 +33,6 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 
 	class AreaFormElement {
 		/**
-		 * @type {string}
-		 */
-		shape = '';
-
-		/**
 		 * @type {ChildNode|HTMLElement}
 		 */
 		element = null;
@@ -51,18 +46,55 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			this.id = fabric.Object.__uid++;
 
 			this.initializeElement();
-			this.initializeValues();
-			this.initializeButtons();
 			this.initializeColorPicker();
+			this.initializeEvents();
+			this.initializeButtons();
+			this.updateValues();
 		}
 
 		initializeElement() {
-			this.element = this.getFormElement('#' + this.shape + 'Form');
-			this.form.areaZone.insertBefore(this.element, this.form.areaZone.firstChild);
+			this.element = this.getFormElement('#' + this.constructor.name.toLowerCase() + 'Form');
+			this.form.areaZone.appendChild(this.element);
 			this.form.initializeArrows();
 		}
 
-		initializeValues() {
+		initializeColorPicker() {
+			let colorPicker = this.getElement('#colorPicker'),
+				values = ['00', '33', '66', '99', 'CC', 'FF'];
+
+			for (let b = 1; b < 6; b++) {
+				for (let g = 1; g < 5; g++) {
+					for (let r = 1; r < 6; r++) {
+						let color = values[b] + values[g] + values[r],
+							cell = document.createElement('div');
+						cell.id = color;
+						cell.style.backgroundColor = '#' + color;
+						cell.classList.add('colorPickerCell');
+						cell.addEventListener('click', this.colorPickerAction.bind(this));
+
+						colorPicker.appendChild(cell);
+					}
+				}
+			}
+		}
+
+		initializeEvents() {
+			this.on('moved', this.moved.bind(this));
+		}
+
+		initializeButtons() {
+			this.getElements('.t3js-btn').forEach(function (button) {
+				button.addEventListener('click', this[button.id + 'Action'].bind(this));
+			}.bind(this));
+		}
+
+		initializeArrows() {
+			let areaZone = this.form.areaZone;
+			this.getElement('#up').classList[areaZone.firstChild !== this.element ? 'remove' : 'add']('disabled');
+			this.getElement('#down').classList[areaZone.lastChild !== this.element ? 'remove' : 'add']('disabled');
+		}
+
+		updateValues() {
 			let that = this;
 			this.getElements('.t3js-field').forEach(function (field) {
 				switch (field.id) {
@@ -78,57 +110,33 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 					default:
 						field.value =
 							that.hasOwnProperty(field.id) && that[field.id] ?
-							that[field.id] :
-							(
-								that.hasOwnProperty('attributes') && that['attributes'].hasOwnProperty(field.id) && this['attributes'][field.id] ?
-								that['attributes'][field.id] :
-								''
-							);
+								that[field.id] :
+								(
+									that.hasOwnProperty('attributes') && that['attributes'].hasOwnProperty(field.id) && this['attributes'][field.id] ?
+										that['attributes'][field.id] :
+										''
+								);
 						break;
 				}
 			});
 		}
 
-		initializeButtons() {
-			this.getElements('.t3js-btn').forEach(function (button) {
-				button.addEventListener('click', this[button.id + 'Action'].bind(this));
-			}.bind(this));
+
+		moved(event) {
+			console.log(event);
 		}
 
-		initializeColorPicker() {
-			let colorPicker = this.getElement('#colorPicker'),
-				values = ['00', '33', '66', '99', 'CC', 'FF'];
-
-			for (let b = 0; b < 6; b++) {
-				for (let g = 0; g < 6; g++) {
-					for (let r = 0; r < 6; r++) {
-						let color = values[b] + values[g] + values[r],
-							cell = document.createElement('div');
-						cell.id = color;
-						cell.style.backgroundColor = '#' + color;
-						cell.classList.add('colorPickerCell');
-						cell.addEventListener('click', this.colorPickerAction.bind(this));
-
-						colorPicker.appendChild(cell);
-					}
-				}
-			}
-		}
-
-		initializeArrows() {
-			let areaZone = this.form.areaZone;
-			this.getElement('#up').classList[areaZone.firstChild !== this.element ? 'remove' : 'add']('disabled');
-			this.getElement('#down').classList[areaZone.lastChild !== this.element ? 'remove' : 'add']('disabled');
-		}
 
 		linkAction(event) {
 			this.form.openPopup(event.currentTarget, this);
 		}
 
 		upAction() {
+			this.form.moveArea(this, -1);
 		}
 
 		downAction() {
+			this.form.moveArea(this, 1);
 		}
 
 		deleteAction() {
@@ -159,6 +167,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			this.form.editor.canvas.renderAll();
 		}
 
+
 		getFormElement(selector, id) {
 			let template = this.form.element.querySelector(selector)
 				.innerHTML.replace(new RegExp('_ID', 'g'), id ? id : this.id);
@@ -181,9 +190,10 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			this.getElement(selector).classList.remove('hide');
 		}
 
+
 		toAreaXml() {
 			return [
-				'<area shape="' + this.shape + '"',
+				'<area shape="' + this.constructor.name.toLowerCase() + '"',
 				' coords="' + this.getAreaCoords() + '"',
 				this.getAdditionalAttributes() + '>',
 				this.getLink(),
@@ -220,8 +230,6 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 	}
 
 	class Rect extends Aggregation(fabric.Rect, AreaFormElement) {
-		shape = 'rect';
-
 		undoAction() {
 		}
 
@@ -234,8 +242,6 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 	}
 
 	class Circle extends Aggregation(fabric.Circle, AreaFormElement) {
-		shape = 'circle';
-
 		undoAction() {
 		}
 
@@ -251,8 +257,6 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 	}
 
 	class Poly extends Aggregation(fabric.Polygon, AreaFormElement) {
-		shape = 'poly';
-
 		undoAction() {
 		}
 
@@ -265,7 +269,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 
 
 		initializeValues() {
-			super.initializeValues();
+			super.updateValues();
 			this.points.forEach((point, index) => {
 				point.id = this.id + '_' + index;
 				let element = this.getFormElement('#polyCoords', point.id);
@@ -345,6 +349,21 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			this.editor.deleteArea(area);
 		}
 
+		moveArea(area, offset) {
+			let index = this.areas.indexOf(area),
+				newIndex = index + offset,
+				parent = area.element.parentNode;
+
+			if (newIndex > -1 && newIndex < this.areas.length) {
+				let removedArea = this.areas.splice(index, 1)[0];
+				this.areas.splice(newIndex, 0, removedArea);
+
+				parent.childNodes[index][offset < 0 ? 'after' : 'before'](parent.childNodes[newIndex]);
+			}
+
+			this.initializeArrows();
+		}
+
 		openPopup(link, area) {
 			link.blur();
 
@@ -392,7 +411,10 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		constructor(canvas, form, options) {
 			this.initializeOptions(options);
 
-			this.canvas = new fabric.Canvas(canvas, options.canvas);
+			this.canvas = new fabric.Canvas(canvas, {
+				...options.canvas,
+				selection: false
+			});
 			if (!this.preview) {
 				this.form = new AreaForm(form, this);
 			}
