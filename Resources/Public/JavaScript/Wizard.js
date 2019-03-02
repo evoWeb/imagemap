@@ -2,14 +2,14 @@ define(['jquery', 'TYPO3/CMS/Imagemap/AreaEditor', 'jquery-ui/sortable', 'jquery
   $(document).ready(function () {
     var configuration = window.imagemap,
         $image = $('#image img'),
-        areaEditor = new AreaEditor('canvas', '#areasForm', {
+        editorConfig = {
       canvas: {
         width: parseInt($image.css('width')),
         height: parseInt($image.css('height')),
         top: parseInt($image.css('height')) * -1
-      },
-      preview: false
-    });
+      }
+    },
+        areaEditor = new AreaEditor('canvas', '#areasForm', editorConfig);
     configuration.areaEditor = areaEditor;
 
     var initializeScaleFactor = function initializeScaleFactor() {

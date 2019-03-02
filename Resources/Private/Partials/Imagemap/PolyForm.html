@@ -10,7 +10,7 @@
 		</div>
 
 		<input type="text" id="alt" class="t3js-field form-control" placeholder="{f:translate(id: 'imagemap.form.area.label', extensionName: 'imagemap')}" />
-		<input type="text" id="link" class="t3js-field form-control" placeholder="{f:translate(id: 'imagemap.form.area.link', extensionName: 'imagemap')}" />
+		<input type="text" id="link" class="t3js-field form-control ignored-attribute" placeholder="{f:translate(id: 'imagemap.form.area.link', extensionName: 'imagemap')}" />
 
 		<f:render partial="Imagemap/Controls" arguments="{returnUrl: returnUrl, formName: formName, renderAddButton: 1}"/>
 	</div>
@@ -36,12 +36,12 @@
 </script>
 
 <script type="text/template" id="polyCoords">
-	<div class="input-group">
-		<label for="x_ID" class="input-group-addon">X_ID:</label>
-		<input type="text" id="x_ID" class="t3js-field form-control" />
+	<div class="input-group coord_ID">
+		<label for="x_ID" class="input-group-addon">X:</label>
+		<input type="text" id="x_ID" class="t3js-field form-control ignored-attribute" />
 
-		<label for="y_ID" class="input-group-addon">Y_ID:</label>
-		<input type="text" id="y_ID" class="t3js-field form-control" />
+		<label for="y_ID" class="input-group-addon">Y:</label>
+		<input type="text" id="y_ID" class="t3js-field form-control ignored-attribute" />
 
 		<div class="input-group-btn">
 			<span id="addBefore" class="t3js-btn btn btn-default" title="{f:translate(id: 'imagemap.form.poly.addEdgeBefore', extensionName: 'imagemap')}"><core:icon identifier="actions-view-go-up"/></span>

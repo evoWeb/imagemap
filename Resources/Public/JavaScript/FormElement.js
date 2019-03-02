@@ -2,6 +2,15 @@ define(['jquery', 'TYPO3/CMS/Imagemap/AreaEditor', 'jquery-ui/sortable', 'jquery
   $(document).ready(function () {
     var $control = $('.imagemap-control:eq(0)'),
         $canvas = $control.find('.canvas'),
+        $image = $control.find('.image-embed-item'),
+        editorConfig = {
+      canvas: {
+        width: parseInt($image.css('width')),
+        height: parseInt($image.css('height')),
+        top: parseInt($image.css('height')) * -1
+      },
+      preview: true
+    },
         areaEditor = new previewCanvasClass();
     areaEditor.init($canvas.attr('id'));
 

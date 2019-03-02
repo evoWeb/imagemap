@@ -1,6 +1,6 @@
 <html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
 
-<script type="text/template" id="circForm">
+<script type="text/template" id="circleForm">
 <div class="areaForm">
 	<div class="basicOptions input-group">
 		<div class="input-group-addon">
@@ -8,7 +8,7 @@
 		</div>
 
 		<input type="text" id="alt" class="t3js-field form-control" placeholder="{f:translate(id: 'imagemap.form.area.label', extensionName: 'imagemap')}" />
-		<input type="text" id="link" class="t3js-field form-control" placeholder="{f:translate(id: 'imagemap.form.area.link', extensionName: 'imagemap')}" />
+		<input type="text" id="link" class="t3js-field form-control ignored-attribute" placeholder="{f:translate(id: 'imagemap.form.area.link', extensionName: 'imagemap')}" />
 
 		<f:render partial="Imagemap/Controls" arguments="{returnUrl: returnUrl, formName: formName}"/>
 	</div>
@@ -29,15 +29,13 @@
 			<div class="positionOptions">
 				<div class="input-group">
 					<label for="left" class="input-group-addon">X:</label>
-					<input type="text" id="left" class="t3js-field form-control" value="x" />
+					<input type="text" id="left" class="t3js-field form-control ignored-attribute" value="x" />
 
 					<label for="top" class="input-group-addon">Y:</label>
-					<input type="text" id="top" class="t3js-field form-control" value="y" />
-				</div>
+					<input type="text" id="top" class="t3js-field form-control ignored-attribute" value="y" />
 
-				<div class="input-group">
 					<label for="radius" class="input-group-addon">R:</label>
-					<input type="text" id="radius" class="t3js-field form-control" value="r" />
+					<input type="text" id="radius" class="t3js-field form-control ignored-attribute" value="r" />
 				</div>
 			</div>
 		</div>

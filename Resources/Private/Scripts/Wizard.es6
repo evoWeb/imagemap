@@ -7,17 +7,17 @@ define([
 	$(document).ready(() => {
 		let configuration = window.imagemap,
 			$image = $('#image img'),
+			editorConfig = {
+				canvas: {
+					width: parseInt($image.css('width')),
+					height: parseInt($image.css('height')),
+					top: parseInt($image.css('height')) * -1,
+				}
+			},
 			areaEditor = new AreaEditor(
 				'canvas',
 				'#areasForm',
-				{
-					canvas: {
-						width: parseInt($image.css('width')),
-						height: parseInt($image.css('height')),
-						top: parseInt($image.css('height')) * -1,
-					},
-					preview: false
-				}
+				editorConfig
 			);
 
 		configuration.areaEditor = areaEditor;

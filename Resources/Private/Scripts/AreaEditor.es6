@@ -38,27 +38,14 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		shape = '';
 
 		/**
-		 * @type {Object}
+		 * @type {ChildNode}
 		 */
-		htmlElements = {
-			subForm: '',
-			coordForm: ''
-		};
-
-		/**
-		 * @type {HTMLElement}
-		 */
-		subForm = null;
-
-		/**
-		 * @type {HTMLElement}
-		 */
-		coordForm = null;
+		element = null;
 
 		/**
 		 * @type {AreaForm}
 		 */
-		editorForm = null;
+		form = null;
 
 		/**
 		 * @type {string[]}
@@ -88,25 +75,19 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			'ffffff', 'cccccc', '999999', '666666', '333333', '000000'
 		];
 
-		/**
-		 * @type {string[]}
-		 */
-		ignoreAttributes = [
-			'link',
-		];
-
 		postAddToForm() {
 			this.id = fabric.Object.__uid++;
 
+			this.initializeElement();
 			this.initializeValues();
 			this.initializeButtons();
 			this.initializeColorPicker();
 		}
 
-		initializeHtmlElements() {
-			for (key of Object.keys(this.htmlElements)) {
-				this[key] = this.getFormElement(this.htmlElements[key]);
-			}
+		initializeElement() {
+			this.element = this.getFormElement('#' + this.shape + 'Form');
+			this.form.areaZone.insertBefore(this.element, this.form.areaZone.firstChild);
+			this.form.initializeArrows();
 		}
 
 		initializeValues() {
@@ -122,7 +103,14 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 						field.value = this.height + this.top;
 						break;
 					default:
-						field.value = this[field.id] ? this[field.id] : (this['attributes'][field.id] ? this['attributes'][field.id] : '');
+						field.value =
+							this.hasOwnProperty(field.id) && this[field.id] ?
+							this[field.id] :
+							(
+								this.hasOwnProperty('attributes') && this['attributes'].hasOwnProperty(field.id) && this['attributes'][field.id] ?
+								this['attributes'][field.id] :
+								''
+							);
 						break;
 				}
 			}.bind(this));
@@ -148,8 +136,14 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			});
 		}
 
+		initializeArrows() {
+			let areaZone = this.form.areaZone;
+			this.getElement('#up').classList[areaZone.firstChild !== this.element ? 'remove' : 'add']('disabled');
+			this.getElement('#down').classList[areaZone.lastChild !== this.element ? 'remove' : 'add']('disabled');
+		}
+
 		linkAction(event) {
-			this.editorForm.openPopup(event.currentTarget, this);
+			this.form.openPopup(event.currentTarget, this);
 		}
 
 		upAction() {
@@ -159,11 +153,9 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 
 		deleteAction() {
-			this.editorForm.deleteArea(this);
-			this.subForm.remove();
-			if (this.coordForm) {
-				this.coordForm.remove();
-			}
+			this.form.deleteArea(this);
+			this.element.remove();
+			this.form.initializeArrows();
 			delete this;
 		}
 
@@ -185,21 +177,21 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			this.set('borderColor', color);
 			this.set('stroke', color);
 			this.set('fill', AreaEditor.hexToRgbA(AreaEditor.rgbAToHex(color), 0.2));
-			this.editorForm.editor.canvas.renderAll();
+			this.form.editor.canvas.renderAll();
 		}
 
-		getFormElement(selector) {
-			let template = this.editorForm.element.querySelector(selector).innerHTML;
-			template.replace(/_ID/g, this.id);
+		getFormElement(selector, id) {
+			let template = this.form.element.querySelector(selector)
+				.innerHTML.replace(new RegExp('_ID', 'g'), id ? id : this.id);
 			return new DOMParser().parseFromString(template, 'text/html').body.firstChild;
 		}
 
 		getElement(selector) {
-			return this.subForm.querySelector(selector);
+			return this.element.querySelector(selector);
 		}
 
 		getElements(selector) {
-			return this.subForm.querySelectorAll(selector);
+			return this.element.querySelectorAll(selector);
 		}
 
 		hideElement(selector) {
@@ -227,7 +219,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			let result = [];
 
 			this.getElements('.t3js-field').forEach((field) => {
-				if (this.ignoreAttributes.indexOf(field.id) < 0) {
+				if (!field.classList.contains('ignored-attribute')) {
 					switch (field.id) {
 						case 'color':
 							result.push(field.id + '="' + AreaEditor.rgbAToHex(field.style.backgroundColor) + '"');
@@ -251,18 +243,6 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 	class Rect extends Aggregation(fabric.Rect, AreaFormElement) {
 		shape = 'rect';
 
-		htmlElements = {
-			subForm: '#rectForm'
-		};
-
-		ignoreAttributes = [
-			'link',
-			'left',
-			'top',
-			'right',
-			'bottom'
-		];
-
 		undoAction() {
 		}
 
@@ -276,17 +256,6 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 
 	class Circle extends Aggregation(fabric.Circle, AreaFormElement) {
 		shape = 'circle';
-
-		htmlElements = {
-			subForm: '#circForm'
-		};
-
-		ignoreAttributes = [
-			'link',
-			'left',
-			'top',
-			'radius'
-		];
 
 		undoAction() {
 		}
@@ -302,45 +271,28 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 	}
 
-	class Polygon extends Aggregation(fabric.Polygon, AreaFormElement) {
+	class Poly extends Aggregation(fabric.Polygon, AreaFormElement) {
 		shape = 'poly';
-
-		htmlElements = {
-			subForm: '#polyForm',
-			coordForm: '#polyCoords'
-		};
-
-		ignoreAttributes = [
-			'link',
-			'left',
-			'top'
-		];
-
-		initializeValues() {
-			this.getElements('.t3js-field').forEach(function (field) {
-				switch (field.id) {
-					case 'color':
-						field.style.backgroundColor = this.color;
-						break;
-					case 'right':
-						field.value = this.width + this.left;
-						break;
-					case 'bottom':
-						field.value = this.height + this.top;
-						break;
-					default:
-						field.value = this[field.id] ? this[field.id] : '';
-						break;
-				}
-			}.bind(this));
-
-			// points
-		}
 
 		undoAction() {
 		}
 
 		redoAction() {
+		}
+
+		getAreaCoords() {
+
+		}
+
+
+		initializeValues() {
+			super.initializeValues();
+			this.points.forEach((point, index) => {
+				let element = this.getFormElement('#polyCoords', this.id + '_' + index);
+				element.querySelector('#x' + this.id + '_' + index).value = point.x;
+				element.querySelector('#y' + this.id + '_' + index).value = point.y;
+				this.append(element);
+			});
 		}
 
 		addBeforeAction() {
@@ -349,33 +301,18 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		addAfterAction() {
 		}
 
-		removeAction() {
+		removeAction(event) {
+			console.log(event.currentTarget);
 		}
 
-		getAreaCoords() {
-
+		prepend(element) {
+			let positionOptions = this.getElement('.positionOptions');
+			positionOptions.insertBefore(element, positionOptions.firstChild);
 		}
 
-		getAdditionalAttributes() {
-			let result = [];
-
-			this.getElements('.t3js-field').forEach((field) => {
-				if (this.ignoreAttributes.indexOf(field.id) < 0
-						|| field.id.indexOf('x') !== 0
-						|| field.id.indexOf('y') !== 0) {
-					switch (field.id) {
-						case 'color':
-							result.push(field.id + '="' + AreaEditor.rgbAToHex(field.style.backgroundColor) + '"');
-							break;
-
-						default:
-							result.push(field.id + '="' + field.value + '"');
-							break;
-					}
-				}
-			});
-
-			return (result.length > 0 ? ' ' : '') + result.join(' ');
+		append(element) {
+			let positionOptions = this.getElement('.positionOptions');
+			positionOptions.insertBefore(element, positionOptions.lastChild);
 		}
 	}
 
@@ -385,18 +322,26 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		 */
 		areas = [];
 
+		/**
+		 * @type {HTMLElement}
+		 */
+		areaZone = null;
+
 		constructor(formElement, editor) {
 			this.element = fabric.document.querySelector(formElement);
+			this.areaZone = this.element.querySelector('#areaZone');
 			this.editor = editor;
 		}
 
+		initializeArrows() {
+			this.areas.forEach((area) => {
+				area.initializeArrows();
+			});
+		}
+
 		addArea(area) {
-			area.editorForm = this;
-			area.initializeHtmlElements();
-
 			this.areas.push(area);
-			this.element.insertBefore(area.subForm, this.element.firstChild);
-
+			area.form = this;
 			area.postAddToForm();
 		}
 
@@ -443,13 +388,24 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 	}
 
 	class AreaEditor {
+		areaConfig = {
+			cornerColor: '#eee',
+			cornerStrokeColor: '#bbb',
+			cornerSize: 10,
+			cornerStyle: 'circle',
+			hasBorders: false,
+			hasRotatingPoint: false,
+			transparentCorners: false
+		};
+
+		preview = false;
+
 		constructor(canvas, form, options) {
-			this.preview = false;
 			this.initializeOptions(options);
 
 			this.canvas = new fabric.Canvas(canvas, options.canvas);
 			if (!this.preview) {
-				this.editorForm = new AreaForm(form, this);
+				this.form = new AreaForm(form, this);
 			}
 		}
 
@@ -480,20 +436,20 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			let [left, top, right, bottom] = configuration.coords.split(','),
 				area = new Rect({
 					...configuration,
-					hasRotatingPoint: false,
+					...this.areaConfig,
+					hasControls: !this.preview,
 					left: parseInt(left),
 					top: parseInt(top),
 					width: right - left,
 					height: bottom - top,
-					borderColor: configuration.color,
 					stroke: configuration.color,
 					strokeWidth: 1,
 					fill: AreaEditor.hexToRgbA(configuration.color, this.preview ? 0.001 : 0.2)
 				});
 
 			this.canvas.add(area);
-			if (this.editorForm) {
-				this.editorForm.addArea(area);
+			if (this.form) {
+				this.form.addArea(area);
 			}
 		}
 
@@ -501,19 +457,24 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			let [left, top, radius] = configuration.coords.split(','),
 				area = new Circle({
 					...configuration,
-					hasRotatingPoint: false,
+					...this.areaConfig,
+					hasControls: !this.preview,
 					left: left - radius,
 					top: top - radius,
 					radius: parseInt(radius),
-					borderColor: configuration.color,
 					stroke: configuration.color,
 					strokeWidth: 1,
 					fill: AreaEditor.hexToRgbA(configuration.color, this.preview ? 0.001 : 0.2)
 				});
 
+			area.setControlVisible('ml', false);
+			area.setControlVisible('mt', false);
+			area.setControlVisible('mr', false);
+			area.setControlVisible('mb', false);
+
 			this.canvas.add(area);
-			if (this.editorForm) {
-				this.editorForm.addArea(area);
+			if (this.form) {
+				this.form.addArea(area);
 			}
 		}
 
@@ -536,21 +497,29 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 				top = Math.min(top, xy.y);
 			}
 
-			let area = new Polygon(points, {
+			let area = new Poly(points, {
 				...configuration,
-				hasRotatingPoint: false,
+				...this.areaConfig,
+				hasControls: !this.preview,
 				top: top,
 				left: left,
-				borderColor: configuration.color,
 				stroke: configuration.color,
 				strokeWidth: 1,
 				fill: AreaEditor.hexToRgbA(configuration.color, this.preview ? 0.001 : 0.2)
 			});
 
 			this.canvas.add(area);
-			if (this.editorForm) {
-				this.editorForm.addArea(area);
+			if (this.form) {
+				this.form.addArea(area);
 			}
+		}
+
+		deleteArea(area) {
+			this.canvas.remove(area);
+		}
+
+		toAreaXml() {
+			return this.form.toAreaXml();
 		}
 
 		static hexToRgbA(hex, alpha) {
@@ -584,14 +553,6 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 
 			let rgb = numbers[2] | (numbers[1] << 8) | (numbers[0] << 16);
 			return '#' + (0x1000000 + rgb).toString(16).slice(1).toUpperCase();
-		}
-
-		deleteArea(area) {
-			this.canvas.remove(area);
-		}
-
-		toAreaXml() {
-			return this.editorForm.toAreaXml();
 		}
 	}
 

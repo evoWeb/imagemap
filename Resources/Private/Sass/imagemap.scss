@@ -99,8 +99,12 @@
 .moreOptions {
     display: grid;
     grid-template-columns: 50% 50%;
+    background-color: #fafafa;
     border: 1px solid #bbb;
     border-top: none;
+    border-radius: 2px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
     overflow: hidden;
 
     .additionalInformation {
