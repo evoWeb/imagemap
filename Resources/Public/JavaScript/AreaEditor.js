@@ -10,10 +10,6 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
 
-function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
-
-function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
-
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
@@ -133,6 +129,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
       key: "initializeEvents",
       value: function initializeEvents() {
         this.on('moved', this.moved.bind(this));
+        this.on('modified', this.modified.bind(this));
       }
     }, {
       key: "initializeButtons",
@@ -150,32 +147,18 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
       }
     }, {
       key: "updateValues",
-      value: function updateValues() {
-        var that = this;
-        this.getElements('.t3js-field').forEach(function (field) {
-          switch (field.id) {
-            case 'color':
-              field.style.backgroundColor = that.color;
-              break;
-
-            case 'right':
-              field.value = that.width + that.left;
-              break;
-
-            case 'bottom':
-              field.value = that.height + that.top;
-              break;
-
-            default:
-              field.value = that.hasOwnProperty(field.id) && that[field.id] ? that[field.id] : that.hasOwnProperty('attributes') && that['attributes'].hasOwnProperty(field.id) && this['attributes'][field.id] ? that['attributes'][field.id] : '';
-              break;
-          }
-        });
-      }
+      value: function updateValues() {}
     }, {
       key: "moved",
       value: function moved(event) {
         console.log(event);
+        this.updateValues();
+      }
+    }, {
+      key: "modified",
+      value: function modified(event) {
+        console.log(event);
+        this.updateValues();
       }
     }, {
       key: "linkAction",
@@ -192,6 +175,12 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
       value: function downAction() {
         this.form.moveArea(this, 1);
       }
+    }, {
+      key: "undoAction",
+      value: function undoAction() {}
+    }, {
+      key: "redoAction",
+      value: function redoAction() {}
     }, {
       key: "deleteAction",
       value: function deleteAction() {
@@ -299,15 +288,28 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     }
 
     _createClass(Rect, [{
-      key: "undoAction",
-      value: function undoAction() {}
-    }, {
-      key: "redoAction",
-      value: function redoAction() {}
+      key: "updateValues",
+      value: function updateValues() {
+        var _this2 = this;
+
+        this.getElement('#color').style.backgroundColor = this.color;
+        this.getElement('#alt').value = this.alt;
+        this.getElement('#link').value = this.link;
+        this.getElement('#left').value = this.left;
+        this.getElement('#top').value = this.top;
+        this.getElement('#right').value = Math.floor(this.left + this.getScaledWidth());
+        this.getElement('#bottom').value = Math.floor(this.top + this.getScaledHeight());
+
+        if (this.hasOwnProperty('attributes') && this.attributes) {
+          Object.entries(this.attributes).forEach(function (attribute) {
+            _this2.getElement('#' + attribute[0]).value = attribute[1];
+          });
+        }
+      }
     }, {
       key: "getAreaCoords",
       value: function getAreaCoords() {
-        return [this.left, this.top, this.left + this.width, this.height + this.top].join(',');
+        return [this.left, this.top, Math.floor(this.left + this.getScaledWidth()), Math.floor(this.top + this.getScaledHeight())].join(',');
       }
     }]);
 
@@ -326,18 +328,28 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     }
 
     _createClass(Circle, [{
-      key: "undoAction",
-      value: function undoAction() {}
-    }, {
-      key: "redoAction",
-      value: function redoAction() {}
+      key: "updateValues",
+      value: function updateValues() {
+        var _this3 = this;
+
+        this.getElement('#color').style.backgroundColor = this.color;
+        this.getElement('#alt').value = this.alt;
+        this.getElement('#link').value = this.link;
+        this.getElement('#left').value = this.left;
+        this.getElement('#top').value = this.top;
+        this.getElement('#radius').value = this.radius;
+
+        if (this.hasOwnProperty('attributes') && this.attributes) {
+          Object.entries(this.attributes).forEach(function (attribute) {
+            _this3.getElement('#' + attribute[0]).value = attribute[1];
+          });
+        }
+      }
     }, {
       key: "getAreaCoords",
       value: function getAreaCoords() {
-        var coords = this.getCoords(),
-            left = coords[0].x + this.radius,
-            top = coords[0].y + this.radius;
-        return left + ',' + top + ',' + this.radius;
+        var coords = this.getCoords();
+        return [coords[0].x + this.getRadiusX(), coords[0].y + this.getRadiusX(), this.getRadiusX()].join(',');
       }
     }]);
 
@@ -356,11 +368,35 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     }
 
     _createClass(Poly, [{
-      key: "undoAction",
-      value: function undoAction() {}
-    }, {
-      key: "redoAction",
-      value: function redoAction() {}
+      key: "updateValues",
+      value: function updateValues() {
+        var _this4 = this;
+
+        this.getElement('#color').style.backgroundColor = this.color;
+        this.getElement('#alt').value = this.alt;
+        this.getElement('#link').value = this.link;
+
+        if (this.hasOwnProperty('attributes') && this.attributes) {
+          Object.entries(this.attributes).forEach(function (attribute) {
+            _this4.getElement('#' + attribute[0]).value = attribute[1];
+          });
+        }
+
+        this.points.forEach(function (point, index) {
+          point.id = point.id ? point.id : 'p' + _this4.id + '_' + index;
+
+          var element = _this4.getElement('#' + point.id);
+
+          if (element === null) {
+            element = _this4.getFormElement('#polyCoords', point.id);
+
+            _this4.append(element);
+          }
+
+          element.querySelector('#x' + point.id).value = point.x;
+          element.querySelector('#y' + point.id).value = point.y;
+        });
+      }
     }, {
       key: "getAreaCoords",
       value: function getAreaCoords() {
@@ -370,24 +406,6 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
           result.push(point.y);
         });
         return result.join(',');
-      }
-    }, {
-      key: "initializeValues",
-      value: function initializeValues() {
-        var _this2 = this;
-
-        _get(_getPrototypeOf(Poly.prototype), "updateValues", this).call(this);
-
-        this.points.forEach(function (point, index) {
-          point.id = _this2.id + '_' + index;
-
-          var element = _this2.getFormElement('#polyCoords', point.id);
-
-          element.querySelector('#x' + point.id).value = point.x;
-          element.querySelector('#y' + point.id).value = point.y;
-
-          _this2.append(element);
-        });
       }
     }, {
       key: "addBeforeAction",

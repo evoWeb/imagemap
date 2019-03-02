@@ -80,6 +80,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 
 		initializeEvents() {
 			this.on('moved', this.moved.bind(this));
+			this.on('modified', this.modified.bind(this));
 		}
 
 		initializeButtons() {
@@ -95,35 +96,17 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 
 		updateValues() {
-			let that = this;
-			this.getElements('.t3js-field').forEach(function (field) {
-				switch (field.id) {
-					case 'color':
-						field.style.backgroundColor = that.color;
-						break;
-					case 'right':
-						field.value = that.width + that.left;
-						break;
-					case 'bottom':
-						field.value = that.height + that.top;
-						break;
-					default:
-						field.value =
-							that.hasOwnProperty(field.id) && that[field.id] ?
-								that[field.id] :
-								(
-									that.hasOwnProperty('attributes') && that['attributes'].hasOwnProperty(field.id) && this['attributes'][field.id] ?
-										that['attributes'][field.id] :
-										''
-								);
-						break;
-				}
-			});
 		}
 
 
 		moved(event) {
 			console.log(event);
+			this.updateValues();
+		}
+
+		modified(event) {
+			console.log(event);
+			this.updateValues();
 		}
 
 
@@ -137,6 +120,12 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 
 		downAction() {
 			this.form.moveArea(this, 1);
+		}
+
+		undoAction() {
+		}
+
+		redoAction() {
 		}
 
 		deleteAction() {
@@ -230,37 +219,82 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 	}
 
 	class Rect extends Aggregation(fabric.Rect, AreaFormElement) {
-		undoAction() {
-		}
+		updateValues() {
+			this.getElement('#color').style.backgroundColor = this.color;
+			this.getElement('#alt').value = this.alt;
+			this.getElement('#link').value = this.link;
+			this.getElement('#left').value = this.left;
+			this.getElement('#top').value = this.top;
+			this.getElement('#right').value = Math.floor(this.left + this.getScaledWidth());
+			this.getElement('#bottom').value = Math.floor(this.top + this.getScaledHeight());
 
-		redoAction() {
+			if (this.hasOwnProperty('attributes') && this.attributes) {
+				Object.entries(this.attributes).forEach((attribute) => {
+					this.getElement('#' + attribute[0]).value = attribute[1];
+				});
+			}
 		}
 
 		getAreaCoords() {
-			return [this.left, this.top, (this.left + this.width), (this.height + this.top)].join(',');
+			return [
+				this.left,
+				this.top,
+				Math.floor(this.left + this.getScaledWidth()),
+				Math.floor(this.top + this.getScaledHeight())
+			].join(',');
 		}
 	}
 
 	class Circle extends Aggregation(fabric.Circle, AreaFormElement) {
-		undoAction() {
-		}
+		updateValues() {
+			this.getElement('#color').style.backgroundColor = this.color;
+			this.getElement('#alt').value = this.alt;
+			this.getElement('#link').value = this.link;
+			this.getElement('#left').value = this.left;
+			this.getElement('#top').value = this.top;
+			this.getElement('#radius').value = this.radius;
 
-		redoAction() {
+			if (this.hasOwnProperty('attributes') && this.attributes) {
+				Object.entries(this.attributes).forEach((attribute) => {
+					this.getElement('#' + attribute[0]).value = attribute[1];
+				});
+			}
 		}
 
 		getAreaCoords() {
-			let coords = this.getCoords(),
-				left = coords[0].x + this.radius,
-				top = coords[0].y + this.radius;
-			return left + ',' + top + ',' + this.radius;
+			let coords = this.getCoords();
+			return [
+				(coords[0].x + this.getRadiusX()),
+				(coords[0].y + this.getRadiusX()),
+				this.getRadiusX()
+			].join(',');
 		}
 	}
 
 	class Poly extends Aggregation(fabric.Polygon, AreaFormElement) {
-		undoAction() {
-		}
+		updateValues() {
+			this.getElement('#color').style.backgroundColor = this.color;
+			this.getElement('#alt').value = this.alt;
+			this.getElement('#link').value = this.link;
 
-		redoAction() {
+			if (this.hasOwnProperty('attributes') && this.attributes) {
+				Object.entries(this.attributes).forEach((attribute) => {
+					this.getElement('#' + attribute[0]).value = attribute[1];
+				});
+			}
+
+			this.points.forEach((point, index) => {
+				point.id = point.id ? point.id : 'p' + this.id + '_' + index;
+				let element = this.getElement('#' + point.id);
+
+				if (element === null) {
+					element = this.getFormElement('#polyCoords', point.id);
+					this.append(element);
+				}
+
+				element.querySelector('#x' + point.id).value = point.x;
+				element.querySelector('#y' + point.id).value = point.y;
+			});
 		}
 
 		getAreaCoords() {
@@ -274,17 +308,6 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			return result.join(',');
 		}
 
-
-		initializeValues() {
-			super.updateValues();
-			this.points.forEach((point, index) => {
-				point.id = this.id + '_' + index;
-				let element = this.getFormElement('#polyCoords', point.id);
-				element.querySelector('#x' + point.id).value = point.x;
-				element.querySelector('#y' + point.id).value = point.y;
-				this.append(element);
-			});
-		}
 
 		addBeforeAction() {
 		}
