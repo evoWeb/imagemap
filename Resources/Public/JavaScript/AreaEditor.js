@@ -295,8 +295,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
         this.getElement('#color').style.backgroundColor = this.color;
         this.getElement('#alt').value = this.alt;
         this.getElement('#link').value = this.link;
-        this.getElement('#left').value = this.left;
-        this.getElement('#top').value = this.top;
+        this.getElement('#left').value = Math.floor(this.left + 0);
+        this.getElement('#top').value = Math.floor(this.top + 0);
         this.getElement('#right').value = Math.floor(this.left + this.getScaledWidth());
         this.getElement('#bottom').value = Math.floor(this.top + this.getScaledHeight());
 
@@ -309,7 +309,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     }, {
       key: "getAreaCoords",
       value: function getAreaCoords() {
-        return [this.left, this.top, Math.floor(this.left + this.getScaledWidth()), Math.floor(this.top + this.getScaledHeight())].join(',');
+        return [Math.floor(this.left + 0), Math.floor(this.top + 0), Math.floor(this.left + this.getScaledWidth()), Math.floor(this.top + this.getScaledHeight())].join(',');
       }
     }]);
 
@@ -335,9 +335,9 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
         this.getElement('#color').style.backgroundColor = this.color;
         this.getElement('#alt').value = this.alt;
         this.getElement('#link').value = this.link;
-        this.getElement('#left').value = this.left;
-        this.getElement('#top').value = this.top;
-        this.getElement('#radius').value = this.radius;
+        this.getElement('#left').value = Math.floor(this.left + 0);
+        this.getElement('#top').value = Math.floor(this.top + 0);
+        this.getElement('#radius').value = Math.floor(this.getRadiusX());
 
         if (this.hasOwnProperty('attributes') && this.attributes) {
           Object.entries(this.attributes).forEach(function (attribute) {
@@ -348,8 +348,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     }, {
       key: "getAreaCoords",
       value: function getAreaCoords() {
-        var coords = this.getCoords();
-        return [coords[0].x + this.getRadiusX(), coords[0].y + this.getRadiusX(), this.getRadiusX()].join(',');
+        return [Math.floor(this.left + this.getRadiusX()), Math.floor(this.top + this.getRadiusX()), Math.floor(this.getRadiusX())].join(',');
       }
     }]);
 
