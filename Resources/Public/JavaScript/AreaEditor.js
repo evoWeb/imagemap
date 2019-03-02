@@ -363,7 +363,14 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
       value: function redoAction() {}
     }, {
       key: "getAreaCoords",
-      value: function getAreaCoords() {}
+      value: function getAreaCoords() {
+        var result = [];
+        this.points.forEach(function (point) {
+          result.push(point.x);
+          result.push(point.y);
+        });
+        return result.join(',');
+      }
     }, {
       key: "initializeValues",
       value: function initializeValues() {

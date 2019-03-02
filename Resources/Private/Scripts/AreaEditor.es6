@@ -264,7 +264,14 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 
 		getAreaCoords() {
+			let result = [];
 
+			this.points.forEach((point) => {
+				result.push(point.x);
+				result.push(point.y);
+			});
+
+			return result.join(',');
 		}
 
 
