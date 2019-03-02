@@ -60,19 +60,16 @@ define(['jquery', 'TYPO3/CMS/Imagemap/AreaEditor', 'jquery-ui/sortable', 'jquery
     var initializeEvents = function initializeEvents() {
       $('#addRect').on('click', function () {
         areaEditor.addRect({
-          color: '#ff0',
           coords: parseInt($image.css('width')) / 2 - 50 + ',' + (parseInt($image.css('height')) / 2 - 50) + ',' + (parseInt($image.css('width')) / 2 + 50) + ',' + (parseInt($image.css('height')) / 2 + 50)
         });
       });
       $('#addCircle').on('click', function () {
         areaEditor.addCircle({
-          color: '#ff0',
           coords: parseInt($image.css('width')) / 2 - 50 + ',' + (parseInt($image.css('height')) / 2 - 50) + ',50'
         });
       });
       $('#addPoly').on('click', function () {
         areaEditor.addPoly({
-          color: '#ff0',
           coords: parseInt($image.css('width')) / 2 + ',' + (parseInt($image.css('height')) / 2 - 50) + ',' + (parseInt($image.css('width')) / 2 + 50) + ',' + (parseInt($image.css('height')) / 2 + 50) + ',' + (parseInt($image.css('width')) / 2 - 50) + ',' + (parseInt($image.css('height')) / 2 + 50)
         });
       });

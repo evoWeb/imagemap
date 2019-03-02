@@ -12,7 +12,7 @@
 		<input type="text" id="alt" class="t3js-field form-control" placeholder="{f:translate(id: 'imagemap.form.area.label', extensionName: 'imagemap')}" />
 		<input type="text" id="link" class="t3js-field form-control ignored-attribute" placeholder="{f:translate(id: 'imagemap.form.area.link', extensionName: 'imagemap')}" />
 
-		<f:render partial="Imagemap/Controls" arguments="{returnUrl: returnUrl, formName: formName, renderAddButton: 1}"/>
+		<f:render partial="Imagemap/Controls" arguments="{returnUrl: returnUrl, formName: formName}"/>
 	</div>
 
 	<div class="moreOptions hide">
@@ -36,7 +36,7 @@
 </script>
 
 <script type="text/template" id="polyCoords">
-	<div class="input-group coord_ID">
+	<div class="input-group coord" id="_ID">
 		<label for="x_ID" class="input-group-addon">X:</label>
 		<input type="text" id="x_ID" class="t3js-field form-control ignored-attribute" />
 
