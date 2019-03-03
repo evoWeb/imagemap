@@ -87,6 +87,7 @@ define([
 				areaEditor.addPoly({
 					coords: (parseInt($image.css('width')) / 2) + ',' + (parseInt($image.css('height')) / 2 - 50)
 						+ ',' + (parseInt($image.css('width')) / 2 + 50) + ',' + (parseInt($image.css('height')) / 2 + 50)
+						+ ',' + (parseInt($image.css('width')) / 2) + ',' + (parseInt($image.css('height')) / 2 + 70)
 						+ ',' + (parseInt($image.css('width')) / 2 - 50) + ',' + (parseInt($image.css('height')) / 2 + 50)
 				});
 			});

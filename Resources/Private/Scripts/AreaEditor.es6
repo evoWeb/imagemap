@@ -462,16 +462,21 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 
 		removeAction(event) {
 			if (this.points.length > 3) {
-				// @todo remove controls
 				let element = event.currentTarget.parentNode.parentNode,
-					points = [];
-				this.points.forEach((point) => {
+					points = [],
+					controls = [];
+				this.points.forEach((point, index) => {
 					if (element.id !== point.id) {
 						points.push(point);
+						controls.push(this.controls[index]);
+					} else {
+						this.canvas.remove(this.controls[index]);
 					}
 				});
 				element.remove();
 				this.points = points;
+				this.controls = controls;
+				this.canvas.renderAll();
 			}
 		}
 

@@ -594,17 +594,24 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     }, {
       key: "removeAction",
       value: function removeAction(event) {
+        var _this8 = this;
+
         if (this.points.length > 3) {
-          // @todo remove controls
           var element = event.currentTarget.parentNode.parentNode,
-              points = [];
-          this.points.forEach(function (point) {
+              points = [],
+              controls = [];
+          this.points.forEach(function (point, index) {
             if (element.id !== point.id) {
               points.push(point);
+              controls.push(_this8.controls[index]);
+            } else {
+              _this8.canvas.remove(_this8.controls[index]);
             }
           });
           element.remove();
           this.points = points;
+          this.controls = controls;
+          this.canvas.renderAll();
         }
       }
     }, {

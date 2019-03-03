@@ -70,7 +70,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/AreaEditor', 'jquery-ui/sortable', 'jquery
       });
       $('#addPoly').on('click', function () {
         areaEditor.addPoly({
-          coords: parseInt($image.css('width')) / 2 + ',' + (parseInt($image.css('height')) / 2 - 50) + ',' + (parseInt($image.css('width')) / 2 + 50) + ',' + (parseInt($image.css('height')) / 2 + 50) + ',' + (parseInt($image.css('width')) / 2 - 50) + ',' + (parseInt($image.css('height')) / 2 + 50)
+          coords: parseInt($image.css('width')) / 2 + ',' + (parseInt($image.css('height')) / 2 - 50) + ',' + (parseInt($image.css('width')) / 2 + 50) + ',' + (parseInt($image.css('height')) / 2 + 50) + ',' + parseInt($image.css('width')) / 2 + ',' + (parseInt($image.css('height')) / 2 + 70) + ',' + (parseInt($image.css('width')) / 2 - 50) + ',' + (parseInt($image.css('height')) / 2 + 50)
         });
       });
       $('#submit').on('click', function () {
