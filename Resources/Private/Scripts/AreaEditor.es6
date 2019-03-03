@@ -397,6 +397,36 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 
 
+		addControls(areaConfig) {
+			this.points.forEach((point, index) => {
+				let circle = new fabric.Circle({
+					...areaConfig,
+					hasControls: false,
+					radius: 5,
+					fill: areaConfig.cornerColor,
+					stroke: areaConfig.cornerStrokeColor,
+					left: point.x,
+					top: point.y,
+					originX: 'center',
+					originY: 'center',
+					name: index,
+					polygon: this,
+					type: 'control'
+				});
+				this.canvas.add(circle);
+			});
+
+			this.canvas.on('object:moving', (event) => {
+				if (event.target.get('type') === 'control') {
+					let control = event.target;
+					control.polygon.points[control.name] = {
+						x: control.getCenterPoint().x,
+						y: control.getCenterPoint().y
+					};
+				}
+			});
+		}
+
 		addBeforeAction() {
 		}
 
@@ -643,6 +673,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			let area = new Poly(points, {
 				...configuration,
 				...this.areaConfig,
+				selectable: false,
 				objectCaching: false,
 				hasControls: !this.preview,
 				top: top,
@@ -652,8 +683,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 				fill: AreaEditor.hexToRgbA(configuration.color, this.preview ? 0.001 : 0.2)
 			});
 
-
 			this.canvas.add(area);
+			area.addControls(this.areaConfig);
 			if (this.form) {
 				this.form.addArea(area);
 			}
