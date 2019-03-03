@@ -288,7 +288,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 					this.set({height: value});
 					break;
 			}
-			this.form.editor.canvas.renderAll();
+			this.canvas.renderAll();
 		}
 
 		getAreaCoords() {
@@ -335,7 +335,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 					this.set({radius: value});
 					break;
 			}
-			this.form.editor.canvas.renderAll();
+			this.canvas.renderAll();
 		}
 
 		getAreaCoords() {
@@ -348,6 +348,11 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 	}
 
 	class Poly extends Aggregation(fabric.Polygon, AreaFormElement) {
+		/**
+		 * @type {Array}
+		 */
+		controls = [];
+
 		updateFields() {
 			this.getElement('#color').style.backgroundColor = this.color;
 			this.getElement('#alt').value = this.alt;
@@ -373,24 +378,31 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 
 		updateCanvas(event) {
 			let field = event.currentTarget || event.target,
-				value = 0;
+				[, point] = field.id.split('_'),
+				control = this.controls[parseInt(point)],
+				x = control.getCenterPoint().x,
+				y = control.getCenterPoint().y;
 
-			switch (field.id) {
-				case 'left':
-					value = parseInt(field.value);
-					this.set({left: value});
-					break;
+			if (field.id.indexOf('x') > -1) {
+				x = parseInt(field.value);
+			}
+			if (field.id.indexOf('y') > -1) {
+				y = parseInt(field.value);
 			}
 
-			console.log(field);
+			control.set('left', x);
+			control.set('top', y);
+			this.points[control.name] = {x: x, y: y};
+			this.canvas.renderAll();
 		}
 
 		getAreaCoords() {
 			let result = [];
 
-			this.points.forEach((point) => {
-				result.push(point.x);
-				result.push(point.y);
+			this.controls.forEach((control) => {
+				let center = control.getCenterPoint();
+				result.push(center.x);
+				result.push(center.y);
 			});
 
 			return result.join(',');
@@ -399,32 +411,47 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 
 		addControls(areaConfig) {
 			this.points.forEach((point, index) => {
-				let circle = new fabric.Circle({
-					...areaConfig,
-					hasControls: false,
-					radius: 5,
-					fill: areaConfig.cornerColor,
-					stroke: areaConfig.cornerStrokeColor,
-					left: point.x,
-					top: point.y,
-					originX: 'center',
-					originY: 'center',
-					name: index,
-					polygon: this,
-					type: 'control'
-				});
-				this.canvas.add(circle);
+				this.addControl(areaConfig, point, index);
 			});
 
 			this.canvas.on('object:moving', (event) => {
 				if (event.target.get('type') === 'control') {
-					let control = event.target;
+					let control = event.target,
+						center = control.getCenterPoint();
 					control.polygon.points[control.name] = {
-						x: control.getCenterPoint().x,
-						y: control.getCenterPoint().y
+						x: center.x,
+						y: center.y
 					};
 				}
 			});
+		}
+
+		addControl(areaConfig, point, index) {
+			let circle = new fabric.Circle({
+				...areaConfig,
+				hasControls: false,
+				radius: 5,
+				fill: areaConfig.cornerColor,
+				stroke: areaConfig.cornerStrokeColor,
+				left: point.x,
+				top: point.y,
+				originX: 'center',
+				originY: 'center',
+				name: index,
+				polygon: this,
+				type: 'control'
+			});
+			circle.on('moved', this.coordMoved.bind(this));
+			this.controls[index] = circle;
+			this.canvas.add(circle);
+		}
+
+		coordMoved(event) {
+			let point = event.currentTabId || event.target,
+				id = 'p' + point.polygon.id + '_' + point.name;
+
+			this.getElement('#x' + id).value = point.getCenterPoint().x;
+			this.getElement('#y' + id).value = point.getCenterPoint().y;
 		}
 
 		addBeforeAction() {
@@ -434,16 +461,18 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 
 		removeAction(event) {
-			let element = event.currentTarget.parentNode.parentNode,
-			points = [];
-			this.points.forEach((point) => {
-				if (element.id !== point.id) {
-					points.push(point);
-				}
-			});
-			element.remove();
-			this.points = points;
-			this.form.editor.canvas.renderAll();
+			if (this.points.length > 3) {
+				// @todo remove controls
+				let element = event.currentTarget.parentNode.parentNode,
+					points = [];
+				this.points.forEach((point) => {
+					if (element.id !== point.id) {
+						points.push(point);
+					}
+				});
+				element.remove();
+				this.points = points;
+			}
 		}
 
 		prepend(element) {
