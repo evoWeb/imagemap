@@ -579,16 +579,33 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
       key: "pointMoved",
       value: function pointMoved(event) {
         var point = event.currentTabId || event.target,
-            id = 'p' + point.polygon.id + '_' + point.name;
-        this.getElement('#x' + id).value = point.getCenterPoint().x;
-        this.getElement('#y' + id).value = point.getCenterPoint().y;
+            id = 'p' + point.polygon.id + '_' + point.name,
+            center = point.getCenterPoint();
+        this.getElement('#x' + id).value = center.x;
+        this.getElement('#y' + id).value = center.y;
       }
     }, {
-      key: "addBeforeAction",
-      value: function addBeforeAction() {}
-    }, {
-      key: "addAfterAction",
-      value: function addAfterAction() {}
+      key: "addPointAction",
+      value: function addPointAction() {
+        var index = this.points.length,
+            firstPoint = this.points[0],
+            lastPoint = this.points[index - 1],
+            id = 'p' + this.id + '_' + index,
+            point = {
+          x: (firstPoint.x + lastPoint.x) / 2,
+          y: (firstPoint.y + lastPoint.y) / 2,
+          id: id,
+          element: this.getFormElement('#polyCoords', id)
+        };
+        point.element.querySelectorAll('.t3js-btn').forEach(function (button) {
+          button.addEventListener('click', this[button.id + 'Action'].bind(this));
+        }.bind(this));
+        point.element.querySelector('#x' + point.id).value = point.x;
+        point.element.querySelector('#y' + point.id).value = point.y;
+        this.append(point.element);
+        this.points.push(point);
+        this.addControl(this.form.editor.areaConfig, point, index);
+      }
     }, {
       key: "removeAction",
       value: function removeAction(event) {
@@ -902,9 +919,9 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
           fill: AreaEditor.hexToRgbA(configuration.color, this.preview ? 0.001 : 0.2)
         }));
         this.canvas.add(area);
-        area.addControls(this.areaConfig);
 
         if (this.form) {
+          area.addControls(this.areaConfig);
           this.form.addArea(area);
         }
       }
