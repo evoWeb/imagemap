@@ -134,15 +134,14 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     }, {
       key: "initializeEvents",
       value: function initializeEvents() {
+        var that = this;
         this.on('moved', this.updateFields.bind(this));
         this.on('modified', this.updateFields.bind(this));
         this.getElements('.positionOptions .t3js-field').forEach(function (field) {
           field.addEventListener('keyup', function (event) {
-            var _this2 = this;
-
-            clearTimeout(this.eventDelay);
-            this.eventDelay = setTimeout(function () {
-              _this2.updateCanvas(event);
+            clearTimeout(that.eventDelay);
+            that.eventDelay = setTimeout(function () {
+              that.updateCanvas(event);
             }, 500);
           }.bind(this));
         }.bind(this));
@@ -309,7 +308,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     _createClass(Rect, [{
       key: "updateFields",
       value: function updateFields() {
-        var _this3 = this;
+        var _this2 = this;
 
         this.getElement('#color').style.backgroundColor = this.color;
         this.getElement('#alt').value = this.alt;
@@ -319,7 +318,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
         this.getElement('#right').value = Math.floor(this.left + this.getScaledWidth());
         this.getElement('#bottom').value = Math.floor(this.top + this.getScaledHeight());
         Object.entries(this.attributes).forEach(function (attribute) {
-          _this3.getElement('#' + attribute[0]).value = attribute[1];
+          _this2.getElement('#' + attribute[0]).value = attribute[1];
         });
       }
     }, {
@@ -398,7 +397,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     _createClass(Circle, [{
       key: "updateFields",
       value: function updateFields() {
-        var _this4 = this;
+        var _this3 = this;
 
         this.getElement('#color').style.backgroundColor = this.color;
         this.getElement('#alt').value = this.alt;
@@ -407,7 +406,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
         this.getElement('#top').value = Math.floor(this.top + 0);
         this.getElement('#radius').value = Math.floor(this.getRadiusX());
         Object.entries(this.attributes).forEach(function (attribute) {
-          _this4.getElement('#' + attribute[0]).value = attribute[1];
+          _this3.getElement('#' + attribute[0]).value = attribute[1];
         });
       }
     }, {
@@ -459,7 +458,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     function Poly() {
       var _getPrototypeOf3;
 
-      var _this5;
+      var _this4;
 
       _classCallCheck(this, Poly);
 
@@ -467,31 +466,31 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
         args[_key3] = arguments[_key3];
       }
 
-      _this5 = _possibleConstructorReturn(this, (_getPrototypeOf3 = _getPrototypeOf(Poly)).call.apply(_getPrototypeOf3, [this].concat(args)));
+      _this4 = _possibleConstructorReturn(this, (_getPrototypeOf3 = _getPrototypeOf(Poly)).call.apply(_getPrototypeOf3, [this].concat(args)));
 
-      _defineProperty(_assertThisInitialized(_this5), "controls", []);
+      _defineProperty(_assertThisInitialized(_this4), "controls", []);
 
-      return _this5;
+      return _this4;
     }
 
     _createClass(Poly, [{
       key: "updateFields",
       value: function updateFields() {
-        var _this6 = this;
+        var _this5 = this;
 
         this.getElement('#color').style.backgroundColor = this.color;
         this.getElement('#alt').value = this.alt;
         this.getElement('.link').value = this.link;
         Object.entries(this.attributes).forEach(function (attribute) {
-          _this6.getElement('#' + attribute[0]).value = attribute[1];
+          _this5.getElement('#' + attribute[0]).value = attribute[1];
         });
         this.points.forEach(function (point, index) {
-          point.id = point.id ? point.id : 'p' + _this6.id + '_' + index;
+          point.id = point.id ? point.id : 'p' + _this5.id + '_' + index;
 
           if (!point.hasOwnProperty('element')) {
-            point.element = _this6.getFormElement('#polyCoords', point.id);
+            point.element = _this5.getFormElement('#polyCoords', point.id);
 
-            _this6.append(point.element);
+            _this5.append(point.element);
           }
 
           point.element.querySelector('#x' + point.id).value = point.x;
@@ -519,6 +518,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
 
         control.set('left', x);
         control.set('top', y);
+        control.setCoords();
         this.points[control.name] = {
           x: x,
           y: y
@@ -539,10 +539,10 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     }, {
       key: "addControls",
       value: function addControls(areaConfig) {
-        var _this7 = this;
+        var _this6 = this;
 
         this.points.forEach(function (point, index) {
-          _this7.addControl(areaConfig, point, index);
+          _this6.addControl(areaConfig, point, index);
         });
         this.canvas.on('object:moving', function (event) {
           if (event.target.get('type') === 'control') {
@@ -610,7 +610,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     }, {
       key: "removeAction",
       value: function removeAction(event) {
-        var _this8 = this;
+        var _this7 = this;
 
         if (this.points.length > 3) {
           var element = event.currentTarget.parentNode.parentNode,
@@ -619,23 +619,23 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
           this.points.forEach(function (point, index) {
             if (element.id !== point.id) {
               points.push(point);
-              controls.push(_this8.controls[index]);
+              controls.push(_this7.controls[index]);
             } else {
               point.element.remove();
 
-              _this8.canvas.remove(_this8.controls[index]);
+              _this7.canvas.remove(_this7.controls[index]);
             }
           });
           points.forEach(function (point, index) {
             var oldId = point.id;
-            point.id = 'p' + _this8.id + '_' + index;
-            _this8.getElement('#' + oldId).id = point.id;
-            _this8.getElement('#x' + oldId).id = 'x' + point.id;
-            _this8.getElement('#y' + oldId).id = 'y' + point.id;
+            point.id = 'p' + _this7.id + '_' + index;
+            _this7.getElement('#' + oldId).id = point.id;
+            _this7.getElement('#x' + oldId).id = 'x' + point.id;
+            _this7.getElement('#y' + oldId).id = 'y' + point.id;
 
-            _this8.getElement('[for="x' + oldId + '"]').setAttribute('for', 'x' + point.id);
+            _this7.getElement('[for="x' + oldId + '"]').setAttribute('for', 'x' + point.id);
 
-            _this8.getElement('[for="y' + oldId + '"]').setAttribute('for', 'y' + point.id);
+            _this7.getElement('[for="y' + oldId + '"]').setAttribute('for', 'y' + point.id);
 
             controls[index].name = index;
           });

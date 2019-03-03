@@ -87,13 +87,14 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 
 		initializeEvents() {
+			let that = this;
 			this.on('moved', this.updateFields.bind(this));
 			this.on('modified', this.updateFields.bind(this));
 
 			this.getElements('.positionOptions .t3js-field').forEach(function (field) {
 				field.addEventListener('keyup', function(event) {
-					clearTimeout(this.eventDelay);
-					this.eventDelay = setTimeout(() => {this.updateCanvas(event);}, 500);
+					clearTimeout(that.eventDelay);
+					that.eventDelay = setTimeout(() => { that.updateCanvas(event); }, 500);
 				}.bind(this));
 			}.bind(this));
 
@@ -391,6 +392,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 
 			control.set('left', x);
 			control.set('top', y);
+			control.setCoords();
 			this.points[control.name] = {x: x, y: y};
 			this.canvas.renderAll();
 		}
