@@ -591,18 +591,19 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
             firstPoint = this.points[0],
             lastPoint = this.points[index - 1],
             id = 'p' + this.id + '_' + index,
+            element = this.getFormElement('#polyCoords', id),
             point = {
           x: (firstPoint.x + lastPoint.x) / 2,
           y: (firstPoint.y + lastPoint.y) / 2,
           id: id,
-          element: this.getFormElement('#polyCoords', id)
+          element: element
         };
-        point.element.querySelectorAll('.t3js-btn').forEach(function (button) {
+        element.querySelectorAll('.t3js-btn').forEach(function (button) {
           button.addEventListener('click', this[button.id + 'Action'].bind(this));
         }.bind(this));
-        point.element.querySelector('#x' + point.id).value = point.x;
-        point.element.querySelector('#y' + point.id).value = point.y;
-        this.append(point.element);
+        element.querySelector('#x' + point.id).value = point.x;
+        element.querySelector('#y' + point.id).value = point.y;
+        this.append(element);
         this.points.push(point);
         this.addControl(this.form.editor.areaConfig, point, index);
       }
