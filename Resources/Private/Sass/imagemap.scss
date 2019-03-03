@@ -112,19 +112,20 @@
     }
 
     .input-group {
-        float: left;
-        width: 5em;
-        min-width: auto;
         margin-bottom: 0.7em;
     }
 
     .form-control {
-        width: 4em;
+        width: 6em;
         min-width: auto;
     }
 
     #attributes {
         overflow: hidden;
+
+        .form-control {
+            width: 14em;
+        }
     }
 }
 

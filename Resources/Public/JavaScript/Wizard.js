@@ -74,15 +74,9 @@ define(['jquery', 'TYPO3/CMS/Imagemap/AreaEditor', 'jquery-ui/sortable', 'jquery
         });
       });
       $('#submit').on('click', function () {
-        var $field = window.opener.$('input[name="' + configuration.itemName + '"]');
-        $field.val(areaEditor.toAreaXml()).trigger('imagemap:changed');
+        window.opener.$('input[name="' + configuration.itemName + '"]').val(areaEditor.toAreaXml()).trigger('imagemap:changed');
         close();
       });
-      /*$('#canvas')
-      	.on('mousedown', areaEditor.mousedown.bind(areaEditor))
-      	.on('mouseup', areaEditor.mouseup.bind(areaEditor))
-      	.on('mousemove', areaEditor.mousemove.bind(areaEditor))
-      	.on('dblclick', areaEditor.dblclick.bind(areaEditor));*/
     };
 
     initializeScaleFactor();

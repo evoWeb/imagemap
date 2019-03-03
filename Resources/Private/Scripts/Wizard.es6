@@ -92,18 +92,11 @@ define([
 			});
 
 			$('#submit').on('click', function () {
-				let $field = window.opener.$('input[name="' + configuration.itemName + '"]');
-				$field
+				window.opener.$('input[name="' + configuration.itemName + '"]')
 					.val(areaEditor.toAreaXml())
 					.trigger('imagemap:changed');
 				close();
 			});
-
-			/*$('#canvas')
-				.on('mousedown', areaEditor.mousedown.bind(areaEditor))
-				.on('mouseup', areaEditor.mouseup.bind(areaEditor))
-				.on('mousemove', areaEditor.mousemove.bind(areaEditor))
-				.on('dblclick', areaEditor.dblclick.bind(areaEditor));*/
 		};
 
 		initializeScaleFactor();

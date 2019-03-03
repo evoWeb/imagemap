@@ -8,7 +8,8 @@
 		</div>
 
 		<input type="text" id="alt" class="t3js-field form-control" placeholder="{f:translate(id: 'imagemap.form.area.label', extensionName: 'imagemap')}" />
-		<input type="text" id="link" class="t3js-field form-control ignored-attribute" placeholder="{f:translate(id: 'imagemap.form.area.link', extensionName: 'imagemap')}" />
+		<input type="text" id="link_ID" class="link t3js-field form-control ignored-attribute"
+					 placeholder="{f:translate(id: 'imagemap.form.area.link', extensionName: 'imagemap')}" data-formengine-input-name="link_ID"/>
 
 		<f:render partial="Imagemap/Controls" arguments="{returnUrl: returnUrl, formName: formName}"/>
 	</div>
@@ -29,18 +30,18 @@
 			<div class="positionOptions">
 				<div class="input-group">
 					<label for="left" class="input-group-addon">X1:</label>
-					<input type="text" id="left" class="t3js-field form-control ignored-attribute" />
+					<input type="text" id="left" class="t3js-field form-control ignored-attribute" autocomplete="off" pattern="\d*"/>
 
 					<label for="top" class="input-group-addon">Y1:</label>
-					<input type="text" id="top" class="t3js-field form-control ignored-attribute" />
+					<input type="text" id="top" class="t3js-field form-control ignored-attribute" autocomplete="off" pattern="\d*"/>
 				</div>
 
 				<div class="input-group">
 					<label for="right" class="input-group-addon">X2:</label>
-					<input type="text" id="right" class="t3js-field form-control ignored-attribute" />
+					<input type="text" id="right" class="t3js-field form-control ignored-attribute" autocomplete="off" pattern="\d*"/>
 
 					<label for="bottom" class="input-group-addon">Y2:</label>
-					<input type="text" id="bottom" class="t3js-field form-control ignored-attribute" />
+					<input type="text" id="bottom" class="t3js-field form-control ignored-attribute" autocomplete="off" pattern="\d*"/>
 				</div>
 			</div>
 		</div>

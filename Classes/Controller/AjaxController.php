@@ -73,11 +73,11 @@ class AjaxController
         $linkParameters = [
             'act' => strpos($parameters['currentValue'], 'http') !== false ? 'url' : 'page',
             'mode' => 'wizard',
-            'field' => $parameters['objectId'] . '_link',
+            'field' => $parameters['itemName'],
             'P' => [
                 'returnUrl' => $parameters['returnUrl'],
                 'formName' => $parameters['formName'],
-                'itemName' => $parameters['objectId'] . '_link',
+                'itemName' => $parameters['itemName'],
                 'currentValue' => $parameters['currentValue'],
                 'pid' => $parameters['pid'],
                 'fieldChangeFunc' => [
@@ -86,6 +86,9 @@ class AjaxController
                 ]
             ]
         ];
+        $linkParameters['P']['fieldChangeFuncHash'] = GeneralUtility::hmac(
+            serialize($linkParameters['P']['fieldChangeFunc'])
+        );
 
         $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
         $response = new Response('php://temp', 200, ['Content-Type' => 'application/json; charset=utf-8']);

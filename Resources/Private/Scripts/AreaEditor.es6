@@ -48,7 +48,6 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			this.initializeElement();
 			this.initializeColorPicker();
 			this.initializeEvents();
-			this.initializeButtons();
 			this.updateValues();
 		}
 
@@ -79,11 +78,13 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 
 		initializeEvents() {
-			this.on('moved', this.moved.bind(this));
-			this.on('modified', this.modified.bind(this));
-		}
+			this.on('moved', this.updateValues.bind(this));
+			this.on('modified', this.updateValues.bind(this));
 
-		initializeButtons() {
+			this.getElements('.positionOptions .t3js-field').forEach(function (field) {
+				field.addEventListener('changed', this['updateCanvas'].bind(this));
+			}.bind(this));
+
 			this.getElements('.t3js-btn').forEach(function (button) {
 				button.addEventListener('click', this[button.id + 'Action'].bind(this));
 			}.bind(this));
@@ -98,20 +99,12 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		updateValues() {
 		}
 
-
-		moved(event) {
-			console.log(event);
-			this.updateValues();
-		}
-
-		modified(event) {
-			console.log(event);
-			this.updateValues();
+		updateCanvas() {
 		}
 
 
 		linkAction(event) {
-			this.form.openPopup(event.currentTarget, this);
+			this.form.openLinkBrowser(event.currentTarget, this);
 		}
 
 		upAction() {
@@ -214,7 +207,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 
 		getLink() {
-			return this.getElement('#link').value;
+			return this.getElement('.link').value;
 		}
 	}
 
@@ -222,7 +215,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		updateValues() {
 			this.getElement('#color').style.backgroundColor = this.color;
 			this.getElement('#alt').value = this.alt;
-			this.getElement('#link').value = this.link;
+			this.getElement('.link').value = this.link;
 			this.getElement('#left').value = Math.floor(this.left + 0);
 			this.getElement('#top').value = Math.floor(this.top + 0);
 			this.getElement('#right').value = Math.floor(this.left + this.getScaledWidth());
@@ -233,6 +226,11 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 					this.getElement('#' + attribute[0]).value = attribute[1];
 				});
 			}
+		}
+
+		updateCanvas(event) {
+			console.log(this);
+			console.log(event);
 		}
 
 		getAreaCoords() {
@@ -249,7 +247,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		updateValues() {
 			this.getElement('#color').style.backgroundColor = this.color;
 			this.getElement('#alt').value = this.alt;
-			this.getElement('#link').value = this.link;
+			this.getElement('.link').value = this.link;
 			this.getElement('#left').value = Math.floor(this.left + 0);
 			this.getElement('#top').value = Math.floor(this.top + 0);
 			this.getElement('#radius').value = Math.floor(this.getRadiusX());
@@ -259,6 +257,11 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 					this.getElement('#' + attribute[0]).value = attribute[1];
 				});
 			}
+		}
+
+		updateCanvas(event) {
+			console.log(this);
+			console.log(event);
 		}
 
 		getAreaCoords() {
@@ -274,7 +277,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		updateValues() {
 			this.getElement('#color').style.backgroundColor = this.color;
 			this.getElement('#alt').value = this.alt;
-			this.getElement('#link').value = this.link;
+			this.getElement('.link').value = this.link;
 
 			if (this.hasOwnProperty('attributes') && this.attributes) {
 				Object.entries(this.attributes).forEach((attribute) => {
@@ -294,6 +297,11 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 				element.querySelector('#x' + point.id).value = point.x;
 				element.querySelector('#y' + point.id).value = point.y;
 			});
+		}
+
+		updateCanvas(event) {
+			console.log(this);
+			console.log(event);
 		}
 
 		getAreaCoords() {
@@ -393,12 +401,15 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			this.initializeArrows();
 		}
 
-		openPopup(link, area) {
+		openLinkBrowser(link, area) {
 			link.blur();
 
-			let data = window.imagemap.browseLink;
-			data.objectId = area.id;
-			data.currentValue = area.getLink();
+			let data = {
+				...window.imagemap.browseLink,
+				objectId: area.id,
+				itemName: 'link' + area.id,
+				currentValue: area.getLink()
+			};
 
 			$.ajax({
 				url: TYPO3.settings.ajaxUrls['imagemap_browselink_url'],
@@ -411,6 +422,14 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 					'height=600,width=500,status=0,menubar=0,scrollbars=1'
 				);
 				vHWin.focus()
+			});
+		}
+
+		syncAreaLinkValue(id) {
+			this.areas.forEach((area) => {
+				if (area.id === parseInt(id)) {
+					area.link = area.getElement('.link').value;
+				}
 			});
 		}
 
@@ -555,6 +574,10 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			if (this.form) {
 				this.form.addArea(area);
 			}
+		}
+
+		triggerAreaLinkUpdate(id) {
+			this.form.syncAreaLinkValue(id);
 		}
 
 		deleteArea(area) {
