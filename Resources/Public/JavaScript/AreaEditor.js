@@ -86,6 +86,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
       _defineProperty(this, "element", null);
 
       _defineProperty(this, "form", null);
+
+      _defineProperty(this, "eventDelay", 0);
     }
 
     _createClass(AreaFormElement, [{
@@ -99,8 +101,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
 
         this.initializeElement();
         this.initializeColorPicker();
-        this.initializeEvents();
         this.updateFields();
+        this.initializeEvents();
       }
     }, {
       key: "initializeElement",
@@ -135,10 +137,16 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
         this.on('moved', this.updateFields.bind(this));
         this.on('modified', this.updateFields.bind(this));
         this.getElements('.positionOptions .t3js-field').forEach(function (field) {
-          field.addEventListener('changed', this['updateCanvas'].bind(this));
+          field.addEventListener('keyup', function (event) {
+            var _this2 = this;
+
+            clearTimeout(this.eventDelay);
+            this.eventDelay = setTimeout(function () {
+              _this2.updateCanvas(event);
+            }, 500);
+          }.bind(this));
         }.bind(this));
         this.getElements('.basicOptions .t3js-field, .attributes .t3js-field').forEach(function (field) {
-          field.addEventListener('change', this['updateProperties'].bind(this));
           field.addEventListener('keyup', this['updateProperties'].bind(this));
         }.bind(this));
         this.getElements('.t3js-btn').forEach(function (button) {
@@ -301,7 +309,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     _createClass(Rect, [{
       key: "updateFields",
       value: function updateFields() {
-        var _this2 = this;
+        var _this3 = this;
 
         this.getElement('#color').style.backgroundColor = this.color;
         this.getElement('#alt').value = this.alt;
@@ -311,14 +319,60 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
         this.getElement('#right').value = Math.floor(this.left + this.getScaledWidth());
         this.getElement('#bottom').value = Math.floor(this.top + this.getScaledHeight());
         Object.entries(this.attributes).forEach(function (attribute) {
-          _this2.getElement('#' + attribute[0]).value = attribute[1];
+          _this3.getElement('#' + attribute[0]).value = attribute[1];
         });
       }
     }, {
       key: "updateCanvas",
       value: function updateCanvas(event) {
-        console.log(this);
-        console.log(event);
+        var field = event.currentTarget || event.target,
+            value = 0;
+
+        switch (field.id) {
+          case 'left':
+            value = parseInt(field.value);
+            this.getElement('#right').value = value + this.getScaledWidth();
+            this.set({
+              left: value
+            });
+            break;
+
+          case 'top':
+            value = parseInt(field.value);
+            this.getElement('#bottom').value = value + this.getScaledHeight();
+            this.set({
+              top: value
+            });
+            break;
+
+          case 'right':
+            value = field.value - this.left;
+
+            if (value < 0) {
+              value = 10;
+              field.value = this.left + value;
+            }
+
+            this.set({
+              width: value
+            });
+            break;
+
+          case 'bottom':
+            value = field.value - this.top;
+
+            if (value < 0) {
+              value = 10;
+              field.value = this.top + value;
+            }
+
+            this.set({
+              height: value
+            });
+            break;
+        }
+
+        this.form.editor.canvas.renderAll();
       }
     }, {
       key: "getAreaCoords",
@@ -344,7 +398,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     _createClass(Circle, [{
       key: "updateFields",
       value: function updateFields() {
-        var _this3 = this;
+        var _this4 = this;
 
         this.getElement('#color').style.backgroundColor = this.color;
         this.getElement('#alt').value = this.alt;
@@ -353,14 +407,39 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
         this.getElement('#top').value = Math.floor(this.top + 0);
         this.getElement('#radius').value = Math.floor(this.getRadiusX());
         Object.entries(this.attributes).forEach(function (attribute) {
-          _this3.getElement('#' + attribute[0]).value = attribute[1];
+          _this4.getElement('#' + attribute[0]).value = attribute[1];
         });
       }
     }, {
       key: "updateCanvas",
       value: function updateCanvas(event) {
-        console.log(this);
-        console.log(event);
+        var field = event.currentTarget || event.target,
+            value = 0;
+
+        switch (field.id) {
+          case 'left':
+            value = parseInt(field.value);
+            this.set({
+              left: value
+            });
+            break;
+
+          case 'top':
+            value = parseInt(field.value);
+            this.set({
+              top: value
+            });
+            break;
+
+          case 'radius':
+            value = parseInt(field.value);
+            this.set({
+              radius: value
+            });
+            break;
+        }
+
+        this.form.editor.canvas.renderAll();
       }
     }, {
       key: "getAreaCoords",
@@ -386,23 +465,23 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     _createClass(Poly, [{
       key: "updateFields",
       value: function updateFields() {
-        var _this4 = this;
+        var _this5 = this;
 
         this.getElement('#color').style.backgroundColor = this.color;
         this.getElement('#alt').value = this.alt;
         this.getElement('.link').value = this.link;
         Object.entries(this.attributes).forEach(function (attribute) {
-          _this4.getElement('#' + attribute[0]).value = attribute[1];
+          _this5.getElement('#' + attribute[0]).value = attribute[1];
         });
         this.points.forEach(function (point, index) {
-          point.id = point.id ? point.id : 'p' + _this4.id + '_' + index;
+          point.id = point.id ? point.id : 'p' + _this5.id + '_' + index;
 
-          var element = _this4.getElement('#' + point.id);
+          var element = _this5.getElement('#' + point.id);
 
           if (element === null) {
-            element = _this4.getFormElement('#polyCoords', point.id);
+            element = _this5.getFormElement('#polyCoords', point.id);
 
-            _this4.append(element);
+            _this5.append(element);
           }
 
           element.querySelector('#x' + point.id).value = point.x;
@@ -412,8 +491,19 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     }, {
       key: "updateCanvas",
       value: function updateCanvas(event) {
-        console.log(this);
-        console.log(event);
+        var field = event.currentTarget || event.target,
+            value = 0;
+
+        switch (field.id) {
+          case 'left':
+            value = parseInt(field.value);
+            this.set({
+              left: value
+            });
+            break;
+        }
+
+        console.log(field);
       }
     }, {
       key: "getAreaCoords",
@@ -711,6 +801,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
         }
 
         var area = new Poly(points, _objectSpread({}, configuration, this.areaConfig, {
+          objectCaching: false,
           hasControls: !this.preview,
           top: top,
           left: left,

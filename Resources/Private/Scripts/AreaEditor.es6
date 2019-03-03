@@ -42,6 +42,11 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		 */
 		form = null;
 
+		/**
+		 * @type {number}
+		 */
+		eventDelay = 0;
+
 		postAddToForm() {
 			this.id = fabric.Object.__uid++;
 
@@ -51,8 +56,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 
 			this.initializeElement();
 			this.initializeColorPicker();
-			this.initializeEvents();
 			this.updateFields();
+			this.initializeEvents();
 		}
 
 		initializeElement() {
@@ -86,11 +91,13 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			this.on('modified', this.updateFields.bind(this));
 
 			this.getElements('.positionOptions .t3js-field').forEach(function (field) {
-				field.addEventListener('changed', this['updateCanvas'].bind(this));
+				field.addEventListener('keyup', function(event) {
+					clearTimeout(this.eventDelay);
+					this.eventDelay = setTimeout(() => {this.updateCanvas(event);}, 500);
+				}.bind(this));
 			}.bind(this));
 
 			this.getElements('.basicOptions .t3js-field, .attributes .t3js-field').forEach(function (field) {
-				field.addEventListener('change', this['updateProperties'].bind(this));
 				field.addEventListener('keyup', this['updateProperties'].bind(this));
 			}.bind(this));
 
@@ -247,8 +254,41 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 
 		updateCanvas(event) {
-			console.log(this);
-			console.log(event);
+			let field = event.currentTarget || event.target,
+				value = 0;
+
+			switch (field.id) {
+				case 'left':
+					value = parseInt(field.value);
+					this.getElement('#right').value = value + this.getScaledWidth();
+					this.set({left: value});
+					break;
+
+				case 'top':
+					value = parseInt(field.value);
+					this.getElement('#bottom').value = value + this.getScaledHeight();
+					this.set({top: value});
+					break;
+
+				case 'right':
+					value = field.value - this.left;
+					if (value < 0) {
+						value = 10;
+						field.value = this.left + value;
+					}
+					this.set({width: value});
+					break;
+
+				case 'bottom':
+					value = field.value - this.top;
+					if (value < 0) {
+						value = 10;
+						field.value = this.top + value;
+					}
+					this.set({height: value});
+					break;
+			}
+			this.form.editor.canvas.renderAll();
 		}
 
 		getAreaCoords() {
@@ -276,8 +316,26 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 
 		updateCanvas(event) {
-			console.log(this);
-			console.log(event);
+			let field = event.currentTarget || event.target,
+				value = 0;
+
+			switch (field.id) {
+				case 'left':
+					value = parseInt(field.value);
+					this.set({left: value});
+					break;
+
+				case 'top':
+					value = parseInt(field.value);
+					this.set({top: value});
+					break;
+
+				case 'radius':
+					value = parseInt(field.value);
+					this.set({radius: value});
+					break;
+			}
+			this.form.editor.canvas.renderAll();
 		}
 
 		getAreaCoords() {
@@ -314,8 +372,17 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 
 		updateCanvas(event) {
-			console.log(this);
-			console.log(event);
+			let field = event.currentTarget || event.target,
+				value = 0;
+
+			switch (field.id) {
+				case 'left':
+					value = parseInt(field.value);
+					this.set({left: value});
+					break;
+			}
+
+			console.log(field);
 		}
 
 		getAreaCoords() {
@@ -576,6 +643,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			let area = new Poly(points, {
 				...configuration,
 				...this.areaConfig,
+				objectCaching: false,
 				hasControls: !this.preview,
 				top: top,
 				left: left,
@@ -583,6 +651,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 				strokeWidth: 1,
 				fill: AreaEditor.hexToRgbA(configuration.color, this.preview ? 0.001 : 0.2)
 			});
+
 
 			this.canvas.add(area);
 			if (this.form) {
