@@ -364,15 +364,14 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 
 			this.points.forEach((point, index) => {
 				point.id = point.id ? point.id : 'p' + this.id + '_' + index;
-				let element = this.getElement('#' + point.id);
 
-				if (element === null) {
-					element = this.getFormElement('#polyCoords', point.id);
-					this.append(element);
+				if (!point.hasOwnProperty('element')) {
+					point.element = this.getFormElement('#polyCoords', point.id);
+					this.append(point.element);
 				}
 
-				element.querySelector('#x' + point.id).value = point.x;
-				element.querySelector('#y' + point.id).value = point.y;
+				point.element.querySelector('#x' + point.id).value = point.x;
+				point.element.querySelector('#y' + point.id).value = point.y;
 			});
 		}
 
@@ -441,12 +440,12 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 				polygon: this,
 				type: 'control'
 			});
-			circle.on('moved', this.coordMoved.bind(this));
+			circle.on('moved', this.pointMoved.bind(this));
 			this.controls[index] = circle;
 			this.canvas.add(circle);
 		}
 
-		coordMoved(event) {
+		pointMoved(event) {
 			let point = event.currentTabId || event.target,
 				id = 'p' + point.polygon.id + '_' + point.name;
 
@@ -465,15 +464,28 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 				let element = event.currentTarget.parentNode.parentNode,
 					points = [],
 					controls = [];
+
 				this.points.forEach((point, index) => {
 					if (element.id !== point.id) {
 						points.push(point);
 						controls.push(this.controls[index]);
 					} else {
+						point.element.remove();
 						this.canvas.remove(this.controls[index]);
 					}
 				});
-				element.remove();
+
+				points.forEach((point, index) => {
+					let oldId = point.id;
+					point.id = 'p' + this.id + '_' + index;
+					this.getElement('#' + oldId).id = point.id;
+					this.getElement('#x' + oldId).id = 'x' + point.id;
+					this.getElement('#y' + oldId).id = 'y' + point.id;
+					this.getElement('[for="x' + oldId + '"]').setAttribute('for', 'x' + point.id);
+					this.getElement('[for="y' + oldId + '"]').setAttribute('for', 'y' + point.id);
+					controls[index].name = index;
+				});
+
 				this.points = points;
 				this.controls = controls;
 				this.canvas.renderAll();
