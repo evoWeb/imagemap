@@ -45,10 +45,14 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		postAddToForm() {
 			this.id = fabric.Object.__uid++;
 
+			if (!this.hasOwnProperty('attributes')) {
+				this.attributes = [];
+			}
+
 			this.initializeElement();
 			this.initializeColorPicker();
 			this.initializeEvents();
-			this.updateValues();
+			this.updateFields();
 		}
 
 		initializeElement() {
@@ -58,7 +62,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 
 		initializeColorPicker() {
-			let colorPicker = this.getElement('#colorPicker'),
+			let colorPicker = this.getElement('.colorPicker'),
 				values = ['00', '33', '66', '99', 'CC', 'FF'];
 
 			for (let b = 1; b < 6; b++) {
@@ -78,11 +82,16 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 
 		initializeEvents() {
-			this.on('moved', this.updateValues.bind(this));
-			this.on('modified', this.updateValues.bind(this));
+			this.on('moved', this.updateFields.bind(this));
+			this.on('modified', this.updateFields.bind(this));
 
 			this.getElements('.positionOptions .t3js-field').forEach(function (field) {
 				field.addEventListener('changed', this['updateCanvas'].bind(this));
+			}.bind(this));
+
+			this.getElements('.basicOptions .t3js-field, .attributes .t3js-field').forEach(function (field) {
+				field.addEventListener('change', this['updateProperties'].bind(this));
+				field.addEventListener('keyup', this['updateProperties'].bind(this));
 			}.bind(this));
 
 			this.getElements('.t3js-btn').forEach(function (button) {
@@ -96,7 +105,18 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			this.getElement('#down').classList[areaZone.lastChild !== this.element ? 'remove' : 'add']('disabled');
 		}
 
-		updateValues() {
+		updateFields() {
+		}
+
+		updateProperties(event) {
+			let field = event.currentTarget;
+			if (field.classList.contains('link')) {
+				this.link = field.value;
+			} else if (this.hasOwnProperty(field.id)) {
+				this[field.id] = field.value;
+			} else if (this.attributes.hasOwnProperty(field.id)) {
+				this.attributes[field.id] = field.value;
+			}
 		}
 
 		updateCanvas() {
@@ -212,7 +232,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 	}
 
 	class Rect extends Aggregation(fabric.Rect, AreaFormElement) {
-		updateValues() {
+		updateFields() {
 			this.getElement('#color').style.backgroundColor = this.color;
 			this.getElement('#alt').value = this.alt;
 			this.getElement('.link').value = this.link;
@@ -221,11 +241,9 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			this.getElement('#right').value = Math.floor(this.left + this.getScaledWidth());
 			this.getElement('#bottom').value = Math.floor(this.top + this.getScaledHeight());
 
-			if (this.hasOwnProperty('attributes') && this.attributes) {
-				Object.entries(this.attributes).forEach((attribute) => {
-					this.getElement('#' + attribute[0]).value = attribute[1];
-				});
-			}
+			Object.entries(this.attributes).forEach((attribute) => {
+				this.getElement('#' + attribute[0]).value = attribute[1];
+			});
 		}
 
 		updateCanvas(event) {
@@ -244,7 +262,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 	}
 
 	class Circle extends Aggregation(fabric.Circle, AreaFormElement) {
-		updateValues() {
+		updateFields() {
 			this.getElement('#color').style.backgroundColor = this.color;
 			this.getElement('#alt').value = this.alt;
 			this.getElement('.link').value = this.link;
@@ -252,11 +270,9 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			this.getElement('#top').value = Math.floor(this.top + 0);
 			this.getElement('#radius').value = Math.floor(this.getRadiusX());
 
-			if (this.hasOwnProperty('attributes') && this.attributes) {
-				Object.entries(this.attributes).forEach((attribute) => {
-					this.getElement('#' + attribute[0]).value = attribute[1];
-				});
-			}
+			Object.entries(this.attributes).forEach((attribute) => {
+				this.getElement('#' + attribute[0]).value = attribute[1];
+			});
 		}
 
 		updateCanvas(event) {
@@ -274,16 +290,14 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 	}
 
 	class Poly extends Aggregation(fabric.Polygon, AreaFormElement) {
-		updateValues() {
+		updateFields() {
 			this.getElement('#color').style.backgroundColor = this.color;
 			this.getElement('#alt').value = this.alt;
 			this.getElement('.link').value = this.link;
 
-			if (this.hasOwnProperty('attributes') && this.attributes) {
-				Object.entries(this.attributes).forEach((attribute) => {
-					this.getElement('#' + attribute[0]).value = attribute[1];
-				});
-			}
+			Object.entries(this.attributes).forEach((attribute) => {
+				this.getElement('#' + attribute[0]).value = attribute[1];
+			});
 
 			this.points.forEach((point, index) => {
 				point.id = point.id ? point.id : 'p' + this.id + '_' + index;

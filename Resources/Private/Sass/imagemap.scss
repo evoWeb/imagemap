@@ -66,19 +66,17 @@
 // Wizard form styles
 #areasForm {
     margin: 20px 4px 0 4px;
-    float: left;
-    clear: left;
 }
 
 .areaForm {
     position: relative;
     width: 100%;
-    float: left;
-    clear: left;
     margin-bottom: 10px;
 }
 
 .basicOptions {
+    overflow: hidden;
+
     .form-control {
         width: 50%;
         min-width: auto;
@@ -105,14 +103,13 @@
     border-radius: 2px;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
-    overflow: hidden;
 
     .additionalInformation {
-        padding: 6px 32px 6px 6px;
+        padding: 6px 32px 0 6px;
     }
 
     .input-group {
-        margin-bottom: 0.7em;
+        margin-bottom: 6px;
     }
 
     .form-control {
@@ -120,27 +117,26 @@
         min-width: auto;
     }
 
-    #attributes {
+    .colorPicker {
+        border-right: 1px solid #bbb;
+        padding: 6px 6px 6px 32px;
         overflow: hidden;
 
+        .colorPickerCell {
+            float: left;
+            width: 16px;
+            height: 16px;
+            margin: 0;
+            border: 1px solid white;
+            cursor: pointer;
+            font-size: 1px;
+            line-height: 1px;
+        }
+    }
+
+    .attributes {
         .form-control {
             width: 14em;
         }
-    }
-}
-
-#colorPicker {
-    border-right: 1px solid #bbb;
-    padding: 6px 6px 6px 32px;
-
-    .colorPickerCell {
-        float: left;
-        width: 16px;
-        height: 16px;
-        margin: 0;
-        border: 1px solid white;
-        cursor: pointer;
-        font-size: 1px;
-        line-height: 1px;
     }
 }
