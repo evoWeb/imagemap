@@ -296,8 +296,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			return [
 				Math.floor(this.left + 0),
 				Math.floor(this.top + 0),
-				Math.floor(this.left + this.getScaledWidth()),
-				Math.floor(this.top + this.getScaledHeight())
+				Math.floor(this.left + this.getScaledWidth() - 1),
+				Math.floor(this.top + this.getScaledHeight() - 1)
 			].join(',');
 		}
 	}

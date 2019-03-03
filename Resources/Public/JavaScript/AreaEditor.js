@@ -376,7 +376,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     }, {
       key: "getAreaCoords",
       value: function getAreaCoords() {
-        return [Math.floor(this.left + 0), Math.floor(this.top + 0), Math.floor(this.left + this.getScaledWidth()), Math.floor(this.top + this.getScaledHeight())].join(',');
+        return [Math.floor(this.left + 0), Math.floor(this.top + 0), Math.floor(this.left + this.getScaledWidth() - 1), Math.floor(this.top + this.getScaledHeight() - 1)].join(',');
       }
     }]);
 
