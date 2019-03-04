@@ -35,6 +35,11 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 
 	class AreaFormElement extends fabric.Object {
 		/**
+		 * @type {string}
+		 */
+		name = '';
+
+		/**
 		 * @type {ChildNode|HTMLElement}
 		 */
 		element = null;
@@ -63,7 +68,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 
 		initializeElement() {
-			this.element = this.getFormElement('#' + this.constructor.name.toLowerCase() + 'Form');
+			this.element = this.getFormElement('#' + this.name + 'Form');
 			this.form.areaZone.append(this.element);
 			this.form.initializeArrows();
 		}
@@ -205,7 +210,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 
 		toAreaXml() {
 			return [
-				'<area shape="' + this.constructor.name.toLowerCase() + '"',
+				'<area shape="' + this.name + '"',
 				' coords="' + this.getAreaCoords() + '"',
 				this.getAdditionalAttributes() + '>',
 				this.getLink(),
@@ -242,6 +247,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 	}
 
 	class Rect extends Aggregation(fabric.Rect, AreaFormElement) {
+		name = 'rect';
+
 		updateFields() {
 			this.getElement('#color').style.backgroundColor = this.color;
 			this.getElement('#alt').value = this.alt;
@@ -305,6 +312,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 	}
 
 	class Circle extends Aggregation(fabric.Circle, AreaFormElement) {
+		name = 'circle';
+
 		updateFields() {
 			this.getElement('#color').style.backgroundColor = this.color;
 			this.getElement('#alt').value = this.alt;
@@ -351,6 +360,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 	}
 
 	class Poly extends Aggregation(fabric.Polygon, AreaFormElement) {
+		name = 'poly';
+
 		updateFields() {
 			this.getElement('#color').style.backgroundColor = this.color;
 			this.getElement('#alt').value = this.alt;
