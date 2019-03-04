@@ -43,7 +43,7 @@ class PopupController
         $this->moduleTemplate = GeneralUtility::makeInstance(\TYPO3\CMS\Backend\Template\ModuleTemplate::class);
 
         $this->view = $this->moduleTemplate->getView();
-        $this->view->setTemplate('Popup/Module');
+        $this->view->setTemplate('Imagemap/Popup');
         $this->view->setTemplateRootPaths(array_merge(
             $this->view->getTemplateRootPaths(),
             ['EXT:imagemap/Resources/Private/Templates/']
@@ -86,7 +86,7 @@ class PopupController
             $this->moduleTemplate->getView()
                 ->assign('parameters', $parameters)
                 ->assign('data', $data)
-                ->assign('scaleFactor', $data->getEnvironment()->getExtConfValue('imageMaxWH', 800))
+                ->assign('scaleFactor', $data->getEnvironment()->getExtConfValue('imageMaxWH', 800) / 1000)
                 ->assign('formName', 'imagemap' . GeneralUtility::shortMD5(rand(1, 100000)))
                 ->assign('returnUrl', GeneralUtility::linkThisScript());
         } catch (\Exception $e) {

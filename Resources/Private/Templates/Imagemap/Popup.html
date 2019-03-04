@@ -9,7 +9,7 @@
 		</f:then>
 	</f:if>
 	<f:if condition="{docHeader.enabled}">
-		<f:render partial="DocHeader" arguments="{docHeader:docHeader}" />
+		<f:render partial="Imagemap/DocHeader" arguments="{docHeader:docHeader}" />
 	</f:if>
 	<div class="module-body t3js-module-body">
 		<f:if condition="{uiBlock}">
@@ -18,7 +18,7 @@
 			</div>
 		</f:if>
 		<f:flashMessages queueIdentifier="{flashMessageQueueIdentifier}" />
-		<f:format.raw>{content}<f:render partial="Wizard" arguments="{_all}"/></f:format.raw>
+		<f:format.raw>{content}<f:render partial="Imagemap/Wizard" arguments="{_all}"/></f:format.raw>
 	</div>
 	<f:if condition="{formTag}">
 		<f:then>

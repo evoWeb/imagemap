@@ -251,7 +251,7 @@ class Data
             foreach ($this->map['areas'] as $area) {
                 $attributes = $area['attributes'];
                 $markers = [
-                    'shape' => ucfirst($attributes['shape']),
+                    'shape' => $attributes['shape'],
                     'coords' => $attributes['coords'],
                     'alt' => $this->convertToAttributeValue($attributes['alt']),
                     'link' => isset($area['value']) ? $this->convertToAttributeValue($area['value']) : '',

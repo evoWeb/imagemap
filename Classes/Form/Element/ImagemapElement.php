@@ -88,12 +88,15 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
         $mainFieldHtml = [];
         $mainFieldHtml[] = '<div class="form-control-wrap imagemap-control">';
         $mainFieldHtml[] =    '<div class="form-wizards-wrap">';
-        $mainFieldHtml[] =      '<div class="form-wizards-element" id="' . $id . '">';
-        $mainFieldHtml[] =          '<div id="' . $id . '-canvas" class="canvas" data-thumbnail-scale="';
+        $mainFieldHtml[] =      '<div class="form-wizards-element pictureWrap" id="' . $id . '">';
+        $mainFieldHtml[] =        '<div id="' . $id . '-canvas" class="picture" data-thumbnail-scale="';
         $mainFieldHtml[] =          $data->getThumbnailScale('previewImageMaxWH', 400);
         $mainFieldHtml[] =          '" data-existing-areas=\'' . $existingAreas . '\'>';
-        $mainFieldHtml[] =              $data->renderThumbnail('previewImageMaxWH', 400);
+        $mainFieldHtml[] =          '<div class="image">';
+        $mainFieldHtml[] =            $data->renderThumbnail('previewImageMaxWH', 400);
         $mainFieldHtml[] =          '</div>';
+        $mainFieldHtml[] =          '<canvas id="canvas" class="canvas"></canvas>';
+        $mainFieldHtml[] =        '</div>';
         $mainFieldHtml[] =      '</div>';
         if (!empty($fieldControlHtml)) {
             $mainFieldHtml[] =      '<div class="form-wizards-items-aside">';
