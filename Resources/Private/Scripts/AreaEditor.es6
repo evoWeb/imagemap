@@ -711,7 +711,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 					height: bottom - top,
 					stroke: configuration.color,
 					strokeWidth: 1,
-					fill: AreaEditor.hexToRgbA(configuration.color, this.preview ? 0.001 : 0.2)
+					fill: AreaEditor.hexToRgbA(configuration.color, this.preview ? 0.1 : 0.3)
 				});
 
 			this.canvas.add(area);
@@ -733,7 +733,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 					radius: parseInt(radius),
 					stroke: configuration.color,
 					strokeWidth: 1,
-					fill: AreaEditor.hexToRgbA(configuration.color, this.preview ? 0.001 : 0.2)
+					fill: AreaEditor.hexToRgbA(configuration.color, this.preview ? 0.1 : 0.3)
 				});
 
 			area.setControlVisible('ml', false);
@@ -777,7 +777,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 				left: left,
 				stroke: configuration.color,
 				strokeWidth: 1,
-				fill: AreaEditor.hexToRgbA(configuration.color, this.preview ? 0.001 : 0.2)
+				fill: AreaEditor.hexToRgbA(configuration.color, this.preview ? 0.1 : 0.3)
 			});
 
 			this.canvas.add(area);
