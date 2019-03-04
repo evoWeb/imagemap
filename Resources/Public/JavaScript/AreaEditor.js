@@ -674,18 +674,18 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
   /*#__PURE__*/
   function () {
     /**
-     * @type {Array}
+     * @type {HTMLElement}
      */
 
     /**
-     * @type {HTMLElement}
+     * @type {AreaEditor}
      */
     function AreaForm(formElement, editor) {
       _classCallCheck(this, AreaForm);
 
-      _defineProperty(this, "areas", []);
-
       _defineProperty(this, "areaZone", null);
+
+      _defineProperty(this, "editor", null);
 
       this.element = fabric.document.querySelector(formElement);
       this.areaZone = this.element.querySelector('#areaZone');
@@ -695,14 +695,14 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     _createClass(AreaForm, [{
       key: "initializeArrows",
       value: function initializeArrows() {
-        this.areas.forEach(function (area) {
+        this.editor.areas.forEach(function (area) {
           area.initializeArrows();
         });
       }
     }, {
       key: "addArea",
       value: function addArea(area) {
-        this.areas.push(area);
+        this.editor.areas.push(area);
         area.form = this;
         area.postAddToForm();
       }
@@ -710,24 +710,24 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
       key: "deleteArea",
       value: function deleteArea(area) {
         var areas = [];
-        this.areas.forEach(function (currentArea) {
+        this.editor.areas.forEach(function (currentArea) {
           if (area !== currentArea) {
             areas.push(currentArea);
           }
         });
-        this.areas = areas;
+        this.editor.areas = areas;
         this.editor.deleteArea(area);
       }
     }, {
       key: "moveArea",
       value: function moveArea(area, offset) {
-        var index = this.areas.indexOf(area),
+        var index = this.editor.areas.indexOf(area),
             newIndex = index + offset,
             parent = area.element.parentNode;
 
-        if (newIndex > -1 && newIndex < this.areas.length) {
-          var removedArea = this.areas.splice(index, 1)[0];
-          this.areas.splice(newIndex, 0, removedArea);
+        if (newIndex > -1 && newIndex < this.editor.areas.length) {
+          var removedArea = this.editor.areas.splice(index, 1)[0];
+          this.editor.areas.splice(newIndex, 0, removedArea);
           parent.childNodes[index][offset < 0 ? 'after' : 'before'](parent.childNodes[newIndex]);
         }
 
@@ -756,7 +756,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     }, {
       key: "syncAreaLinkValue",
       value: function syncAreaLinkValue(id) {
-        this.areas.forEach(function (area) {
+        this.editor.areas.forEach(function (area) {
           if (area.id === parseInt(id)) {
             area.link = area.getElement('.link').value;
           }
@@ -766,7 +766,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
       key: "toAreaXml",
       value: function toAreaXml() {
         var xml = ['<map>'];
-        this.areas.forEach(function (area) {
+        this.editor.areas.forEach(function (area) {
           xml.push(area.toAreaXml());
         });
         xml.push('</map>');
@@ -780,6 +780,13 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
   var AreaEditor =
   /*#__PURE__*/
   function () {
+    /**
+     * @type {boolean}
+     */
+
+    /**
+     * @type {Array}
+     */
     function AreaEditor(options, canvasSelector, formSelector) {
       _classCallCheck(this, AreaEditor);
 
@@ -794,6 +801,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
       });
 
       _defineProperty(this, "preview", true);
+
+      _defineProperty(this, "areas", []);
 
       this.initializeOptions(options);
       this.canvas = new fabric.Canvas(canvasSelector, _objectSpread({}, options.canvas, {
@@ -836,6 +845,37 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
       key: "getMaxHeight",
       value: function getMaxHeight() {
         return this.scaleFactor * this.canvas.height;
+      }
+    }, {
+      key: "initializeAreas",
+      value: function initializeAreas(areas) {
+        var _this9 = this;
+
+        areas.forEach(function (area) {
+          switch (area.shape) {
+            case 'rect':
+              _this9.addRect(area);
+
+              break;
+
+            case 'circle':
+              _this9.addCircle(area);
+
+              break;
+
+            case 'poly':
+              _this9.addPoly(area);
+
+              break;
+          }
+        });
+      }
+    }, {
+      key: "removeAllAreas",
+      value: function removeAllAreas() {
+        this.areas.forEach(function (area) {
+          area.deleteAction();
+        });
       }
     }, {
       key: "addRect",

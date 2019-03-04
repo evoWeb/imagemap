@@ -22,25 +22,6 @@ define([
 			areaEditor.setScale(scaleFactor);
 		};
 
-		let initializeAreas = (areas) => {
-			console.log(areas);
-			areas.forEach((area) => {
-				switch (area.shape) {
-					case 'rect':
-						areaEditor.addRect(area);
-						break;
-
-					case 'circle':
-						areaEditor.addCircle(area);
-						break;
-
-					case 'poly':
-						areaEditor.addPoly(area);
-						break;
-				}
-			});
-		};
-
 		let initializeEvents = () => {
 			$control.find('input[type=hidden]').on('imagemap:changed', function () {
 				let $field = $(this);
@@ -58,15 +39,15 @@ define([
 					}
 				}).done((data, textStatus) => {
 					if (textStatus === 'success') {
-						areaEditor.removeAreas();
-						initializeAreas(data);
+						areaEditor.removeAllAreas();
+						areaEditor.initializeAreas(data);
 					}
 				});
 			});
 		};
 
 		initializeScaleFactor($canvas.data('thumbnail-scale'));
-		initializeAreas($canvas.data('existing-areas'));
 		initializeEvents();
+		areaEditor.initializeAreas($canvas.data('existing-areas'));
 	});
 });

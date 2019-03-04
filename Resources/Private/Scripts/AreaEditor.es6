@@ -521,14 +521,14 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 
 	class AreaForm {
 		/**
-		 * @type {Array}
-		 */
-		areas = [];
-
-		/**
 		 * @type {HTMLElement}
 		 */
 		areaZone = null;
+
+		/**
+		 * @type {AreaEditor}
+		 */
+		editor = null;
 
 		constructor(formElement, editor) {
 			this.element = fabric.document.querySelector(formElement);
@@ -537,36 +537,36 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 
 		initializeArrows() {
-			this.areas.forEach((area) => {
+			this.editor.areas.forEach((area) => {
 				area.initializeArrows();
 			});
 		}
 
 		addArea(area) {
-			this.areas.push(area);
+			this.editor.areas.push(area);
 			area.form = this;
 			area.postAddToForm();
 		}
 
 		deleteArea(area) {
 			let areas = [];
-			this.areas.forEach((currentArea) => {
+			this.editor.areas.forEach((currentArea) => {
 				if (area !== currentArea) {
 					areas.push(currentArea);
 				}
 			});
-			this.areas = areas;
+			this.editor.areas = areas;
 			this.editor.deleteArea(area);
 		}
 
 		moveArea(area, offset) {
-			let index = this.areas.indexOf(area),
+			let index = this.editor.areas.indexOf(area),
 				newIndex = index + offset,
 				parent = area.element.parentNode;
 
-			if (newIndex > -1 && newIndex < this.areas.length) {
-				let removedArea = this.areas.splice(index, 1)[0];
-				this.areas.splice(newIndex, 0, removedArea);
+			if (newIndex > -1 && newIndex < this.editor.areas.length) {
+				let removedArea = this.editor.areas.splice(index, 1)[0];
+				this.editor.areas.splice(newIndex, 0, removedArea);
 
 				parent.childNodes[index][offset < 0 ? 'after' : 'before'](parent.childNodes[newIndex]);
 			}
@@ -599,7 +599,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 
 		syncAreaLinkValue(id) {
-			this.areas.forEach((area) => {
+			this.editor.areas.forEach((area) => {
 				if (area.id === parseInt(id)) {
 					area.link = area.getElement('.link').value;
 				}
@@ -608,7 +608,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 
 		toAreaXml() {
 			let xml = ['<map>'];
-			this.areas.forEach((area) => {
+			this.editor.areas.forEach((area) => {
 				xml.push(area.toAreaXml());
 			});
 			xml.push('</map>');
@@ -627,7 +627,15 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			transparentCorners: false
 		};
 
+		/**
+		 * @type {boolean}
+		 */
 		preview = true;
+
+		/**
+		 * @type {Array}
+		 */
+		areas = [];
 
 		constructor(options, canvasSelector, formSelector) {
 			this.initializeOptions(options);
@@ -664,6 +672,28 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 		getMaxHeight() {
 			return this.scaleFactor * this.canvas.height;
+		}
+
+		initializeAreas(areas) {
+			areas.forEach((area) => {
+				switch (area.shape) {
+					case 'rect':
+						this.addRect(area);
+						break;
+
+					case 'circle':
+						this.addCircle(area);
+						break;
+
+					case 'poly':
+						this.addPoly(area);
+						break;
+				}
+			});
+		}
+
+		removeAllAreas() {
+			this.areas.forEach((area) => { area.deleteAction(); });
 		}
 
 		addRect(configuration) {

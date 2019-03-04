@@ -39,25 +39,6 @@ define(['jquery', 'TYPO3/CMS/Imagemap/AreaEditor', 'jquery-ui/sortable', 'jquery
       });
     };
 
-    var initializeAreas = function initializeAreas(areas) {
-      console.log(areas);
-      areas.forEach(function (area) {
-        switch (area.shape) {
-          case 'rect':
-            areaEditor.addRect(area);
-            break;
-
-          case 'circle':
-            areaEditor.addCircle(area);
-            break;
-
-          case 'poly':
-            areaEditor.addPoly(area);
-            break;
-        }
-      });
-    };
-
     var initializeEvents = function initializeEvents() {
       $('#addRect').on('click', function () {
         areaEditor.addRect({
@@ -81,8 +62,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/AreaEditor', 'jquery-ui/sortable', 'jquery
     };
 
     initializeScaleFactor();
-    initializeAreas(configuration.existingAreas);
     initializeEvents();
+    areaEditor.initializeAreas(configuration.existingAreas);
   });
 });
 //# sourceMappingURL=Wizard.js.map

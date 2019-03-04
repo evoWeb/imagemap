@@ -16,25 +16,6 @@ define(['jquery', 'TYPO3/CMS/Imagemap/AreaEditor', 'jquery-ui/sortable', 'jquery
       areaEditor.setScale(scaleFactor);
     };
 
-    var initializeAreas = function initializeAreas(areas) {
-      console.log(areas);
-      areas.forEach(function (area) {
-        switch (area.shape) {
-          case 'rect':
-            areaEditor.addRect(area);
-            break;
-
-          case 'circle':
-            areaEditor.addCircle(area);
-            break;
-
-          case 'poly':
-            areaEditor.addPoly(area);
-            break;
-        }
-      });
-    };
-
     var initializeEvents = function initializeEvents() {
       $control.find('input[type=hidden]').on('imagemap:changed', function () {
         var $field = $(this);
@@ -52,16 +33,16 @@ define(['jquery', 'TYPO3/CMS/Imagemap/AreaEditor', 'jquery-ui/sortable', 'jquery
           }
         }).done(function (data, textStatus) {
           if (textStatus === 'success') {
-            areaEditor.removeAreas();
-            initializeAreas(data);
+            areaEditor.removeAllAreas();
+            areaEditor.initializeAreas(data);
           }
         });
       });
     };
 
     initializeScaleFactor($canvas.data('thumbnail-scale'));
-    initializeAreas($canvas.data('existing-areas'));
     initializeEvents();
+    areaEditor.initializeAreas($canvas.data('existing-areas'));
   });
 });
 //# sourceMappingURL=FormElement.js.map

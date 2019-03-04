@@ -47,25 +47,6 @@ define([
 			});
 		};
 
-		let initializeAreas = (areas) => {
-			console.log(areas);
-			areas.forEach((area) => {
-				switch (area.shape) {
-					case 'rect':
-						areaEditor.addRect(area);
-						break;
-
-					case 'circle':
-						areaEditor.addCircle(area);
-						break;
-
-					case 'poly':
-						areaEditor.addPoly(area);
-						break;
-				}
-			});
-		};
-
 		let initializeEvents = () => {
 			$('#addRect').on('click', function () {
 				areaEditor.addRect({
@@ -98,7 +79,7 @@ define([
 		};
 
 		initializeScaleFactor();
-		initializeAreas(configuration.existingAreas);
 		initializeEvents();
+		areaEditor.initializeAreas(configuration.existingAreas);
 	});
 });
