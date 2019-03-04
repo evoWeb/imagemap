@@ -1,15 +1,15 @@
 define(['jquery', 'TYPO3/CMS/Imagemap/AreaEditor', 'jquery-ui/sortable', 'jquery-ui/draggable'], function ($, AreaEditor) {
   $(document).ready(function () {
     var configuration = window.imagemap,
-        $image = $('#image img'),
-        editorConfig = {
+        $image = $('.image img'),
+        editorOptions = {
       canvas: {
         width: parseInt($image.css('width')),
         height: parseInt($image.css('height')),
         top: parseInt($image.css('height')) * -1
       }
     },
-        areaEditor = new AreaEditor('canvas', '#areasForm', editorConfig);
+        areaEditor = new AreaEditor(editorOptions, 'canvas', '#areasForm');
     configuration.areaEditor = areaEditor;
 
     var initializeScaleFactor = function initializeScaleFactor() {
@@ -40,18 +40,19 @@ define(['jquery', 'TYPO3/CMS/Imagemap/AreaEditor', 'jquery-ui/sortable', 'jquery
     };
 
     var initializeAreas = function initializeAreas(areas) {
-      areas.forEach(function (configuration) {
-        switch (configuration.shape) {
+      console.log(areas);
+      areas.forEach(function (area) {
+        switch (area.shape) {
           case 'rect':
-            areaEditor.addRect(configuration);
+            areaEditor.addRect(area);
             break;
 
           case 'circle':
-            areaEditor.addCircle(configuration);
+            areaEditor.addCircle(area);
             break;
 
           case 'poly':
-            areaEditor.addPoly(configuration);
+            areaEditor.addPoly(area);
             break;
         }
       });

@@ -6,19 +6,15 @@ define([
 ], ($, AreaEditor) => {
 	$(document).ready(() => {
 		let configuration = window.imagemap,
-			$image = $('#image img'),
-			editorConfig = {
+			$image = $('.image img'),
+			editorOptions = {
 				canvas: {
 					width: parseInt($image.css('width')),
 					height: parseInt($image.css('height')),
 					top: parseInt($image.css('height')) * -1,
 				}
 			},
-			areaEditor = new AreaEditor(
-				'canvas',
-				'#areasForm',
-				editorConfig
-			);
+			areaEditor = new AreaEditor(editorOptions, 'canvas', '#areasForm');
 
 		configuration.areaEditor = areaEditor;
 
@@ -52,18 +48,19 @@ define([
 		};
 
 		let initializeAreas = (areas) => {
-			areas.forEach((configuration) => {
-				switch (configuration.shape) {
+			console.log(areas);
+			areas.forEach((area) => {
+				switch (area.shape) {
 					case 'rect':
-						areaEditor.addRect(configuration);
+						areaEditor.addRect(area);
 						break;
 
 					case 'circle':
-						areaEditor.addCircle(configuration);
+						areaEditor.addCircle(area);
 						break;
 
 					case 'poly':
-						areaEditor.addPoly(configuration);
+						areaEditor.addPoly(area);
 						break;
 				}
 			});

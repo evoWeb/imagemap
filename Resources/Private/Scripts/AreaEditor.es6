@@ -627,17 +627,19 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			transparentCorners: false
 		};
 
-		preview = false;
+		preview = true;
 
-		constructor(canvas, form, options) {
+		constructor(options, canvasSelector, formSelector) {
 			this.initializeOptions(options);
 
-			this.canvas = new fabric.Canvas(canvas, {
+			this.canvas = new fabric.Canvas(canvasSelector, {
 				...options.canvas,
 				selection: false
 			});
-			if (!this.preview) {
-				this.form = new AreaForm(form, this);
+
+			if (formSelector !== undefined) {
+				this.preview = false;
+				this.form = new AreaForm(formSelector, this);
 			}
 		}
 
@@ -670,6 +672,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 				area = new Rect({
 					...configuration,
 					...this.areaConfig,
+					selectable: !this.preview,
 					hasControls: !this.preview,
 					left: parseInt(left),
 					top: parseInt(top),
@@ -692,6 +695,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 				area = new Circle({
 					...configuration,
 					...this.areaConfig,
+					selectable: !this.preview,
 					hasControls: !this.preview,
 					left: left - radius,
 					top: top - radius,

@@ -1,26 +1,37 @@
 define(['jquery', 'TYPO3/CMS/Imagemap/AreaEditor', 'jquery-ui/sortable', 'jquery-ui/draggable', 'TYPO3/CMS/Imagemap/JsGraphics'], function ($, AreaEditor) {
   $(document).ready(function () {
     var $control = $('.imagemap-control:eq(0)'),
-        $canvas = $control.find('.canvas'),
-        $image = $control.find('.image-embed-item'),
-        editorConfig = {
+        $image = $control.find('.image img'),
+        $canvas = $control.find('.picture'),
+        editorOptions = {
       canvas: {
         width: parseInt($image.css('width')),
         height: parseInt($image.css('height')),
         top: parseInt($image.css('height')) * -1
-      },
-      preview: true
+      }
     },
-        areaEditor = new previewCanvasClass();
-    areaEditor.init($canvas.attr('id'));
+        areaEditor = new AreaEditor(editorOptions, 'canvas');
 
     var initializeScaleFactor = function initializeScaleFactor(scaleFactor) {
       areaEditor.setScale(scaleFactor);
     };
 
     var initializeAreas = function initializeAreas(areas) {
+      console.log(areas);
       areas.forEach(function (area) {
-        areaEditor.addArea(new window['area' + area.shape + 'Class'](), area.coords, area.alt, area.link, area.color, 0);
+        switch (area.shape) {
+          case 'rect':
+            areaEditor.addRect(area);
+            break;
+
+          case 'circle':
+            areaEditor.addCircle(area);
+            break;
+
+          case 'poly':
+            areaEditor.addPoly(area);
+            break;
+        }
       });
     };
 

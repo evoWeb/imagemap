@@ -780,7 +780,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
   var AreaEditor =
   /*#__PURE__*/
   function () {
-    function AreaEditor(canvas, form, options) {
+    function AreaEditor(options, canvasSelector, formSelector) {
       _classCallCheck(this, AreaEditor);
 
       _defineProperty(this, "areaConfig", {
@@ -793,15 +793,16 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
         transparentCorners: false
       });
 
-      _defineProperty(this, "preview", false);
+      _defineProperty(this, "preview", true);
 
       this.initializeOptions(options);
-      this.canvas = new fabric.Canvas(canvas, _objectSpread({}, options.canvas, {
+      this.canvas = new fabric.Canvas(canvasSelector, _objectSpread({}, options.canvas, {
         selection: false
       }));
 
-      if (!this.preview) {
-        this.form = new AreaForm(form, this);
+      if (formSelector !== undefined) {
+        this.preview = false;
+        this.form = new AreaForm(formSelector, this);
       }
     }
 
@@ -848,6 +849,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
             right = _configuration$coords2[2],
             bottom = _configuration$coords2[3],
             area = new Rect(_objectSpread({}, configuration, this.areaConfig, {
+          selectable: !this.preview,
           hasControls: !this.preview,
           left: parseInt(left),
           top: parseInt(top),
@@ -875,6 +877,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
             top = _configuration$coords4[1],
             radius = _configuration$coords4[2],
             area = new Circle(_objectSpread({}, configuration, this.areaConfig, {
+          selectable: !this.preview,
           hasControls: !this.preview,
           left: left - radius,
           top: top - radius,

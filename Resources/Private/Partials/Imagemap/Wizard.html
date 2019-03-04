@@ -48,13 +48,13 @@ window.imagemap = {<f:format.raw>
 </f:format.raw>};
 </script>
 
-<div id="pic">
+<div class="pictureWrap">
 	<div id="magnify" data-scale-factor="{scaleFactor}">
 		<span class="zoomin hide" title="{f:translate(id: 'imagemap.form.zoomin', extensionName: 'imagemap')}"><core:icon identifier="extensions-imagemap-zoomin" size="default" /></span>
 		<span class="zoomout hide" title="{f:translate(id: 'imagemap.form.zoomout', extensionName: 'imagemap')}"><core:icon identifier="extensions-imagemap-zoomout" size="default" /></span>
 	</div>
-	<div id="picture">
-		<div id="image">{data.image -> f:format.raw()}</div>
+	<div class="picture">
+		<div class="image">{data.image -> f:format.raw()}</div>
 		<canvas id="canvas" class="canvas"></canvas>
 	</div>
 </div>
