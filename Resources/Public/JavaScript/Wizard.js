@@ -1,7 +1,8 @@
-define(['jquery', 'TYPO3/CMS/Imagemap/AreaEditor', 'jquery-ui/sortable', 'jquery-ui/draggable'], function ($, AreaEditor) {
+define(['jquery', 'TYPO3/CMS/Imagemap/AreaEditor'], function ($, AreaEditor) {
   $(document).ready(function () {
     var configuration = window.imagemap,
         $image = $('.image img'),
+        $canvas = $('.picture'),
         editorOptions = {
       canvas: {
         width: parseInt($image.css('width')),
@@ -12,31 +13,25 @@ define(['jquery', 'TYPO3/CMS/Imagemap/AreaEditor', 'jquery-ui/sortable', 'jquery
         areaEditor = new AreaEditor(editorOptions, 'canvas', '#areasForm');
     configuration.areaEditor = areaEditor;
 
-    var initializeScaleFactor = function initializeScaleFactor() {
+    var initializeScaleFactor = function initializeScaleFactor(scaleFactor) {
       var $magnify = $('#magnify'),
           $zoomOut = $magnify.find('.zoomout'),
-          $zoomIn = $magnify.find('.zoomin'),
-          scaleFactor = areaEditor.setScale($magnify.data('scale-factor'));
-      areaEditor.setScale(scaleFactor);
+          $zoomIn = $magnify.find('.zoomin');
+      areaEditor.setScale();
 
       if (scaleFactor < 1) {
         $zoomIn.removeClass('hide');
-        $zoomOut.addClass('hide');
-      } else {
-        $zoomIn.addClass('hide');
-        $zoomOut.addClass('hide');
+        $zoomIn.click(function () {
+          areaEditor.setScale(1);
+          $zoomIn.hide();
+          $zoomOut.show();
+        });
+        $zoomOut.click(function () {
+          areaEditor.setScale(scaleFactor);
+          $zoomOut.hide();
+          $zoomIn.show();
+        });
       }
-
-      $zoomIn.click(function () {
-        areaEditor.setScale(1);
-        $zoomIn.hide();
-        $zoomOut.show();
-      });
-      $zoomOut.click(function () {
-        areaEditor.setScale(scaleFactor);
-        $zoomOut.hide();
-        $zoomIn.show();
-      });
     };
 
     var initializeEvents = function initializeEvents() {
@@ -61,7 +56,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/AreaEditor', 'jquery-ui/sortable', 'jquery
       });
     };
 
-    initializeScaleFactor();
+    initializeScaleFactor($canvas.data('scale-factor'));
     initializeEvents();
     areaEditor.initializeAreas(configuration.existingAreas);
   });

@@ -588,7 +588,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 				url: TYPO3.settings.ajaxUrls['imagemap_browselink_url'],
 				context: area,
 				data: data
-			}).done(function (response) {
+			}).done((response) => {
 				let vHWin = window.open(
 					response.url,
 					'',

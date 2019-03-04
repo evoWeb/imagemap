@@ -1,12 +1,11 @@
 define([
 	'jquery',
-	'TYPO3/CMS/Imagemap/AreaEditor',
-	'jquery-ui/sortable',
-	'jquery-ui/draggable'
+	'TYPO3/CMS/Imagemap/AreaEditor'
 ], ($, AreaEditor) => {
 	$(document).ready(() => {
 		let configuration = window.imagemap,
 			$image = $('.image img'),
+			$canvas = $('.picture'),
 			editorOptions = {
 				canvas: {
 					width: parseInt($image.css('width')),
@@ -18,50 +17,45 @@ define([
 
 		configuration.areaEditor = areaEditor;
 
-		let initializeScaleFactor = () => {
+		let initializeScaleFactor = (scaleFactor) => {
 			let $magnify = $('#magnify'),
 				$zoomOut = $magnify.find('.zoomout'),
-				$zoomIn = $magnify.find('.zoomin'),
-				scaleFactor = areaEditor.setScale($magnify.data('scale-factor'));
+				$zoomIn = $magnify.find('.zoomin');
 
-			areaEditor.setScale(scaleFactor);
+			areaEditor.setScale();
 
 			if (scaleFactor < 1) {
 				$zoomIn.removeClass('hide');
-				$zoomOut.addClass('hide');
-			} else {
-				$zoomIn.addClass('hide');
-				$zoomOut.addClass('hide');
+
+				$zoomIn.click(() => {
+					areaEditor.setScale(1);
+					$zoomIn.hide();
+					$zoomOut.show();
+				});
+
+				$zoomOut.click(() => {
+					areaEditor.setScale(scaleFactor);
+					$zoomOut.hide();
+					$zoomIn.show();
+				});
 			}
-
-			$zoomIn.click(() => {
-				areaEditor.setScale(1);
-				$zoomIn.hide();
-				$zoomOut.show();
-			});
-
-			$zoomOut.click(() => {
-				areaEditor.setScale(scaleFactor);
-				$zoomOut.hide();
-				$zoomIn.show();
-			});
 		};
 
 		let initializeEvents = () => {
-			$('#addRect').on('click', function () {
+			$('#addRect').on('click', () => {
 				areaEditor.addRect({
 					coords: (parseInt($image.css('width')) / 2 - 50) + ',' + (parseInt($image.css('height')) / 2 - 50)
 						+ ',' + (parseInt($image.css('width')) / 2 + 50) + ',' + (parseInt($image.css('height')) / 2 + 50),
 				});
 			});
 
-			$('#addCircle').on('click', function () {
+			$('#addCircle').on('click', () => {
 				areaEditor.addCircle({
 					coords: (parseInt($image.css('width')) / 2 - 50) + ',' + (parseInt($image.css('height')) / 2 - 50) + ',50',
 				});
 			});
 
-			$('#addPoly').on('click', function () {
+			$('#addPoly').on('click', () => {
 				areaEditor.addPoly({
 					coords: (parseInt($image.css('width')) / 2) + ',' + (parseInt($image.css('height')) / 2 - 50)
 						+ ',' + (parseInt($image.css('width')) / 2 + 50) + ',' + (parseInt($image.css('height')) / 2 + 50)
@@ -70,7 +64,7 @@ define([
 				});
 			});
 
-			$('#submit').on('click', function () {
+			$('#submit').on('click', () => {
 				window.opener.$('input[name="' + configuration.itemName + '"]')
 					.val(areaEditor.toAreaXml())
 					.trigger('imagemap:changed');
@@ -78,7 +72,7 @@ define([
 			});
 		};
 
-		initializeScaleFactor();
+		initializeScaleFactor($canvas.data('scale-factor'));
 		initializeEvents();
 		areaEditor.initializeAreas(configuration.existingAreas);
 	});

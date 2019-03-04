@@ -1,9 +1,6 @@
 define([
 	'jquery',
-	'TYPO3/CMS/Imagemap/AreaEditor',
-	'jquery-ui/sortable',
-	'jquery-ui/draggable',
-	'TYPO3/CMS/Imagemap/JsGraphics'
+	'TYPO3/CMS/Imagemap/AreaEditor'
 ], ($, AreaEditor) => {
 	$(document).ready(() => {
 		let $control = $('.imagemap-control:eq(0)'),
@@ -23,7 +20,7 @@ define([
 		};
 
 		let initializeEvents = () => {
-			$control.find('input[type=hidden]').on('imagemap:changed', function () {
+			$control.find('input[type=hidden]').on('imagemap:changed', () => {
 				let $field = $(this);
 				$.ajax({
 					url: window.TYPO3.settings.ajaxUrls['imagemap_preview_rerender'],
