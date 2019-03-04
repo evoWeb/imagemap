@@ -11,8 +11,10 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 
 		// this function copies all properties and symbols, filtering out some special ones
 		let copyProperties = (target, source) => {
+			/** @type {Array} */
+			let propertySymbols = Object.getOwnPropertySymbols(source);
 			Object.getOwnPropertyNames(source)
-				.concat(Object.getOwnPropertySymbols(source))
+				.concat(propertySymbols)
 				.forEach((property) => {
 					if (!property.match(
 						/^(?:constructor|prototype|arguments|caller|name|bind|call|apply|toString|length)$/
@@ -31,7 +33,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		return base;
 	};
 
-	class AreaFormElement {
+	class AreaFormElement extends fabric.Object {
 		/**
 		 * @type {ChildNode|HTMLElement}
 		 */
@@ -62,7 +64,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 
 		initializeElement() {
 			this.element = this.getFormElement('#' + this.constructor.name.toLowerCase() + 'Form');
-			this.form.areaZone.appendChild(this.element);
+			this.form.areaZone.append(this.element);
 			this.form.initializeArrows();
 		}
 
@@ -80,7 +82,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 						cell.classList.add('colorPickerCell');
 						cell.addEventListener('click', this.colorPickerAction.bind(this));
 
-						colorPicker.appendChild(cell);
+						colorPicker.append(cell);
 					}
 				}
 			}
@@ -349,11 +351,6 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 	}
 
 	class Poly extends Aggregation(fabric.Polygon, AreaFormElement) {
-		/**
-		 * @type {Array}
-		 */
-		controls = [];
-
 		updateFields() {
 			this.getElement('#color').style.backgroundColor = this.color;
 			this.getElement('#alt').value = this.alt;
@@ -363,12 +360,13 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 				this.getElement('#' + attribute[0]).value = attribute[1];
 			});
 
+			let parentElement = this.getElement('.positionOptions');
 			this.points.forEach((point, index) => {
 				point.id = point.id ? point.id : 'p' + this.id + '_' + index;
 
 				if (!point.hasOwnProperty('element')) {
 					point.element = this.getFormElement('#polyCoords', point.id);
-					this.append(point.element);
+					parentElement.append(point.element);
 				}
 
 				point.element.querySelector('#x' + point.id).value = point.x;
@@ -409,6 +407,10 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			return result.join(',');
 		}
 
+		/**
+		 * @type {Array}
+		 */
+		controls = [];
 
 		addControls(areaConfig) {
 			this.points.forEach((point, index) => {
@@ -461,6 +463,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 				firstPoint = this.points[0],
 				lastPoint = this.points[index - 1],
 				id = 'p' + this.id + '_' + index,
+				parentElement = this.getElement('.positionOptions'),
 				element = this.getFormElement('#polyCoords', id),
 				point = {
 					x: (firstPoint.x + lastPoint.x) / 2,
@@ -476,13 +479,13 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			element.querySelector('#x' + point.id).value = point.x;
 			element.querySelector('#y' + point.id).value = point.y;
 
-			this.append(element);
+			parentElement.append(element);
 
 			this.points.push(point);
 			this.addControl(this.form.editor.areaConfig, point, index);
 		}
 
-		removeAction(event) {
+		removePointAction(event) {
 			if (this.points.length > 3) {
 				let element = event.currentTarget.parentNode.parentNode,
 					points = [],
@@ -513,16 +516,6 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 				this.controls = controls;
 				this.canvas.renderAll();
 			}
-		}
-
-		prepend(element) {
-			let positionOptions = this.getElement('.positionOptions');
-			positionOptions.insertBefore(element, positionOptions.firstChild);
-		}
-
-		append(element) {
-			let positionOptions = this.getElement('.positionOptions');
-			positionOptions.insertBefore(element, positionOptions.lastChild);
 		}
 	}
 

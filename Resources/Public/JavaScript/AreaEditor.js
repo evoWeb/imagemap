@@ -62,7 +62,9 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
 
 
     var copyProperties = function copyProperties(target, source) {
-      Object.getOwnPropertyNames(source).concat(Object.getOwnPropertySymbols(source)).forEach(function (property) {
+      /** @type {Array} */
+      var propertySymbols = Object.getOwnPropertySymbols(source);
+      Object.getOwnPropertyNames(source).concat(propertySymbols).forEach(function (property) {
         if (!property.match(/^(?:constructor|prototype|arguments|caller|name|bind|call|apply|toString|length)$/)) {
           Object.defineProperty(target, property, Object.getOwnPropertyDescriptor(source, property));
         }
@@ -79,15 +81,29 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
 
   var AreaFormElement =
   /*#__PURE__*/
-  function () {
+  function (_fabric$Object) {
+    _inherits(AreaFormElement, _fabric$Object);
+
     function AreaFormElement() {
+      var _getPrototypeOf3;
+
+      var _this2;
+
       _classCallCheck(this, AreaFormElement);
 
-      _defineProperty(this, "element", null);
+      for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+        args[_key3] = arguments[_key3];
+      }
 
-      _defineProperty(this, "form", null);
+      _this2 = _possibleConstructorReturn(this, (_getPrototypeOf3 = _getPrototypeOf(AreaFormElement)).call.apply(_getPrototypeOf3, [this].concat(args)));
 
-      _defineProperty(this, "eventDelay", 0);
+      _defineProperty(_assertThisInitialized(_this2), "element", null);
+
+      _defineProperty(_assertThisInitialized(_this2), "form", null);
+
+      _defineProperty(_assertThisInitialized(_this2), "eventDelay", 0);
+
+      return _this2;
     }
 
     _createClass(AreaFormElement, [{
@@ -108,7 +124,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
       key: "initializeElement",
       value: function initializeElement() {
         this.element = this.getFormElement('#' + this.constructor.name.toLowerCase() + 'Form');
-        this.form.areaZone.appendChild(this.element);
+        this.form.areaZone.append(this.element);
         this.form.initializeArrows();
       }
     }, {
@@ -126,7 +142,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
               cell.style.backgroundColor = '#' + color;
               cell.classList.add('colorPickerCell');
               cell.addEventListener('click', this.colorPickerAction.bind(this));
-              colorPicker.appendChild(cell);
+              colorPicker.append(cell);
             }
           }
         }
@@ -292,7 +308,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     }]);
 
     return AreaFormElement;
-  }();
+  }(fabric.Object);
 
   var Rect =
   /*#__PURE__*/
@@ -308,7 +324,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     _createClass(Rect, [{
       key: "updateFields",
       value: function updateFields() {
-        var _this2 = this;
+        var _this3 = this;
 
         this.getElement('#color').style.backgroundColor = this.color;
         this.getElement('#alt').value = this.alt;
@@ -318,7 +334,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
         this.getElement('#right').value = Math.floor(this.left + this.getScaledWidth());
         this.getElement('#bottom').value = Math.floor(this.top + this.getScaledHeight());
         Object.entries(this.attributes).forEach(function (attribute) {
-          _this2.getElement('#' + attribute[0]).value = attribute[1];
+          _this3.getElement('#' + attribute[0]).value = attribute[1];
         });
       }
     }, {
@@ -397,7 +413,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     _createClass(Circle, [{
       key: "updateFields",
       value: function updateFields() {
-        var _this3 = this;
+        var _this4 = this;
 
         this.getElement('#color').style.backgroundColor = this.color;
         this.getElement('#alt').value = this.alt;
@@ -406,7 +422,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
         this.getElement('#top').value = Math.floor(this.top + 0);
         this.getElement('#radius').value = Math.floor(this.getRadiusX());
         Object.entries(this.attributes).forEach(function (attribute) {
-          _this3.getElement('#' + attribute[0]).value = attribute[1];
+          _this4.getElement('#' + attribute[0]).value = attribute[1];
         });
       }
     }, {
@@ -456,41 +472,41 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
     _inherits(Poly, _Aggregation3);
 
     function Poly() {
-      var _getPrototypeOf3;
+      var _getPrototypeOf4;
 
-      var _this4;
+      var _this5;
 
       _classCallCheck(this, Poly);
 
-      for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-        args[_key3] = arguments[_key3];
+      for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+        args[_key4] = arguments[_key4];
       }
 
-      _this4 = _possibleConstructorReturn(this, (_getPrototypeOf3 = _getPrototypeOf(Poly)).call.apply(_getPrototypeOf3, [this].concat(args)));
+      _this5 = _possibleConstructorReturn(this, (_getPrototypeOf4 = _getPrototypeOf(Poly)).call.apply(_getPrototypeOf4, [this].concat(args)));
 
-      _defineProperty(_assertThisInitialized(_this4), "controls", []);
+      _defineProperty(_assertThisInitialized(_this5), "controls", []);
 
-      return _this4;
+      return _this5;
     }
 
     _createClass(Poly, [{
       key: "updateFields",
       value: function updateFields() {
-        var _this5 = this;
+        var _this6 = this;
 
         this.getElement('#color').style.backgroundColor = this.color;
         this.getElement('#alt').value = this.alt;
         this.getElement('.link').value = this.link;
         Object.entries(this.attributes).forEach(function (attribute) {
-          _this5.getElement('#' + attribute[0]).value = attribute[1];
+          _this6.getElement('#' + attribute[0]).value = attribute[1];
         });
+        var parentElement = this.getElement('.positionOptions');
         this.points.forEach(function (point, index) {
-          point.id = point.id ? point.id : 'p' + _this5.id + '_' + index;
+          point.id = point.id ? point.id : 'p' + _this6.id + '_' + index;
 
           if (!point.hasOwnProperty('element')) {
-            point.element = _this5.getFormElement('#polyCoords', point.id);
-
-            _this5.append(point.element);
+            point.element = _this6.getFormElement('#polyCoords', point.id);
+            parentElement.append(point.element);
           }
 
           point.element.querySelector('#x' + point.id).value = point.x;
@@ -536,13 +552,17 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
         });
         return result.join(',');
       }
+      /**
+       * @type {Array}
+       */
+
     }, {
       key: "addControls",
       value: function addControls(areaConfig) {
-        var _this6 = this;
+        var _this7 = this;
 
         this.points.forEach(function (point, index) {
-          _this6.addControl(areaConfig, point, index);
+          _this7.addControl(areaConfig, point, index);
         });
         this.canvas.on('object:moving', function (event) {
           if (event.target.get('type') === 'control') {
@@ -591,6 +611,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
             firstPoint = this.points[0],
             lastPoint = this.points[index - 1],
             id = 'p' + this.id + '_' + index,
+            parentElement = this.getElement('.positionOptions'),
             element = this.getFormElement('#polyCoords', id),
             point = {
           x: (firstPoint.x + lastPoint.x) / 2,
@@ -603,14 +624,14 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
         }.bind(this));
         element.querySelector('#x' + point.id).value = point.x;
         element.querySelector('#y' + point.id).value = point.y;
-        this.append(element);
+        parentElement.append(element);
         this.points.push(point);
         this.addControl(this.form.editor.areaConfig, point, index);
       }
     }, {
-      key: "removeAction",
-      value: function removeAction(event) {
-        var _this7 = this;
+      key: "removePointAction",
+      value: function removePointAction(event) {
+        var _this8 = this;
 
         if (this.points.length > 3) {
           var element = event.currentTarget.parentNode.parentNode,
@@ -619,23 +640,23 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
           this.points.forEach(function (point, index) {
             if (element.id !== point.id) {
               points.push(point);
-              controls.push(_this7.controls[index]);
+              controls.push(_this8.controls[index]);
             } else {
               point.element.remove();
 
-              _this7.canvas.remove(_this7.controls[index]);
+              _this8.canvas.remove(_this8.controls[index]);
             }
           });
           points.forEach(function (point, index) {
             var oldId = point.id;
-            point.id = 'p' + _this7.id + '_' + index;
-            _this7.getElement('#' + oldId).id = point.id;
-            _this7.getElement('#x' + oldId).id = 'x' + point.id;
-            _this7.getElement('#y' + oldId).id = 'y' + point.id;
+            point.id = 'p' + _this8.id + '_' + index;
+            _this8.getElement('#' + oldId).id = point.id;
+            _this8.getElement('#x' + oldId).id = 'x' + point.id;
+            _this8.getElement('#y' + oldId).id = 'y' + point.id;
 
-            _this7.getElement('[for="x' + oldId + '"]').setAttribute('for', 'x' + point.id);
+            _this8.getElement('[for="x' + oldId + '"]').setAttribute('for', 'x' + point.id);
 
-            _this7.getElement('[for="y' + oldId + '"]').setAttribute('for', 'y' + point.id);
+            _this8.getElement('[for="y' + oldId + '"]').setAttribute('for', 'y' + point.id);
 
             controls[index].name = index;
           });
@@ -643,18 +664,6 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
           this.controls = controls;
           this.canvas.renderAll();
         }
-      }
-    }, {
-      key: "prepend",
-      value: function prepend(element) {
-        var positionOptions = this.getElement('.positionOptions');
-        positionOptions.insertBefore(element, positionOptions.firstChild);
-      }
-    }, {
-      key: "append",
-      value: function append(element) {
-        var positionOptions = this.getElement('.positionOptions');
-        positionOptions.insertBefore(element, positionOptions.lastChild);
       }
     }]);
 
