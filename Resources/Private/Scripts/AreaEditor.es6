@@ -645,6 +645,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 				selection: false
 			});
 
+
 			if (formSelector !== undefined) {
 				this.preview = false;
 				this.form = new AreaForm(formSelector, this);
@@ -659,19 +660,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			}
 		}
 
-		initializeScaling(scaling) {
-			let width = parseInt(scaling) / this.canvas.width,
-				height = parseInt(scaling) / this.canvas.height;
-			return (width > height) ? height : width;
-		}
 		setScale(scaling) {
-			this.scaleFactor = scaling > 1 ? 1 : scaling;
-		}
-		getMaxWidth() {
-			return this.scaleFactor * this.canvas.width;
-		}
-		getMaxHeight() {
-			return this.scaleFactor * this.canvas.height;
+			this.canvas.setZoom(this.canvas.getZoom() * (scaling ? scaling : 1));
 		}
 
 		initializeAreas(areas) {

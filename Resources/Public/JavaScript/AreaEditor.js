@@ -825,26 +825,9 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], function ($, fabric) {
         }
       }
     }, {
-      key: "initializeScaling",
-      value: function initializeScaling(scaling) {
-        var width = parseInt(scaling) / this.canvas.width,
-            height = parseInt(scaling) / this.canvas.height;
-        return width > height ? height : width;
-      }
-    }, {
       key: "setScale",
       value: function setScale(scaling) {
-        this.scaleFactor = scaling > 1 ? 1 : scaling;
-      }
-    }, {
-      key: "getMaxWidth",
-      value: function getMaxWidth() {
-        return this.scaleFactor * this.canvas.width;
-      }
-    }, {
-      key: "getMaxHeight",
-      value: function getMaxHeight() {
-        return this.scaleFactor * this.canvas.height;
+        this.canvas.setZoom(this.canvas.getZoom() * (scaling ? scaling : 1));
       }
     }, {
       key: "initializeAreas",

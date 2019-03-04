@@ -86,7 +86,7 @@ class PopupController
             $this->moduleTemplate->getView()
                 ->assign('parameters', $parameters)
                 ->assign('data', $data)
-                ->assign('scaleFactor', $data->getEnvironment()->getExtConfValue('imageMaxWH', 800))
+                ->assign('scaleFactor', $data->getEnvironment()->getExtConfValue('imageMaxWH', 800) / 1000)
                 ->assign('formName', 'imagemap' . GeneralUtility::shortMD5(rand(1, 100000)))
                 ->assign('returnUrl', GeneralUtility::linkThisScript());
         } catch (\Exception $e) {

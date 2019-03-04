@@ -22,7 +22,7 @@ define([
 			let $magnify = $('#magnify'),
 				$zoomOut = $magnify.find('.zoomout'),
 				$zoomIn = $magnify.find('.zoomin'),
-				scaleFactor = areaEditor.initializeScaling($magnify.data('scale-factor'));
+				scaleFactor = areaEditor.setScale($magnify.data('scale-factor'));
 
 			areaEditor.setScale(scaleFactor);
 

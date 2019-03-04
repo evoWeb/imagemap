@@ -16,7 +16,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/AreaEditor', 'jquery-ui/sortable', 'jquery
       var $magnify = $('#magnify'),
           $zoomOut = $magnify.find('.zoomout'),
           $zoomIn = $magnify.find('.zoomin'),
-          scaleFactor = areaEditor.initializeScaling($magnify.data('scale-factor'));
+          scaleFactor = areaEditor.setScale($magnify.data('scale-factor'));
       areaEditor.setScale(scaleFactor);
 
       if (scaleFactor < 1) {
