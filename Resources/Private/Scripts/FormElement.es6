@@ -1,6 +1,6 @@
 define([
 	'jquery',
-	'TYPO3/CMS/Imagemap/AreaEditor'
+	'./AreaEditor'
 ], ($, AreaEditor) => {
 	$(document).ready(() => {
 		let $control = $('.imagemap-control:eq(0)'),
@@ -11,7 +11,8 @@ define([
 					width: parseInt($image.css('width')),
 					height: parseInt($image.css('height')),
 					top: parseInt($image.css('height')) * -1,
-				}
+				},
+				previewRerenderAjaxUrl: window.TYPO3.settings.ajaxUrls.imagemap_preview_rerender
 			},
 			areaEditor = new AreaEditor(editorOptions, 'canvas');
 
@@ -19,11 +20,11 @@ define([
 			areaEditor.setScale(scaleFactor);
 		};
 
-		let initializeEvents = () => {
+		let initializeEvents = (editorOptions) => {
 			$control.find('input[type=hidden]').on('imagemap:changed', () => {
 				let $field = $(this);
 				$.ajax({
-					url: window.TYPO3.settings.ajaxUrls['imagemap_preview_rerender'],
+					url: editorOptions.previewRerenderAjaxUrl,
 					method: 'POST',
 					data: {
 						P: {
@@ -44,7 +45,7 @@ define([
 		};
 
 		initializeScaleFactor($canvas.data('thumbnail-scale'));
-		initializeEvents();
+		initializeEvents(editorOptions);
 		areaEditor.initializeAreas($canvas.data('existing-areas'));
 	});
 });

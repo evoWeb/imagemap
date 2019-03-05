@@ -15,6 +15,7 @@ namespace Evoweb\Imagemap\Form\Element;
  */
 
 use Evoweb\Imagemap\Domain\Model\Data;
+use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElement
@@ -120,6 +121,22 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
 
         $resultArray['html'] = '<div class="formengine-field-item t3js-formengine-field-item">' . $html . '</div>';
         return $resultArray;
+    }
+
+    /**
+     * Override field control rendering to have a custom button
+     *
+     * @return array Result array
+     */
+    protected function renderFieldControl(): array
+    {
+        $options = $this->data;
+        $fieldControl = $this->defaultFieldControl;
+        $fieldControlFromTca = $options['parameterArray']['fieldConf']['config']['fieldControl'] ?? [];
+        ArrayUtility::mergeRecursiveWithOverrule($fieldControl, $fieldControlFromTca);
+        $options['renderType'] = 'imagemapPopup';
+        $options['renderData']['fieldControl'] = $fieldControl;
+        return $this->nodeFactory->create($options)->render();
     }
 
     /**

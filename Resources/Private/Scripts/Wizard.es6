@@ -11,7 +11,8 @@ define([
 					width: parseInt($image.css('width')),
 					height: parseInt($image.css('height')),
 					top: parseInt($image.css('height')) * -1,
-				}
+				},
+				browseLinkUrlAjaxUrl: window.TYPO3.settings.ajaxUrls.imagemap_browselink_url
 			},
 			areaEditor = new AreaEditor(editorOptions, 'canvas', '#areasForm');
 

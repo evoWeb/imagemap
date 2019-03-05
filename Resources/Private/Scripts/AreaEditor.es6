@@ -101,7 +101,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			this.getElements('.positionOptions .t3js-field').forEach(function (field) {
 				field.addEventListener('keyup', function(event) {
 					clearTimeout(that.eventDelay);
-					that.eventDelay = setTimeout(() => { that.updateCanvas(event); }, 500);
+					that.eventDelay = AreaFormElement.wait(() => { that.updateCanvas(event); }, 500);
 				}.bind(this));
 			}.bind(this));
 
@@ -243,6 +243,10 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 
 		getLink() {
 			return this.getElement('.link').value;
+		}
+
+		static wait(callback, delay) {
+			return window.setTimeout(callback, delay);
 		}
 	}
 
@@ -596,7 +600,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			};
 
 			$.ajax({
-				url: TYPO3.settings.ajaxUrls['imagemap_browselink_url'],
+				url: this.editor.browseLinkUrlAjaxUrl,
 				context: area,
 				data: data
 			}).done((response) => {
@@ -639,6 +643,11 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		};
 
 		/**
+		 * @type {string}
+		 */
+		browseLinkUrlAjaxUrl = '';
+
+		/**
 		 * @type {boolean}
 		 */
 		preview = true;
@@ -655,7 +664,6 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 				...options.canvas,
 				selection: false
 			});
-
 
 			if (formSelector !== undefined) {
 				this.preview = false;

@@ -14,19 +14,18 @@ call_user_func(function () {
     // Register Icons
     /** @var \TYPO3\CMS\Core\Imaging\IconRegistry $iconRegistry */
     $iconRegistry = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Imaging\IconRegistry::class);
-    $iconRegistry->registerIcon(
-        'extensions-imagemap-content',
-        \TYPO3\CMS\Core\Imaging\IconProvider\SvgIconProvider::class,
-        ['source' => 'EXT:imagemap/Resources/Public/Icons/content-imagemap.svg']
-    );
     $icons = [
-        'zoomin' => 'EXT:imagemap/Resources/Public/Icons/magnifier_zoom_in.png',
-        'zoomout' => 'EXT:imagemap/Resources/Public/Icons/magnifier_zoom_out.png',
+        'content' => 'EXT:imagemap/Resources/Public/Icons/content-imagemap.svg',
+        'zoomin' => 'EXT:imagemap/Resources/Public/Icons/search-plus.svg',
+        'zoomout' => 'EXT:imagemap/Resources/Public/Icons/search-minus.svg',
+        'circle' => 'EXT:imagemap/Resources/Public/Icons/draw-circle.svg',
+        'poly' => 'EXT:imagemap/Resources/Public/Icons/draw-polygon.svg',
+        'rect' => 'EXT:imagemap/Resources/Public/Icons/draw-square.svg',
     ];
     foreach ($icons as $identifier => $iconPath) {
         $iconRegistry->registerIcon(
             'extensions-imagemap-' . $identifier,
-            \TYPO3\CMS\Core\Imaging\IconProvider\BitmapIconProvider::class,
+            \TYPO3\CMS\Core\Imaging\IconProvider\SvgIconProvider::class,
             ['source' => $iconPath]
         );
     }
@@ -39,6 +38,6 @@ call_user_func(function () {
     $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1549819420] = [
         'nodeName' => 'imagemapPopup',
         'priority' => '70',
-        'class' => \Evoweb\Imagemap\Form\FieldControl\EditPopup::class,
+        'class' => \Evoweb\Imagemap\Form\FieldControl\EditControl::class,
     ];
 });
