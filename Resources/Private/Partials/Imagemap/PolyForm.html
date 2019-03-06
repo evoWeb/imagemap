@@ -6,7 +6,7 @@
 <div class="areaForm polyForm">
 	<div class="basicOptions input-group">
 		<div class="input-group-addon">
-			<div class="input-group-text colorPreview"><div id="color" class="t3js-field"></div></div>
+			<input class="form-control t3js-color-picker" type="hidden" id="color" value=""/>
 		</div>
 		<input type="text" id="link_ID" class="link t3js-field form-control ignored-attribute"
 					 placeholder="{f:translate(id: 'imagemap.form.area.link', extensionName: 'imagemap')}" data-formengine-input-name="link_ID"/>
@@ -35,8 +35,6 @@
 				<span id="addPoint" class="t3js-btn btn btn-default" title="{f:translate(id: 'imagemap.form.poly.addEdge', extensionName: 'imagemap')}"><core:icon identifier="actions-add"/></span>
 			</div>
 		</div>
-
-		<div class="colorPicker"></div>
 	</div>
 </div>
 </script>

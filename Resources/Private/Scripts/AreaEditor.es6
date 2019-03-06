@@ -1,4 +1,8 @@
-define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
+define([
+	'jquery',
+	'TYPO3/CMS/Imagemap/Fabric',
+	'TYPO3/CMS/Core/Contrib/jquery.minicolors'
+], ($, fabric) => {
 	let Aggregation = (baseClass, ...mixins) => {
 		class base extends baseClass {
 			constructor (...args) {
@@ -62,8 +66,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			}
 
 			this.initializeElement();
-			this.initializeColorPicker();
 			this.updateFields();
+			this.initializeColorPicker();
 			this.initializeEvents();
 		}
 
@@ -74,23 +78,13 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 
 		initializeColorPicker() {
-			let colorPicker = this.getElement('.colorPicker'),
-				values = ['00', '33', '66', '99', 'CC', 'FF'];
-
-			for (let b = 1; b < 6; b++) {
-				for (let g = 1; g < 5; g++) {
-					for (let r = 1; r < 6; r++) {
-						let color = values[b] + values[g] + values[r],
-							cell = document.createElement('div');
-						cell.id = color;
-						cell.style.backgroundColor = '#' + color;
-						cell.classList.add('colorPickerCell');
-						cell.addEventListener('click', this.colorPickerAction.bind(this));
-
-						colorPicker.append(cell);
-					}
-				}
-			}
+			$(this.getElement('.t3js-color-picker')).minicolors({
+				format: 'hex',
+				position: 'left',
+				theme: 'default',
+				changeDelay: 100,
+				change: this.colorPickerAction.bind(this)
+			});
 		}
 
 		initializeEvents() {
@@ -184,12 +178,11 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			this.showElement('#expand');
 		}
 
-		colorPickerAction(event) {
-			let color = event.currentTarget.style.backgroundColor;
-			this.getElement('#color').style.backgroundColor = color;
-			this.set('borderColor', color);
-			this.set('stroke', color);
-			this.set('fill', AreaEditor.hexToRgbA(AreaEditor.rgbAToHex(color), 0.2));
+		colorPickerAction(value) {
+			this.getElement('.t3js-color-picker').value = value;
+			this.set('borderColor', value);
+			this.set('stroke', value);
+			this.set('fill', AreaEditor.hexToRgbA(value, 0.2));
 			this.editor.canvas.renderAll();
 		}
 
@@ -237,7 +230,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 				if (!field.classList.contains('ignored-attribute')) {
 					switch (field.id) {
 						case 'color':
-							result.push(field.id + '="' + AreaEditor.rgbAToHex(field.style.backgroundColor) + '"');
+							result.push(field.id + '="' + field.value + '"');
 							break;
 
 						default:
@@ -263,7 +256,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		name = 'rect';
 
 		updateFields() {
-			this.getElement('#color').style.backgroundColor = this.color;
+			this.getElement('#color').value = this.color;
 			this.getElement('#alt').value = this.alt;
 			this.getElement('.link').value = this.link;
 			this.getElement('#left').value = Math.floor(this.left + 0);
@@ -328,7 +321,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		name = 'circle';
 
 		updateFields() {
-			this.getElement('#color').style.backgroundColor = this.color;
+			this.getElement('#color').value = this.color;
 			this.getElement('#alt').value = this.alt;
 			this.getElement('.link').value = this.link;
 			this.getElement('#left').value = Math.floor(this.left + 0);
@@ -376,7 +369,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		name = 'poly';
 
 		updateFields() {
-			this.getElement('#color').style.backgroundColor = this.color;
+			this.getElement('#color').value = this.color;
 			this.getElement('#alt').value = this.alt;
 			this.getElement('.link').value = this.link;
 
@@ -850,17 +843,6 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 				return result;
 			}
 			throw new Error('Bad Hex');
-		}
-
-		static rgbAToHex(rgba) {
-			let numbers = rgba.replace(/[^0-9,]*/g, '').split(',');
-
-			if (numbers.length < 3) {
-				throw new Error('Bad rgba');
-			}
-
-			let rgb = numbers[2] | (numbers[1] << 8) | (numbers[0] << 16);
-			return '#' + (0x1000000 + rgb).toString(16).slice(1).toUpperCase();
 		}
 	}
 
