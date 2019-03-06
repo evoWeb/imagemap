@@ -93,17 +93,7 @@ class WizardController
 
     protected function getConfiguration(array $parameters, Data $data, string $formName): array
     {
-        $defaultAttributeset = [];
-        foreach ($data->getAttributeKeys() as $key) {
-            $defaultAttributeset[$key] = '';
-        }
-
-        $fieldChangeFuncs = [];
-        foreach ($parameters['fieldChangeFunc'] as $fieldChangeFunc) {
-            $fieldChangeFuncs[] = 'parent.opener.' . $fieldChangeFunc;
-        }
-
-        $browseLink = [
+        $browseLinkConfiguration = [
             'returnUrl' => GeneralUtility::linkThisScript(),
             'formName' => $formName,
             'tableName' => 'tt_content',
@@ -131,10 +121,9 @@ class WizardController
         return [
             'formName' => $formName,
             'itemName' => $parameters['itemName'],
-            'fieldChangeFunc' => $fieldChangeFuncs,
-            'defaultAttributeset' => $defaultAttributeset,
+            'fieldChangeFunc' => $parameters['fieldChangeFunc'] ?? [],
             'existingAreas' => $existingAreas,
-            'browseLink' => $browseLink
+            'browseLink' => $browseLinkConfiguration
         ];
     }
 

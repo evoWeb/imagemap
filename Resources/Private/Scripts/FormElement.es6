@@ -21,8 +21,8 @@ define([
 		};
 
 		let initializeEvents = (editorOptions) => {
-			$control.find('input[type=hidden]').on('imagemap:changed', () => {
-				let $field = $(this);
+			$control.find('input[type=hidden]').on('imagemap:changed', (event) => {
+				let $field = $(event.currentTarget);
 				$.ajax({
 					url: editorOptions.previewRerenderAjaxUrl,
 					method: 'POST',

@@ -3,9 +3,9 @@ define([
 	'TYPO3/CMS/Backend/Icons',
 	'TYPO3/CMS/Backend/Modal',
 	'./AreaEditor',
-	'jquery-ui/draggable',
-	'jquery-ui/resizable'
-], ($, Icons, Modal, AreaEditor) => {
+	'TYPO3/CMS/Backend/FormEngineValidation',
+	'jquery-ui/draggable'
+], ($, Icons, Modal, AreaEditor, FormEngineValidation) => {
 	'use strict';
 
 	class EditControl {
@@ -23,6 +23,41 @@ define([
 		 * @type {AreaEditor}
 		 */
 		areaEditor = null;
+
+		/**
+		 * @type {jQuery}
+		 */
+		image = null;
+
+		/**
+		 * @type {jQuery}
+		 */
+		buttonAddRect = null;
+
+		/**
+		 * @type {jQuery}
+		 */
+		buttonAddCircle = null;
+
+		/**
+		 * @type {jQuery}
+		 */
+		buttonAddPoly = null;
+
+		/**
+		 * @type {jQuery}
+		 */
+		buttonDismiss = null;
+
+		/**
+		 * @type {jQuery}
+		 */
+		buttonSave = null;
+
+		/**
+		 * @type {object}
+		 */
+		configuration = null;
 
 		constructor() {
 			this.initializeTrigger();
@@ -43,10 +78,11 @@ define([
 				buttonAddrectText = this.trigger.data('buttonAddrectText'),
 				buttonAddcircleText = this.trigger.data('buttonAddcircleText'),
 				buttonAddpolyText = this.trigger.data('buttonAddpolyText'),
-				buttonSubmitText = this.trigger.data('buttonSubmitText'),
+				buttonDismissText = this.trigger.data('buttonDismissText'),
+				buttonSaveText = this.trigger.data('buttonSaveText'),
 				wizardUri = this.trigger.data('url'),
 				payload = this.trigger.data('payload'),
-				initWizardModal = this.init.bind(this);
+				initWizardModal = this.initialize.bind(this);
 
 			Icons.getIcon('spinner-circle', Icons.sizes.default, null, null, Icons.markupIdentifiers.inline).done((icon) => {
 				/**
@@ -56,36 +92,29 @@ define([
 					additionalCssClasses: ['modal-area-wizard'],
 					buttons: [
 						{
-							btnClass: 'btn-default pull-left',
-							dataAttributes: {
-								method: 'addRect',
-							},
+							btnClass: 'btn-default pull-left button-add-rect',
 							icon: 'extensions-imagemap-rect',
 							text: buttonAddrectText,
 						},
 						{
-							btnClass: 'btn-default pull-left',
-							dataAttributes: {
-								method: 'addCircle',
-							},
+							btnClass: 'btn-default pull-left button-add-circle',
 							icon: 'extensions-imagemap-circle',
 							text: buttonAddcircleText,
 						},
 						{
-							btnClass: 'btn-default pull-left',
-							dataAttributes: {
-								method: 'addPoly',
-							},
+							btnClass: 'btn-default pull-left button-add-poly',
 							icon: 'extensions-imagemap-poly',
 							text: buttonAddpolyText,
 						},
 						{
-							btnClass: 'btn-primary',
-							dataAttributes: {
-								method: 'save',
-							},
+							btnClass: 'btn-default button-dismiss',
+							icon: 'actions-close',
+							text: buttonDismissText,
+						},
+						{
+							btnClass: 'btn-primary button-save',
 							icon: 'actions-document-save',
-							text: buttonSubmitText,
+							text: buttonSaveText,
 						},
 					],
 					callback: (currentModal) => {
@@ -93,7 +122,7 @@ define([
 							url: wizardUri,
 							data: payload
 						}).done((response) => {
-							currentModal.find('.t3js-modal-body').html(response);
+							currentModal.find('.t3js-modal-body').append(response).addClass('area-editor');
 							initWizardModal();
 						});
 					},
@@ -111,88 +140,119 @@ define([
 			});
 		}
 
-		init() {
-			let $image = $('.modal-panel-main .image img'),
-				$canvas = $('.modal-panel-main .picture'),
-				configuration = $canvas.data('configuration'),
+		initialize() {
+			this.image = this.currentModal.find('.image img');
+			this.configuration = this.currentModal.find('.picture').data('configuration');
+
+			let scaleFactor = this.currentModal.find('.picture').data('scale-factor'),
+				width = parseInt(this.image.css('width')),
+				height = parseInt(this.image.css('height')),
 				editorOptions = {
 					canvas: {
-						width: parseInt($image.css('width')),
-						height: parseInt($image.css('height')),
-						top: parseInt($image.css('height')) * -1,
+						width: width,
+						height: height,
+						top: height * -1,
 					},
 					browseLinkUrlAjaxUrl: window.TYPO3.settings.ajaxUrls.imagemap_browselink_url
 				};
 
-			let areaEditor = new AreaEditor(editorOptions, 'modal-canvas', '#areasForm');
+			this.buttonAddRect = this.currentModal.find('.button-add-rect').off('click').on('click', this.buttonAddRectHandler.bind(this));
+			this.buttonAddCircle = this.currentModal.find('.button-add-circle').off('click').on('click', this.buttonAddCircleHandler.bind(this));
+			this.buttonAddPoly = this.currentModal.find('.button-add-poly').off('click').on('click', this.buttonAddPolyHandler.bind(this));
+			this.buttonDismiss = this.currentModal.find('.button-dismiss').off('click').on('click', this.buttonDismissHandler.bind(this));
+			this.buttonSave = this.currentModal.find('.button-save').off('click').on('click', this.buttonSaveHandler.bind(this));
 
-			this.areaEditor = areaEditor;
+			this.areaEditor = new AreaEditor(editorOptions, 'modal-canvas', '#areasForm');
 
-			let initializeScaleFactor = (scaleFactor) => {
-				let $magnify = $('#magnify'),
+			((scaleFactor) => {
+				this.areaEditor.setScale(scaleFactor);
+
+				let that = this,
+					$magnify = $('#magnify'),
 					$zoomOut = $magnify.find('.zoomout'),
 					$zoomIn = $magnify.find('.zoomin');
-
-				areaEditor.setScale();
 
 				if (scaleFactor < 1) {
 					$zoomIn.removeClass('hide');
 
 					$zoomIn.click(() => {
-						areaEditor.setScale(1);
+						that.areaEditor.setScale(1);
 						$zoomIn.hide();
 						$zoomOut.show();
 					});
 
 					$zoomOut.click(() => {
-						areaEditor.setScale(scaleFactor);
+						that.areaEditor.setScale(scaleFactor);
 						$zoomOut.hide();
 						$zoomIn.show();
 					});
 				}
-			};
+			})(scaleFactor);
 
-			let initializeEvents = () => {
-				$('#addRect').on('click', () => {
-					areaEditor.addRect({
-						coords: (parseInt($image.css('width')) / 2 - 50) + ',' + (parseInt($image.css('height')) / 2 - 50)
-							+ ',' + (parseInt($image.css('width')) / 2 + 50) + ',' + (parseInt($image.css('height')) / 2 + 50),
-					});
-				});
-
-				$('#addCircle').on('click', () => {
-					areaEditor.addCircle({
-						coords: (parseInt($image.css('width')) / 2 - 50) + ',' + (parseInt($image.css('height')) / 2 - 50) + ',50',
-					});
-				});
-
-				$('#addPoly').on('click', () => {
-					areaEditor.addPoly({
-						coords: (parseInt($image.css('width')) / 2) + ',' + (parseInt($image.css('height')) / 2 - 50)
-							+ ',' + (parseInt($image.css('width')) / 2 + 50) + ',' + (parseInt($image.css('height')) / 2 + 50)
-							+ ',' + (parseInt($image.css('width')) / 2) + ',' + (parseInt($image.css('height')) / 2 + 70)
-							+ ',' + (parseInt($image.css('width')) / 2 - 50) + ',' + (parseInt($image.css('height')) / 2 + 50)
-					});
-				});
-
-				$('#submit').on('click', () => {
-					window.opener.$('input[name="' + configuration.itemName + '"]')
-						.val(areaEditor.toAreaXml())
-						.trigger('imagemap:changed');
-					close();
-				});
-			};
-
-			initializeScaleFactor($canvas.data('scale-factor'));
-			initializeEvents();
-			areaEditor.initializeAreas(configuration.existingAreas);
+			this.areaEditor.initializeAreas(this.configuration.existingAreas);
 		}
 
 		destroy() {
 			if (this.currentModal) {
 				this.currentModal = null;
-				this.data = null;
+				this.areaEditor = null;
 			}
+		}
+
+		buttonAddRectHandler(event) {
+			event.stopPropagation();
+			event.preventDefault();
+
+			let width = parseInt(this.image.css('width')),
+				height = parseInt(this.image.css('height'));
+
+			this.areaEditor.addRect({
+				coords: (width / 2 - 50) + ',' + (height / 2 - 50) + ',' + (width / 2 + 50) + ',' + (height / 2 + 50),
+			});
+		}
+
+		buttonAddCircleHandler(event) {
+			event.stopPropagation();
+			event.preventDefault();
+
+			let width = parseInt(this.image.css('width')),
+				height = parseInt(this.image.css('height'));
+
+			this.areaEditor.addCircle({
+				coords: (width / 2) + ',' + (height / 2) + ',50',
+			});
+		}
+
+		buttonAddPolyHandler(event) {
+			event.stopPropagation();
+			event.preventDefault();
+
+			let width = parseInt(this.image.css('width')),
+				height = parseInt(this.image.css('height'));
+
+			this.areaEditor.addPoly({
+				coords: (width / 2) + ',' + (height / 2 - 50)
+					+ ',' + (width / 2 + 50) + ',' + (height / 2 + 50)
+					+ ',' + (width / 2) + ',' + (height / 2 + 70)
+					+ ',' + (width / 2 - 50) + ',' + (height / 2 + 50)
+			});
+		}
+
+		buttonDismissHandler(event) {
+			event.stopPropagation();
+			event.preventDefault();
+
+			this.currentModal.modal('hide');
+		}
+
+		buttonSaveHandler(event) {
+			event.stopPropagation();
+			event.preventDefault();
+
+			const hiddenField = $(`input[name="${this.configuration.itemName}"]`);
+			hiddenField.val(this.areaEditor.toAreaXml()).trigger('imagemap:changed');
+			FormEngineValidation.markFieldAsChanged(hiddenField);
+			this.currentModal.modal('hide');
 		}
 	}
 

@@ -38,11 +38,6 @@ const javascriptPaths = {
 		src: `${dirs.src}/Scripts/FormElement.es6`,
 		dest: `${dirs.dest}/JavaScript/`,
 		name: 'FormElement.js'
-	},
-	'Wizard.es6': {
-		src: `${dirs.src}/Scripts/Wizard.es6`,
-		dest: `${dirs.dest}/JavaScript/`,
-		name: 'Wizard.js'
 	}
 };
 
