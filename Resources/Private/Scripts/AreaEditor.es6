@@ -228,15 +228,7 @@ define([
 
 			this.getElements('.t3js-field').forEach((field) => {
 				if (!field.classList.contains('ignored-attribute')) {
-					switch (field.id) {
-						case 'color':
-							result.push(field.id + '="' + field.value + '"');
-							break;
-
-						default:
-							result.push(field.id + '="' + field.value + '"');
-							break;
-					}
+					result.push(field.id + '="' + field.value + '"');
 				}
 			});
 
@@ -608,15 +600,6 @@ define([
 				}
 			});
 		}
-
-		toAreaXml() {
-			let xml = ['<map>'];
-			this.editor.areas.forEach((area) => {
-				xml.push(area.toAreaXml());
-			});
-			xml.push('</map>');
-			return xml.join("\n");
-		}
 	}
 
 	class AreaEditor {
@@ -712,7 +695,7 @@ define([
 					height: bottom - top,
 					stroke: configuration.color,
 					strokeWidth: 1,
-					fill: AreaEditor.hexToRgbA(configuration.color, this.preview ? 0.1 : 0.3)
+					fill: AreaEditor.hexToRgbA(configuration.color, 0.3)
 				});
 
 			area.editor = this;
@@ -736,7 +719,7 @@ define([
 					radius: parseInt(radius),
 					stroke: configuration.color,
 					strokeWidth: 1,
-					fill: AreaEditor.hexToRgbA(configuration.color, this.preview ? 0.1 : 0.3)
+					fill: AreaEditor.hexToRgbA(configuration.color, 0.3)
 				});
 
 			area.setControlVisible('ml', false);
@@ -782,7 +765,7 @@ define([
 				left: left,
 				stroke: configuration.color,
 				strokeWidth: 1,
-				fill: AreaEditor.hexToRgbA(configuration.color, this.preview ? 0.1 : 0.3)
+				fill: AreaEditor.hexToRgbA(configuration.color, 0.3)
 			});
 
 			area.editor = this;
@@ -810,7 +793,12 @@ define([
 		}
 
 		toAreaXml() {
-			return this.form.toAreaXml();
+			let xml = ['<map>'];
+			this.areas.forEach((area) => {
+				xml.push(area.toAreaXml());
+			});
+			xml.push('</map>');
+			return xml.join("\n");
 		}
 
 		static getRandomColor(color) {
