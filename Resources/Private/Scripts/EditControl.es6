@@ -153,7 +153,8 @@ define([
 						height: height,
 						top: height * -1,
 					},
-					browseLinkUrlAjaxUrl: window.TYPO3.settings.ajaxUrls.imagemap_browselink_url
+					browseLinkUrlAjaxUrl: window.TYPO3.settings.ajaxUrls.imagemap_browselink_url,
+					browseLink: this.configuration.browseLink
 				};
 
 			this.buttonAddRect = this.currentModal.find('.button-add-rect').off('click').on('click', this.buttonAddRectHandler.bind(this));
@@ -162,7 +163,8 @@ define([
 			this.buttonDismiss = this.currentModal.find('.button-dismiss').off('click').on('click', this.buttonDismissHandler.bind(this));
 			this.buttonSave = this.currentModal.find('.button-save').off('click').on('click', this.buttonSaveHandler.bind(this));
 
-			this.areaEditor = new AreaEditor(editorOptions, 'modal-canvas', '#areasForm');
+			window.imagemap = {};
+			window.imagemap.areaEditor = this.areaEditor = new AreaEditor(editorOptions, 'modal-canvas', '#areasForm');
 
 			((scaleFactor) => {
 				this.areaEditor.setScale(scaleFactor);

@@ -588,7 +588,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			link.blur();
 
 			let data = {
-				...window.imagemap.browseLink,
+				...this.editor.browseLink,
 				objectId: area.id,
 				itemName: 'link' + area.id,
 				currentValue: area.getLink()
@@ -641,6 +641,11 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		 * @type {string}
 		 */
 		browseLinkUrlAjaxUrl = '';
+
+		/**
+		 * @type {object}
+		 */
+		browseLink = null;
 
 		/**
 		 * @type {boolean}
