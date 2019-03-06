@@ -157,9 +157,13 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 
 		deleteAction() {
-			this.form.deleteArea(this);
-			this.element.remove();
-			this.form.initializeArrows();
+			if (this.element) {
+				this.element.remove();
+			}
+			if (this.form) {
+				this.form.initializeArrows();
+			}
+			this.editor.deleteArea(this);
 			delete this;
 		}
 
@@ -181,7 +185,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			this.set('borderColor', color);
 			this.set('stroke', color);
 			this.set('fill', AreaEditor.hexToRgbA(AreaEditor.rgbAToHex(color), 0.2));
-			this.form.editor.canvas.renderAll();
+			this.editor.canvas.renderAll();
 		}
 
 
@@ -497,7 +501,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			parentElement.append(element);
 
 			this.points.push(point);
-			this.addControl(this.form.editor.areaConfig, point, index);
+			this.addControl(this.editor.areaConfig, point, index);
 		}
 
 		removePointAction(event) {
@@ -558,20 +562,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 
 		addArea(area) {
-			this.editor.areas.push(area);
 			area.form = this;
 			area.postAddToForm();
-		}
-
-		deleteArea(area) {
-			let areas = [];
-			this.editor.areas.forEach((currentArea) => {
-				if (area !== currentArea) {
-					areas.push(currentArea);
-				}
-			});
-			this.editor.areas = areas;
-			this.editor.deleteArea(area);
 		}
 
 		moveArea(area, offset) {
@@ -722,7 +714,9 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 					fill: AreaEditor.hexToRgbA(configuration.color, this.preview ? 0.1 : 0.3)
 				});
 
+			area.editor = this;
 			this.canvas.add(area);
+			this.areas.push(area);
 			if (this.form) {
 				this.form.addArea(area);
 			}
@@ -749,7 +743,9 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			area.setControlVisible('mr', false);
 			area.setControlVisible('mb', false);
 
+			area.editor = this;
 			this.canvas.add(area);
+			this.areas.push(area);
 			if (this.form) {
 				this.form.addArea(area);
 			}
@@ -788,7 +784,9 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 				fill: AreaEditor.hexToRgbA(configuration.color, this.preview ? 0.1 : 0.3)
 			});
 
+			area.editor = this;
 			this.canvas.add(area);
+			this.areas.push(area);
 			if (this.form) {
 				area.addControls(this.areaConfig);
 				this.form.addArea(area);
@@ -800,6 +798,13 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 
 		deleteArea(area) {
+			let areas = [];
+			this.areas.forEach((currentArea) => {
+				if (area !== currentArea) {
+					areas.push(currentArea);
+				}
+			});
+			this.areas = areas;
 			this.canvas.remove(area);
 		}
 

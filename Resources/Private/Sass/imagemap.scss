@@ -65,6 +65,43 @@
 }
 
 // Wizard form styles
+.modal-area-wizard .modal-body {
+    padding: 0;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex
+}
+.modal-area-wizard .modal-panel-main {
+    overflow: visible;
+    background-image: url(../../../../../../typo3/sysext/backend/Resources/Public/Images/cropper-background.png);
+    display:-webkit-box;
+    display:-webkit-flex;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+    padding: 20px;
+    width: 100%
+}
+.modal-area-wizard .modal-panel-main img {
+    max-width:100%
+}
+.modal-area-wizard .modal-panel-sidebar {
+    padding: 15px;
+    -webkit-flex-shrink: 0;
+    flex-shrink: 0;
+    border-left: 1px solid rgba(0,0,0,.25);
+    position: relative;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 200px
+}
+@media (min-width:768px) { .modal-area-wizard .modal-panel-sidebar{ width: 250px } }
+@media (min-width:992px) { .modal-area-wizard .modal-panel-sidebar{ width: 300px } }
+
 #areasForm {
     margin: 20px 4px 0 4px;
     max-width: 620px;

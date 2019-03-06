@@ -71,7 +71,7 @@ let babelTask = (done) => {
 							'@babel/plugin-proposal-class-properties'
 						]
 					}))
-					.pipe(uglify())
+					//.pipe(uglify())
 					.pipe(sourcemaps.write('.'))
 					.pipe(gulp.dest(paths.dest));
 			};
