@@ -29,15 +29,15 @@ const javascriptPaths = {
 		dest: `${dirs.dest}/JavaScript/`,
 		name: 'AreaEditor.js'
 	},
+	'EditControl.es6': {
+		src: `${dirs.src}/Scripts/EditControl.es6`,
+		dest: `${dirs.dest}/JavaScript/`,
+		name: 'EditControl.js'
+	},
 	'FormElement.es6': {
 		src: `${dirs.src}/Scripts/FormElement.es6`,
 		dest: `${dirs.dest}/JavaScript/`,
 		name: 'FormElement.js'
-	},
-	'Wizard.es6': {
-		src: `${dirs.src}/Scripts/Wizard.es6`,
-		dest: `${dirs.dest}/JavaScript/`,
-		name: 'Wizard.js'
 	}
 };
 

@@ -1,4 +1,8 @@
-define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
+define([
+	'jquery',
+	'TYPO3/CMS/Imagemap/Fabric',
+	'TYPO3/CMS/Core/Contrib/jquery.minicolors'
+], ($, fabric) => {
 	let Aggregation = (baseClass, ...mixins) => {
 		class base extends baseClass {
 			constructor (...args) {
@@ -62,8 +66,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			}
 
 			this.initializeElement();
-			this.initializeColorPicker();
 			this.updateFields();
+			this.initializeColorPicker();
 			this.initializeEvents();
 		}
 
@@ -74,44 +78,39 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 
 		initializeColorPicker() {
-			let colorPicker = this.getElement('.colorPicker'),
-				values = ['00', '33', '66', '99', 'CC', 'FF'];
-
-			for (let b = 1; b < 6; b++) {
-				for (let g = 1; g < 5; g++) {
-					for (let r = 1; r < 6; r++) {
-						let color = values[b] + values[g] + values[r],
-							cell = document.createElement('div');
-						cell.id = color;
-						cell.style.backgroundColor = '#' + color;
-						cell.classList.add('colorPickerCell');
-						cell.addEventListener('click', this.colorPickerAction.bind(this));
-
-						colorPicker.append(cell);
-					}
-				}
-			}
+			$(this.getElement('.t3js-color-picker')).minicolors({
+				format: 'hex',
+				position: 'left',
+				theme: 'default',
+				changeDelay: 100,
+				change: this.colorPickerAction.bind(this)
+			});
 		}
 
 		initializeEvents() {
-			let that = this;
 			this.on('moved', this.updateFields.bind(this));
 			this.on('modified', this.updateFields.bind(this));
 
-			this.getElements('.positionOptions .t3js-field').forEach(function (field) {
-				field.addEventListener('keyup', function(event) {
-					clearTimeout(that.eventDelay);
-					that.eventDelay = setTimeout(() => { that.updateCanvas(event); }, 500);
-				}.bind(this));
-			}.bind(this));
+			this.getElements('.positionOptions .t3js-field').forEach(this.coordinateFieldHandler.bind(this));
+			this.getElements('.basicOptions .t3js-field, .attributes .t3js-field').forEach(this.attributeFieldHandler.bind(this));
+			this.getElements('.t3js-btn').forEach(this.buttonHandler.bind(this));
+		}
 
-			this.getElements('.basicOptions .t3js-field, .attributes .t3js-field').forEach(function (field) {
-				field.addEventListener('keyup', this['updateProperties'].bind(this));
-			}.bind(this));
+		coordinateFieldHandler(field) {
+			field.addEventListener('keyup', this.fieldKeyUpHandler.bind(this));
+		}
 
-			this.getElements('.t3js-btn').forEach(function (button) {
-				button.addEventListener('click', this[button.id + 'Action'].bind(this));
-			}.bind(this));
+		fieldKeyUpHandler(event) {
+			clearTimeout(this.eventDelay);
+			this.eventDelay = AreaFormElement.wait(() => { this.updateCanvas(event); }, 500);
+		}
+
+		attributeFieldHandler(field) {
+			field.addEventListener('keyup', this.updateProperties.bind(this));
+		}
+
+		buttonHandler(button) {
+			button.addEventListener('click', this[button.id + 'Action'].bind(this));
 		}
 
 		initializeArrows() {
@@ -157,9 +156,13 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 
 		deleteAction() {
-			this.form.deleteArea(this);
-			this.element.remove();
-			this.form.initializeArrows();
+			if (this.element) {
+				this.element.remove();
+			}
+			if (this.form) {
+				this.form.initializeArrows();
+			}
+			this.editor.deleteArea(this);
 			delete this;
 		}
 
@@ -175,13 +178,12 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			this.showElement('#expand');
 		}
 
-		colorPickerAction(event) {
-			let color = event.currentTarget.style.backgroundColor;
-			this.getElement('#color').style.backgroundColor = color;
-			this.set('borderColor', color);
-			this.set('stroke', color);
-			this.set('fill', AreaEditor.hexToRgbA(AreaEditor.rgbAToHex(color), 0.2));
-			this.form.editor.canvas.renderAll();
+		colorPickerAction(value) {
+			this.getElement('.t3js-color-picker').value = value;
+			this.set('borderColor', value);
+			this.set('stroke', value);
+			this.set('fill', AreaEditor.hexToRgbA(value, 0.2));
+			this.editor.canvas.renderAll();
 		}
 
 
@@ -228,7 +230,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 				if (!field.classList.contains('ignored-attribute')) {
 					switch (field.id) {
 						case 'color':
-							result.push(field.id + '="' + AreaEditor.rgbAToHex(field.style.backgroundColor) + '"');
+							result.push(field.id + '="' + field.value + '"');
 							break;
 
 						default:
@@ -244,13 +246,17 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		getLink() {
 			return this.getElement('.link').value;
 		}
+
+		static wait(callback, delay) {
+			return window.setTimeout(callback, delay);
+		}
 	}
 
 	class Rect extends Aggregation(fabric.Rect, AreaFormElement) {
 		name = 'rect';
 
 		updateFields() {
-			this.getElement('#color').style.backgroundColor = this.color;
+			this.getElement('#color').value = this.color;
 			this.getElement('#alt').value = this.alt;
 			this.getElement('.link').value = this.link;
 			this.getElement('#left').value = Math.floor(this.left + 0);
@@ -315,7 +321,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		name = 'circle';
 
 		updateFields() {
-			this.getElement('#color').style.backgroundColor = this.color;
+			this.getElement('#color').value = this.color;
 			this.getElement('#alt').value = this.alt;
 			this.getElement('.link').value = this.link;
 			this.getElement('#left').value = Math.floor(this.left + 0);
@@ -363,7 +369,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		name = 'poly';
 
 		updateFields() {
-			this.getElement('#color').style.backgroundColor = this.color;
+			this.getElement('#color').value = this.color;
 			this.getElement('#alt').value = this.alt;
 			this.getElement('.link').value = this.link;
 
@@ -483,9 +489,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 					element: element
 				};
 
-			element.querySelectorAll('.t3js-btn').forEach(function (button) {
-				button.addEventListener('click', this[button.id + 'Action'].bind(this));
-			}.bind(this));
+			element.querySelectorAll('.t3js-btn').forEach(this.buttonHandler.bind(this));
 
 			element.querySelector('#x' + point.id).value = point.x;
 			element.querySelector('#y' + point.id).value = point.y;
@@ -493,7 +497,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			parentElement.append(element);
 
 			this.points.push(point);
-			this.addControl(this.form.editor.areaConfig, point, index);
+			this.addControl(this.editor.areaConfig, point, index);
 		}
 
 		removePointAction(event) {
@@ -554,20 +558,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 
 		addArea(area) {
-			this.editor.areas.push(area);
 			area.form = this;
 			area.postAddToForm();
-		}
-
-		deleteArea(area) {
-			let areas = [];
-			this.editor.areas.forEach((currentArea) => {
-				if (area !== currentArea) {
-					areas.push(currentArea);
-				}
-			});
-			this.editor.areas = areas;
-			this.editor.deleteArea(area);
 		}
 
 		moveArea(area, offset) {
@@ -589,14 +581,14 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			link.blur();
 
 			let data = {
-				...window.imagemap.browseLink,
+				...this.editor.browseLink,
 				objectId: area.id,
 				itemName: 'link' + area.id,
 				currentValue: area.getLink()
 			};
 
 			$.ajax({
-				url: TYPO3.settings.ajaxUrls['imagemap_browselink_url'],
+				url: this.editor.browseLinkUrlAjaxUrl,
 				context: area,
 				data: data
 			}).done((response) => {
@@ -639,6 +631,16 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		};
 
 		/**
+		 * @type {string}
+		 */
+		browseLinkUrlAjaxUrl = '';
+
+		/**
+		 * @type {object}
+		 */
+		browseLink = null;
+
+		/**
 		 * @type {boolean}
 		 */
 		preview = true;
@@ -655,7 +657,6 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 				...options.canvas,
 				selection: false
 			});
-
 
 			if (formSelector !== undefined) {
 				this.preview = false;
@@ -714,7 +715,9 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 					fill: AreaEditor.hexToRgbA(configuration.color, this.preview ? 0.1 : 0.3)
 				});
 
+			area.editor = this;
 			this.canvas.add(area);
+			this.areas.push(area);
 			if (this.form) {
 				this.form.addArea(area);
 			}
@@ -741,7 +744,9 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			area.setControlVisible('mr', false);
 			area.setControlVisible('mb', false);
 
+			area.editor = this;
 			this.canvas.add(area);
+			this.areas.push(area);
 			if (this.form) {
 				this.form.addArea(area);
 			}
@@ -780,7 +785,9 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 				fill: AreaEditor.hexToRgbA(configuration.color, this.preview ? 0.1 : 0.3)
 			});
 
+			area.editor = this;
 			this.canvas.add(area);
+			this.areas.push(area);
 			if (this.form) {
 				area.addControls(this.areaConfig);
 				this.form.addArea(area);
@@ -792,6 +799,13 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 
 		deleteArea(area) {
+			let areas = [];
+			this.areas.forEach((currentArea) => {
+				if (area !== currentArea) {
+					areas.push(currentArea);
+				}
+			});
+			this.areas = areas;
 			this.canvas.remove(area);
 		}
 
@@ -830,18 +844,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 			}
 			throw new Error('Bad Hex');
 		}
-
-		static rgbAToHex(rgba) {
-			let numbers = rgba.replace(/[^0-9,]*/g, '').split(',');
-
-			if (numbers.length < 3) {
-				throw new Error('Bad rgba');
-			}
-
-			let rgb = numbers[2] | (numbers[1] << 8) | (numbers[0] << 16);
-			return '#' + (0x1000000 + rgb).toString(16).slice(1).toUpperCase();
-		}
 	}
 
 	return AreaEditor;
 });
+

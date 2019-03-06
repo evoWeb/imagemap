@@ -18,8 +18,11 @@
 			<trans-unit id="imagemap.form.addpoly" xml:space="preserve">
 				<source>Poly-Area</source>
 			</trans-unit>
-			<trans-unit id="imagemap.form.submit" xml:space="preserve">
-				<source>Apply &amp; Close</source>
+			<trans-unit id="imagemap.form.dismiss" xml:space="preserve">
+				<source>Cancel</source>
+			</trans-unit>
+			<trans-unit id="imagemap.form.save" xml:space="preserve">
+				<source>Accept</source>
 			</trans-unit>
 			<trans-unit id="imagemap.form.zoomin" xml:space="preserve">
 				<source>Zoom image to 100%</source>

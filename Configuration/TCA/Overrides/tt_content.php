@@ -17,11 +17,10 @@ $tempColumns = [
                 'field' => 'image'
             ],
             'fieldControl' => [
-                'imagemap' => [
+                'editControl' => [
                     'renderType' => 'imagemapPopup',
                     'options' => [
                         'title' => 'ImageMap',
-                        'script' => 'EXT:imagemap/Classes/Module/Wizard.php',
                         'windowOpenParameters' => 'height=700,width=780,status=0,menubar=0,scrollbars=1',
                     ]
                 ],
