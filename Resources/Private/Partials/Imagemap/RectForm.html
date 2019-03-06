@@ -6,17 +6,15 @@
 		<div class="input-group-addon">
 			<div class="input-group-text colorPreview"><div id="color" class="t3js-field"></div></div>
 		</div>
-
-		<input type="text" id="alt" class="t3js-field form-control" placeholder="{f:translate(id: 'imagemap.form.area.label', extensionName: 'imagemap')}" />
 		<input type="text" id="link_ID" class="link t3js-field form-control ignored-attribute"
 					 placeholder="{f:translate(id: 'imagemap.form.area.link', extensionName: 'imagemap')}" data-formengine-input-name="link_ID"/>
-
+	</div>
+	<div class="input-group">
+		<input type="text" id="alt" class="t3js-field form-control" placeholder="{f:translate(id: 'imagemap.form.area.label', extensionName: 'imagemap')}" />
 		<f:render partial="Imagemap/Controls" arguments="{returnUrl: returnUrl, formName: formName}"/>
 	</div>
 
 	<div class="moreOptions hide">
-		<div class="colorPicker"></div>
-
 		<div class="additionalInformation">
 			<div class="attributes">
 				<f:for each="{data.attributeKeys}" as="key">
@@ -45,6 +43,8 @@
 				</div>
 			</div>
 		</div>
+
+		<div class="colorPicker"></div>
 	</div>
 </div>
 </script>

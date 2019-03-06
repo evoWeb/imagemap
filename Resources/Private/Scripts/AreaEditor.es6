@@ -94,24 +94,29 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 		}
 
 		initializeEvents() {
-			let that = this;
 			this.on('moved', this.updateFields.bind(this));
 			this.on('modified', this.updateFields.bind(this));
 
-			this.getElements('.positionOptions .t3js-field').forEach(function (field) {
-				field.addEventListener('keyup', function(event) {
-					clearTimeout(that.eventDelay);
-					that.eventDelay = AreaFormElement.wait(() => { that.updateCanvas(event); }, 500);
-				}.bind(this));
-			}.bind(this));
+			this.getElements('.positionOptions .t3js-field').forEach(this.coordinateFieldHandler.bind(this));
+			this.getElements('.basicOptions .t3js-field, .attributes .t3js-field').forEach(this.attributeFieldHandler.bind(this));
+			this.getElements('.t3js-btn').forEach(this.buttonHandler.bind(this));
+		}
 
-			this.getElements('.basicOptions .t3js-field, .attributes .t3js-field').forEach(function (field) {
-				field.addEventListener('keyup', this['updateProperties'].bind(this));
-			}.bind(this));
+		coordinateFieldHandler(field) {
+			field.addEventListener('keyup', this.fieldKeyUpHandler.bind(this));
+		}
 
-			this.getElements('.t3js-btn').forEach(function (button) {
-				button.addEventListener('click', this[button.id + 'Action'].bind(this));
-			}.bind(this));
+		fieldKeyUpHandler(event) {
+			clearTimeout(this.eventDelay);
+			this.eventDelay = AreaFormElement.wait(() => { this.updateCanvas(event); }, 500);
+		}
+
+		attributeFieldHandler(field) {
+			field.addEventListener('keyup', this.updateProperties.bind(this));
+		}
+
+		buttonHandler(button) {
+			button.addEventListener('click', this[button.id + 'Action'].bind(this));
 		}
 
 		initializeArrows() {
@@ -491,9 +496,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 					element: element
 				};
 
-			element.querySelectorAll('.t3js-btn').forEach(function (button) {
-				button.addEventListener('click', this[button.id + 'Action'].bind(this));
-			}.bind(this));
+			element.querySelectorAll('.t3js-btn').forEach(this.buttonHandler.bind(this));
 
 			element.querySelector('#x' + point.id).value = point.x;
 			element.querySelector('#y' + point.id).value = point.y;
@@ -858,3 +861,4 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric'], ($, fabric) => {
 
 	return AreaEditor;
 });
+

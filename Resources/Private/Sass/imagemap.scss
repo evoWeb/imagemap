@@ -100,7 +100,7 @@
     width: 200px
 }
 @media (min-width:768px) { .modal-area-wizard .modal-panel-sidebar{ width: 250px } }
-@media (min-width:992px) { .modal-area-wizard .modal-panel-sidebar{ width: 300px } }
+@media (min-width:992px) { .modal-area-wizard .modal-panel-sidebar{ width: 350px } }
 
 #areasForm {
     margin: 20px 4px 0 4px;
@@ -117,7 +117,7 @@
     overflow: hidden;
 
     .form-control {
-        width: 50%;
+        width: 100%;
         min-width: auto;
     }
 
@@ -134,8 +134,6 @@
 }
 
 .moreOptions {
-    display: grid;
-    grid-template-columns: 50% 50%;
     background-color: #fafafa;
     border: 1px solid #bbb;
     border-top: none;
@@ -145,6 +143,10 @@
 
     .additionalInformation {
         padding: 6px 32px 0 6px;
+
+        > .input-group-btn {
+            padding-bottom: 6px;
+        }
     }
 
     .input-group {
@@ -156,8 +158,8 @@
     }
 
     .colorPicker {
-        border-right: 1px solid #bbb;
-        padding: 6px 6px 6px 32px;
+        border-top: 1px solid #bbb;
+        padding: 6px 6px 6px 6px;
         overflow: hidden;
 
         .colorPickerCell {
