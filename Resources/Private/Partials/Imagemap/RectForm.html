@@ -1,4 +1,6 @@
-<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+			xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+			data-namespace-typo3-fluid="true">
 
 <script type="text/template" id="rectForm">
 <div class="areaForm rectForm">
@@ -8,6 +10,9 @@
 		</div>
 		<input type="text" id="link_ID" class="link t3js-field form-control ignored-attribute"
 					 placeholder="{f:translate(id: 'imagemap.form.area.link', extensionName: 'imagemap')}" data-formengine-input-name="link_ID"/>
+		<div class="input-group-btn">
+			<span id="link" class="t3js-btn btn btn-default" title="{f:translate(id: 'imagemap.form.area.linkwizard', extensionName: 'imagemap')}"><core:icon identifier="actions-wizard-link"/></span>
+		</div>
 	</div>
 	<div class="input-group">
 		<input type="text" id="alt" class="t3js-field form-control" placeholder="{f:translate(id: 'imagemap.form.area.label', extensionName: 'imagemap')}" />
