@@ -163,7 +163,8 @@ define([
 			this.buttonDismiss = this.currentModal.find('.button-dismiss').off('click').on('click', this.buttonDismissHandler.bind(this));
 			this.buttonSave = this.currentModal.find('.button-save').off('click').on('click', this.buttonSaveHandler.bind(this));
 
-			this.areaEditor = new AreaEditor(editorOptions, 'modal-canvas', '#areasForm', this.currentModal[0]);
+			let canvas = this.currentModal.find('#modal-canvas')[0];
+			this.areaEditor = new AreaEditor(editorOptions, canvas, '#areasForm', this.currentModal[0]);
 
 			window.imagemap = { areaEditor: this.areaEditor };
 
