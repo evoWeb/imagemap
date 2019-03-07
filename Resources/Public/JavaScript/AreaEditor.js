@@ -719,10 +719,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
 
       _defineProperty(this, "editor", null);
 
-      console.log(formElement);
-      console.log(editor.document);
       this.element = editor.document.querySelector(formElement);
-      console.log(this.element);
       this.areaZone = this.element.querySelector('#areaZone');
       this.editor = editor;
     }
