@@ -21,7 +21,7 @@ class EditControl extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElement
     /**
      * @var string
      */
-    protected $wizardRouteName = 'imagemap_wizard';
+    protected $wizardRouteName = 'imagemap_modal';
 
     /**
      * @var \TYPO3\CMS\Fluid\View\StandaloneView

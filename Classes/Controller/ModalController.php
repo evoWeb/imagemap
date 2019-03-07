@@ -21,7 +21,7 @@ use TYPO3\CMS\Core\Http\Response;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 
-class WizardController
+class ModalController
 {
     /**
      * @var \TYPO3\CMS\Backend\View\BackendTemplateView
@@ -86,7 +86,8 @@ class WizardController
         }
 
         $response = new Response;
-        $response->getBody()->write($this->templateView->render());
+        $a = $this->templateView->render();
+        $response->getBody()->write($a);
 
         return $response;
     }
