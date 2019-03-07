@@ -11,7 +11,8 @@ define(['jquery', './AreaEditor'], function ($, AreaEditor) {
       },
       previewRerenderAjaxUrl: window.TYPO3.settings.ajaxUrls.imagemap_preview_rerender
     },
-        areaEditor = new AreaEditor(editorOptions, 'canvas', '', window.document);
+        canvasContainer = $control.find('#canvas')[0],
+        areaEditor = new AreaEditor(editorOptions, canvasContainer, '', window.document);
 
     var initializeScaleFactor = function initializeScaleFactor(scaleFactor) {
       areaEditor.setScale(scaleFactor);
