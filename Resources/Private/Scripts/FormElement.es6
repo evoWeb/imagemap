@@ -14,7 +14,7 @@ define([
 				},
 				previewRerenderAjaxUrl: window.TYPO3.settings.ajaxUrls.imagemap_preview_rerender
 			},
-			areaEditor = new AreaEditor(editorOptions, 'canvas');
+			areaEditor = new AreaEditor(editorOptions, 'canvas', '', window.document);
 
 		let initializeScaleFactor = (scaleFactor) => {
 			areaEditor.setScale(scaleFactor);

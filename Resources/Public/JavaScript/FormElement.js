@@ -1,2 +1,49 @@
-define(["jquery","./AreaEditor"],function(d,m){d(document).ready(function(){var e,t,a=d(".imagemap-control:eq(0)"),i=a.find(".image img"),n=a.find(".picture"),r={canvas:{width:parseInt(i.css("width")),height:parseInt(i.css("height")),top:-1*parseInt(i.css("height"))},previewRerenderAjaxUrl:window.TYPO3.settings.ajaxUrls.imagemap_preview_rerender},s=new m(r,"canvas");e=n.data("thumbnail-scale"),s.setScale(e),t=r,a.find("input[type=hidden]").on("imagemap:changed",function(e){var a=d(e.currentTarget);d.ajax({url:t.previewRerenderAjaxUrl,method:"POST",data:{P:{itemFormElName:a.attr("name"),tableName:"tt_content",fieldName:"tx_imagemap_links",uid:a.attr("name").replace("data[tt_content][","").replace("][tx_imagemap_links]",""),value:a.val()}}}).done(function(e,a){"success"===a&&(s.removeAllAreas(),s.initializeAreas(e))})}),s.initializeAreas(n.data("existing-areas"))})});
+define(['jquery', './AreaEditor'], function ($, AreaEditor) {
+  $(document).ready(function () {
+    var $control = $('.imagemap-control:eq(0)'),
+        $image = $control.find('.image img'),
+        $canvas = $control.find('.picture'),
+        editorOptions = {
+      canvas: {
+        width: parseInt($image.css('width')),
+        height: parseInt($image.css('height')),
+        top: parseInt($image.css('height')) * -1
+      },
+      previewRerenderAjaxUrl: window.TYPO3.settings.ajaxUrls.imagemap_preview_rerender
+    },
+        areaEditor = new AreaEditor(editorOptions, 'canvas', '', window.document);
+
+    var initializeScaleFactor = function initializeScaleFactor(scaleFactor) {
+      areaEditor.setScale(scaleFactor);
+    };
+
+    var initializeEvents = function initializeEvents(editorOptions) {
+      $control.find('input[type=hidden]').on('imagemap:changed', function (event) {
+        var $field = $(event.currentTarget);
+        $.ajax({
+          url: editorOptions.previewRerenderAjaxUrl,
+          method: 'POST',
+          data: {
+            P: {
+              itemFormElName: $field.attr('name'),
+              tableName: 'tt_content',
+              fieldName: 'tx_imagemap_links',
+              uid: $field.attr('name').replace('data[tt_content][', '').replace('][tx_imagemap_links]', ''),
+              value: $field.val()
+            }
+          }
+        }).done(function (data, textStatus) {
+          if (textStatus === 'success') {
+            areaEditor.removeAllAreas();
+            areaEditor.initializeAreas(data);
+          }
+        });
+      });
+    };
+
+    initializeScaleFactor($canvas.data('thumbnail-scale'));
+    initializeEvents(editorOptions);
+    areaEditor.initializeAreas($canvas.data('existing-areas'));
+  });
+});
 //# sourceMappingURL=FormElement.js.map

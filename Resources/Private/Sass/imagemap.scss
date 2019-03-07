@@ -65,13 +65,12 @@
 }
 
 // Modal styles
-.modal-area-wizard {
-    .modal-body {
-        padding: 0;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: flex
-    }
+.area-editor {
+    background: red;
+    padding: 0;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
 
     .modal-panel-main {
         overflow: visible;

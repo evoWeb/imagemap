@@ -538,7 +538,10 @@ define([
 		editor = null;
 
 		constructor(formElement, editor) {
-			this.element = fabric.document.querySelector(formElement);
+			console.log(formElement);
+			console.log(editor.document);
+			this.element = editor.document.querySelector(formElement);
+			console.log(this.element);
 			this.areaZone = this.element.querySelector('#areaZone');
 			this.editor = editor;
 		}
@@ -614,6 +617,11 @@ define([
 		};
 
 		/**
+		 * @type {HTMLElement}
+		 */
+		document = null;
+
+		/**
 		 * @type {string}
 		 */
 		browseLinkUrlAjaxUrl = '';
@@ -633,15 +641,16 @@ define([
 		 */
 		areas = [];
 
-		constructor(options, canvasSelector, formSelector) {
+		constructor(options, canvasSelector, formSelector, document) {
 			this.initializeOptions(options);
+			this.document = document;
 
 			this.canvas = new fabric.Canvas(canvasSelector, {
 				...options.canvas,
 				selection: false
 			});
 
-			if (formSelector !== undefined) {
+			if (formSelector !== '') {
 				this.preview = false;
 				this.form = new AreaForm(formSelector, this);
 			}
@@ -660,21 +669,23 @@ define([
 		}
 
 		initializeAreas(areas) {
-			areas.forEach((area) => {
-				switch (area.shape) {
-					case 'rect':
-						this.addRect(area);
-						break;
+			if (areas != undefined) {
+				areas.forEach((area) => {
+					switch (area.shape) {
+						case 'rect':
+							this.addRect(area);
+							break;
 
-					case 'circle':
-						this.addCircle(area);
-						break;
+						case 'circle':
+							this.addCircle(area);
+							break;
 
-					case 'poly':
-						this.addPoly(area);
-						break;
-				}
-			});
+						case 'poly':
+							this.addPoly(area);
+							break;
+					}
+				});
+			}
 		}
 
 		removeAllAreas() {

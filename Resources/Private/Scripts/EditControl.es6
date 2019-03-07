@@ -122,7 +122,7 @@ define([
 							url: wizardUri,
 							data: payload
 						}).done((response) => {
-							currentModal.find('.t3js-modal-body').append(response).addClass('area-editor');
+							currentModal.find('.t3js-modal-body').html(response).addClass('area-editor');
 							initWizardModal();
 						});
 					},
@@ -163,8 +163,9 @@ define([
 			this.buttonDismiss = this.currentModal.find('.button-dismiss').off('click').on('click', this.buttonDismissHandler.bind(this));
 			this.buttonSave = this.currentModal.find('.button-save').off('click').on('click', this.buttonSaveHandler.bind(this));
 
-			window.imagemap = {};
-			window.imagemap.areaEditor = this.areaEditor = new AreaEditor(editorOptions, 'modal-canvas', '#areasForm');
+			this.areaEditor = new AreaEditor(editorOptions, 'modal-canvas', '#areasForm', this.currentModal[0]);
+
+			window.imagemap = { areaEditor: this.areaEditor };
 
 			((scaleFactor) => {
 				this.areaEditor.setScale(scaleFactor);
