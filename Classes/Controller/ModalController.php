@@ -34,7 +34,7 @@ class ModalController
 
         if (!$templateView) {
             $templateView = GeneralUtility::makeInstance(StandaloneView::class);
-            $templateView->setTemplate('Imagemap/Wizard');
+            $templateView->setTemplate('Imagemap/Modal');
             $templateView->setTemplateRootPaths(
                 array_merge(
                     $templateView->getTemplateRootPaths(),
@@ -103,7 +103,7 @@ class ModalController
         ];
 
         $existingAreas = [];
-        foreach ($data->getMap()['areas'] as $area) {
+        foreach ($data->getMap()['areas'] ?? [] as $area) {
             $attributes = $area['attributes'];
             $existingArea = [
                 'link' => $area['value'],

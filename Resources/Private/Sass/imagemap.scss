@@ -23,7 +23,6 @@
 .pictureWrap {
     position: relative;
     display: inline-block;
-    padding-right: 44px;
     overflow: hidden;
     clear: both;
 }
@@ -57,16 +56,16 @@
     z-index: 1;
 }
 
+#modal-canvas,
 .canvas-container {
     display: block;
     left: 0;
-    top: 0;
+    top: -100%;
     z-index: 100;
 }
 
 // Modal styles
 .area-editor {
-    background: red;
     padding: 0;
     display: -webkit-box;
     display: -webkit-flex;
