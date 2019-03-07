@@ -6,7 +6,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-define(['jquery', 'TYPO3/CMS/Backend/Icons', 'TYPO3/CMS/Backend/Modal', './AreaEditor', 'TYPO3/CMS/Backend/FormEngineValidation', 'jquery-ui/draggable'], function ($, Icons, Modal, AreaEditor, FormEngineValidation) {
+define(['jquery', 'TYPO3/CMS/Backend/Icons', 'TYPO3/CMS/Backend/Modal', './AreaEditor', 'TYPO3/CMS/Backend/FormEngineValidation'], function ($, Icons, Modal, AreaEditor, FormEngineValidation) {
   'use strict';
 
   var EditControl =

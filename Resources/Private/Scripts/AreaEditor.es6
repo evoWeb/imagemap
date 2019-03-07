@@ -1,7 +1,7 @@
 define([
 	'jquery',
 	'TYPO3/CMS/Imagemap/Fabric',
-	'TYPO3/CMS/Core/Contrib/jquery.minicolors'
+	'TYPO3/CMS/Imagemap/jquery.minicolors'
 ], ($, fabric) => {
 	let Aggregation = (baseClass, ...mixins) => {
 		class base extends baseClass {
@@ -666,7 +666,7 @@ define([
 		}
 
 		initializeAreas(areas) {
-			if (areas != undefined) {
+			if (areas !== undefined) {
 				areas.forEach((area) => {
 					switch (area.shape) {
 						case 'rect':

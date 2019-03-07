@@ -3,8 +3,7 @@ define([
 	'TYPO3/CMS/Backend/Icons',
 	'TYPO3/CMS/Backend/Modal',
 	'./AreaEditor',
-	'TYPO3/CMS/Backend/FormEngineValidation',
-	'jquery-ui/draggable'
+	'TYPO3/CMS/Backend/FormEngineValidation'
 ], ($, Icons, Modal, AreaEditor, FormEngineValidation) => {
 	'use strict';
 

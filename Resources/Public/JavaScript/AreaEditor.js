@@ -28,7 +28,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
-define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.minicolors'], function ($, fabric) {
+define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Imagemap/jquery.minicolors'], function ($, fabric) {
   var Aggregation = function Aggregation(baseClass) {
     for (var _len = arguments.length, mixins = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
       mixins[_key - 1] = arguments[_key];
@@ -862,7 +862,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
       value: function initializeAreas(areas) {
         var _this12 = this;
 
-        if (areas != undefined) {
+        if (areas !== undefined) {
           areas.forEach(function (area) {
             switch (area.shape) {
               case 'rect':
