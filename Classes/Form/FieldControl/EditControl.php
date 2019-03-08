@@ -39,14 +39,8 @@ class EditControl extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElement
 
         $this->templateView = GeneralUtility::makeInstance(\TYPO3\CMS\Fluid\View\StandaloneView::class);
         $this->templateView->setTemplate('Imagemap/EditControl');
-        $this->templateView->setTemplateRootPaths(array_merge(
-            $this->templateView->getTemplateRootPaths(),
-            ['EXT:imagemap/Resources/Private/Templates/']
-        ));
-        $this->templateView->setPartialRootPaths(array_merge(
-            $this->templateView->getPartialRootPaths(),
-            ['EXT:imagemap/Resources/Private/Partials/']
-        ));
+        $this->templateView->setTemplateRootPaths(['EXT:imagemap/Resources/Private/Templates/']);
+        $this->templateView->setPartialRootPaths(['EXT:imagemap/Resources/Private/Partials/']);
 
         $this->uriBuilder = GeneralUtility::makeInstance(\TYPO3\CMS\Backend\Routing\UriBuilder::class);
     }
