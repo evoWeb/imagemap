@@ -35,18 +35,8 @@ class ModalController
         if (!$templateView) {
             $templateView = GeneralUtility::makeInstance(StandaloneView::class);
             $templateView->setTemplate('Imagemap/Modal');
-            $templateView->setTemplateRootPaths(
-                array_merge(
-                    $templateView->getTemplateRootPaths(),
-                    ['EXT:imagemap/Resources/Private/Templates/']
-                )
-            );
-            $templateView->setPartialRootPaths(
-                array_merge(
-                    $templateView->getPartialRootPaths(),
-                    ['EXT:imagemap/Resources/Private/Partials/']
-                )
-            );
+            $templateView->setTemplateRootPaths(['EXT:imagemap/Resources/Private/Templates/']);
+            $templateView->setPartialRootPaths(['EXT:imagemap/Resources/Private/Partials/']);
         }
         $this->templateView = $templateView;
     }
