@@ -108,14 +108,4 @@ class AjaxController
     {
         return $GLOBALS['BE_USER'] ?? null;
     }
-
-    /**
-     * Returns an instance of LanguageService
-     *
-     * @return \TYPO3\CMS\Core\Localization\LanguageService|null
-     */
-    protected function getLanguageService()
-    {
-        return $GLOBALS['LANG'] ?? null;
-    }
 }
