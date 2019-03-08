@@ -56,7 +56,6 @@
     z-index: 1;
 }
 
-#modal-canvas,
 .canvas-container {
     display: block;
     left: 0;
@@ -70,6 +69,11 @@
     display: -webkit-box;
     display: -webkit-flex;
     display: flex;
+
+    #modal-canvas {
+        height: 0;
+        width: 0;
+    }
 
     .modal-panel-main {
         overflow: visible;

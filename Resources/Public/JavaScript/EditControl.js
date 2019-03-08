@@ -160,6 +160,20 @@ define(['jquery', 'TYPO3/CMS/Backend/Icons', 'TYPO3/CMS/Backend/Modal', './AreaE
 
         this.image = this.currentModal.find('.image img');
         this.configuration = this.currentModal.find('.picture').data('configuration');
+        this.buttonAddRect = this.currentModal.find('.button-add-rect').off('click').on('click', this.buttonAddRectHandler.bind(this));
+        this.buttonAddCircle = this.currentModal.find('.button-add-circle').off('click').on('click', this.buttonAddCircleHandler.bind(this));
+        this.buttonAddPoly = this.currentModal.find('.button-add-poly').off('click').on('click', this.buttonAddPolyHandler.bind(this));
+        this.buttonDismiss = this.currentModal.find('.button-dismiss').off('click').on('click', this.buttonDismissHandler.bind(this));
+        this.buttonSave = this.currentModal.find('.button-save').off('click').on('click', this.buttonSaveHandler.bind(this));
+        this.image.on('load', function () {
+          setTimeout(_this2.initalizeArea.bind(_this2), 100);
+        });
+      }
+    }, {
+      key: "initalizeArea",
+      value: function initalizeArea() {
+        var _this3 = this;
+
         var scaleFactor = this.currentModal.find('.picture').data('scale-factor'),
             width = parseInt(this.image.css('width')),
             height = parseInt(this.image.css('height')),
@@ -172,11 +186,6 @@ define(['jquery', 'TYPO3/CMS/Backend/Icons', 'TYPO3/CMS/Backend/Modal', './AreaE
           browseLinkUrlAjaxUrl: window.TYPO3.settings.ajaxUrls.imagemap_browselink_url,
           browseLink: this.configuration.browseLink
         };
-        this.buttonAddRect = this.currentModal.find('.button-add-rect').off('click').on('click', this.buttonAddRectHandler.bind(this));
-        this.buttonAddCircle = this.currentModal.find('.button-add-circle').off('click').on('click', this.buttonAddCircleHandler.bind(this));
-        this.buttonAddPoly = this.currentModal.find('.button-add-poly').off('click').on('click', this.buttonAddPolyHandler.bind(this));
-        this.buttonDismiss = this.currentModal.find('.button-dismiss').off('click').on('click', this.buttonDismissHandler.bind(this));
-        this.buttonSave = this.currentModal.find('.button-save').off('click').on('click', this.buttonSaveHandler.bind(this));
         var canvas = this.currentModal.find('#modal-canvas')[0];
         this.areaEditor = new AreaEditor(editorOptions, canvas, '#areasForm', this.currentModal[0]);
         window.imagemap = {
@@ -184,9 +193,9 @@ define(['jquery', 'TYPO3/CMS/Backend/Icons', 'TYPO3/CMS/Backend/Modal', './AreaE
         };
 
         (function (scaleFactor) {
-          _this2.areaEditor.setScale(scaleFactor);
+          _this3.areaEditor.setScale(scaleFactor);
 
-          var that = _this2,
+          var that = _this3,
               $magnify = $('#magnify'),
               $zoomOut = $magnify.find('.zoomout'),
               $zoomIn = $magnify.find('.zoomin');

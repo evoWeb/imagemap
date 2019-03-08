@@ -142,7 +142,18 @@ define([
 		initialize() {
 			this.image = this.currentModal.find('.image img');
 			this.configuration = this.currentModal.find('.picture').data('configuration');
+			this.buttonAddRect = this.currentModal.find('.button-add-rect').off('click').on('click', this.buttonAddRectHandler.bind(this));
+			this.buttonAddCircle = this.currentModal.find('.button-add-circle').off('click').on('click', this.buttonAddCircleHandler.bind(this));
+			this.buttonAddPoly = this.currentModal.find('.button-add-poly').off('click').on('click', this.buttonAddPolyHandler.bind(this));
+			this.buttonDismiss = this.currentModal.find('.button-dismiss').off('click').on('click', this.buttonDismissHandler.bind(this));
+			this.buttonSave = this.currentModal.find('.button-save').off('click').on('click', this.buttonSaveHandler.bind(this));
 
+			this.image.on('load', () => {
+				setTimeout(this.initalizeArea.bind(this), 100);
+			});
+		}
+
+		initalizeArea() {
 			let scaleFactor = this.currentModal.find('.picture').data('scale-factor'),
 				width = parseInt(this.image.css('width')),
 				height = parseInt(this.image.css('height')),
@@ -155,12 +166,6 @@ define([
 					browseLinkUrlAjaxUrl: window.TYPO3.settings.ajaxUrls.imagemap_browselink_url,
 					browseLink: this.configuration.browseLink
 				};
-
-			this.buttonAddRect = this.currentModal.find('.button-add-rect').off('click').on('click', this.buttonAddRectHandler.bind(this));
-			this.buttonAddCircle = this.currentModal.find('.button-add-circle').off('click').on('click', this.buttonAddCircleHandler.bind(this));
-			this.buttonAddPoly = this.currentModal.find('.button-add-poly').off('click').on('click', this.buttonAddPolyHandler.bind(this));
-			this.buttonDismiss = this.currentModal.find('.button-dismiss').off('click').on('click', this.buttonDismissHandler.bind(this));
-			this.buttonSave = this.currentModal.find('.button-save').off('click').on('click', this.buttonSaveHandler.bind(this));
 
 			let canvas = this.currentModal.find('#modal-canvas')[0];
 			this.areaEditor = new AreaEditor(editorOptions, canvas, '#areasForm', this.currentModal[0]);

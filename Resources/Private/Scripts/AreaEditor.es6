@@ -1,8 +1,17 @@
 define([
 	'jquery',
 	'TYPO3/CMS/Imagemap/Fabric',
-	'TYPO3/CMS/Imagemap/jquery.minicolors'
+	'TYPO3/CMS/Imagemap/jquery.minicolors',
+	'jquery-ui/draggable',
+	'jquery-ui/resizable'
 ], ($, fabric) => {
+	let d = top.document || document,
+		w = top.window || window;
+	if (typeof d !== 'undefined' && typeof w !== 'undefined') {
+		fabric.document = d;
+		fabric.window = w;
+	}
+
 	let Aggregation = (baseClass, ...mixins) => {
 		class base extends baseClass {
 			constructor (...args) {
