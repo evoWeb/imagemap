@@ -166,12 +166,12 @@ define(['jquery', 'TYPO3/CMS/Backend/Icons', 'TYPO3/CMS/Backend/Modal', './AreaE
         this.buttonDismiss = this.currentModal.find('.button-dismiss').off('click').on('click', this.buttonDismissHandler.bind(this));
         this.buttonSave = this.currentModal.find('.button-save').off('click').on('click', this.buttonSaveHandler.bind(this));
         this.image.on('load', function () {
-          setTimeout(_this2.initalizeArea.bind(_this2), 100);
+          setTimeout(_this2.initializeArea.bind(_this2), 100);
         });
       }
     }, {
-      key: "initalizeArea",
-      value: function initalizeArea() {
+      key: "initializeArea",
+      value: function initializeArea() {
         var _this3 = this;
 
         var scaleFactor = this.currentModal.find('.picture').data('scale-factor'),

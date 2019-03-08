@@ -149,11 +149,11 @@ define([
 			this.buttonSave = this.currentModal.find('.button-save').off('click').on('click', this.buttonSaveHandler.bind(this));
 
 			this.image.on('load', () => {
-				setTimeout(this.initalizeArea.bind(this), 100);
+				setTimeout(this.initializeArea.bind(this), 100);
 			});
 		}
 
-		initalizeArea() {
+		initializeArea() {
 			let scaleFactor = this.currentModal.find('.picture').data('scale-factor'),
 				width = parseInt(this.image.css('width')),
 				height = parseInt(this.image.css('height')),
