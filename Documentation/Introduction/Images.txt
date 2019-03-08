@@ -1,0 +1,5 @@
+.. |img-1|      image:: ../Images/screenshot-image-with-area.png
+.. :align: LEFT
+.. :border: 0
+.. :name: Grafik1
+.. :width: 100%

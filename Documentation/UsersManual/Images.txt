@@ -1,0 +1,11 @@
+.. |img-1|      image:: ../Images/screenshot-new-content-wizard.png
+.. :align: LEFT
+.. :border: 0
+.. :name: Grafik1
+.. :width: 100%
+
+.. |img-2|      image:: ../Images/screenshot-open-modal.png
+.. :align: LEFT
+.. :border: 0
+.. :name: Grafik2
+.. :width: 100%

@@ -5,6 +5,7 @@ define([
 	'jquery-ui/draggable',
 	'jquery-ui/resizable'
 ], ($, fabric) => {
+	// needed to access top frame elements
 	let d = top.document || document,
 		w = top.window || window;
 	if (typeof d !== 'undefined' && typeof w !== 'undefined') {
