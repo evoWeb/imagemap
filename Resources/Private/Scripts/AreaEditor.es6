@@ -472,7 +472,7 @@ define([
 
 		addControls(areaConfig) {
 			this.points.forEach((point, index) => {
-				this.addControl(areaConfig, point, index);
+				this.addControl(areaConfig, point, index, 100000);
 			});
 
 			this.canvas.on('object:moving', (event) => {
@@ -487,7 +487,7 @@ define([
 			});
 		}
 
-		addControl(areaConfig, point, index) {
+		addControl(areaConfig, point, index, newControlIndex) {
 			let circle = new fabric.Circle({
 				...areaConfig,
 				hasControls: false,
@@ -503,8 +503,10 @@ define([
 				type: 'control'
 			});
 			circle.on('moved', this.pointMoved.bind(this));
-			this.controls[index] = circle;
+
+			this.controls = Poly.addElementToArrayWithPosition(this.controls, circle, newControlIndex);
 			this.canvas.add(circle);
+			this.canvas.renderAll();
 		}
 
 		pointMoved(event) {
@@ -524,8 +526,8 @@ define([
 
 			parentElement.insertBefore(element, currentPoint.element);
 
-			this.addPointToPointsWithPosition(point, currentPointIndex, direction);
-			this.addControl(this.editor.areaConfig, point, index);
+			this.points = Poly.addElementToArrayWithPosition(this.points, point, currentPointIndex + direction);
+			this.addControl(this.editor.areaConfig, point, index, currentPointIndex + direction);
 		}
 
 		addPointAfterAction(event) {
@@ -534,14 +536,14 @@ define([
 				parentElement = this.getElement('.positionOptions'),
 				[point, element, currentPointIndex, currentPoint] = this.getPointElementAndCurrentPoint(event, direction);
 
-			if (currentPoint.nextSibling) {
+			if (currentPoint.element.nextSibling) {
 				parentElement.insertBefore(element, currentPoint.element.nextSibling);
 			} else {
 				parentElement.append(element);
 			}
 
-			this.addPointToPointsWithPosition(point, currentPointIndex, direction);
-			this.addControl(this.editor.areaConfig, point, index);
+			this.points = Poly.addElementToArrayWithPosition(this.points, point, currentPointIndex + direction);
+			this.addControl(this.editor.areaConfig, point, index, currentPointIndex + direction);
 		}
 
 		getPointElementAndCurrentPoint(event, direction) {
@@ -587,18 +589,22 @@ define([
 			return [this.points[currentPointIndex], this.points[nextPointIndex], currentPointIndex, nextPointIndex];
 		}
 
-		addPointToPointsWithPosition(point, currentPointIndex, direction) {
-			let newPointIndex = currentPointIndex + direction;
-
+		static addElementToArrayWithPosition(array, item, newPointIndex) {
 			if (newPointIndex < 0) {
-				this.points.unshift(point);
-			} else if (newPointIndex === this.points.length) {
-				this.points.push(point);
+				array.unshift(item);
+			} else if (newPointIndex >= array.length) {
+				array.push(item);
 			} else {
-				let pointsBegin = this.points.slice(0, newPointIndex + 1),
-					pointsEnd = this.points.slice(newPointIndex + 1);
-				this.points = pointsBegin.concat([point], pointsEnd);
+				let newPoints = [];
+				for (let i = 0; i < array.length; i++) {
+					newPoints.push(array[i]);
+					if (i === newPointIndex - 1) {
+						newPoints.push(item);
+					}
+				}
+				array = newPoints;
 			}
+			return array;
 		}
 
 		removePointAction(event) {

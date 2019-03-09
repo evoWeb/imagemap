@@ -645,7 +645,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
         var _this10 = this;
 
         this.points.forEach(function (point, index) {
-          _this10.addControl(areaConfig, point, index);
+          _this10.addControl(areaConfig, point, index, 100000);
         });
         this.canvas.on('object:moving', function (event) {
           if (event.target.get('type') === 'control') {
@@ -660,7 +660,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
       }
     }, {
       key: "addControl",
-      value: function addControl(areaConfig, point, index) {
+      value: function addControl(areaConfig, point, index, newControlIndex) {
         var circle = new fabric.Circle(_objectSpread({}, areaConfig, {
           hasControls: false,
           radius: 5,
@@ -675,8 +675,9 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
           type: 'control'
         }));
         circle.on('moved', this.pointMoved.bind(this));
-        this.controls[index] = circle;
+        this.controls = Poly.addElementToArrayWithPosition(this.controls, circle, newControlIndex);
         this.canvas.add(circle);
+        this.canvas.renderAll();
       }
     }, {
       key: "pointMoved",
@@ -701,8 +702,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
             currentPoint = _this$getPointElement2[3];
 
         parentElement.insertBefore(element, currentPoint.element);
-        this.addPointToPointsWithPosition(point, currentPointIndex, direction);
-        this.addControl(this.editor.areaConfig, point, index);
+        this.points = Poly.addElementToArrayWithPosition(this.points, point, currentPointIndex + direction);
+        this.addControl(this.editor.areaConfig, point, index, currentPointIndex + direction);
       }
     }, {
       key: "addPointAfterAction",
@@ -717,14 +718,14 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
             currentPointIndex = _this$getPointElement4[2],
             currentPoint = _this$getPointElement4[3];
 
-        if (currentPoint.nextSibling) {
+        if (currentPoint.element.nextSibling) {
           parentElement.insertBefore(element, currentPoint.element.nextSibling);
         } else {
           parentElement.append(element);
         }
 
-        this.addPointToPointsWithPosition(point, currentPointIndex, direction);
-        this.addControl(this.editor.areaConfig, point, index);
+        this.points = Poly.addElementToArrayWithPosition(this.points, point, currentPointIndex + direction);
+        this.addControl(this.editor.areaConfig, point, index, currentPointIndex + direction);
       }
     }, {
       key: "getPointElementAndCurrentPoint",
@@ -776,21 +777,6 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
         return [this.points[currentPointIndex], this.points[nextPointIndex], currentPointIndex, nextPointIndex];
       }
     }, {
-      key: "addPointToPointsWithPosition",
-      value: function addPointToPointsWithPosition(point, currentPointIndex, direction) {
-        var newPointIndex = currentPointIndex + direction;
-
-        if (newPointIndex < 0) {
-          this.points.unshift(point);
-        } else if (newPointIndex === this.points.length) {
-          this.points.push(point);
-        } else {
-          var pointsBegin = this.points.slice(0, newPointIndex + 1),
-              pointsEnd = this.points.slice(newPointIndex + 1);
-          this.points = pointsBegin.concat([point], pointsEnd);
-        }
-      }
-    }, {
       key: "removePointAction",
       value: function removePointAction(event) {
         var _this11 = this;
@@ -826,6 +812,29 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
           this.controls = controls;
           this.canvas.renderAll();
         }
+      }
+    }], [{
+      key: "addElementToArrayWithPosition",
+      value: function addElementToArrayWithPosition(array, item, newPointIndex) {
+        if (newPointIndex < 0) {
+          array.unshift(item);
+        } else if (newPointIndex >= array.length) {
+          array.push(item);
+        } else {
+          var newPoints = [];
+
+          for (var i = 0; i < array.length; i++) {
+            newPoints.push(array[i]);
+
+            if (i === newPointIndex - 1) {
+              newPoints.push(item);
+            }
+          }
+
+          array = newPoints;
+        }
+
+        return array;
       }
     }]);
 
