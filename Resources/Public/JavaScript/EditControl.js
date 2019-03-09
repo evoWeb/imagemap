@@ -6,7 +6,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-define(['jquery', 'TYPO3/CMS/Backend/Icons', 'TYPO3/CMS/Backend/Modal', './AreaEditor', 'TYPO3/CMS/Backend/FormEngineValidation'], function ($, Icons, Modal, AreaEditor, FormEngineValidation) {
+define(['jquery', './AreaEditor', 'TYPO3/CMS/Backend/Icons', 'TYPO3/CMS/Backend/Modal', 'TYPO3/CMS/Backend/FormEngineValidation'], function ($, AreaEditor, Icons, Modal, FormEngineValidation) {
   'use strict';
 
   var EditControl =
@@ -51,6 +51,10 @@ define(['jquery', 'TYPO3/CMS/Backend/Icons', 'TYPO3/CMS/Backend/Modal', './AreaE
     /**
      * @type {object}
      */
+
+    /**
+     * @type {object}
+     */
     function EditControl() {
       _classCallCheck(this, EditControl);
 
@@ -72,7 +76,11 @@ define(['jquery', 'TYPO3/CMS/Backend/Icons', 'TYPO3/CMS/Backend/Modal', './AreaE
 
       _defineProperty(this, "buttonSave", null);
 
-      _defineProperty(this, "configuration", null);
+      _defineProperty(this, "configuration", {
+        existingAreas: null
+      });
+
+      _defineProperty(this, "editorOptions", {});
 
       this.initializeTrigger();
     }
@@ -177,8 +185,8 @@ define(['jquery', 'TYPO3/CMS/Backend/Icons', 'TYPO3/CMS/Backend/Modal', './AreaE
 
         var scaleFactor = this.currentModal.find('.picture').data('scale-factor'),
             width = parseInt(this.image.css('width')),
-            height = parseInt(this.image.css('height')),
-            editorOptions = {
+            height = parseInt(this.image.css('height'));
+        this.editorOptions = {
           fauxFormDocument: document,
           canvas: {
             width: width,
@@ -189,7 +197,7 @@ define(['jquery', 'TYPO3/CMS/Backend/Icons', 'TYPO3/CMS/Backend/Modal', './AreaE
           browseLink: this.configuration.browseLink
         };
         var canvas = this.currentModal.find('#modal-canvas')[0];
-        this.areaEditor = new AreaEditor(editorOptions, canvas, '#areasForm', this.currentModal[0]);
+        this.areaEditor = new AreaEditor(this.editorOptions, canvas, '#areasForm', this.currentModal[0]);
         window.imagemap = {
           areaEditor: this.areaEditor
         };

@@ -1,10 +1,10 @@
 define([
 	'jquery',
+	'./AreaEditor',
 	'TYPO3/CMS/Backend/Icons',
 	'TYPO3/CMS/Backend/Modal',
-	'./AreaEditor',
 	'TYPO3/CMS/Backend/FormEngineValidation'
-], ($, Icons, Modal, AreaEditor, FormEngineValidation) => {
+], ($, AreaEditor, Icons, Modal, FormEngineValidation) => {
 	'use strict';
 
 	class EditControl {
@@ -56,7 +56,14 @@ define([
 		/**
 		 * @type {object}
 		 */
-		configuration = null;
+		configuration = {
+			existingAreas: null
+		};
+
+		/**
+		 * @type {object}
+		 */
+		editorOptions = {};
 
 		constructor() {
 			this.initializeTrigger();
@@ -158,20 +165,20 @@ define([
 		initializeArea() {
 			let scaleFactor = this.currentModal.find('.picture').data('scale-factor'),
 				width = parseInt(this.image.css('width')),
-				height = parseInt(this.image.css('height')),
-				editorOptions = {
-					fauxFormDocument: document,
-					canvas: {
-						width: width,
-						height: height,
-						top: height * -1,
-					},
-					browseLinkUrlAjaxUrl: window.TYPO3.settings.ajaxUrls.imagemap_browselink_url,
-					browseLink: this.configuration.browseLink
-				};
+				height = parseInt(this.image.css('height'));
+			this.editorOptions = {
+				fauxFormDocument: document,
+				canvas: {
+					width: width,
+					height: height,
+					top: height * -1,
+				},
+				browseLinkUrlAjaxUrl: window.TYPO3.settings.ajaxUrls.imagemap_browselink_url,
+				browseLink: this.configuration.browseLink
+			};
 
 			let canvas = this.currentModal.find('#modal-canvas')[0];
-			this.areaEditor = new AreaEditor(editorOptions, canvas, '#areasForm', this.currentModal[0]);
+			this.areaEditor = new AreaEditor(this.editorOptions, canvas, '#areasForm', this.currentModal[0]);
 
 			window.imagemap = { areaEditor: this.areaEditor };
 

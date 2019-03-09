@@ -28,7 +28,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
-define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.minicolors', 'jquery-ui/draggable', 'jquery-ui/resizable'], function ($, fabric) {
+define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.minicolors'], function ($, fabric) {
   // needed to access top frame elements
   var d = top.document || document,
       w = top.window || window;
@@ -875,11 +875,11 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
   /*#__PURE__*/
   function () {
     /**
-     * @type {HTMLElement}
+     * @type {Document}
      */
 
     /**
-     * @type {HTMLElement}
+     * @type {Document}
      */
 
     /**

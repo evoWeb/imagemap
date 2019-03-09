@@ -75,7 +75,9 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
 
         $existingAreas = json_encode($data->getAreas());
 
-        $resultArray['requireJsModules']['imagemapElement'] = 'TYPO3/CMS/Imagemap/FormElement';
+        $resultArray['requireJsModules'][] = [
+            'TYPO3/CMS/Imagemap/FormElement' => 'function (FormElement) { new FormElement(); }'
+        ];
         $resultArray['stylesheetFiles']['imagemapElement'] = 'EXT:imagemap/Resources/Public/Stylesheets/imagemap.css';
 
         $fieldControlResult = $this->renderFieldControl();

@@ -1,9 +1,7 @@
 define([
 	'jquery',
 	'TYPO3/CMS/Imagemap/Fabric',
-	'TYPO3/CMS/Core/Contrib/jquery.minicolors',
-	'jquery-ui/draggable',
-	'jquery-ui/resizable'
+	'TYPO3/CMS/Core/Contrib/jquery.minicolors'
 ], ($, fabric) => {
 	// needed to access top frame elements
 	let d = top.document || document,
@@ -690,12 +688,12 @@ define([
 		};
 
 		/**
-		 * @type {HTMLElement}
+		 * @type {Document}
 		 */
 		document = null;
 
 		/**
-		 * @type {HTMLElement}
+		 * @type {Document}
 		 */
 		fauxFormDocument = null;
 
