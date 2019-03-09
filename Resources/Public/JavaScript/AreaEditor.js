@@ -363,6 +363,10 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
     return AreaFormElement;
   }(fabric.Object);
 
+  _defineProperty(AreaFormElement, "before", -1);
+
+  _defineProperty(AreaFormElement, "after", 1);
+
   var Rect =
   /*#__PURE__*/
   function (_Aggregation) {
@@ -392,14 +396,14 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
         var _this5 = this;
 
         this.getElement('#color').value = this.color;
-        this.getElement('#alt').value = this.alt;
-        this.getElement('.link').value = this.link;
+        this.getElement('#alt').value = this.alt || '';
+        this.getElement('.link').value = this.link || '';
         this.getElement('#left').value = Math.floor(this.left + 0);
         this.getElement('#top').value = Math.floor(this.top + 0);
         this.getElement('#right').value = Math.floor(this.left + this.getScaledWidth());
         this.getElement('#bottom').value = Math.floor(this.top + this.getScaledHeight());
         Object.entries(this.attributes).forEach(function (attribute) {
-          _this5.getElement('#' + attribute[0]).value = attribute[1];
+          _this5.getElement('#' + attribute[0]).value = attribute[1] || '';
         });
       }
     }, {
@@ -493,13 +497,13 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
         var _this7 = this;
 
         this.getElement('#color').value = this.color;
-        this.getElement('#alt').value = this.alt;
-        this.getElement('.link').value = this.link;
+        this.getElement('#alt').value = this.alt || '';
+        this.getElement('.link').value = this.link || '';
         this.getElement('#left').value = Math.floor(this.left + 0);
         this.getElement('#top').value = Math.floor(this.top + 0);
         this.getElement('#radius').value = Math.floor(this.getRadiusX());
         Object.entries(this.attributes).forEach(function (attribute) {
-          _this7.getElement('#' + attribute[0]).value = attribute[1];
+          _this7.getElement('#' + attribute[0]).value = attribute[1] || '';
         });
       }
     }, {
@@ -574,10 +578,10 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
         var _this9 = this;
 
         this.getElement('#color').value = this.color;
-        this.getElement('#alt').value = this.alt;
-        this.getElement('.link').value = this.link;
+        this.getElement('#alt').value = this.alt || '';
+        this.getElement('.link').value = this.link || '';
         Object.entries(this.attributes).forEach(function (attribute) {
-          _this9.getElement('#' + attribute[0]).value = attribute[1];
+          _this9.getElement('#' + attribute[0]).value = attribute[1] || '';
         });
         var parentElement = this.getElement('.positionOptions');
         this.points.forEach(function (point, index) {
@@ -684,26 +688,97 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
         this.getElement('#y' + id).value = center.y;
       }
     }, {
-      key: "addPointAction",
-      value: function addPointAction() {
-        var index = this.points.length,
-            firstPoint = this.points[0],
-            lastPoint = this.points[index - 1],
-            id = 'p' + this.id + '_' + index,
+      key: "addPointBeforeAction",
+      value: function addPointBeforeAction(event) {
+        var direction = AreaFormElement.before,
+            index = this.points.length,
             parentElement = this.getElement('.positionOptions'),
+            _this$getPointElement = this.getPointElementAndCurrentPoint(event, direction),
+            _this$getPointElement2 = _slicedToArray(_this$getPointElement, 4),
+            point = _this$getPointElement2[0],
+            element = _this$getPointElement2[1],
+            currentPointIndex = _this$getPointElement2[2],
+            currentPoint = _this$getPointElement2[3];
+
+        parentElement.insertBefore(element, currentPoint.element);
+        this.addPointToPointsWithPosition(point, currentPointIndex, direction);
+        this.addControl(this.editor.areaConfig, point, index);
+      }
+    }, {
+      key: "addPointAfterAction",
+      value: function addPointAfterAction(event) {
+        var direction = AreaFormElement.after,
+            index = this.points.length,
+            parentElement = this.getElement('.positionOptions'),
+            _this$getPointElement3 = this.getPointElementAndCurrentPoint(event, direction),
+            _this$getPointElement4 = _slicedToArray(_this$getPointElement3, 4),
+            point = _this$getPointElement4[0],
+            element = _this$getPointElement4[1],
+            currentPointIndex = _this$getPointElement4[2],
+            currentPoint = _this$getPointElement4[3];
+
+        if (currentPoint.nextSibling) {
+          parentElement.insertBefore(element, currentPoint.element.nextSibling);
+        } else {
+          parentElement.append(element);
+        }
+
+        this.addPointToPointsWithPosition(point, currentPointIndex, direction);
+        this.addControl(this.editor.areaConfig, point, index);
+      }
+    }, {
+      key: "getPointElementAndCurrentPoint",
+      value: function getPointElementAndCurrentPoint(event, direction) {
+        var currentPointId = event.currentTarget.parentNode.parentNode.id,
+            _this$getCurrentAndNe = this.getCurrentAndNextPoint(currentPointId, direction),
+            _this$getCurrentAndNe2 = _slicedToArray(_this$getCurrentAndNe, 3),
+            currentPoint = _this$getCurrentAndNe2[0],
+            nextPoint = _this$getCurrentAndNe2[1],
+            currentPointIndex = _this$getCurrentAndNe2[2],
+            index = this.points.length,
+            id = 'p' + this.id + '_' + index,
             element = this.getFormElement('#polyCoords', id),
             point = {
-          x: (firstPoint.x + lastPoint.x) / 2,
-          y: (firstPoint.y + lastPoint.y) / 2,
+          x: Math.floor((currentPoint.x + nextPoint.x) / 2),
+          y: Math.floor((currentPoint.y + nextPoint.y) / 2),
           id: id,
           element: element
         };
+
         element.querySelectorAll('.t3js-btn').forEach(this.buttonHandler.bind(this));
         element.querySelector('#x' + point.id).value = point.x;
         element.querySelector('#y' + point.id).value = point.y;
-        parentElement.append(element);
+        return [point, element, currentPointIndex, currentPoint];
+      }
+    }, {
+      key: "getCurrentAndNextPoint",
+      value: function getCurrentAndNextPoint(currentPointId, direction) {
+        var currentPointIndex = 0;
+
+        for (var i = 0; i < this.points.length; i++) {
+          if (this.points[i].id === currentPointId) {
+            break;
+          }
+
+          currentPointIndex++;
+        }
+
+        var nextPointIndex = currentPointIndex + direction;
+
+        if (nextPointIndex < 0) {
+          nextPointIndex = this.points.length - 1;
+        }
+
+        if (nextPointIndex >= this.points.length) {
+          nextPointIndex = 0;
+        }
+
+        return [this.points[currentPointIndex], this.points[nextPointIndex], currentPointIndex, nextPointIndex];
+      }
+    }, {
+      key: "addPointToPointsWithPosition",
+      value: function addPointToPointsWithPosition(point, currentPointIndex, direction) {
         this.points.push(point);
-        this.addControl(this.editor.areaConfig, point, index);
       }
     }, {
       key: "removePointAction",

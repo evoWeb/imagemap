@@ -66,6 +66,16 @@ define([
 		 */
 		eventDelay = 0;
 
+		/**
+		 * @type {number}
+		 */
+		static before = -1;
+
+		/**
+		 * @type {number}
+		 */
+		static after = 1;
+
 		postAddToForm() {
 			this.id = fabric.Object.__uid++;
 
@@ -288,15 +298,15 @@ define([
 
 		updateFields() {
 			this.getElement('#color').value = this.color;
-			this.getElement('#alt').value = this.alt;
-			this.getElement('.link').value = this.link;
+			this.getElement('#alt').value = this.alt || '';
+			this.getElement('.link').value = this.link || '';
 			this.getElement('#left').value = Math.floor(this.left + 0);
 			this.getElement('#top').value = Math.floor(this.top + 0);
 			this.getElement('#right').value = Math.floor(this.left + this.getScaledWidth());
 			this.getElement('#bottom').value = Math.floor(this.top + this.getScaledHeight());
 
 			Object.entries(this.attributes).forEach((attribute) => {
-				this.getElement('#' + attribute[0]).value = attribute[1];
+				this.getElement('#' + attribute[0]).value = attribute[1] || '';
 			});
 		}
 
@@ -353,14 +363,14 @@ define([
 
 		updateFields() {
 			this.getElement('#color').value = this.color;
-			this.getElement('#alt').value = this.alt;
-			this.getElement('.link').value = this.link;
+			this.getElement('#alt').value = this.alt || '';
+			this.getElement('.link').value = this.link || '';
 			this.getElement('#left').value = Math.floor(this.left + 0);
 			this.getElement('#top').value = Math.floor(this.top + 0);
 			this.getElement('#radius').value = Math.floor(this.getRadiusX());
 
 			Object.entries(this.attributes).forEach((attribute) => {
-				this.getElement('#' + attribute[0]).value = attribute[1];
+				this.getElement('#' + attribute[0]).value = attribute[1] || '';
 			});
 		}
 
@@ -401,11 +411,11 @@ define([
 
 		updateFields() {
 			this.getElement('#color').value = this.color;
-			this.getElement('#alt').value = this.alt;
-			this.getElement('.link').value = this.link;
+			this.getElement('#alt').value = this.alt || '';
+			this.getElement('.link').value = this.link || '';
 
 			Object.entries(this.attributes).forEach((attribute) => {
-				this.getElement('#' + attribute[0]).value = attribute[1];
+				this.getElement('#' + attribute[0]).value = attribute[1] || '';
 			});
 
 			let parentElement = this.getElement('.positionOptions');
@@ -506,16 +516,43 @@ define([
 			this.getElement('#y' + id).value = center.y;
 		}
 
-		addPointAction() {
-			let index = this.points.length,
-				firstPoint = this.points[0],
-				lastPoint = this.points[index - 1],
-				id = 'p' + this.id + '_' + index,
+		addPointBeforeAction(event) {
+			let direction = AreaFormElement.before,
+				index = this.points.length,
 				parentElement = this.getElement('.positionOptions'),
+				[point, element, currentPointIndex, currentPoint] = this.getPointElementAndCurrentPoint(event, direction);
+
+			parentElement.insertBefore(element, currentPoint.element);
+
+			this.addPointToPointsWithPosition(point, currentPointIndex, direction);
+			this.addControl(this.editor.areaConfig, point, index);
+		}
+
+		addPointAfterAction(event) {
+			let direction = AreaFormElement.after,
+				index = this.points.length,
+				parentElement = this.getElement('.positionOptions'),
+				[point, element, currentPointIndex, currentPoint] = this.getPointElementAndCurrentPoint(event, direction);
+
+			if (currentPoint.nextSibling) {
+				parentElement.insertBefore(element, currentPoint.element.nextSibling);
+			} else {
+				parentElement.append(element);
+			}
+
+			this.addPointToPointsWithPosition(point, currentPointIndex, direction);
+			this.addControl(this.editor.areaConfig, point, index);
+		}
+
+		getPointElementAndCurrentPoint(event, direction) {
+			let currentPointId = event.currentTarget.parentNode.parentNode.id,
+				[currentPoint, nextPoint, currentPointIndex] = this.getCurrentAndNextPoint(currentPointId, direction),
+				index = this.points.length,
+				id = 'p' + this.id + '_' + index,
 				element = this.getFormElement('#polyCoords', id),
 				point = {
-					x: (firstPoint.x + lastPoint.x) / 2,
-					y: (firstPoint.y + lastPoint.y) / 2,
+					x: Math.floor((currentPoint.x + nextPoint.x) / 2),
+					y: Math.floor((currentPoint.y + nextPoint.y) / 2),
 					id: id,
 					element: element
 				};
@@ -525,10 +562,33 @@ define([
 			element.querySelector('#x' + point.id).value = point.x;
 			element.querySelector('#y' + point.id).value = point.y;
 
-			parentElement.append(element);
+			return [point, element, currentPointIndex, currentPoint];
+		}
 
+		getCurrentAndNextPoint(currentPointId, direction) {
+			let currentPointIndex = 0;
+
+			for (let i = 0; i < this.points.length; i++) {
+				if (this.points[i].id === currentPointId) {
+					break;
+				}
+				currentPointIndex++;
+			}
+
+			let nextPointIndex = currentPointIndex + direction;
+
+			if (nextPointIndex < 0) {
+				nextPointIndex = this.points.length - 1;
+			}
+			if (nextPointIndex >= this.points.length) {
+				nextPointIndex = 0;
+			}
+
+			return [this.points[currentPointIndex], this.points[nextPointIndex], currentPointIndex, nextPointIndex];
+		}
+
+		addPointToPointsWithPosition(point, currentPointIndex, direction) {
 			this.points.push(point);
-			this.addControl(this.editor.areaConfig, point, index);
 		}
 
 		removePointAction(event) {
