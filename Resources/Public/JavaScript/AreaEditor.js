@@ -779,6 +779,11 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Imagemap/jquery.minico
     }
 
     _createClass(AreaForm, [{
+      key: "destroy",
+      value: function destroy() {
+        this.removeFauxForm();
+      }
+    }, {
       key: "initializeArrows",
       value: function initializeArrows() {
         this.editor.areas.forEach(function (area) {
@@ -843,6 +848,13 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Imagemap/jquery.minico
           }
 
           fauxFormContainer.appendChild(this.fauxForm);
+        }
+      }
+    }, {
+      key: "removeFauxForm",
+      value: function removeFauxForm() {
+        if (this.fauxForm) {
+          this.fauxForm.remove();
         }
       }
     }, {

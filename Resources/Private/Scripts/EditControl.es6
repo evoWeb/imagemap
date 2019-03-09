@@ -204,6 +204,7 @@ define([
 		destroy() {
 			if (this.currentModal) {
 				this.currentModal = null;
+				this.areaEditor.form.destroy();
 				this.areaEditor = null;
 			}
 		}

@@ -593,6 +593,10 @@ define([
 			this.addFauxFormForLinkBrowser(this.editor.browseLink);
 		}
 
+		destroy() {
+			this.removeFauxForm();
+		}
+
 		initializeArrows() {
 			this.editor.areas.forEach((area) => {
 				area.initializeArrows();
@@ -656,6 +660,12 @@ define([
 					fauxFormContainer.removeChild(fauxFormContainer.firstChild);
 				}
 				fauxFormContainer.appendChild(this.fauxForm);
+			}
+		}
+
+		removeFauxForm() {
+			if (this.fauxForm) {
+				this.fauxForm.remove();
 			}
 		}
 

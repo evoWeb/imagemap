@@ -223,6 +223,7 @@ define(['jquery', 'TYPO3/CMS/Backend/Icons', 'TYPO3/CMS/Backend/Modal', './AreaE
       value: function destroy() {
         if (this.currentModal) {
           this.currentModal = null;
+          this.areaEditor.form.destroy();
           this.areaEditor = null;
         }
       }
