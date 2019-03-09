@@ -60,7 +60,7 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
         $resultArray = $this->initializeResultArray();
         if (!$data->hasValidImageFile()) {
             $resultArray['html'] = $this->getLanguageService()->sL(
-                'LLL:EXT:imagemap/Resources/Private/Language/locallang.xlf:form.no_image'
+                'LLL:EXT:imagemap/Resources/Private/Language/locallang.xlf:imagemap.element.no_image'
             );
         } else {
             $resultArray = $this->renderElementWithControl($resultArray, $data);

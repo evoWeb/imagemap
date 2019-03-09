@@ -3,109 +3,122 @@
 	<file source-language="en" target-language="de" datatype="plaintext" original="messages" date="2019-02-09T15:13:27Z" product-name="imagemap">
 		<header/>
 		<body>
-			<trans-unit id="imagemap.title" xml:space="preserve" approved="yes">
+			<trans-unit id="imagemap.title">
 				<source>ImageMap</source>
 				<target>ImageMap</target>
 			</trans-unit>
-			<trans-unit id="imagemap.description" xml:space="preserve" approved="yes">
+			<trans-unit id="imagemap.description">
 				<source>Adds a Imagemap element.</source>
 				<target>Fügt eine Imagemap ein.</target>
 			</trans-unit>
-			<trans-unit id="imagemap.form.addrect" xml:space="preserve" approved="yes">
-				<source>Rect-Area</source>
-				<target>Rect-Area</target>
+
+			<trans-unit id="tt_content.tx_imagemap_links">
+				<source>ImageMap Configuration</source>
+				<target>ImageMap Konfiguration</target>
 			</trans-unit>
-			<trans-unit id="imagemap.form.addcircle" xml:space="preserve" approved="yes">
-				<source>Circle-Area</source>
-				<target>Circle-Area</target>
-			</trans-unit>
-			<trans-unit id="imagemap.form.addpoly" xml:space="preserve" approved="yes">
-				<source>Poly-Area</source>
-				<target>Poly-Area</target>
-			</trans-unit>
-			<trans-unit id="imagemap.form.submit" xml:space="preserve" approved="yes">
-				<source>Apply &amp; Close</source>
-				<target>Übernehmen &amp; Schliessen</target>
-			</trans-unit>
-			<trans-unit id="imagemap.form.zoomin" xml:space="preserve" approved="yes">
-				<source>Zoom image to 100%</source>
-				<target>Bild auf 100% zoomen.</target>
-			</trans-unit>
-			<trans-unit id="imagemap.form.zoomout" xml:space="preserve" approved="yes">
-				<source>Zoom image to fit the Wizard popup.</source>
-				<target>Bild an Fenstergröße anpassen.</target>
-			</trans-unit>
-			<trans-unit id="imagemap.form.area.label" xml:space="preserve" approved="yes">
-				<source>Label</source>
-				<target>Label</target>
-			</trans-unit>
-			<trans-unit id="imagemap.form.area.link" xml:space="preserve" approved="yes">
-				<source>Link</source>
-				<target>Link</target>
-			</trans-unit>
-			<trans-unit id="imagemap.form.area.linkwizard" xml:space="preserve" approved="yes">
-				<source>Open LinkWizard</source>
-				<target>Öffne LinkWizard</target>
-			</trans-unit>
-			<trans-unit id="imagemap.form.area.up" xml:space="preserve" approved="yes">
-				<source>move up</source>
-				<target>nach oben</target>
-			</trans-unit>
-			<trans-unit id="imagemap.form.area.down" xml:space="preserve" approved="yes">
-				<source>move down</source>
-				<target>nach unten</target>
-			</trans-unit>
-			<trans-unit id="imagemap.form.area.undo" xml:space="preserve" approved="yes">
-				<source>undo</source>
-				<target></target>
-			</trans-unit>
-			<trans-unit id="imagemap.form.area.redo" xml:space="preserve" approved="yes">
-				<source>redo</source>
-				<target></target>
-			</trans-unit>
-			<trans-unit id="imagemap.form.area.remove" xml:space="preserve" approved="yes">
-				<source>remove</source>
-				<target>löschen</target>
-			</trans-unit>
-			<trans-unit id="imagemap.form.area.refresh" xml:space="preserve" approved="yes">
-				<source>Update Coords</source>
-				<target>Koordinaten aktualisieren</target>
-			</trans-unit>
-			<trans-unit id="imagemap.form.area.expand" xml:space="preserve" approved="yes">
-				<source>show more options</source>
-				<target>Weitere Optionen anzeigen</target>
-			</trans-unit>
-			<trans-unit id="imagemap.form.area.collapse" xml:space="preserve" approved="yes">
-				<source>hide more options</source>
-				<target>Weitere Optionen verbergen</target>
-			</trans-unit>
-			<trans-unit id="imagemap.form.poly.add" xml:space="preserve" approved="yes">
-				<source>add new edge to polygone</source>
-				<target>Neue Ecke an Polygon anfügen</target>
-			</trans-unit>
-			<trans-unit id="imagemap.form.poly.addEdgeBefore" xml:space="preserve" approved="yes">
-				<source>add edge before current</source>
-				<target>Neue Ecke vor Dieser</target>
-			</trans-unit>
-			<trans-unit id="imagemap.form.poly.addEdgeAfter" xml:space="preserve" approved="yes">
-				<source>add edge after current</source>
-				<target>Neue Ecke nach Dieser</target>
-			</trans-unit>
-			<trans-unit id="imagemap.form.poly.removeEdge" xml:space="preserve" approved="yes">
-				<source>remove edge</source>
-				<target>Ecke löschen</target>
-			</trans-unit>
-			<trans-unit id="form.no_image" xml:space="preserve" approved="yes">
+
+			<trans-unit id="imagemap.element.no_image">
 				<source>No Image defined for current record (maybe you need to save your changes first).</source>
 				<target>Es ist kein Bild für den aktuellen Datensatz vorhanden (eventuell müssen Sie Änderung speichern bevor Sie weiterarbeiten könne).</target>
 			</trans-unit>
-			<trans-unit id="form.is_dirty" xml:space="preserve" approved="yes">
+
+			<trans-unit id="imagemap.control.open.editor">
+				<source>Open Area Editor</source>
+				<target>Area Editor öffnen</target>
+			</trans-unit>
+
+			<trans-unit id="imagemap.form.addrect">
+				<source>Rect-Area</source>
+				<target>Rect-Area</target>
+			</trans-unit>
+			<trans-unit id="imagemap.form.addcircle">
+				<source>Circle-Area</source>
+				<target>Circle-Area</target>
+			</trans-unit>
+			<trans-unit id="imagemap.form.addpoly">
+				<source>Poly-Area</source>
+				<target>Poly-Area</target>
+			</trans-unit>
+			<trans-unit id="imagemap.form.dismiss">
+				<source>Cancel</source>
+				<target>Abbrechen</target>
+			</trans-unit>
+			<trans-unit id="imagemap.form.save">
+				<source>Accept</source>
+				<target>Übernehmen</target>
+			</trans-unit>
+			<trans-unit id="imagemap.form.zoomin">
+				<source>Zoom image to 100%</source>
+				<target>Bild auf 100% zoomen.</target>
+			</trans-unit>
+			<trans-unit id="imagemap.form.zoomout">
+				<source>Zoom image to fit the Wizard popup.</source>
+				<target>Bild an Fenstergröße anpassen.</target>
+			</trans-unit>
+			<trans-unit id="imagemap.form.area.label">
+				<source>Label</source>
+				<target>Label</target>
+			</trans-unit>
+			<trans-unit id="imagemap.form.area.link">
+				<source>Link</source>
+				<target>Link</target>
+			</trans-unit>
+			<trans-unit id="imagemap.form.area.linkwizard">
+				<source>Open LinkWizard</source>
+				<target>Öffne LinkWizard</target>
+			</trans-unit>
+			<trans-unit id="imagemap.form.area.up">
+				<source>move up</source>
+				<target>nach oben</target>
+			</trans-unit>
+			<trans-unit id="imagemap.form.area.down">
+				<source>move down</source>
+				<target>nach unten</target>
+			</trans-unit>
+			<trans-unit id="imagemap.form.area.undo">
+				<source>undo</source>
+				<target>rückgängig machen</target>
+			</trans-unit>
+			<trans-unit id="imagemap.form.area.redo">
+				<source>redo</source>
+				<target>wiederholen</target>
+			</trans-unit>
+			<trans-unit id="imagemap.form.area.remove">
+				<source>remove</source>
+				<target>löschen</target>
+			</trans-unit>
+			<trans-unit id="imagemap.form.area.expand">
+				<source>show more options</source>
+				<target>Weitere Optionen anzeigen</target>
+			</trans-unit>
+			<trans-unit id="imagemap.form.area.collapse">
+				<source>hide more options</source>
+				<target>Weitere Optionen verbergen</target>
+			</trans-unit>
+			<trans-unit id="imagemap.form.poly.addEdge">
+				<source>add new edge to polygone</source>
+				<target>Neue Ecke an Polygon anfügen</target>
+			</trans-unit>
+			<trans-unit id="imagemap.form.poly.removeEdge">
+				<source>remove edge</source>
+				<target>Ecke löschen</target>
+			</trans-unit>
+
+			<trans-unit id="imagemap.form.area.refresh">
+				<source>Update Coords</source>
+				<target>Koordinaten aktualisieren</target>
+			</trans-unit>
+			<trans-unit id="imagemap.form.poly.addEdgeBefore">
+				<source>add edge before current</source>
+				<target>Neue Ecke vor Dieser</target>
+			</trans-unit>
+			<trans-unit id="imagemap.form.poly.addEdgeAfter">
+				<source>add edge after current</source>
+				<target>Neue Ecke nach Dieser</target>
+			</trans-unit>
+			<trans-unit id="form.is_dirty">
 				<source>The imagemap was changed, please save this record otherwise the changes might be lost.</source>
 				<target>Die Imagemap wurde aktualisiert, bitte speichern Sie den Datensatz da Änderungen andernfalls verloren gehen könnten.</target>
-			</trans-unit>
-			<trans-unit id="tt_content.tx_imagemap_links" xml:space="preserve" approved="yes">
-				<source>ImageMap Configuration</source>
-				<target>ImageMap Konfiguration</target>
 			</trans-unit>
 		</body>
 	</file>
