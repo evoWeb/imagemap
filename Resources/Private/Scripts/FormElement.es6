@@ -86,6 +86,7 @@ define([
 				}
 			}).done((data, textStatus) => {
 				if (textStatus === 'success') {
+					this.control.find('.modifiedState').css('display', 'block');
 					this.areaEditor.removeAllAreas();
 					this.areaEditor.initializeAreas(data);
 				}

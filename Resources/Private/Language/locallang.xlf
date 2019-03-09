@@ -17,6 +17,9 @@
 			<trans-unit id="imagemap.element.no_image">
 				<source>No Image defined for current record (maybe you need to save your changes first).</source>
 			</trans-unit>
+			<trans-unit id="imagemap.element.is_modified">
+				<source>The imagemap was changed, please save this record otherwise the changes might get lost.</source>
+			</trans-unit>
 
 			<trans-unit id="imagemap.control.open.editor">
 				<source>Open Area Editor</source>
@@ -76,21 +79,14 @@
 			<trans-unit id="imagemap.form.poly.addEdge">
 				<source>add new edge to polygone</source>
 			</trans-unit>
-			<trans-unit id="imagemap.form.poly.removeEdge">
-				<source>remove edge</source>
-			</trans-unit>
-
-			<trans-unit id="imagemap.form.area.refresh">
-				<source>Update Coords</source>
-			</trans-unit>
 			<trans-unit id="imagemap.form.poly.addEdgeBefore">
 				<source>add edge before current</source>
 			</trans-unit>
 			<trans-unit id="imagemap.form.poly.addEdgeAfter">
 				<source>add edge after current</source>
 			</trans-unit>
-			<trans-unit id="form.is_dirty">
-				<source>The imagemap was changed, please save this record otherwise the changes might be lost.</source>
+			<trans-unit id="imagemap.form.poly.removeEdge">
+				<source>remove edge</source>
 			</trans-unit>
 		</body>
 	</file>

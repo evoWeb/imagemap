@@ -72,9 +72,9 @@ class Data
      * @param string $table
      * @param string $field
      * @param int $uid
-     * @param mixed $currentValue
+     * @param string|null $currentValue
      */
-    public function __construct(string $table, string $field, int $uid, $currentValue = null)
+    public function __construct(string $table, string $field, int $uid, $currentValue = '')
     {
         if (!in_array($table, array_keys($GLOBALS['TCA']))) {
             throw new \Exception('table (' . $table . ') not defined in TCA');
@@ -96,32 +96,19 @@ class Data
         \TYPO3\CMS\Backend\Utility\BackendUtility::fixVersioningPid($table, $this->liveRow);
 
         $this->map = $this->mapper->map2array($this->getFieldValue($field));
-
-        $this->environment = GeneralUtility::makeInstance(\Evoweb\Imagemap\Service\Environment::class);
     }
 
     /**
      * @param string $field
-     * @param int $listNum
      *
      * @return mixed
      */
-    public function getFieldValue(string $field, int $listNum = -1)
+    protected function getFieldValue(string $field)
     {
-        if (!is_array($this->row)) {
+        if (!is_array($this->row) || !array_key_exists($field, $this->row)) {
             return null;
         }
-        if (!array_key_exists($field, $this->row)) {
-            return null;
-        }
-
-        $data = $this->row[$field];
-        if ($listNum == -1) {
-            return $data;
-        } else {
-            $tmp = preg_split('/,/', $data);
-            return $tmp[$listNum];
-        }
+        return $this->row[$field];
     }
 
     /**
@@ -130,9 +117,9 @@ class Data
      *
      * @param int $uid
      *
-     * @return \TYPO3\CMS\Core\Resource\File
+     * @return \TYPO3\CMS\Core\Resource\File|null
      */
-    public function getImageFile(int $uid)
+    protected function getImageFile(int $uid)
     {
         $imageField = $this->determineImageFieldName();
         /** @var \TYPO3\CMS\Core\Resource\FileRepository $fileRepository */
@@ -154,9 +141,6 @@ class Data
      */
     public function getImage(): string
     {
-        $this->environment->initializeTSFE($this->getLivePid());
-        $cObj = $this->getTypoScriptFrontendController()->cObj;
-
         $conf = [
             'table' => $this->table,
             'select.' => [
@@ -165,21 +149,26 @@ class Data
             ],
         ];
 
+        $environment = $this->getEnvironment();
+        $environment->initializeTSFE($this->getLivePid());
         // render like in FE with WS-preview etc...
-        $this->environment->pushEnvironment();
-        $this->environment->prepareEnvironment(PATH_site);
-        $this->environment->resetEnableColumns('pages');
-        $this->environment->resetEnableColumns($this->table);
+        $environment->pushEnvironment();
+        $environment->prepareEnvironment(PATH_site);
+        $environment->resetEnableColumns('pages');
+        $environment->resetEnableColumns($this->table);
+
+        $cObj = $this->getTypoScriptFrontendController()->cObj;
         $cObj->cObjGetSingle('LOAD_REGISTER', ['keepUsemapMarker' => '1']);
         $result = $cObj->cObjGetSingle('CONTENT', $conf);
-        $this->environment->popEnvironment();
+
+        $environment->popEnvironment();
 
         // extract the image
         $matches = [];
         if (!preg_match('/(<img[^>]+usemap="#[^"]+"[^>]*\/>)/', $result, $matches)) {
-            return 'No Image rendered from TSFE. :(<br/>Error was:' . $this->environment->getLastError();
+            return 'No Image rendered from TSFE. :(<br/>Error was:' . $environment->getLastError();
         }
-        $result = str_replace('src="', 'src="' . $this->environment->getBackPath(), $matches[1]);
+        $result = str_replace('src="', 'src="' . $environment->getBackPath(), $matches[1]);
         return $result;
     }
 
@@ -187,17 +176,17 @@ class Data
      * Renders a thumbnail with preconfigured dimensions
      *
      * @param string $confKey
-     * @param mixed $defaultMaxWH
+     * @param int $defaultMaxWH
      *
      * @return string
      */
-    public function renderThumbnail(string $confKey, $defaultMaxWH): string
+    public function renderThumbnail(string $confKey, int $defaultMaxWH): string
     {
         $image = $this->getImage();
         $matches = [];
         $result = '';
         if (preg_match('/width="(\d+)" height="(\d+)"/', $image, $matches)) {
-            $maxSize = $this->environment->getExtConfValue($confKey, $defaultMaxWH);
+            $maxSize = $this->getEnvironment()->getExtConfValue($confKey, $defaultMaxWH);
 
             $width = intval($matches[1]);
             $height = intval($matches[2]);
@@ -221,17 +210,17 @@ class Data
      * Calculates the scale-factor which is required to scale down the imagemap to the thumbnail
      *
      * @param string $confKey
-     * @param mixed $defaultMaxWH
+     * @param int $defaultMaxWH
      *
      * @return float
      */
-    public function getThumbnailScale(string $confKey, $defaultMaxWH): float
+    public function getThumbnailScale(string $confKey, int $defaultMaxWH): float
     {
         $image = $this->getImage();
         $matches = [];
         $result = 1;
         if (preg_match('/width="(\d+)" height="(\d+)"/', $image, $matches)) {
-            $maxSize = $this->environment->getExtConfValue($confKey, $defaultMaxWH);
+            $maxSize = $this->getEnvironment()->getExtConfValue($confKey, $defaultMaxWH);
 
             $width = intval($matches[1]);
             $height = intval($matches[2]);
@@ -277,18 +266,6 @@ class Data
         return $result;
     }
 
-    public function emptyAttributeSet(): string
-    {
-        $attributeKeys = $this->getAttributeKeys();
-        $result = [];
-        foreach ($attributeKeys as $key) {
-            if ($key) {
-                $result[] = $key . ':\'\'';
-            }
-        }
-        return implode(',', $result);
-    }
-
     protected function convertToAttributeValue(string $value): string
     {
         $attribute = preg_replace(
@@ -304,7 +281,7 @@ class Data
     {
         $keys = GeneralUtility::trimExplode(
             ',',
-            $this->environment->getExtConfValue('additionalAttributes', '')
+            $this->getEnvironment()->getExtConfValue('additionalAttributes', '')
         );
         $keys = array_diff($keys, ['alt', 'href', 'shape', 'coords']);
         $keys = array_map('strtolower', $keys);
@@ -328,32 +305,16 @@ class Data
         return $this->getFieldConf('config/userImage/field') ?? 'image';
     }
 
-    public function getTable(): string
-    {
-        return $this->table;
-    }
-
     public function getMap(): array
     {
         return $this->map;
     }
 
-    /**
-     * @param string|array $map
-     */
-    public function setMap($map)
+    public function setMap(string $map)
     {
-        if (is_array($map)) {
-            $this->map = $map;
-        }
         if (is_string($map)) {
             $this->mapper->map2array($map);
         }
-    }
-
-    public function getMapField(): string
-    {
-        return $this->mapField;
     }
 
     public function getRow(): array
@@ -361,15 +322,10 @@ class Data
         return $this->row;
     }
 
-    public function getUid(): int
-    {
-        return (int) $this->row['uid'];
-    }
-
     /**
      * @param mixed $value
      */
-    public function useCurrentData($value)
+    protected function useCurrentData($value)
     {
         if (!$this->mapper->compareMaps($this->getCurrentData(), $value)) {
             $this->modified = true;
@@ -379,14 +335,14 @@ class Data
     }
 
     /**
-     * @return string
+     * @return mixed
      */
     public function getCurrentData()
     {
         return $this->row[$this->mapField];
     }
 
-    public function hasDirtyState(): bool
+    public function isModified(): bool
     {
         return $this->modified;
     }
@@ -401,7 +357,7 @@ class Data
      *
      * @return mixed
      */
-    public function getFieldConf(string $path = null)
+    protected function getFieldConf(string $path = null)
     {
         if ($path === null) {
             return $this->fieldConf;
@@ -411,6 +367,9 @@ class Data
 
     public function getEnvironment(): \Evoweb\Imagemap\Service\Environment
     {
+        if (!$this->environment) {
+            $this->environment = GeneralUtility::makeInstance(\Evoweb\Imagemap\Service\Environment::class);
+        }
         return $this->environment;
     }
 

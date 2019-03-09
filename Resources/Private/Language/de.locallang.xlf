@@ -21,6 +21,10 @@
 				<source>No Image defined for current record (maybe you need to save your changes first).</source>
 				<target>Es ist kein Bild für den aktuellen Datensatz vorhanden (eventuell müssen Sie Änderung speichern bevor Sie weiterarbeiten könne).</target>
 			</trans-unit>
+			<trans-unit id="imagemap.element.is_modified">
+				<source>The imagemap was changed, please save this record otherwise the changes might be lost.</source>
+				<target>Die Imagemap wurde aktualisiert, bitte speichern Sie den Datensatz da Änderungen andernfalls verloren gehen könnten.</target>
+			</trans-unit>
 
 			<trans-unit id="imagemap.control.open.editor">
 				<source>Open Area Editor</source>
@@ -99,15 +103,6 @@
 				<source>add new edge to polygone</source>
 				<target>Neue Ecke an Polygon anfügen</target>
 			</trans-unit>
-			<trans-unit id="imagemap.form.poly.removeEdge">
-				<source>remove edge</source>
-				<target>Ecke löschen</target>
-			</trans-unit>
-
-			<trans-unit id="imagemap.form.area.refresh">
-				<source>Update Coords</source>
-				<target>Koordinaten aktualisieren</target>
-			</trans-unit>
 			<trans-unit id="imagemap.form.poly.addEdgeBefore">
 				<source>add edge before current</source>
 				<target>Neue Ecke vor Dieser</target>
@@ -116,9 +111,9 @@
 				<source>add edge after current</source>
 				<target>Neue Ecke nach Dieser</target>
 			</trans-unit>
-			<trans-unit id="form.is_dirty">
-				<source>The imagemap was changed, please save this record otherwise the changes might be lost.</source>
-				<target>Die Imagemap wurde aktualisiert, bitte speichern Sie den Datensatz da Änderungen andernfalls verloren gehen könnten.</target>
+			<trans-unit id="imagemap.form.poly.removeEdge">
+				<source>remove edge</source>
+				<target>Ecke löschen</target>
 			</trans-unit>
 		</body>
 	</file>

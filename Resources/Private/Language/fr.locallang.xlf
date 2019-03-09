@@ -21,6 +21,10 @@
 				<source>No Image defined for current record (maybe you need to save your changes first).</source>
 				<target>Aucune image définie pour l'enregistrement courant (peut-être avez vous besoin d'enregistrer vos modifications en premier).</target>
 			</trans-unit>
+			<trans-unit id="imagemap.element.is_modified">
+				<source>The imagemap was changed, please save this record otherwise the changes might be lost.</source>
+				<target>L'Imagemap a été modifié, veuillez enregistrer cet enregistrement sinon l'Imagemap sera perdue.</target>
+			</trans-unit>
 
 			<trans-unit id="imagemap.control.open.editor">
 				<source>Open Area Editor</source>
@@ -77,11 +81,11 @@
 			</trans-unit>
 			<trans-unit id="imagemap.form.area.undo">
 				<source>undo</source>
-				<target></target>
+				<target>annuler</target>
 			</trans-unit>
 			<trans-unit id="imagemap.form.area.redo">
 				<source>redo</source>
-				<target></target>
+				<target>refaire</target>
 			</trans-unit>
 			<trans-unit id="imagemap.form.area.remove">
 				<source>remove</source>
@@ -99,16 +103,6 @@
 				<source>add new edge to polygone</source>
 				<target>ajouter un point au polygone</target>
 			</trans-unit>
-			<trans-unit id="imagemap.form.poly.removeEdge">
-				<source>remove edge</source>
-				<target>supprimer le point</target>
-			</trans-unit>
-
-
-			<trans-unit id="imagemap.form.area.refresh">
-				<source>Update Coords</source>
-				<target>Mettre à jour les coordonnées</target>
-			</trans-unit>
 			<trans-unit id="imagemap.form.poly.addEdgeBefore">
 				<source>add edge before current</source>
 				<target>ajouter un point devant</target>
@@ -117,9 +111,9 @@
 				<source>add edge after current</source>
 				<target>ajouter un point après</target>
 			</trans-unit>
-			<trans-unit id="form.is_dirty">
-				<source>The imagemap was changed, please save this record otherwise the changes might be lost.</source>
-				<target>L'Imagemap a été modifié, veuillez enregistrer cet enregistrement sinon l'Imagemap sera perdue.</target>
+			<trans-unit id="imagemap.form.poly.removeEdge">
+				<source>remove edge</source>
+				<target>supprimer le point</target>
 			</trans-unit>
 		</body>
 	</file>

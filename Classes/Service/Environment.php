@@ -47,11 +47,6 @@ class Environment
      */
     public function initializeTSFE(int $pid = 1)
     {
-        if (!is_object($GLOBALS['TT'])) {
-            $GLOBALS['TT'] = GeneralUtility::makeInstance(\TYPO3\CMS\Core\TimeTracker\TimeTracker::class);
-            $GLOBALS['TT']->start();
-        }
-
         if (!is_object($GLOBALS['TSFE'])) {
             /** @var \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController $controller */
             $controller = GeneralUtility::makeInstance(

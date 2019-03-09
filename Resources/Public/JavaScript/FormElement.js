@@ -106,6 +106,8 @@ define(['jquery', './AreaEditor'], function ($, AreaEditor) {
           }
         }).done(function (data, textStatus) {
           if (textStatus === 'success') {
+            _this.control.find('.modifiedState').css('display', 'block');
+
             _this.areaEditor.removeAllAreas();
 
             _this.areaEditor.initializeAreas(data);

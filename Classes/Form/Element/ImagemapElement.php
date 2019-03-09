@@ -99,6 +99,16 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
         $mainFieldHtml[] =            $data->renderThumbnail('previewImageMaxWH', 400);
         $mainFieldHtml[] =          '</div>';
         $mainFieldHtml[] =          '<canvas id="canvas" class="canvas"></canvas>';
+        $mainFieldHtml[] =          '<div class="modifiedState alert alert-warning"><div class="media">';
+        $mainFieldHtml[] =              '<div class="media-left"><span class="fa-stack fa-lg">';
+        $mainFieldHtml[] =                  '<i class="fa fa-circle fa-stack-2x"></i>';
+        $mainFieldHtml[] =                  '<i class="fa fa-exclamation fa-stack-1x"></i>';
+        $mainFieldHtml[] =              '</span></div>';
+        $mainFieldHtml[] =              '<div class="media-body">';
+        $mainFieldHtml[] =              $this->getLanguageService()->sL(
+            'LLL:EXT:imagemap/Resources/Private/Language/locallang.xlf:imagemap.element.is_modified'
+        );
+        $mainFieldHtml[] =          '</div></div></div>';
         $mainFieldHtml[] =        '</div>';
         $mainFieldHtml[] =      '</div>';
         if (!empty($fieldControlHtml)) {
