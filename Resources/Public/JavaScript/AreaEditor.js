@@ -778,7 +778,17 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
     }, {
       key: "addPointToPointsWithPosition",
       value: function addPointToPointsWithPosition(point, currentPointIndex, direction) {
-        this.points.push(point);
+        var newPointIndex = currentPointIndex + direction;
+
+        if (newPointIndex < 0) {
+          this.points.unshift(point);
+        } else if (newPointIndex === this.points.length) {
+          this.points.push(point);
+        } else {
+          var pointsBegin = this.points.slice(0, newPointIndex + 1),
+              pointsEnd = this.points.slice(newPointIndex + 1);
+          this.points = pointsBegin.concat([point], pointsEnd);
+        }
       }
     }, {
       key: "removePointAction",

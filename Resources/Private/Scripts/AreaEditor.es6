@@ -588,7 +588,17 @@ define([
 		}
 
 		addPointToPointsWithPosition(point, currentPointIndex, direction) {
-			this.points.push(point);
+			let newPointIndex = currentPointIndex + direction;
+
+			if (newPointIndex < 0) {
+				this.points.unshift(point);
+			} else if (newPointIndex === this.points.length) {
+				this.points.push(point);
+			} else {
+				let pointsBegin = this.points.slice(0, newPointIndex + 1),
+					pointsEnd = this.points.slice(newPointIndex + 1);
+				this.points = pointsBegin.concat([point], pointsEnd);
+			}
 		}
 
 		removePointAction(event) {
