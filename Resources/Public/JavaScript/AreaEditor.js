@@ -341,7 +341,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Imagemap/jquery.minico
     }, {
       key: "removeFauxInput",
       value: function removeFauxInput() {
-        if (this.form.fauxForm !== null) {
+        if (this.form && this.form.fauxForm !== null) {
           var field = this.form.fauxForm.querySelector('#link' + this.id);
 
           if (field) {
@@ -1069,8 +1069,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Imagemap/jquery.minico
         }
       }
     }, {
-      key: "triggerAreaLinkUpdate",
-      value: function triggerAreaLinkUpdate(id) {
+      key: "triggerLinkChanged",
+      value: function triggerLinkChanged(id) {
         var selector = 'form[name="' + this.browseLink.formName + '"] [data-formengine-input-name="link' + id + '"]',
             field = this.fauxFormDocument.querySelector(selector),
             event = this.fauxFormDocument.createEvent('HTMLEvents');

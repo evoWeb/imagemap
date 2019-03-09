@@ -269,7 +269,7 @@ define([
 		}
 
 		removeFauxInput() {
-			if (this.form.fauxForm !== null) {
+			if (this.form && this.form.fauxForm !== null) {
 				let field = this.form.fauxForm.querySelector('#link' + this.id);
 				if (field) {
 					field.remove();
@@ -850,7 +850,7 @@ define([
 			}
 		}
 
-		triggerAreaLinkUpdate(id) {
+		triggerLinkChanged(id) {
 			let selector = 'form[name="' + this.browseLink.formName + '"] [data-formengine-input-name="link' + id + '"]',
 				field = this.fauxFormDocument.querySelector(selector),
 				event = this.fauxFormDocument.createEvent('HTMLEvents');

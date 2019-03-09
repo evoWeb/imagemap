@@ -82,7 +82,7 @@ class AjaxController
                 'pid' => $parameters['pid'],
                 'fieldChangeFunc' => [
                     'focus' => 'focus()',
-                    'callback' => 'imagemap.areaEditor.triggerAreaLinkUpdate("' . $parameters['objectId'] . '")'
+                    'callback' => 'imagemap.areaEditor.triggerLinkChanged("' . $parameters['objectId'] . '")'
                 ]
             ]
         ];
