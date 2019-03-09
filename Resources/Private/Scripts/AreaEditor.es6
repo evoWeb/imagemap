@@ -251,6 +251,9 @@ define([
 			return this.getElement('.link').value;
 		}
 
+		/**
+		 * Add faux input as target for browselink which listens for changes and writes value to real field
+		 */
 		addFauxInput() {
 			if (this.form.fauxForm !== null) {
 				let fauxInput = this.editor.fauxFormDocument.createElement('input');
@@ -640,6 +643,9 @@ define([
 			});
 		}
 
+		/**
+		 * Triggers change event after faux field was changed by browselink
+		 */
 		addFauxFormForLinkBrowser() {
 			if (top.document !== this.editor.fauxFormDocument) {
 				this.fauxForm = this.editor.fauxFormDocument.createElement('form');

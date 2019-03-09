@@ -319,6 +319,10 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Imagemap/jquery.minico
       value: function getLink() {
         return this.getElement('.link').value;
       }
+      /**
+       * Add faux input as target for browselink which listens for changes and writes value to real field
+       */
+
     }, {
       key: "addFauxInput",
       value: function addFauxInput() {
@@ -822,6 +826,10 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Imagemap/jquery.minico
           vHWin.focus();
         });
       }
+      /**
+       * Triggers change event after faux field was changed by browselink
+       */
+
     }, {
       key: "addFauxFormForLinkBrowser",
       value: function addFauxFormForLinkBrowser() {
