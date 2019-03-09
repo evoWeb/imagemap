@@ -79,6 +79,7 @@ define([
 			this.updateFields();
 			this.initializeColorPicker();
 			this.initializeEvents();
+			this.addFauxInput();
 		}
 
 		initializeElement() {
@@ -173,6 +174,7 @@ define([
 				this.form.initializeArrows();
 			}
 			this.editor.deleteArea(this);
+			this.removeFauxInput();
 			delete this;
 		}
 
@@ -247,6 +249,32 @@ define([
 
 		getLink() {
 			return this.getElement('.link').value;
+		}
+
+		addFauxInput() {
+			if (this.form.fauxForm !== null) {
+				let fauxInput = this.editor.fauxFormDocument.createElement('input');
+				fauxInput.setAttribute('id', 'link' + this.id);
+				fauxInput.setAttribute('data-formengine-input-name', 'link' + this.id);
+				fauxInput.setAttribute('value', this.link);
+				fauxInput.addEventListener('change', this.fauxInputChanged.bind(this));
+				this.form.fauxForm.appendChild(fauxInput);
+			}
+		}
+
+		fauxInputChanged(event) {
+			let field = event.currentTarget;
+			this.link = field.value;
+			this.updateFields();
+		}
+
+		removeFauxInput() {
+			if (this.form.fauxForm !== null) {
+				let field = this.form.fauxForm.querySelector('#link' + this.id);
+				if (field) {
+					field.remove();
+				}
+			}
 		}
 
 		static wait(callback, delay) {
@@ -547,10 +575,19 @@ define([
 		 */
 		editor = null;
 
+		/**
+		 * Element needed to add inputs that act as target for browselink finalizeFunction target
+		 *
+		 * @type {HTMLElement}
+		 */
+		fauxForm = null;
+
 		constructor(formElement, editor) {
 			this.element = editor.document.querySelector(formElement);
 			this.areaZone = this.element.querySelector('#areaZone');
 			this.editor = editor;
+
+			this.addFauxFormForLinkBrowser(this.editor.browseLink);
 		}
 
 		initializeArrows() {
@@ -603,6 +640,19 @@ define([
 			});
 		}
 
+		addFauxFormForLinkBrowser() {
+			if (top.document !== this.editor.fauxFormDocument) {
+				this.fauxForm = this.editor.fauxFormDocument.createElement('form');
+				this.fauxForm.setAttribute('name', this.editor.browseLink.formName);
+
+				let fauxFormContainer = this.editor.fauxFormDocument.querySelector('#fauxFormContainer');
+				while (fauxFormContainer.firstChild) {
+					fauxFormContainer.removeChild(fauxFormContainer.firstChild);
+				}
+				fauxFormContainer.appendChild(this.fauxForm);
+			}
+		}
+
 		syncAreaLinkValue(id) {
 			this.editor.areas.forEach((area) => {
 				if (area.id === parseInt(id)) {
@@ -627,6 +677,11 @@ define([
 		 * @type {HTMLElement}
 		 */
 		document = null;
+
+		/**
+		 * @type {HTMLElement}
+		 */
+		fauxFormDocument = null;
 
 		/**
 		 * @type {string}
@@ -796,7 +851,11 @@ define([
 		}
 
 		triggerAreaLinkUpdate(id) {
-			this.form.syncAreaLinkValue(id);
+			let selector = 'form[name="' + this.browseLink.formName + '"] [data-formengine-input-name="link' + id + '"]',
+				field = this.fauxFormDocument.querySelector(selector),
+				event = this.fauxFormDocument.createEvent('HTMLEvents');
+			event.initEvent('change', false, true);
+			field.dispatchEvent(event);
 		}
 
 		deleteArea(area) {

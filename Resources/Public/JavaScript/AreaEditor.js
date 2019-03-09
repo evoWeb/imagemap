@@ -130,6 +130,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Imagemap/jquery.minico
         this.updateFields();
         this.initializeColorPicker();
         this.initializeEvents();
+        this.addFauxInput();
       }
     }, {
       key: "initializeElement",
@@ -242,6 +243,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Imagemap/jquery.minico
         }
 
         this.editor.deleteArea(this);
+        this.removeFauxInput();
         delete this;
       }
     }, {
@@ -316,6 +318,36 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Imagemap/jquery.minico
       key: "getLink",
       value: function getLink() {
         return this.getElement('.link').value;
+      }
+    }, {
+      key: "addFauxInput",
+      value: function addFauxInput() {
+        if (this.form.fauxForm !== null) {
+          var fauxInput = this.editor.fauxFormDocument.createElement('input');
+          fauxInput.setAttribute('id', 'link' + this.id);
+          fauxInput.setAttribute('data-formengine-input-name', 'link' + this.id);
+          fauxInput.setAttribute('value', this.link);
+          fauxInput.addEventListener('change', this.fauxInputChanged.bind(this));
+          this.form.fauxForm.appendChild(fauxInput);
+        }
+      }
+    }, {
+      key: "fauxInputChanged",
+      value: function fauxInputChanged(event) {
+        var field = event.currentTarget;
+        this.link = field.value;
+        this.updateFields();
+      }
+    }, {
+      key: "removeFauxInput",
+      value: function removeFauxInput() {
+        if (this.form.fauxForm !== null) {
+          var field = this.form.fauxForm.querySelector('#link' + this.id);
+
+          if (field) {
+            field.remove();
+          }
+        }
       }
     }], [{
       key: "wait",
@@ -721,6 +753,12 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Imagemap/jquery.minico
     /**
      * @type {AreaEditor}
      */
+
+    /**
+     * Element needed to add inputs that act as target for browselink finalizeFunction target
+     *
+     * @type {HTMLElement}
+     */
     function AreaForm(formElement, editor) {
       _classCallCheck(this, AreaForm);
 
@@ -728,9 +766,12 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Imagemap/jquery.minico
 
       _defineProperty(this, "editor", null);
 
+      _defineProperty(this, "fauxForm", null);
+
       this.element = editor.document.querySelector(formElement);
       this.areaZone = this.element.querySelector('#areaZone');
       this.editor = editor;
+      this.addFauxFormForLinkBrowser(this.editor.browseLink);
     }
 
     _createClass(AreaForm, [{
@@ -782,6 +823,21 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Imagemap/jquery.minico
         });
       }
     }, {
+      key: "addFauxFormForLinkBrowser",
+      value: function addFauxFormForLinkBrowser() {
+        if (top.document !== this.editor.fauxFormDocument) {
+          this.fauxForm = this.editor.fauxFormDocument.createElement('form');
+          this.fauxForm.setAttribute('name', this.editor.browseLink.formName);
+          var fauxFormContainer = this.editor.fauxFormDocument.querySelector('#fauxFormContainer');
+
+          while (fauxFormContainer.firstChild) {
+            fauxFormContainer.removeChild(fauxFormContainer.firstChild);
+          }
+
+          fauxFormContainer.appendChild(this.fauxForm);
+        }
+      }
+    }, {
       key: "syncAreaLinkValue",
       value: function syncAreaLinkValue(id) {
         this.editor.areas.forEach(function (area) {
@@ -798,6 +854,10 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Imagemap/jquery.minico
   var AreaEditor =
   /*#__PURE__*/
   function () {
+    /**
+     * @type {HTMLElement}
+     */
+
     /**
      * @type {HTMLElement}
      */
@@ -831,6 +891,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Imagemap/jquery.minico
       });
 
       _defineProperty(this, "document", null);
+
+      _defineProperty(this, "fauxFormDocument", null);
 
       _defineProperty(this, "browseLinkUrlAjaxUrl", '');
 
@@ -1009,7 +1071,11 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Imagemap/jquery.minico
     }, {
       key: "triggerAreaLinkUpdate",
       value: function triggerAreaLinkUpdate(id) {
-        this.form.syncAreaLinkValue(id);
+        var selector = 'form[name="' + this.browseLink.formName + '"] [data-formengine-input-name="link' + id + '"]',
+            field = this.fauxFormDocument.querySelector(selector),
+            event = this.fauxFormDocument.createEvent('HTMLEvents');
+        event.initEvent('change', false, true);
+        field.dispatchEvent(event);
       }
     }, {
       key: "deleteArea",

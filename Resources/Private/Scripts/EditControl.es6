@@ -158,6 +158,7 @@ define([
 				width = parseInt(this.image.css('width')),
 				height = parseInt(this.image.css('height')),
 				editorOptions = {
+					fauxFormDocument: document,
 					canvas: {
 						width: width,
 						height: height,
