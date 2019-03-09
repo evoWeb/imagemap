@@ -165,6 +165,7 @@ define(['jquery', 'TYPO3/CMS/Backend/Icons', 'TYPO3/CMS/Backend/Modal', './AreaE
         this.buttonAddPoly = this.currentModal.find('.button-add-poly').off('click').on('click', this.buttonAddPolyHandler.bind(this));
         this.buttonDismiss = this.currentModal.find('.button-dismiss').off('click').on('click', this.buttonDismissHandler.bind(this));
         this.buttonSave = this.currentModal.find('.button-save').off('click').on('click', this.buttonSaveHandler.bind(this));
+        $([document, top.document]).on('mousedown.minicolors touchstart.minicolors', this.hideColorSwatch);
         this.image.on('load', function () {
           setTimeout(_this2.initializeArea.bind(_this2), 100);
         });
@@ -276,6 +277,25 @@ define(['jquery', 'TYPO3/CMS/Backend/Icons', 'TYPO3/CMS/Backend/Modal', './AreaE
         hiddenField.val(this.areaEditor.toAreaXml()).trigger('imagemap:changed');
         FormEngineValidation.markFieldAsChanged(hiddenField);
         this.currentModal.modal('hide');
+      }
+    }, {
+      key: "hideColorSwatch",
+      value: function hideColorSwatch(event) {
+        var _this4 = this;
+
+        if (!$(event.target).parents().add(event.target).hasClass('minicolors')) {
+          // Hides all dropdown panels
+          top.window.$('.minicolors-focus').each(function () {
+            var minicolors = $(_this4),
+                input = minicolors.find('.minicolors-input'),
+                panel = minicolors.find('.minicolors-panel'),
+                settings = input.data('minicolors-settings');
+            panel.fadeOut(settings.hideSpeed, function () {
+              if (settings.hide) settings.hide.call(input.get(0));
+              minicolors.removeClass('minicolors-focus');
+            });
+          });
+        }
       }
     }]);
 

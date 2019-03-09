@@ -148,6 +148,8 @@ define([
 			this.buttonDismiss = this.currentModal.find('.button-dismiss').off('click').on('click', this.buttonDismissHandler.bind(this));
 			this.buttonSave = this.currentModal.find('.button-save').off('click').on('click', this.buttonSaveHandler.bind(this));
 
+			$([document, top.document]).on('mousedown.minicolors touchstart.minicolors', this.hideColorSwatch);
+
 			this.image.on('load', () => {
 				setTimeout(this.initializeArea.bind(this), 100);
 			});
@@ -263,6 +265,23 @@ define([
 			hiddenField.val(this.areaEditor.toAreaXml()).trigger('imagemap:changed');
 			FormEngineValidation.markFieldAsChanged(hiddenField);
 			this.currentModal.modal('hide');
+		}
+
+		hideColorSwatch(event) {
+			if (!$(event.target).parents().add(event.target).hasClass('minicolors')) {
+				// Hides all dropdown panels
+				top.window.$('.minicolors-focus').each(() => {
+					let minicolors = $(this),
+						input = minicolors.find('.minicolors-input'),
+						panel = minicolors.find('.minicolors-panel'),
+						settings = input.data('minicolors-settings');
+
+					panel.fadeOut(settings.hideSpeed, () => {
+						if( settings.hide ) settings.hide.call(input.get(0));
+						minicolors.removeClass('minicolors-focus');
+					});
+				});
+			}
 		}
 	}
 

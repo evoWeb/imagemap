@@ -1,7 +1,7 @@
 define([
 	'jquery',
 	'TYPO3/CMS/Imagemap/Fabric',
-	'TYPO3/CMS/Imagemap/jquery.minicolors',
+	'TYPO3/CMS/Core/Contrib/jquery.minicolors',
 	'jquery-ui/draggable',
 	'jquery-ui/resizable'
 ], ($, fabric) => {
