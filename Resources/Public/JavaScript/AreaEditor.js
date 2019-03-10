@@ -668,10 +668,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
           if (event.target.get('type') === 'control') {
             var control = event.target,
                 center = control.getCenterPoint();
-            control.polygon.points[control.name] = {
-              x: center.x,
-              y: center.y
-            };
+            control.point.x = center.x;
+            control.point.y = center.y;
           }
         });
       }
@@ -693,9 +691,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
           type: 'control'
         }));
         circle.on('moved', this.pointMoved.bind(this));
-        circle.on('clicked', function (e) {
-          console.log(e);
-        });
+        point.control = circle;
         this.controls = Poly.addElementToArrayWithPosition(this.controls, circle, newControlIndex);
         this.canvas.add(circle);
         this.canvas.renderAll();
@@ -705,8 +701,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
       value: function pointMoved(event) {
         var control = event.currentTabId || event.target,
             id = 'p' + control.polygon.id + '_' + control.name,
-            center = control.getCenterPoint(); // @todo sync circle coordinate with point.
-
+            center = control.getCenterPoint();
         this.getElement('#x' + id).value = center.x;
         this.getElement('#y' + id).value = center.y;
       }
@@ -1159,8 +1154,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
       key: "addPoly",
       value: function addPoly(configuration) {
         var area = new Poly([], _objectSpread({}, configuration, {
-          selectable: false,
-          hasControls: !this.preview,
+          hasControls: false,
           objectCaching: false
         }));
         this.canvas.add(area);

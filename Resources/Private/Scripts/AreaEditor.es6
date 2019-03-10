@@ -506,10 +506,8 @@ define([
 				if (event.target.get('type') === 'control') {
 					let control = event.target,
 						center = control.getCenterPoint();
-					control.polygon.points[control.name] = {
-						x: center.x,
-						y: center.y
-					};
+					control.point.x = center.x;
+					control.point.y = center.y;
 				}
 			});
 		}
@@ -531,7 +529,8 @@ define([
 				type: 'control'
 			});
 			circle.on('moved', this.pointMoved.bind(this));
-			circle.on('clicked', (e) => { console.log(e); });
+
+			point.control = circle;
 
 			this.controls = Poly.addElementToArrayWithPosition(this.controls, circle, newControlIndex);
 			this.canvas.add(circle);
@@ -542,7 +541,7 @@ define([
 			let control = event.currentTabId || event.target,
 				id = 'p' + control.polygon.id + '_' + control.name,
 				center = control.getCenterPoint();
-// @todo sync circle coordinate with point.
+
 			this.getElement('#x' + id).value = center.x;
 			this.getElement('#y' + id).value = center.y;
 		}
@@ -928,8 +927,7 @@ define([
 		addPoly(configuration) {
 			let area = new Poly([], {
 				...configuration,
-				selectable: false,
-				hasControls: !this.preview,
+				hasControls: false,
 				objectCaching: false,
 			});
 
