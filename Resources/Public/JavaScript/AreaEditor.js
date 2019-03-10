@@ -688,6 +688,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
           polygon: this,
           point: point,
           type: 'control',
+          opacity: 0,
           // set control position relative to polygon
           left: this.left + point.x,
           top: this.top + point.y
@@ -1072,14 +1073,17 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
     }, {
       key: "initializeCanvas",
       value: function initializeCanvas(canvasSelector, options) {
+        var _this13 = this;
+
         this.canvas = new fabric.Canvas(canvasSelector, _objectSpread({}, options.canvas, {
           selection: false,
+          preserveObjectStacking: true,
           hoverCursor: this.preview ? 'default' : 'move'
         }));
         this.canvas.on('object:moving', function (event) {
           var element = event.target;
 
-          switch (event.target.type) {
+          switch (element.type) {
             case 'control':
               var center = element.getCenterPoint();
               element.point.x = center.x - element.polygon.left;
@@ -1094,19 +1098,63 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
               break;
           }
         });
+        var activePolygon = null;
+        this.canvas.on('selection:created', function (event) {
+          if (event.target.type === 'polygon') {
+            activePolygon = event.target; // show controls of active polygon
+
+            activePolygon.controls.forEach(function (control) {
+              control.opacity = 1;
+            });
+
+            _this13.canvas.renderAll();
+          }
+        });
+        this.canvas.on('selection:updated', function (event) {
+          event.deselected.forEach(function (element) {
+            if (element.type === 'polygon' && event.selected[0].type !== 'control') {
+              // hide controls of active polygon
+              element.controls.forEach(function (control) {
+                control.opacity = 0;
+              });
+              activePolygon = null;
+
+              _this13.canvas.renderAll();
+            } else if (element.type === 'control') {
+              // hide controls of active polygon
+              activePolygon.controls.forEach(function (control) {
+                control.opacity = 0;
+              });
+              activePolygon = null;
+
+              _this13.canvas.renderAll();
+            }
+          });
+          event.selected.forEach(function (element) {
+            if (element.type === 'polygon') {
+              activePolygon = element; // hide controls of active polygon
+
+              element.controls.forEach(function (control) {
+                control.opacity = 1;
+              });
+
+              _this13.canvas.renderAll();
+            }
+          });
+        });
       }
     }, {
       key: "initializeAreas",
       value: function initializeAreas(areas) {
-        var _this13 = this;
+        var _this14 = this;
 
         if (areas !== undefined) {
           areas.forEach(function (area) {
             area.color = AreaEditor.getRandomColor(area.color);
 
-            var configuration = _objectSpread({}, area, _this13.areaConfig, {
-              selectable: !_this13.preview,
-              hasControls: !_this13.preview,
+            var configuration = _objectSpread({}, area, _this14.areaConfig, {
+              selectable: !_this14.preview,
+              hasControls: !_this14.preview,
               stroke: area.color,
               strokeWidth: 1,
               fill: AreaEditor.hexToRgbA(area.color, 0.3)
@@ -1114,24 +1162,24 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
 
             switch (configuration.shape) {
               case 'rect':
-                area = _this13.addRect(configuration);
+                area = _this14.addRect(configuration);
                 break;
 
               case 'circle':
-                area = _this13.addCircle(configuration);
+                area = _this14.addCircle(configuration);
                 break;
 
               case 'poly':
-                area = _this13.addPoly(configuration);
+                area = _this14.addPoly(configuration);
                 break;
             }
 
-            area.editor = _this13;
+            area.editor = _this14;
 
-            _this13.areas.push(area);
+            _this14.areas.push(area);
 
-            if (_this13.form) {
-              _this13.form.addArea(area);
+            if (_this14.form) {
+              _this14.form.addArea(area);
             }
           });
         }
@@ -1189,7 +1237,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
       key: "addPoly",
       value: function addPoly(configuration) {
         var area = new Poly([], _objectSpread({}, configuration, {
-          selectable: false,
+          selectable: true,
           hasControls: false,
           objectCaching: false,
           controlConfig: this.areaConfig

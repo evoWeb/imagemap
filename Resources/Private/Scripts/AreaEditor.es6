@@ -525,6 +525,7 @@ define([
 				polygon: this,
 				point: point,
 				type: 'control',
+				opacity: 0,
 
 				// set control position relative to polygon
 				left: this.left + point.x,
@@ -859,12 +860,13 @@ define([
 			this.canvas = new fabric.Canvas(canvasSelector, {
 				...options.canvas,
 				selection: false,
+				preserveObjectStacking: true,
 				hoverCursor: this.preview ? 'default' : 'move',
 			});
 
 			this.canvas.on('object:moving', (event) => {
 				let element = event.target;
-				switch (event.target.type) {
+				switch (element.type) {
 					case 'control':
 						let center = element.getCenterPoint();
 						element.point.x = center.x - element.polygon.left;
@@ -878,6 +880,48 @@ define([
 						});
 						break;
 				}
+			});
+
+			let activePolygon = null;
+			this.canvas.on('selection:created', (event) => {
+				if (event.target.type === 'polygon') {
+					activePolygon = event.target;
+					// show controls of active polygon
+					activePolygon.controls.forEach((control) => {
+						control.opacity = 1;
+					});
+					this.canvas.renderAll();
+				}
+			});
+
+			this.canvas.on('selection:updated', (event) => {
+				event.deselected.forEach((element) => {
+					if (element.type === 'polygon' && event.selected[0].type !== 'control') {
+						// hide controls of active polygon
+						element.controls.forEach((control) => {
+							control.opacity = 0;
+						});
+						activePolygon = null;
+						this.canvas.renderAll();
+					} else if (element.type === 'control') {
+						// hide controls of active polygon
+						activePolygon.controls.forEach((control) => {
+							control.opacity = 0;
+						});
+						activePolygon = null;
+						this.canvas.renderAll();
+					}
+				});
+				event.selected.forEach((element) => {
+					if (element.type === 'polygon') {
+						activePolygon = element;
+						// hide controls of active polygon
+						element.controls.forEach((control) => {
+							control.opacity = 1;
+						});
+						this.canvas.renderAll();
+					}
+				});
 			});
 		}
 
@@ -959,7 +1003,7 @@ define([
 		addPoly(configuration) {
 			let area = new Poly([], {
 				...configuration,
-				selectable: false,
+				selectable: true,
 				hasControls: false,
 				objectCaching: false,
 				controlConfig: this.areaConfig,
