@@ -688,7 +688,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
           polygon: this,
           point: point,
           type: 'control',
-          opacity: 0,
+          opacity: this.controls.length === 0 ? 0 : this.controls[0].opacity,
           // set control position relative to polygon
           left: this.left + point.x,
           top: this.top + point.y
