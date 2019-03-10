@@ -419,6 +419,8 @@ define([
 				throw new Error('Bad coords count');
 			}
 
+			// first get all coordinates and create point of odd even numbers
+			// and get top and left corner of polygon
 			points = [];
 			for (; i < coordsXY.length; i = i + 2) {
 				let xy = {
@@ -432,6 +434,12 @@ define([
 			}
 			options.left = left;
 			options.top = top;
+
+			// reduce point x/y values by top/left values
+			points.forEach((point) => {
+				point.x = point.x - options.left;
+				point.y = point.y - options.top;
+			});
 
 			super(points, options);
 		}
@@ -454,8 +462,8 @@ define([
 					parentElement.append(point.element);
 				}
 
-				point.element.querySelector('#x' + point.id).value = point.x;
-				point.element.querySelector('#y' + point.id).value = point.y;
+				point.element.querySelector('#x' + point.id).value = point.x + this.left;
+				point.element.querySelector('#y' + point.id).value = point.y + this.top;
 			});
 		}
 
@@ -497,18 +505,9 @@ define([
 		 */
 		controls = [];
 
-		addControls(areaConfig) {
+		addControls() {
 			this.points.forEach((point, index) => {
-				this.addControl(areaConfig, point, index, 100000);
-			});
-
-			this.canvas.on('object:moving', (event) => {
-				if (event.target.get('type') === 'control') {
-					let control = event.target,
-						center = control.getCenterPoint();
-					control.point.x = center.x;
-					control.point.y = center.y;
-				}
+				this.addControl(this.controlConfig, point, index, 100000);
 			});
 		}
 
@@ -519,14 +518,16 @@ define([
 				radius: 5,
 				fill: areaConfig.cornerColor,
 				stroke: areaConfig.cornerStrokeColor,
-				left: point.x,
-				top: point.y,
 				originX: 'center',
 				originY: 'center',
 				name: index,
 				polygon: this,
 				point: point,
-				type: 'control'
+				type: 'control',
+
+				// set control position relative to polygon
+				left: this.left + point.x,
+				top: this.top + point.y,
 			});
 			circle.on('moved', this.pointMoved.bind(this));
 
@@ -822,22 +823,19 @@ define([
 		areas = [];
 
 		constructor(options, canvasSelector, formSelector, document) {
-			this.initializeOptions(options);
+			this.setOptions(options);
+
 			this.document = document;
 			this.preview = formSelector === '';
 
-			this.canvas = new fabric.Canvas(canvasSelector, {
-				...options.canvas,
-				selection: false,
-				hoverCursor: this.preview ? 'default' : 'move',
-			});
+			this.initializeCanvas(canvasSelector, options);
 
 			if (!this.preview) {
 				this.form = new AreaForm(formSelector, this);
 			}
 		}
 
-		initializeOptions(options) {
+		setOptions(options) {
 			for (let option in options) {
 				if (options.hasOwnProperty(option)) {
 					this[option] = options[option];
@@ -847,6 +845,32 @@ define([
 
 		setScale(scaling) {
 			this.canvas.setZoom(this.canvas.getZoom() * (scaling ? scaling : 1));
+		}
+
+		initializeCanvas(canvasSelector, options) {
+			this.canvas = new fabric.Canvas(canvasSelector, {
+				...options.canvas,
+				selection: false,
+				hoverCursor: this.preview ? 'default' : 'move',
+			});
+
+			this.canvas.on('object:moving', (event) => {
+				let element = event.target;
+				switch (event.target.type) {
+					case 'control':
+						let center = element.getCenterPoint();
+						element.point.x = center.x - element.polygon.left;
+						element.point.y = center.y - element.polygon.top;
+						break;
+
+					case 'polygon':
+						element.controls.forEach((control) => {
+							control.left = element.left + control.point.x;
+							control.top = element.top + control.point.y;
+						});
+						break;
+				}
+			});
 		}
 
 		initializeAreas(areas) {
@@ -927,13 +951,15 @@ define([
 		addPoly(configuration) {
 			let area = new Poly([], {
 				...configuration,
+				selectable: false,
 				hasControls: false,
 				objectCaching: false,
+				controlConfig: this.areaConfig,
 			});
 
 			this.canvas.add(area);
 			if (this.form) {
-				area.addControls(this.areaConfig);
+				area.addControls();
 			}
 			return area;
 		}
