@@ -409,6 +409,33 @@ define([
 	class Poly extends Aggregation(fabric.Polygon, AreaFormElement) {
 		name = 'poly';
 
+		constructor(points, options) {
+			let coordsXY = options.coords.split(','),
+				left = 100000,
+				top = 100000,
+				i = 0;
+
+			if (coordsXY.length % 2) {
+				throw new Error('Bad coords count');
+			}
+
+			points = [];
+			for (; i < coordsXY.length; i = i + 2) {
+				let xy = {
+					x: parseInt(coordsXY[i]),
+					y: parseInt(coordsXY[i + 1])
+				};
+				points.push(xy);
+
+				left = Math.min(left, xy.x);
+				top = Math.min(top, xy.y);
+			}
+			options.left = left;
+			options.top = top;
+
+			super(points, options);
+		}
+
 		updateFields() {
 			this.getElement('#color').value = this.color;
 			this.getElement('#alt').value = this.alt || '';
@@ -500,9 +527,11 @@ define([
 				originY: 'center',
 				name: index,
 				polygon: this,
+				point: point,
 				type: 'control'
 			});
 			circle.on('moved', this.pointMoved.bind(this));
+			circle.on('clicked', (e) => { console.log(e); });
 
 			this.controls = Poly.addElementToArrayWithPosition(this.controls, circle, newControlIndex);
 			this.canvas.add(circle);
@@ -510,10 +539,10 @@ define([
 		}
 
 		pointMoved(event) {
-			let point = event.currentTabId || event.target,
-				id = 'p' + point.polygon.id + '_' + point.name,
-				center = point.getCenterPoint();
-
+			let control = event.currentTabId || event.target,
+				id = 'p' + control.polygon.id + '_' + control.name,
+				center = control.getCenterPoint();
+// @todo sync circle coordinate with point.
 			this.getElement('#x' + id).value = center.x;
 			this.getElement('#y' + id).value = center.y;
 		}
@@ -589,24 +618,6 @@ define([
 			return [this.points[currentPointIndex], this.points[nextPointIndex], currentPointIndex, nextPointIndex];
 		}
 
-		static addElementToArrayWithPosition(array, item, newPointIndex) {
-			if (newPointIndex < 0) {
-				array.unshift(item);
-			} else if (newPointIndex >= array.length) {
-				array.push(item);
-			} else {
-				let newPoints = [];
-				for (let i = 0; i < array.length; i++) {
-					newPoints.push(array[i]);
-					if (i === newPointIndex - 1) {
-						newPoints.push(item);
-					}
-				}
-				array = newPoints;
-			}
-			return array;
-		}
-
 		removePointAction(event) {
 			if (this.points.length > 3) {
 				let element = event.currentTarget.parentNode.parentNode,
@@ -638,6 +649,24 @@ define([
 				this.controls = controls;
 				this.canvas.renderAll();
 			}
+		}
+
+		static addElementToArrayWithPosition(array, item, newPointIndex) {
+			if (newPointIndex < 0) {
+				array.unshift(item);
+			} else if (newPointIndex >= array.length) {
+				array.push(item);
+			} else {
+				let newPoints = [];
+				for (let i = 0; i < array.length; i++) {
+					newPoints.push(array[i]);
+					if (i === newPointIndex - 1) {
+						newPoints.push(item);
+					}
+				}
+				array = newPoints;
+			}
+			return array;
 		}
 	}
 
@@ -796,14 +825,15 @@ define([
 		constructor(options, canvasSelector, formSelector, document) {
 			this.initializeOptions(options);
 			this.document = document;
+			this.preview = formSelector === '';
 
 			this.canvas = new fabric.Canvas(canvasSelector, {
 				...options.canvas,
-				selection: false
+				selection: false,
+				hoverCursor: this.preview ? 'default' : 'move',
 			});
 
-			if (formSelector !== '') {
-				this.preview = false;
+			if (!this.preview) {
 				this.form = new AreaForm(formSelector, this);
 			}
 		}
@@ -823,18 +853,35 @@ define([
 		initializeAreas(areas) {
 			if (areas !== undefined) {
 				areas.forEach((area) => {
-					switch (area.shape) {
+					area.color = AreaEditor.getRandomColor(area.color);
+					let configuration = {
+						...area,
+						...this.areaConfig,
+						selectable: !this.preview,
+						hasControls: !this.preview,
+						stroke: area.color,
+						strokeWidth: 1,
+						fill: AreaEditor.hexToRgbA(area.color, 0.3)
+					};
+
+					switch (configuration.shape) {
 						case 'rect':
-							this.addRect(area);
+							area = this.addRect(configuration);
 							break;
 
 						case 'circle':
-							this.addCircle(area);
+							area = this.addCircle(configuration);
 							break;
 
 						case 'poly':
-							this.addPoly(area);
+							area = this.addPoly(configuration);
 							break;
+					}
+
+					area.editor = this;
+					this.areas.push(area);
+					if (this.form) {
+						this.form.addArea(area);
 					}
 				});
 			}
@@ -845,99 +892,52 @@ define([
 		}
 
 		addRect(configuration) {
-			configuration.color = AreaEditor.getRandomColor(configuration.color);
 			let [left, top, right, bottom] = configuration.coords.split(','),
 				area = new Rect({
 					...configuration,
-					...this.areaConfig,
-					selectable: !this.preview,
-					hasControls: !this.preview,
 					left: parseInt(left),
 					top: parseInt(top),
 					width: right - left,
 					height: bottom - top,
-					stroke: configuration.color,
-					strokeWidth: 1,
-					fill: AreaEditor.hexToRgbA(configuration.color, 0.3)
 				});
 
-			area.editor = this;
 			this.canvas.add(area);
-			this.areas.push(area);
-			if (this.form) {
-				this.form.addArea(area);
-			}
+			return area;
 		}
 
 		addCircle(configuration) {
-			configuration.color = AreaEditor.getRandomColor(configuration.color);
 			let [left, top, radius] = configuration.coords.split(','),
 				area = new Circle({
 					...configuration,
-					...this.areaConfig,
-					selectable: !this.preview,
-					hasControls: !this.preview,
 					left: left - radius,
 					top: top - radius,
 					radius: parseInt(radius),
-					stroke: configuration.color,
-					strokeWidth: 1,
-					fill: AreaEditor.hexToRgbA(configuration.color, 0.3)
 				});
 
+			// disable control points as these would stretch the circle
+			// to an ellipse which is not possible in html areas
 			area.setControlVisible('ml', false);
 			area.setControlVisible('mt', false);
 			area.setControlVisible('mr', false);
 			area.setControlVisible('mb', false);
 
-			area.editor = this;
 			this.canvas.add(area);
-			this.areas.push(area);
-			if (this.form) {
-				this.form.addArea(area);
-			}
+			return area;
 		}
 
 		addPoly(configuration) {
-			configuration.color = AreaEditor.getRandomColor(configuration.color);
-			let coordsXY = configuration.coords.split(','),
-				left = 100000,
-				top = 100000,
-				i = 0,
-				points = [];
-
-			if (coordsXY.length % 2) {
-				throw new Error('Bad coords count');
-			}
-
-			for (; i < coordsXY.length; i = i + 2) {
-				let xy = {x: parseInt(coordsXY[i]), y: parseInt(coordsXY[i + 1])};
-				points.push(xy);
-
-				left = Math.min(left, xy.x);
-				top = Math.min(top, xy.y);
-			}
-
-			let area = new Poly(points, {
+			let area = new Poly([], {
 				...configuration,
-				...this.areaConfig,
 				selectable: false,
-				objectCaching: false,
 				hasControls: !this.preview,
-				top: top,
-				left: left,
-				stroke: configuration.color,
-				strokeWidth: 1,
-				fill: AreaEditor.hexToRgbA(configuration.color, 0.3)
+				objectCaching: false,
 			});
 
-			area.editor = this;
 			this.canvas.add(area);
-			this.areas.push(area);
 			if (this.form) {
 				area.addControls(this.areaConfig);
-				this.form.addArea(area);
 			}
+			return area;
 		}
 
 		triggerLinkChanged(id) {

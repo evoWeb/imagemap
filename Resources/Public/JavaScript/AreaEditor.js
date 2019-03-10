@@ -552,18 +552,35 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
   function (_Aggregation3) {
     _inherits(Poly, _Aggregation3);
 
-    function Poly() {
-      var _getPrototypeOf6;
-
+    function Poly(points, options) {
       var _this8;
 
       _classCallCheck(this, Poly);
 
-      for (var _len6 = arguments.length, args = new Array(_len6), _key6 = 0; _key6 < _len6; _key6++) {
-        args[_key6] = arguments[_key6];
+      var coordsXY = options.coords.split(','),
+          left = 100000,
+          top = 100000,
+          i = 0;
+
+      if (coordsXY.length % 2) {
+        throw new Error('Bad coords count');
       }
 
-      _this8 = _possibleConstructorReturn(this, (_getPrototypeOf6 = _getPrototypeOf(Poly)).call.apply(_getPrototypeOf6, [this].concat(args)));
+      points = [];
+
+      for (; i < coordsXY.length; i = i + 2) {
+        var xy = {
+          x: parseInt(coordsXY[i]),
+          y: parseInt(coordsXY[i + 1])
+        };
+        points.push(xy);
+        left = Math.min(left, xy.x);
+        top = Math.min(top, xy.y);
+      }
+
+      options.left = left;
+      options.top = top;
+      _this8 = _possibleConstructorReturn(this, _getPrototypeOf(Poly).call(this, points, options));
 
       _defineProperty(_assertThisInitialized(_this8), "name", 'poly');
 
@@ -672,9 +689,13 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
           originY: 'center',
           name: index,
           polygon: this,
+          point: point,
           type: 'control'
         }));
         circle.on('moved', this.pointMoved.bind(this));
+        circle.on('clicked', function (e) {
+          console.log(e);
+        });
         this.controls = Poly.addElementToArrayWithPosition(this.controls, circle, newControlIndex);
         this.canvas.add(circle);
         this.canvas.renderAll();
@@ -682,9 +703,10 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
     }, {
       key: "pointMoved",
       value: function pointMoved(event) {
-        var point = event.currentTabId || event.target,
-            id = 'p' + point.polygon.id + '_' + point.name,
-            center = point.getCenterPoint();
+        var control = event.currentTabId || event.target,
+            id = 'p' + control.polygon.id + '_' + control.name,
+            center = control.getCenterPoint(); // @todo sync circle coordinate with point.
+
         this.getElement('#x' + id).value = center.x;
         this.getElement('#y' + id).value = center.y;
       }
@@ -756,8 +778,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
       value: function getCurrentAndNextPoint(currentPointId, direction) {
         var currentPointIndex = 0;
 
-        for (var i = 0; i < this.points.length; i++) {
-          if (this.points[i].id === currentPointId) {
+        for (var _i2 = 0; _i2 < this.points.length; _i2++) {
+          if (this.points[_i2].id === currentPointId) {
             break;
           }
 
@@ -823,10 +845,10 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
         } else {
           var newPoints = [];
 
-          for (var i = 0; i < array.length; i++) {
-            newPoints.push(array[i]);
+          for (var _i3 = 0; _i3 < array.length; _i3++) {
+            newPoints.push(array[_i3]);
 
-            if (i === newPointIndex - 1) {
+            if (_i3 === newPointIndex - 1) {
               newPoints.push(item);
             }
           }
@@ -1018,12 +1040,13 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
 
       this.initializeOptions(options);
       this.document = document;
+      this.preview = formSelector === '';
       this.canvas = new fabric.Canvas(canvasSelector, _objectSpread({}, options.canvas, {
-        selection: false
+        selection: false,
+        hoverCursor: this.preview ? 'default' : 'move'
       }));
 
-      if (formSelector !== '') {
-        this.preview = false;
+      if (!this.preview) {
         this.form = new AreaForm(formSelector, this);
       }
     }
@@ -1049,21 +1072,36 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
 
         if (areas !== undefined) {
           areas.forEach(function (area) {
-            switch (area.shape) {
-              case 'rect':
-                _this12.addRect(area);
+            area.color = AreaEditor.getRandomColor(area.color);
 
+            var configuration = _objectSpread({}, area, _this12.areaConfig, {
+              selectable: !_this12.preview,
+              hasControls: !_this12.preview,
+              stroke: area.color,
+              strokeWidth: 1,
+              fill: AreaEditor.hexToRgbA(area.color, 0.3)
+            });
+
+            switch (configuration.shape) {
+              case 'rect':
+                area = _this12.addRect(configuration);
                 break;
 
               case 'circle':
-                _this12.addCircle(area);
-
+                area = _this12.addCircle(configuration);
                 break;
 
               case 'poly':
-                _this12.addPoly(area);
-
+                area = _this12.addPoly(configuration);
                 break;
+            }
+
+            area.editor = _this12;
+
+            _this12.areas.push(area);
+
+            if (_this12.form) {
+              _this12.form.addArea(area);
             }
           });
         }
@@ -1078,109 +1116,60 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
     }, {
       key: "addRect",
       value: function addRect(configuration) {
-        configuration.color = AreaEditor.getRandomColor(configuration.color);
-
         var _configuration$coords = configuration.coords.split(','),
             _configuration$coords2 = _slicedToArray(_configuration$coords, 4),
             left = _configuration$coords2[0],
             top = _configuration$coords2[1],
             right = _configuration$coords2[2],
             bottom = _configuration$coords2[3],
-            area = new Rect(_objectSpread({}, configuration, this.areaConfig, {
-          selectable: !this.preview,
-          hasControls: !this.preview,
+            area = new Rect(_objectSpread({}, configuration, {
           left: parseInt(left),
           top: parseInt(top),
           width: right - left,
-          height: bottom - top,
-          stroke: configuration.color,
-          strokeWidth: 1,
-          fill: AreaEditor.hexToRgbA(configuration.color, 0.3)
+          height: bottom - top
         }));
 
-        area.editor = this;
         this.canvas.add(area);
-        this.areas.push(area);
-
-        if (this.form) {
-          this.form.addArea(area);
-        }
+        return area;
       }
     }, {
       key: "addCircle",
       value: function addCircle(configuration) {
-        configuration.color = AreaEditor.getRandomColor(configuration.color);
-
         var _configuration$coords3 = configuration.coords.split(','),
             _configuration$coords4 = _slicedToArray(_configuration$coords3, 3),
             left = _configuration$coords4[0],
             top = _configuration$coords4[1],
             radius = _configuration$coords4[2],
-            area = new Circle(_objectSpread({}, configuration, this.areaConfig, {
-          selectable: !this.preview,
-          hasControls: !this.preview,
+            area = new Circle(_objectSpread({}, configuration, {
           left: left - radius,
           top: top - radius,
-          radius: parseInt(radius),
-          stroke: configuration.color,
-          strokeWidth: 1,
-          fill: AreaEditor.hexToRgbA(configuration.color, 0.3)
-        }));
+          radius: parseInt(radius)
+        })); // disable control points as these would stretch the circle
+        // to an ellipse which is not possible in html areas
+
 
         area.setControlVisible('ml', false);
         area.setControlVisible('mt', false);
         area.setControlVisible('mr', false);
         area.setControlVisible('mb', false);
-        area.editor = this;
         this.canvas.add(area);
-        this.areas.push(area);
-
-        if (this.form) {
-          this.form.addArea(area);
-        }
+        return area;
       }
     }, {
       key: "addPoly",
       value: function addPoly(configuration) {
-        configuration.color = AreaEditor.getRandomColor(configuration.color);
-        var coordsXY = configuration.coords.split(','),
-            left = 100000,
-            top = 100000,
-            i = 0,
-            points = [];
-
-        if (coordsXY.length % 2) {
-          throw new Error('Bad coords count');
-        }
-
-        for (; i < coordsXY.length; i = i + 2) {
-          var xy = {
-            x: parseInt(coordsXY[i]),
-            y: parseInt(coordsXY[i + 1])
-          };
-          points.push(xy);
-          left = Math.min(left, xy.x);
-          top = Math.min(top, xy.y);
-        }
-
-        var area = new Poly(points, _objectSpread({}, configuration, this.areaConfig, {
+        var area = new Poly([], _objectSpread({}, configuration, {
           selectable: false,
-          objectCaching: false,
           hasControls: !this.preview,
-          top: top,
-          left: left,
-          stroke: configuration.color,
-          strokeWidth: 1,
-          fill: AreaEditor.hexToRgbA(configuration.color, 0.3)
+          objectCaching: false
         }));
-        area.editor = this;
         this.canvas.add(area);
-        this.areas.push(area);
 
         if (this.form) {
           area.addControls(this.areaConfig);
-          this.form.addArea(area);
         }
+
+        return area;
       }
     }, {
       key: "triggerLinkChanged",
