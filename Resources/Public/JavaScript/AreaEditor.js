@@ -593,6 +593,8 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
 
       _defineProperty(_assertThisInitialized(_this8), "controls", []);
 
+      _this8.on('moved', _this8.polygonMoved.bind(_assertThisInitialized(_this8)));
+
       return _this8;
     }
 
@@ -706,6 +708,16 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
         this.getElement('#y' + id).value = center.y;
       }
     }, {
+      key: "polygonMoved",
+      value: function polygonMoved() {
+        var _this11 = this;
+
+        this.points.forEach(function (point) {
+          _this11.getElement('#x' + point.id).value = _this11.left + point.x;
+          _this11.getElement('#y' + point.id).value = _this11.top + point.y;
+        });
+      }
+    }, {
       key: "addPointBeforeAction",
       value: function addPointBeforeAction(event) {
         var direction = AreaFormElement.before,
@@ -796,7 +808,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
     }, {
       key: "removePointAction",
       value: function removePointAction(event) {
-        var _this11 = this;
+        var _this12 = this;
 
         if (this.points.length > 3) {
           var element = event.currentTarget.parentNode.parentNode,
@@ -805,23 +817,23 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
           this.points.forEach(function (point, index) {
             if (element.id !== point.id) {
               points.push(point);
-              controls.push(_this11.controls[index]);
+              controls.push(_this12.controls[index]);
             } else {
               point.element.remove();
 
-              _this11.canvas.remove(_this11.controls[index]);
+              _this12.canvas.remove(_this12.controls[index]);
             }
           });
           points.forEach(function (point, index) {
             var oldId = point.id;
-            point.id = 'p' + _this11.id + '_' + index;
-            _this11.getElement('#' + oldId).id = point.id;
-            _this11.getElement('#x' + oldId).id = 'x' + point.id;
-            _this11.getElement('#y' + oldId).id = 'y' + point.id;
+            point.id = 'p' + _this12.id + '_' + index;
+            _this12.getElement('#' + oldId).id = point.id;
+            _this12.getElement('#x' + oldId).id = 'x' + point.id;
+            _this12.getElement('#y' + oldId).id = 'y' + point.id;
 
-            _this11.getElement('[for="x' + oldId + '"]').setAttribute('for', 'x' + point.id);
+            _this12.getElement('[for="x' + oldId + '"]').setAttribute('for', 'x' + point.id);
 
-            _this11.getElement('[for="y' + oldId + '"]').setAttribute('for', 'y' + point.id);
+            _this12.getElement('[for="y' + oldId + '"]').setAttribute('for', 'y' + point.id);
 
             controls[index].name = index;
           });
@@ -1086,15 +1098,15 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
     }, {
       key: "initializeAreas",
       value: function initializeAreas(areas) {
-        var _this12 = this;
+        var _this13 = this;
 
         if (areas !== undefined) {
           areas.forEach(function (area) {
             area.color = AreaEditor.getRandomColor(area.color);
 
-            var configuration = _objectSpread({}, area, _this12.areaConfig, {
-              selectable: !_this12.preview,
-              hasControls: !_this12.preview,
+            var configuration = _objectSpread({}, area, _this13.areaConfig, {
+              selectable: !_this13.preview,
+              hasControls: !_this13.preview,
               stroke: area.color,
               strokeWidth: 1,
               fill: AreaEditor.hexToRgbA(area.color, 0.3)
@@ -1102,24 +1114,24 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
 
             switch (configuration.shape) {
               case 'rect':
-                area = _this12.addRect(configuration);
+                area = _this13.addRect(configuration);
                 break;
 
               case 'circle':
-                area = _this12.addCircle(configuration);
+                area = _this13.addCircle(configuration);
                 break;
 
               case 'poly':
-                area = _this12.addPoly(configuration);
+                area = _this13.addPoly(configuration);
                 break;
             }
 
-            area.editor = _this12;
+            area.editor = _this13;
 
-            _this12.areas.push(area);
+            _this13.areas.push(area);
 
-            if (_this12.form) {
-              _this12.form.addArea(area);
+            if (_this13.form) {
+              _this13.form.addArea(area);
             }
           });
         }

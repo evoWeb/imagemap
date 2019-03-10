@@ -442,6 +442,7 @@ define([
 			});
 
 			super(points, options);
+			this.on('moved', this.polygonMoved.bind(this));
 		}
 
 		updateFields() {
@@ -545,6 +546,13 @@ define([
 
 			this.getElement('#x' + id).value = center.x;
 			this.getElement('#y' + id).value = center.y;
+		}
+
+		polygonMoved() {
+			this.points.forEach((point) => {
+				this.getElement('#x' + point.id).value = this.left + point.x;
+				this.getElement('#y' + point.id).value = this.top + point.y;
+			});
 		}
 
 		addPointBeforeAction(event) {
