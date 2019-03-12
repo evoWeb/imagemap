@@ -23,7 +23,8 @@
 		"sjbr/static-info-tables": "^6.7"
 	},
 	"require-dev": {
-		"typo3/testing-framework": "~4.10.0"
+		"typo3/testing-framework": "~4.10.0",
+		"friendsofphp/php-cs-fixer": "^2.12.2"
 	},
 
 	"autoload": {
@@ -53,6 +54,7 @@
 		"post-autoload-dump": [
 			"mkdir -p .Build/Web/typo3conf/ext/",
 			"[ -L .Build/Web/typo3conf/ext/imagemap ] || ln -snvf ../../../../. .Build/Web/typo3conf/ext/imagemap"
-		]
+		],
+		"php-cs-fixer": ".Build/bin/php-cs-fixer fix --config .Build/.php_cs"
 	}
 }

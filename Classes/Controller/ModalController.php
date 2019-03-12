@@ -1,8 +1,6 @@
 <?php
 declare(strict_types = 1);
 
-namespace Evoweb\Imagemap\Controller;
-
 /**
  * This file is developed by evoWeb.
  *
@@ -14,9 +12,11 @@ namespace Evoweb\Imagemap\Controller;
  * LICENSE.txt file that was distributed with this source code.
  */
 
+namespace Evoweb\Imagemap\Controller;
+
 use Evoweb\Imagemap\Domain\Model\Data;
-use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Http\Response;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;

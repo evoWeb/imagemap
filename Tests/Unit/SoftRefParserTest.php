@@ -1,5 +1,4 @@
 <?php
-namespace Evoweb\Imagemap\Tests;
 
 /**
  * This file is developed by evoWeb.
@@ -11,6 +10,8 @@ namespace Evoweb\Imagemap\Tests;
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
+
+namespace Evoweb\Imagemap\Tests;
 
 class SoftRefParserTest extends \TYPO3\TestingFramework\Core\Unit\UnitTestCase
 {

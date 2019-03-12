@@ -1,8 +1,6 @@
 <?php
 declare(strict_types = 1);
 
-namespace Evoweb\Imagemap\Database;
-
 /**
  * This file is developed by evoWeb.
  *
@@ -13,6 +11,8 @@ namespace Evoweb\Imagemap\Database;
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
+
+namespace Evoweb\Imagemap\Database;
 
 class SoftRefParser extends \TYPO3\CMS\Core\Database\SoftReferenceIndex
 {

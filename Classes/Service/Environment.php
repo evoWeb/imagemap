@@ -1,8 +1,6 @@
 <?php
 declare(strict_types = 1);
 
-namespace Evoweb\Imagemap\Service;
-
 /**
  * This file is developed by evoWeb.
  *
@@ -13,6 +11,8 @@ namespace Evoweb\Imagemap\Service;
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
+
+namespace Evoweb\Imagemap\Service;
 
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 

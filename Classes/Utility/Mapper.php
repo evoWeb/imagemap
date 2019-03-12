@@ -1,8 +1,6 @@
 <?php
 declare(strict_types = 1);
 
-namespace Evoweb\Imagemap\Utility;
-
 /**
  * This file is developed by evoWeb.
  *
@@ -13,6 +11,8 @@ namespace Evoweb\Imagemap\Utility;
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
+
+namespace Evoweb\Imagemap\Utility;
 
 class Mapper
 {
@@ -238,7 +238,6 @@ class Mapper
      * @param string $name determines if a single attributes should be extracted
      *
      * @return mixed Extracted attribute(s)
-     *
      */
     protected function getAttributesFromXMLNode($node, string $name = null)
     {

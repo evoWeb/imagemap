@@ -1,8 +1,6 @@
 <?php
 declare(strict_types = 1);
 
-namespace Evoweb\Imagemap\Domain\Model;
-
 /**
  * This file is developed by evoWeb.
  *
@@ -13,6 +11,8 @@ namespace Evoweb\Imagemap\Domain\Model;
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
+
+namespace Evoweb\Imagemap\Domain\Model;
 
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -132,7 +132,7 @@ class Data
     public function hasValidImageFile(): bool
     {
         $uid = $this->getFieldValue('uid');
-        $image = $this->getImageFile((int) $uid);
+        $image = $this->getImageFile((int)$uid);
         return $uid && $image !== null && $image->exists();
     }
 
@@ -290,7 +290,7 @@ class Data
 
     protected function getLivePid(): int
     {
-        return (int) ($this->row['pid'] > 0 ? $this->row['pid'] : $this->liveRow['pid']);
+        return (int)($this->row['pid'] > 0 ? $this->row['pid'] : $this->liveRow['pid']);
     }
 
     protected function getLiveUid(): int
