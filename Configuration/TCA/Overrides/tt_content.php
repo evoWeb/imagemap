@@ -13,6 +13,7 @@ $tempColumns = [
         'config' => [
             'type' => 'input',
             'renderType' => 'imagemap',
+            'default' => '',
             'userImage' => [
                 'field' => 'image'
             ],
