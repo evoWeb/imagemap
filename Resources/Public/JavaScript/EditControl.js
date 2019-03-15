@@ -243,9 +243,10 @@ define(['jquery', './AreaEditor', 'TYPO3/CMS/Backend/Icons', 'TYPO3/CMS/Backend/
         event.preventDefault();
         var width = parseInt(this.image.css('width')),
             height = parseInt(this.image.css('height'));
-        this.areaEditor.addRect({
+        this.areaEditor.initializeAreas([{
+          shape: 'rect',
           coords: width / 2 - 50 + ',' + (height / 2 - 50) + ',' + (width / 2 + 50) + ',' + (height / 2 + 50)
-        });
+        }]);
       }
     }, {
       key: "buttonAddCircleHandler",
@@ -254,9 +255,10 @@ define(['jquery', './AreaEditor', 'TYPO3/CMS/Backend/Icons', 'TYPO3/CMS/Backend/
         event.preventDefault();
         var width = parseInt(this.image.css('width')),
             height = parseInt(this.image.css('height'));
-        this.areaEditor.addCircle({
+        this.areaEditor.initializeAreas([{
+          shape: 'circle',
           coords: width / 2 + ',' + height / 2 + ',50'
-        });
+        }]);
       }
     }, {
       key: "buttonAddPolyHandler",
@@ -265,9 +267,10 @@ define(['jquery', './AreaEditor', 'TYPO3/CMS/Backend/Icons', 'TYPO3/CMS/Backend/
         event.preventDefault();
         var width = parseInt(this.image.css('width')),
             height = parseInt(this.image.css('height'));
-        this.areaEditor.addPoly({
+        this.areaEditor.initializeAreas([{
+          shape: 'poly',
           coords: width / 2 + ',' + (height / 2 - 50) + ',' + (width / 2 + 50) + ',' + (height / 2 + 50) + ',' + width / 2 + ',' + (height / 2 + 70) + ',' + (width / 2 - 50) + ',' + (height / 2 + 50)
-        });
+        }]);
       }
     }, {
       key: "buttonDismissHandler",
