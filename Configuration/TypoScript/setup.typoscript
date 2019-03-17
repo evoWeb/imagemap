@@ -8,6 +8,7 @@ tt_content.imagemap {
     30 = Evoweb\Imagemap\DataProcessing\ImagemapProcessor
     30 {
       data = field:tx_imagemap_links
+
       name = TEXT
       name {
         data = field:titleText // field:altText // field:imagecaption // field:header

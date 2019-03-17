@@ -86,17 +86,19 @@ class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcess
             /* @var $mapper \Evoweb\Imagemap\Utility\Mapper */
             $mapper = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\Evoweb\Imagemap\Utility\Mapper::class);
             $mapName = $mapper->createValidNameAttribute($mapName);
-            $map = $mapper->generateMap(
-                $cObj,
-                $mapName,
-                $cObj->getData($processorConfiguration['data'], $cObj->data),
-                $this->attributes,
-                $this->getTypoScriptFrontendController()->config['config']['xhtmlDoctype'] !== '',
-                $processorConfiguration
-            );
-            if (!$mapper->isEmptyMap($map) || $cObj->getData('register:keepUsemapMarker', $cObj->data)) {
-                $processedData['imageMap'] = $map;
+
+            $mapData = $cObj->getData($processorConfiguration['data'], $cObj->data);
+            $mapArray = $mapper->map2array($mapData);
+            if (!$mapper->isEmptyMap($mapArray)) {
+                $mapArray['attributes']['name'] = $mapName;
+
+                if ($this->getTypoScriptFrontendController()->config['config']['xhtmlDoctype'] !== '') {
+                    $mapArray['attributes']['id'] = $mapArray['attributes']['name'];
+                }
+
+                $processedData['imageMap'] = $mapArray;
                 $processedData['imageMapName'] = $mapName;
+                $processedData['imageMapAttributes'] = $this->attributes;
             }
         }
         return $processedData;

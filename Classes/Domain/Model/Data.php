@@ -157,9 +157,7 @@ class Data
         $environment->resetEnableColumns('pages');
         $environment->resetEnableColumns($this->table);
 
-        $cObj = $this->getTypoScriptFrontendController()->cObj;
-        $cObj->cObjGetSingle('LOAD_REGISTER', ['keepUsemapMarker' => '1']);
-        $result = $cObj->cObjGetSingle('CONTENT', $conf);
+        $result = $this->getTypoScriptFrontendController()->cObj->cObjGetSingle('CONTENT', $conf);
 
         $environment->popEnvironment();
 
