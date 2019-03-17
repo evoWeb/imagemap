@@ -85,10 +85,6 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
 
     protected function renderElementWithControl(array $resultArray, Data $data): array
     {
-        $id = 'imagemap' . GeneralUtility::shortMD5(rand(1, 100000));
-
-        $existingAreas = json_encode($data->getAreas());
-
         $resultArray['requireJsModules'][] = [
             'TYPO3/CMS/Imagemap/FormElement' => 'function (FormElement) { new FormElement(); }'
         ];
@@ -105,10 +101,13 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
         $arguments = [
             'formEngine' => [
                 'field' => [
+                    'tablename' => $this->data['tableName'],
+                    'fieldname' => $this->data['fieldName'],
+                    'uid' => (int)$this->data['databaseRow']['uid'],
                     'value' => htmlspecialchars($data->getCurrentData()),
                     'name' => $this->data['parameterArray']['itemFormElName'],
-                    'id' => $id,
-                    'existingAreas' => $existingAreas,
+                    'id' => 'imagemap' . GeneralUtility::shortMD5(rand(1, 100000)),
+                    'existingAreas' => json_encode($data->getAreas()),
                 ]
             ],
             'thumbnailScale' => $data->getThumbnailScale('previewImageMaxWH', 400),

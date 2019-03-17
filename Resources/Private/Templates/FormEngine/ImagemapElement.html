@@ -5,7 +5,8 @@
 	<div class="form-control-wrap imagemap-control">
 		<div class="form-wizards-wrap">
 			<div class="form-wizards-element pictureWrap" id="{formEngine.field.id}">
-				<div id="{formEngine.field.id}-canvas" class="picture"
+				<div id="{formEngine.field.id}-canvas"
+						 class="picture"
 						 data-thumbnail-scale="{thumbnailScale}"
 						 data-existing-areas='{formEngine.field.existingAreas}'>
 					<div class="image">{thumbnail -> f:format.raw()}</div>
@@ -34,7 +35,10 @@
 			<div class="form-wizards-items-bottom">{fieldWizardHtml -> f:format.raw()}</div>
 		</f:if>
 		</div>
-		<input type="hidden" name="{formEngine.field.name}" value="{formEngine.field.value}" />
+		<input type="hidden" name="{formEngine.field.name}" value="{formEngine.field.value}"
+					 data-tablename="{formEngine.field.tablename}"
+					 data-fieldname="{formEngine.field.fieldname}"
+					 data-uid="{formEngine.field.uid}" />
 	</div>
 
 </div>

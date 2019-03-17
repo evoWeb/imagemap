@@ -78,9 +78,9 @@ define([
 				data: {
 					P: {
 						itemFormElName: $field.attr('name'),
-						tableName: 'tt_content',
-						fieldName: 'tx_imagemap_links',
-						uid: $field.attr('name').replace('data[tt_content][', '').replace('][tx_imagemap_links]', ''),
+						tableName: $field.data('tablename'),
+						fieldName: $field.data('fieldname'),
+						uid: $field.data('uid'),
 						value: $field.val()
 					}
 				}

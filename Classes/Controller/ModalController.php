@@ -86,8 +86,8 @@ class ModalController
         $browseLinkConfiguration = [
             'returnUrl' => GeneralUtility::linkThisScript(),
             'formName' => $formName,
-            'tableName' => 'tt_content',
-            'fieldName' => 'tx_imagemap_links',
+            'tableName' => $parameters['tableName'],
+            'fieldName' => $parameters['fieldName'],
             'pid' => $data->getRow()['pid'],
         ];
 
