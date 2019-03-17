@@ -125,7 +125,7 @@ class Data
         /** @var \TYPO3\CMS\Core\Resource\FileRepository $fileRepository */
         $fileRepository = GeneralUtility::makeInstance(\TYPO3\CMS\Core\Resource\FileRepository::class);
         /** @var \TYPO3\CMS\Core\Resource\FileReference $fileReference */
-        $fileReference = current($fileRepository->findByRelation('tt_content', $imageField, $uid));
+        $fileReference = current($fileRepository->findByRelation($this->table, $imageField, $uid));
         return $fileReference ? $fileReference->getOriginalFile() : null;
     }
 
