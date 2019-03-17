@@ -17,11 +17,6 @@ namespace Evoweb\Imagemap\DataProcessing;
 class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcessorInterface
 {
     /**
-     * @var \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer
-     */
-    public $cObj;
-
-    /**
      * @var array
      */
     protected $attributes = [
@@ -52,14 +47,6 @@ class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcess
         'onkeydown',
         'onkeyup',
     ];
-
-    public function __construct()
-    {
-        if ($this->getTypoScriptFrontendController()->config['config']['xhtmlDoctype'] !== '') {
-            // remove target attribute to have xhtml-strict output
-            $this->attributes = array_diff($this->attributes, ['target']);
-        }
-    }
 
     /**
      * Process data of a record to resolve imagemap
@@ -93,6 +80,8 @@ class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcess
                 $mapArray['attributes']['name'] = $mapName;
 
                 if ($this->getTypoScriptFrontendController()->config['config']['xhtmlDoctype'] !== '') {
+                    // remove target attribute to have xhtml-strict output
+                    $this->attributes = array_diff($this->attributes, ['target']);
                     $mapArray['attributes']['id'] = $mapArray['attributes']['name'];
                 }
 
