@@ -70,8 +70,8 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
      */
     public function simpleComparingWorks()
     {
-        $map1 = '<map><area>1</area></map>';
-        $map2 = '<map><area>2</area></map>';
+        $map1 = '[{link:"1"}]';
+        $map2 = '[{link:"2"}]';
 
         $this->assertEquals(
             true,
@@ -90,7 +90,7 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
      */
     public function complexerComparingWithVariousAttributeOrderWorks()
     {
-        $map1 = '<map><area coords="abc" shape="circle">1</area></map>';
+        $map1 = '[{coords:"abc",shape:"circle",link:"1"}]';
         $map2 = '<map><area shape="circle" coords="abc">1</area></map>';
 
         $this->assertEquals(
@@ -105,9 +105,9 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
      */
     public function compairingDifferentStructures()
     {
-        $map1 = '<map></map>';
-        $map2 = '<map><area xxx="abc" color="green">1</area></map>';
-        $map3 = '<map attr="value" />';
+        $map1 = '[]';
+        $map2 = '[{xxx:"abc",color:"green",link:"1"}]';
+        $map3 = '[{xxx:"cde",color:"blue",link:"2"}]';
 
         $this->assertEquals(
             false,

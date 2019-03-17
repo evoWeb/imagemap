@@ -37,7 +37,7 @@ class SoftRefParserTest extends \TYPO3\TestingFramework\Core\Unit\UnitTestCase
      */
     public function emptySoftRefsWork()
     {
-        $emptyStrings = ['', '<map></map>'];
+        $emptyStrings = ['', '[]'];
 
         foreach ($emptyStrings as $str) {
             $result = $this->processor->findRef('', '', '', $str, '', [], '');
@@ -61,7 +61,7 @@ class SoftRefParserTest extends \TYPO3\TestingFramework\Core\Unit\UnitTestCase
             ->method('getTypoLinkParts')
             ->will($this->returnCallback([$this, 'getTypoLinkPartsCallback']));
 
-        $mapContent = '<map><area coords="0,0,100,100" shape="rect">t3://page?uid=1</area></map>';
+        $mapContent = '[{coords:"0,0,100,100",shape:"rect",link:"t3://page?uid=1"}]';
         $result = $this->processor->findRef('', '', '', $mapContent, '', [], '');
 
         $this->assertEquals(1, count($result['elements']), 'Wrong Reference-Count found');
@@ -87,7 +87,7 @@ class SoftRefParserTest extends \TYPO3\TestingFramework\Core\Unit\UnitTestCase
             ->method('getTypoLinkParts')
             ->will($this->returnCallback([$this, 'getTypoLinkPartsCallback']));
 
-        $mapContent = '<map><area>t3://page?uid=1</area><area>t3://page?uid=2</area><area>t3://page?uid=3</area></map>';
+        $mapContent = '[{link:"t3://page?uid=1"},{link:"t3://page?uid=2"},{link:"t3://page?uid=3"}]';
         $result = $this->processor->findRef('', '', '', $mapContent, '', [], '');
 
         $this->assertEquals(3, count($result['elements']), 'Wrong Reference-Count found');

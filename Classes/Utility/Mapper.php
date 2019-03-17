@@ -47,54 +47,7 @@ class Mapper
      */
     public function compareMaps(string $map1, string $map2): bool
     {
-        return $this->arraysMatch(
-            \json_decode($map1),
-            \json_decode($map2)
-        );
-    }
-
-    /**
-     * Encapsulate the extraction of Attributes out of the SimpleXML-Structure
-     *
-     * @param \SimpleXMLElement $node
-     * @param string $name determines if a single attributes should be extracted
-     *
-     * @return mixed Extracted attribute(s)
-     */
-    protected function getAttributesFromXMLNode($node, string $name = null)
-    {
-        $attributes = (array)$node->attributes();
-        return isset($attributes['@attributes']) ?
-            ($name === null ? $attributes['@attributes'] : (string)$attributes['@attributes'][$name]) :
-            '';
-    }
-
-    /**
-     * Check if a node has any attributes or not
-     *
-     * @param \SimpleXMLElement $node
-     *
-     * @return bool
-     */
-    protected function nodeHasAttributes($node): bool
-    {
-        return is_array($this->getAttributesFromXMLNode($node));
-    }
-
-    /**
-     * Combines a array of attributes into a HTML-conform list
-     *
-     * @param array $attributes
-     *
-     * @return string
-     */
-    protected function implodeXMLAttributes(array $attributes): string
-    {
-        $result = '';
-        foreach ($attributes as $key => $value) {
-            $result .= sprintf(' %s="%s"', $key, htmlspecialchars($value));
-        }
-        return $result;
+        return $this->arraysMatch(\json_decode($map1, true), \json_decode($map2, true));
     }
 
     /**

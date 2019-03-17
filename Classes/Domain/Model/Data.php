@@ -91,7 +91,7 @@ class Data
         \TYPO3\CMS\Backend\Utility\BackendUtility::fixVersioningPid($table, $this->liveRow);
 
         $value = $this->getFieldValue($field);
-        $this->map = $value ? \json_decode($value) : [];
+        $this->map = $value ? \json_decode($value, true) : [];
     }
 
     /**
@@ -286,7 +286,7 @@ class Data
     public function setMap(string $map)
     {
         if (is_string($map)) {
-            $map = \json_decode($map);
+            $map = \json_decode($map, true);
         }
         $this->map = $map;
     }

@@ -34,7 +34,7 @@ class SoftRefParser extends \TYPO3\CMS\Core\Database\SoftReferenceIndex
     {
         $this->tokenID_basePrefix = $table . ':' . $uid . ':' . $field . ':' . $structurePath . ':' . $spKey;
 
-        $data = \json_decode($content);
+        $data = \json_decode($content, true);
 
         $elements = [];
         if (isset($data['areas']) && is_array($data['areas'])) {
