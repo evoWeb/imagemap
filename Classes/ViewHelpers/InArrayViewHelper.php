@@ -38,7 +38,7 @@ class InArrayViewHelper extends AbstractViewHelper
     use CompileWithRenderStatic;
 
     /**
-     * ViewHelper outputs HTML therefore output escaping has to be disabled
+     * ViewHelper outputs boolean therefore output escaping has to be disabled
      *
      * @var bool
      */

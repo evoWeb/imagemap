@@ -89,7 +89,7 @@ class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcess
 
             $mapData = $cObj->getData($processorConfiguration['data'], $cObj->data);
             $mapArray = $mapper->map2array($mapData);
-            if (!$mapper->isEmptyMap($mapArray)) {
+            if (isset($mapArray['areas']) && count($mapArray['areas'])) {
                 $mapArray['attributes']['name'] = $mapName;
 
                 if ($this->getTypoScriptFrontendController()->config['config']['xhtmlDoctype'] !== '') {

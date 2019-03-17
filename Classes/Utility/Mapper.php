@@ -17,88 +17,6 @@ namespace Evoweb\Imagemap\Utility;
 class Mapper
 {
     /**
-     * Generate a HTML-Imagemap using Typolink etc..
-     *
-     * @param \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer $cObj we used for generating the Links
-     * @param string $name Name of the generated map
-     * @param string $mapping mapping the XML_pseudo-imagemap
-     * @param array $whitelist
-     * @param bool $xhtml
-     * @param array $conf
-     *
-     * @return string the valid HTML-imagemap
-     */
-    public function generateMap(
-        \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer &$cObj,
-        string $name,
-        string $mapping = '',
-        array $whitelist = [],
-        bool $xhtml = false,
-        array $conf = null
-    ): string {
-        if (is_array($whitelist)) {
-            $whitelist = array_flip($whitelist);
-        }
-        $mapArray = $this->map2array($mapping);
-
-        $mapArray['attributes']['name'] = $this->createValidNameAttribute($name);
-        // name-attribute is still required due to browser compatibility ;(
-        if ($xhtml) {
-            $mapArray['attributes']['id'] = $mapArray['attributes']['name'];
-        }
-
-        if (!is_array($conf) || !isset($conf['area.'])) {
-            $conf = ['area.' => []];
-        }
-
-        if (isset($mapArray['areas']) && is_array($mapArray['areas'])) {
-            foreach ($mapArray['areas'] as $key => $node) {
-                if ((!isset($node['value']) || !$node['value']) && !$node['attributes']['href']) {
-                    continue;
-                }
-
-                $reg = ['area-href' => $node['value'] ?? ''];
-                foreach ($node['attributes'] as $ak => $av) {
-                    $reg['area-' . $ak] = htmlspecialchars($av);
-                }
-
-                $cObj->cObjGetSingle('LOAD_REGISTER', $reg);
-                $tmp = $this->map2array(
-                    $cObj->typolink(
-                        '-',
-                        $this->getTypolinkSetup(
-                            $node['value'] ? $node['value'] : $node['attributes']['href'],
-                            $conf['area.']
-                        )
-                    ),
-                    'a'
-                );
-                $cObj->cObjGetSingle('RESTORE_REGISTER', $reg);
-
-                if (is_array($tmp['attributes'])) {
-                    unset($mapArray['areas'][$key]['attributes']['href']);
-                    $mapArray['areas'][$key]['attributes'] = array_merge(
-                        array_filter($tmp['attributes']),
-                        array_filter($mapArray['areas'][$key]['attributes'])
-                    );
-
-                    if (is_array($whitelist)) {
-                        $mapArray['areas'][$key]['attributes'] = array_intersect_key(
-                            $mapArray['areas'][$key]['attributes'],
-                            $whitelist
-                        );
-                    }
-                    // Remove empty attributes
-                    $mapArray['areas'][$key]['attributes'] = array_filter($mapArray['areas'][$key]['attributes']);
-                }
-                unset($mapArray['areas'][$key]['value']);
-            }
-        }
-
-        return $this->isEmptyMap($mapArray) ? '' : $this->array2map($mapArray);
-    }
-
-    /**
      * Encapsulates the creation of valid HTML-imagemap-names
      *
      * @param string value
@@ -117,23 +35,6 @@ class Mapper
             $name = chr(rand(97, 122)) . $name;
         }
         return $name;
-    }
-
-    /**
-     * Encapsulates the creation of a valid typolink-conf array
-     *
-     * @param string $param the parameter which is used for the link-generation
-     * @param array $conf
-     *
-     * @return array typolink-conf array
-     */
-    protected function getTypolinkSetup(string $param, array $conf = null): array
-    {
-        $result = ['parameter.' => ['wrap' => $param]];
-        if (is_array($conf) && array_key_exists('typolink.', $conf) && is_array($conf['typolink.'])) {
-            $result = array_merge($result, $conf['typolink.']);
-        }
-        return $result;
     }
 
     /**
@@ -299,19 +200,5 @@ class Mapper
             $match = $match && $this->arraysMatch($b[$key] ?? [], $a[$key] ?? []);
         }
         return $match;
-    }
-
-    /**
-     * Check whether a given string is a valid imagemap
-     * the check is not very robust so far but it resolves all required situations (see unit-tests)
-     *
-     * @param array|string $map the value which is supposed to be a imagemap
-     *
-     * @return bool determine whether the valued passed the test or not
-     */
-    public function isEmptyMap($map): bool
-    {
-        $arr = is_array($map) ? $map : $this->map2array($map);
-        return !isset($arr['areas']) || count($arr['areas']) == 0;
     }
 }
