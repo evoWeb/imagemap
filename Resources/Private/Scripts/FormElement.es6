@@ -1,7 +1,7 @@
 define([
 	'jquery',
 	'./AreaEditor'
-], ($, AreaEditor) => {
+], (jQuery, AreaEditor) => {
 	'use strict';
 
 	class FormElement {
@@ -31,7 +31,7 @@ define([
 		areaEditor = null;
 
 		constructor() {
-			this.control = $('.imagemap-control:eq(0)');
+			this.control = jQuery('.imagemap-control:eq(0)');
 			this.image = this.control.find('.image img');
 			this.canvas = this.control.find('.picture');
 
@@ -71,8 +71,8 @@ define([
 		}
 
 		imagemapChangedHandler(event) {
-			let $field = $(event.currentTarget);
-			$.ajax({
+			let $field = jQuery(event.currentTarget);
+			jQuery.ajax({
 				url: this.editorOptions.previewRerenderAjaxUrl,
 				method: 'POST',
 				data: {

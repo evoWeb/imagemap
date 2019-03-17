@@ -6,7 +6,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-define(['jquery', './AreaEditor'], function ($, AreaEditor) {
+define(['jquery', './AreaEditor'], function (jQuery, AreaEditor) {
   'use strict';
 
   var FormElement =
@@ -44,7 +44,7 @@ define(['jquery', './AreaEditor'], function ($, AreaEditor) {
 
       _defineProperty(this, "areaEditor", null);
 
-      this.control = $('.imagemap-control:eq(0)');
+      this.control = jQuery('.imagemap-control:eq(0)');
       this.image = this.control.find('.image img');
       this.canvas = this.control.find('.picture');
       this.initialize();
@@ -91,8 +91,8 @@ define(['jquery', './AreaEditor'], function ($, AreaEditor) {
       value: function imagemapChangedHandler(event) {
         var _this = this;
 
-        var $field = $(event.currentTarget);
-        $.ajax({
+        var $field = jQuery(event.currentTarget);
+        jQuery.ajax({
           url: this.editorOptions.previewRerenderAjaxUrl,
           method: 'POST',
           data: {

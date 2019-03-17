@@ -107,7 +107,7 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
                     'value' => htmlspecialchars($data->getCurrentData()),
                     'name' => $this->data['parameterArray']['itemFormElName'],
                     'id' => 'imagemap' . GeneralUtility::shortMD5(rand(1, 100000)),
-                    'existingAreas' => json_encode($data->getAreas()),
+                    'existingAreas' => \json_encode($data->getMap()),
                 ]
             ],
             'thumbnailScale' => $data->getThumbnailScale('previewImageMaxWH', 400),

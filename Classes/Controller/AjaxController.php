@@ -51,9 +51,9 @@ class AjaxController
 
             $content = '';
             if ($data->hasValidImageFile()) {
-                $content = $data->getAreas();
+                $content = \json_encode($data->getMap());
             }
-            $response->getBody()->write(json_encode($content));
+            $response->getBody()->write($content);
         } catch (\Exception $e) {
         }
 
@@ -92,7 +92,7 @@ class AjaxController
 
         $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
         $response = new Response('php://temp', 200, ['Content-Type' => 'application/json; charset=utf-8']);
-        $response->getBody()->write(json_encode([
+        $response->getBody()->write(\json_encode([
             'url' => (string)$uriBuilder->buildUriFromRoute('wizard_link', $linkParameters)
         ]));
 

@@ -67,11 +67,11 @@ class ModalController
             $formName = 'imagemap' . GeneralUtility::shortMD5(rand(1, 100000));
             $this->templateView
                 ->assign('parameters', $parameters)
-                ->assign('configuration', json_encode($this->getConfiguration($parameters, $data, $formName)))
+                ->assign('configuration', \json_encode($this->getConfiguration($parameters, $data, $formName)))
                 ->assign('data', $data)
                 ->assign('scaleFactor', $data->getEnvironment()->getExtConfValue('imageMaxWH', 800) / 1000)
                 ->assign('formName', $formName);
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
         }
 
         $response = new Response;
@@ -91,28 +91,11 @@ class ModalController
             'pid' => $data->getRow()['pid'],
         ];
 
-        $existingAreas = [];
-        foreach ($data->getMap()['areas'] ?? [] as $area) {
-            $attributes = $area['attributes'];
-            $existingArea = [
-                'link' => $area['value'],
-                'shape' => $attributes['shape'],
-                'coords' => $attributes['coords'],
-                'alt' => $attributes['alt'],
-                'color' => $attributes['color'],
-                'attributes' => []
-            ];
-            foreach ($data->getAttributeKeys() as $key) {
-                $existingArea['attributes'][$key] = $attributes[$key];
-            }
-            $existingAreas[] = $existingArea;
-        }
-
         return [
             'formName' => $formName,
             'itemName' => $parameters['itemName'],
             'fieldChangeFunc' => $parameters['fieldChangeFunc'] ?? [],
-            'existingAreas' => $existingAreas,
+            'existingAreas' => $data->getMap(),
             'browseLink' => $browseLinkConfiguration
         ];
     }

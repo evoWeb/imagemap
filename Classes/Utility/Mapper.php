@@ -38,85 +38,6 @@ class Mapper
     }
 
     /**
-     * Convert XML into an array, keep attributes, values etc,
-     * is limited to one level (no recursion) since this is enough for the image maps
-     *
-     * @param string $value the XML-map
-     * @param string $baseTag the Root-Tag of the resulting Array
-     *
-     * @return array transformed Array keys:
-     *  'name' string tag name
-     *  'value' string tag value
-     *  'attributes' array with attributes
-     *  'areas' array with child nodes
-     */
-    public function map2array($value, $baseTag = 'map'): array
-    {
-        $result = ['name' => $baseTag];
-
-        if (!is_string($value) || !strlen($value)) {
-            $value = '<map></map>';
-        }
-        if (!($xml = @simplexml_load_string($value))) {
-            return $result;
-        }
-        if (!($xml->getName() == $baseTag)) {
-            return $result;
-        }
-        if ($this->nodeHasAttributes($xml)) {
-            $result['attributes'] = $this->getAttributesFromXMLNode($xml);
-        }
-
-        $result['areas'] = [];
-        foreach ($xml->children() as $subNode) {
-            $newChild = [];
-            $newChild['name'] = $subNode->getName();
-            if ((string)$subNode) {
-                $newChild['value'] = (string)$subNode;
-            }
-            if ($this->nodeHasAttributes($subNode)) {
-                $newChild['attributes'] = $this->getAttributesFromXMLNode($subNode);
-            }
-            $result['areas'][] = $newChild;
-        }
-        if (!count($result['areas'])) {
-            unset($result['areas']);
-        }
-        return $result;
-    }
-
-    /**
-     * Convert a PHP-Array into a XML-Structure
-     *
-     * @param array $value a Array which uses the same notation as described above
-     * @param int $level counting the current level for recursion...
-     *
-     * @return string XML-String
-     */
-    public function array2map(array $value, int $level = 0): string
-    {
-        if ($level == 0 && (!isset($value['name']) || !$value['name'])) {
-            $value['name'] = 'map';
-        }
-
-        if ((!isset($value['areas']) || !$value['areas']) && (!isset($value['value']) || !$value['value'])) {
-            $result = '<' . $value['name'] . $this->implodeXMLAttributes($value['attributes'] ?? []) . ' />';
-        } else {
-            $result = '<' . $value['name'] . $this->implodeXMLAttributes($value['attributes'] ?? []) . '>';
-            if (isset($value['areas']) && is_array($value['areas'])) {
-                foreach ($value['areas'] as $subNode) {
-                    $result .= $this->array2map($subNode, $level + 1);
-                }
-            }
-            if (isset($value['value'])) {
-                $result .= $value['value'];
-            }
-            $result .= '</' . $value['name'] . '>';
-        }
-        return $result;
-    }
-
-    /**
      * compare two maps
      *
      * @param string $map1 first imagemap
@@ -127,8 +48,8 @@ class Mapper
     public function compareMaps(string $map1, string $map2): bool
     {
         return $this->arraysMatch(
-            $this->map2array($map1),
-            $this->map2array($map2)
+            \json_decode($map1),
+            \json_decode($map2)
         );
     }
 

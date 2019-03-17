@@ -28,7 +28,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
-define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.minicolors'], function ($, fabric) {
+define(['jquery', './Fabric', 'TYPO3/CMS/Core/Contrib/jquery.minicolors'], function (jQuery, fabric) {
   // needed to access top frame elements
   var d = top.document || document,
       w = top.window || window;
@@ -142,7 +142,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
     }, {
       key: "initializeColorPicker",
       value: function initializeColorPicker() {
-        $(this.getElement('.t3js-color-picker')).minicolors({
+        jQuery(this.getElement('.t3js-color-picker')).minicolors({
           format: 'hex',
           position: 'left',
           theme: 'default',
@@ -296,9 +296,18 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
         this.getElement(selector).classList.remove('hide');
       }
     }, {
-      key: "toAreaXml",
-      value: function toAreaXml() {
-        return ['<area shape="' + this.name + '"', ' coords="' + this.getAreaCoords() + '"', this.getAdditionalAttributes() + '>', this.getLink(), '</area>'].join('');
+      key: "getMapData",
+      value: function getMapData() {
+        var area = {
+          shape: this.name,
+          coords: this.getAreaCoords(),
+          link: this.getLink()
+        },
+            attributes = this.getAdditionalAttributes();
+        Object.keys(attributes).forEach(function (key) {
+          area[key] = attributes[key];
+        });
+        return area;
       }
     }, {
       key: "getAreaCoords",
@@ -306,13 +315,13 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
     }, {
       key: "getAdditionalAttributes",
       value: function getAdditionalAttributes() {
-        var result = [];
+        var result = {};
         this.getElements('.t3js-field').forEach(function (field) {
           if (!field.classList.contains('ignored-attribute')) {
-            result.push(field.id + '="' + field.value + '"');
+            result[field.id] = field.value;
           }
         });
-        return (result.length > 0 ? ' ' : '') + result.join(' ');
+        return result;
       }
     }, {
       key: "getLink",
@@ -946,7 +955,7 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
           currentValue: area.getLink()
         });
 
-        $.ajax({
+        jQuery.ajax({
           url: this.editor.browseLinkUrlAjaxUrl,
           context: area,
           data: data
@@ -1272,14 +1281,13 @@ define(['jquery', 'TYPO3/CMS/Imagemap/Fabric', 'TYPO3/CMS/Core/Contrib/jquery.mi
         this.canvas.remove(area);
       }
     }, {
-      key: "toAreaXml",
-      value: function toAreaXml() {
-        var xml = ['<map>'];
+      key: "getMapData",
+      value: function getMapData() {
+        var areas = [];
         this.areas.forEach(function (area) {
-          xml.push(area.toAreaXml());
+          areas.push(area.getMapData());
         });
-        xml.push('</map>');
-        return xml.join("\n");
+        return JSON.stringify(areas);
       }
     }], [{
       key: "getRandomColor",

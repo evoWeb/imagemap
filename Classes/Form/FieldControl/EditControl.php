@@ -67,7 +67,7 @@ class EditControl extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElement
             ],
             'title' => $options['title'] ?? 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.edit',
             'wizardUri' => $this->getWizardUri(),
-            'wizardPayload' => json_encode($this->getWizardPayload($parameterArray)),
+            'wizardPayload' => \json_encode($this->getWizardPayload($parameterArray)),
         ];
 
         $resultArray['requireJsModules'][] = [

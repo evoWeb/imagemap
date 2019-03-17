@@ -75,20 +75,17 @@ class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcess
             $mapName = $mapper->createValidNameAttribute($mapName);
 
             $mapData = $cObj->getData($processorConfiguration['data'], $cObj->data);
-            $mapArray = $mapper->map2array($mapData);
-            if (isset($mapArray['areas']) && count($mapArray['areas'])) {
-                $mapArray['attributes']['name'] = $mapName;
-
+            $mapArray = $mapData ? \json_decode($mapData, true) : [];
+            if (count($mapArray)) {
                 if ($this->getTypoScriptFrontendController()->config['config']['xhtmlDoctype'] !== '') {
                     // remove target attribute to have xhtml-strict output
                     $this->attributes = array_diff($this->attributes, ['target']);
-                    $mapArray['attributes']['id'] = $mapArray['attributes']['name'];
                 }
 
                 $processedData['imageMap'] = $mapArray;
-                $processedData['imageMapName'] = $mapName;
                 $processedData['imageMapAttributes'] = $this->attributes;
             }
+            $processedData['imageMapName'] = $mapName;
         }
         return $processedData;
     }

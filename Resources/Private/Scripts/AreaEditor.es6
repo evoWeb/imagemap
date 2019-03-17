@@ -1,8 +1,8 @@
 define([
 	'jquery',
-	'TYPO3/CMS/Imagemap/Fabric',
+	'./Fabric',
 	'TYPO3/CMS/Core/Contrib/jquery.minicolors'
-], ($, fabric) => {
+], (jQuery, fabric) => {
 	// needed to access top frame elements
 	let d = top.document || document,
 		w = top.window || window;
@@ -97,7 +97,7 @@ define([
 		}
 
 		initializeColorPicker() {
-			$(this.getElement('.t3js-color-picker')).minicolors({
+			jQuery(this.getElement('.t3js-color-picker')).minicolors({
 				format: 'hex',
 				position: 'left',
 				theme: 'default',
@@ -230,29 +230,34 @@ define([
 		}
 
 
-		toAreaXml() {
-			return [
-				'<area shape="' + this.name + '"',
-				' coords="' + this.getAreaCoords() + '"',
-				this.getAdditionalAttributes() + '>',
-				this.getLink(),
-				'</area>'
-			].join('');
+		getMapData() {
+			let area = {
+					shape: this.name,
+					coords: this.getAreaCoords(),
+					link: this.getLink()
+				},
+				attributes = this.getAdditionalAttributes();
+
+			Object.keys(attributes).forEach(function (key) {
+				area[key] = attributes[key];
+			});
+
+			return area;
 		}
 
 		getAreaCoords() {
 		}
 
 		getAdditionalAttributes() {
-			let result = [];
+			let result = {};
 
 			this.getElements('.t3js-field').forEach((field) => {
 				if (!field.classList.contains('ignored-attribute')) {
-					result.push(field.id + '="' + field.value + '"');
+					result[field.id] = field.value;
 				}
 			});
 
-			return (result.length > 0 ? ' ' : '') + result.join(' ');
+			return result;
 		}
 
 		getLink() {
@@ -745,7 +750,7 @@ define([
 				currentValue: area.getLink()
 			};
 
-			$.ajax({
+			jQuery.ajax({
 				url: this.editor.browseLinkUrlAjaxUrl,
 				context: area,
 				data: data
@@ -1035,13 +1040,14 @@ define([
 			this.canvas.remove(area);
 		}
 
-		toAreaXml() {
-			let xml = ['<map>'];
+		getMapData() {
+			let areas = [];
+
 			this.areas.forEach((area) => {
-				xml.push(area.toAreaXml());
+				areas.push(area.getMapData());
 			});
-			xml.push('</map>');
-			return xml.join("\n");
+
+			return JSON.stringify(areas);
 		}
 
 		static getRandomColor(color) {

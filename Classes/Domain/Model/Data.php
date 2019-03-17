@@ -44,11 +44,6 @@ class Data
     protected $mapField;
 
     /**
-     * @var string
-     */
-    protected $backPath;
-
-    /**
      * @var bool
      */
     protected $modified = false;
@@ -95,7 +90,8 @@ class Data
         $this->liveRow = $this->row;
         \TYPO3\CMS\Backend\Utility\BackendUtility::fixVersioningPid($table, $this->liveRow);
 
-        $this->map = $this->mapper->map2array($this->getFieldValue($field));
+        $value = $this->getFieldValue($field);
+        $this->map = $value ? \json_decode($value) : [];
     }
 
     /**
@@ -231,27 +227,6 @@ class Data
         return (float)$result;
     }
 
-    public function getAreas(): array
-    {
-        $result = [];
-        if (is_array($this->map['areas'])) {
-            foreach ($this->map['areas'] as $area) {
-                $attributes = $area['attributes'];
-                $markers = [
-                    'shape' => $attributes['shape'],
-                    'coords' => $attributes['coords'],
-                    'alt' => $this->convertToAttributeValue($attributes['alt']),
-                    'link' => isset($area['value']) ? $this->convertToAttributeValue($area['value']) : '',
-                    'color' => $this->convertToAttributeValue($attributes['color']),
-                    'attributes' => $this->listAttributesAsSet($area),
-                ];
-
-                $result[] = $markers;
-            }
-        }
-        return $result;
-    }
-
     protected function listAttributesAsSet(array $area): array
     {
         $attributeKeys = $this->getAttributeKeys();
@@ -311,8 +286,9 @@ class Data
     public function setMap(string $map)
     {
         if (is_string($map)) {
-            $this->mapper->map2array($map);
+            $map = \json_decode($map);
         }
+        $this->map = $map;
     }
 
     public function getRow(): array

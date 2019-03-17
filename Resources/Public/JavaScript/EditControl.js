@@ -285,7 +285,7 @@ define(['jquery', './AreaEditor', 'TYPO3/CMS/Backend/Icons', 'TYPO3/CMS/Backend/
         event.stopPropagation();
         event.preventDefault();
         var hiddenField = $("input[name=\"".concat(this.configuration.itemName, "\"]"));
-        hiddenField.val(this.areaEditor.toAreaXml()).trigger('imagemap:changed');
+        hiddenField.val(this.areaEditor.getMapData()).trigger('imagemap:changed');
         FormEngineValidation.markFieldAsChanged(hiddenField);
         this.currentModal.modal('hide');
       }
