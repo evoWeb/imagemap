@@ -34,7 +34,7 @@ class ModalController
 
         if (!$templateView) {
             $templateView = GeneralUtility::makeInstance(StandaloneView::class);
-            $templateView->setTemplate('Imagemap/Modal');
+            $templateView->setTemplate('FormEngine/Modal');
             $templateView->setTemplateRootPaths(['EXT:imagemap/Resources/Private/Templates/']);
         }
         $this->templateView = $templateView;

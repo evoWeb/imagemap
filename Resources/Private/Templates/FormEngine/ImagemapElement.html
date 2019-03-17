@@ -1,0 +1,42 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
+
+<div class="formengine-field-item t3js-formengine-field-item">
+
+	<div class="form-control-wrap imagemap-control">
+		<div class="form-wizards-wrap">
+			<div class="form-wizards-element pictureWrap" id="{formEngine.field.id}">
+				<div id="{formEngine.field.id}-canvas" class="picture"
+						 data-thumbnail-scale="{thumbnailScale}"
+						 data-existing-areas='{formEngine.field.existingAreas}'>
+					<div class="image">{thumbnail -> f:format.raw()}</div>
+					<canvas id="canvas" class="canvas"></canvas>
+					<div class="modifiedState alert alert-warning">
+						<div class="media">
+							<div class="media-left">
+								<span class="fa-stack fa-lg">
+									<span class="fa fa-circle fa-stack-2x"></span>
+									<span class="fa fa-exclamation fa-stack-1x"></span>
+								</span>
+							</div>
+							<div class="media-body">
+								<f:translate id="imagemap.element.is_modified" extensionName="imagemap"/>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		<f:if condition="{fieldControlHtml}">
+			<div class="form-wizards-items-aside">
+				<div class="btn-group">{fieldControlHtml -> f:format.raw()}</div>
+			</div>
+		</f:if>
+		<f:if condition="{fieldWizardHtml}">
+			<div class="form-wizards-items-bottom">{fieldWizardHtml -> f:format.raw()}</div>
+		</f:if>
+		</div>
+		<input type="hidden" name="{formEngine.field.name}" value="{formEngine.field.value}" />
+	</div>
+
+</div>
+
+</html>

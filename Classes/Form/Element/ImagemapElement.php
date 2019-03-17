@@ -43,6 +43,20 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
         ],
     ];
 
+    /**
+     * @var \TYPO3\CMS\Fluid\View\StandaloneView
+     */
+    protected $templateView;
+
+    public function __construct(\TYPO3\CMS\Backend\Form\NodeFactory $nodeFactory, array $data)
+    {
+        parent::__construct($nodeFactory, $data);
+
+        $this->templateView = GeneralUtility::makeInstance(\TYPO3\CMS\Fluid\View\StandaloneView::class);
+        $this->templateView->setTemplate('FormEngine/ImagemapElement');
+        $this->templateView->setTemplateRootPaths(['EXT:imagemap/Resources/Private/Templates/']);
+    }
+
     public function render(): array
     {
         $this->getBackendUser()->setAndSaveSessionData('imagemap.value', null);
@@ -88,50 +102,24 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
         $fieldWizardHtml = $fieldWizardResult['html'];
         $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldWizardResult, false);
 
-        $mainFieldHtml = [];
-        $mainFieldHtml[] = '<div class="form-control-wrap imagemap-control">';
-        $mainFieldHtml[] =    '<div class="form-wizards-wrap">';
-        $mainFieldHtml[] =      '<div class="form-wizards-element pictureWrap" id="' . $id . '">';
-        $mainFieldHtml[] =        '<div id="' . $id . '-canvas" class="picture" data-thumbnail-scale="';
-        $mainFieldHtml[] =          $data->getThumbnailScale('previewImageMaxWH', 400);
-        $mainFieldHtml[] =          '" data-existing-areas=\'' . $existingAreas . '\'>';
-        $mainFieldHtml[] =          '<div class="image">';
-        $mainFieldHtml[] =            $data->renderThumbnail('previewImageMaxWH', 400);
-        $mainFieldHtml[] =          '</div>';
-        $mainFieldHtml[] =          '<canvas id="canvas" class="canvas"></canvas>';
-        $mainFieldHtml[] =          '<div class="modifiedState alert alert-warning"><div class="media">';
-        $mainFieldHtml[] =              '<div class="media-left"><span class="fa-stack fa-lg">';
-        $mainFieldHtml[] =                  '<i class="fa fa-circle fa-stack-2x"></i>';
-        $mainFieldHtml[] =                  '<i class="fa fa-exclamation fa-stack-1x"></i>';
-        $mainFieldHtml[] =              '</span></div>';
-        $mainFieldHtml[] =              '<div class="media-body">';
-        $mainFieldHtml[] =              $this->getLanguageService()->sL(
-            'LLL:EXT:imagemap/Resources/Private/Language/locallang.xlf:imagemap.element.is_modified'
-        );
-        $mainFieldHtml[] =          '</div></div></div>';
-        $mainFieldHtml[] =        '</div>';
-        $mainFieldHtml[] =      '</div>';
-        if (!empty($fieldControlHtml)) {
-            $mainFieldHtml[] =      '<div class="form-wizards-items-aside">';
-            $mainFieldHtml[] =          '<div class="btn-group">';
-            $mainFieldHtml[] =              $fieldControlHtml;
-            $mainFieldHtml[] =          '</div>';
-            $mainFieldHtml[] =      '</div>';
-        }
-        if (!empty($fieldWizardHtml)) {
-            $mainFieldHtml[] = '<div class="form-wizards-items-bottom">';
-            $mainFieldHtml[] =     $fieldWizardHtml;
-            $mainFieldHtml[] = '</div>';
-        }
-        $mainFieldHtml[] =    '</div>';
-        $mainFieldHtml[] =  '<input type="hidden" 
-            name="' . $this->data['parameterArray']['itemFormElName'] . '" 
-            value="' . htmlspecialchars($data->getCurrentData()) . '" />';
-        $mainFieldHtml[] = '</div>';
+        $arguments = [
+            'formEngine' => [
+                'field' => [
+                    'value' => htmlspecialchars($data->getCurrentData()),
+                    'name' => $this->data['parameterArray']['itemFormElName'],
+                    'id' => $id,
+                    'existingAreas' => $existingAreas,
+                ]
+            ],
+            'thumbnailScale' => $data->getThumbnailScale('previewImageMaxWH', 400),
+            'thumbnail' => $data->renderThumbnail('previewImageMaxWH', 400),
+            'fieldControlHtml' => $fieldControlHtml,
+            'fieldWizardHtml' => $fieldWizardHtml,
+        ];
 
-        $html = implode(LF, $mainFieldHtml);
+        $this->templateView->assignMultiple($arguments);
+        $resultArray['html'] = $this->templateView->render();
 
-        $resultArray['html'] = '<div class="formengine-field-item t3js-formengine-field-item">' . $html . '</div>';
         return $resultArray;
     }
 
