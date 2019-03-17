@@ -10,10 +10,6 @@
 Users manual
 ============
 
-.. contents::
-   :local:
-   :depth: 1
-
 
 Create new elements:
 --------------------
