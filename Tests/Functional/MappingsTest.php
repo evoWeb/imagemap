@@ -75,12 +75,12 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
 
         $this->assertEquals(
             true,
-            $this->mapper->compareMaps($map1, $map1),
+            $this->mapper->compareJsonEncodedAreas($map1, $map1),
             'Equal maps are not recognized when compared...'
         );
         $this->assertEquals(
             false,
-            $this->mapper->compareMaps($map1, $map2),
+            $this->mapper->compareJsonEncodedAreas($map1, $map2),
             'Different maps are not recognized when compared...'
         );
     }
@@ -95,7 +95,7 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
 
         $this->assertEquals(
             true,
-            $this->mapper->compareMaps($map1, $map2),
+            $this->mapper->compareJsonEncodedAreas($map1, $map2),
             'Equal maps are not recognized when compared...'
         );
     }
@@ -111,17 +111,17 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
 
         $this->assertEquals(
             false,
-            $this->mapper->compareMaps($map1, $map2),
+            $this->mapper->compareJsonEncodedAreas($map1, $map2),
             'Different structured maps are not processed as supposed'
         );
         $this->assertEquals(
             false,
-            $this->mapper->compareMaps($map1, $map3),
+            $this->mapper->compareJsonEncodedAreas($map1, $map3),
             'Different structured maps are not processed as supposed'
         );
         $this->assertEquals(
             false,
-            $this->mapper->compareMaps($map2, $map3),
+            $this->mapper->compareJsonEncodedAreas($map2, $map3),
             'Different structured maps are not processed as supposed'
         );
     }

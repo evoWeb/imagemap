@@ -45,7 +45,7 @@ class Mapper
      *
      * @return bool determines whether the maps match or not
      */
-    public function compareMaps(string $map1, string $map2): bool
+    public function compareJsonEncodedAreas(string $map1, string $map2): bool
     {
         return $this->arraysMatch(\json_decode($map1, true), \json_decode($map2, true));
     }

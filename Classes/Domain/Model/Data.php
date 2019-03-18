@@ -85,7 +85,7 @@ class Data
 
         $this->row = \TYPO3\CMS\Backend\Utility\BackendUtility::getRecordWSOL($table, $uid);
         if ($currentValue) {
-            $this->useCurrentData($currentValue);
+            $this->setCurrentData($currentValue);
         }
         $this->liveRow = $this->row;
         \TYPO3\CMS\Backend\Utility\BackendUtility::fixVersioningPid($table, $this->liveRow);
@@ -160,7 +160,7 @@ class Data
         // extract the image
         $matches = [];
         if (!preg_match('/(<img[^>]+usemap="#[^"]+"[^>]*\/>)/', $result, $matches)) {
-            return 'No Image rendered from TSFE. :(<br/>Error was:' . $environment->getLastError();
+            return 'No image with usemap rendered in frontend. :(<br/>Error was:' . $environment->getLastError();
         }
         $result = str_replace('src="', 'src="' . $environment->getBackPath(), $matches[1]);
         return $result;
@@ -227,40 +227,6 @@ class Data
         return (float)$result;
     }
 
-    protected function listAttributesAsSet(array $area): array
-    {
-        $attributeKeys = $this->getAttributeKeys();
-        $result = [];
-        foreach ($attributeKeys as $key) {
-            $result[$key] = $this->convertToAttributeValue(
-                isset($area['attributes'][$key]) ? $area['attributes'][$key] : ''
-            );
-        }
-        return $result;
-    }
-
-    protected function convertToAttributeValue(string $value): string
-    {
-        $attribute = preg_replace(
-            '/([^\\\\])\\\\\\\\\'/',
-            '\1\\\\\\\\\\\'',
-            str_replace('\'', '\\\'', $value)
-        );
-
-        return $attribute;
-    }
-
-    public function getAttributeKeys(): array
-    {
-        $keys = GeneralUtility::trimExplode(
-            ',',
-            $this->getEnvironment()->getExtConfValue('additionalAttributes', '')
-        );
-        $keys = array_diff($keys, ['alt', 'href', 'shape', 'coords']);
-        $keys = array_map('strtolower', $keys);
-        return array_filter($keys);
-    }
-
     protected function getLivePid(): int
     {
         return (int)($this->row['pid'] > 0 ? $this->row['pid'] : $this->liveRow['pid']);
@@ -273,7 +239,7 @@ class Data
             $this->row['t3ver_oid'];
     }
 
-    protected function determineImageFieldName(): string
+    public function determineImageFieldName(): string
     {
         return $this->getFieldConf('config/userImage/field') ?? 'image';
     }
@@ -299,12 +265,8 @@ class Data
     /**
      * @param mixed $value
      */
-    protected function useCurrentData($value)
+    protected function setCurrentData($value)
     {
-        if (!$this->mapper->compareMaps($this->getCurrentData(), $value)) {
-            $this->modified = true;
-        }
-
         $this->row[$this->mapField] = $value;
     }
 
@@ -314,11 +276,6 @@ class Data
     public function getCurrentData()
     {
         return $this->row[$this->mapField];
-    }
-
-    public function isModified(): bool
-    {
-        return $this->modified;
     }
 
     public function setFieldConf(array $fieldConf)
