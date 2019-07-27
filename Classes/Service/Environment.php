@@ -162,10 +162,16 @@ class Environment
      */
     public function getBackPath(): string
     {
+        $path = class_exists('TYPO3\\CMS\\Core\\Core\\Environment') ?
+            (\TYPO3\CMS\Core\Core\Environment::getPublicPath() . '/') :
+            PATH_site;
+        $scriptPath = class_exists('TYPO3\\CMS\\Core\\Core\\Environment') ?
+            (\TYPO3\CMS\Core\Core\Environment::getCurrentScript() . '/') :
+            PATH_thisScript;
         return preg_replace(
-            '/([^\/]+)\//',
+            '@([^/]+)/@',
             '..',
-            str_replace([PATH_site, basename(PATH_thisScript)], ['', ''], PATH_thisScript)
+            str_replace([$path, basename($scriptPath)], ['', ''], $scriptPath)
         );
     }
 

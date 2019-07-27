@@ -149,7 +149,10 @@ class Data
         $environment->initializeTSFE($this->getLivePid());
         // render like in FE with WS-preview etc...
         $environment->pushEnvironment();
-        $environment->prepareEnvironment(PATH_site);
+        $path = class_exists('TYPO3\\CMS\\Core\\Core\\Environment') ?
+            (\TYPO3\CMS\Core\Core\Environment::getPublicPath() . '/') :
+            PATH_site;
+        $environment->prepareEnvironment($path);
         $environment->resetEnableColumns('pages');
         $environment->resetEnableColumns($this->table);
 
@@ -159,7 +162,7 @@ class Data
 
         // extract the image
         $matches = [];
-        if (!preg_match('/(<img[^>]+usemap="#[^"]+"[^>]*\/>)/', $result, $matches)) {
+        if (!preg_match('@(<img[^>]+usemap="#[^"]+"[^>]*/>)@', $result, $matches)) {
             return 'No image with usemap rendered in frontend. :(<br/>Error was:' . $environment->getLastError();
         }
         $result = str_replace('src="', 'src="' . $environment->getBackPath(), $matches[1]);
