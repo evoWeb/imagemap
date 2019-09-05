@@ -17,38 +17,6 @@ namespace Evoweb\Imagemap\DataProcessing;
 class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcessorInterface
 {
     /**
-     * @var array
-     */
-    protected $attributes = [
-        'shape',
-        'coords',
-        'href',
-        'target',
-        'nohref',
-        'alt',
-        'title',
-        'accesskey',
-        'tabindex',
-        'onfocus',
-        'onblur',
-        'id',
-        'class',
-        'style',
-        'lang',
-        'dir',
-        'onclick',
-        'ondblclick',
-        'onmousedown',
-        'onmouseup',
-        'onmouseover',
-        'onmousemove',
-        'onmouseout',
-        'onkeypress',
-        'onkeydown',
-        'onkeyup',
-    ];
-
-    /**
      * Process data of a record to resolve imagemap
      *
      * @param \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer $cObj The data of the content element or page
@@ -65,6 +33,7 @@ class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcess
         array $processedData
     ): array {
         if (!empty($processedData['files'])) {
+            $attributes = $contentObjectConfiguration['variables.']['imageMapAttributes.'] ?? [];
             $mapName = $cObj->cObjGetSingle(
                 $processorConfiguration['name'],
                 $processorConfiguration['name.']
@@ -79,11 +48,11 @@ class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcess
             if (count($mapArray)) {
                 if ($this->getTypoScriptFrontendController()->config['config']['xhtmlDoctype'] !== '') {
                     // remove target attribute to have xhtml-strict output
-                    $this->attributes = array_diff($this->attributes, ['target']);
+                    $attributes = array_diff($attributes, ['target']);
                 }
 
                 $processedData['imageMap'] = $mapArray;
-                $processedData['imageMapAttributes'] = $this->attributes;
+                $processedData['imageMapAttributes'] = $attributes;
             }
             $processedData['imageMapName'] = $mapName;
         }

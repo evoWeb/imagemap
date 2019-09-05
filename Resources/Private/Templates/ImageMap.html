@@ -3,47 +3,73 @@
 			data-namespace-typo3-fluid="true">
 <f:layout name="Default" />
 <f:section name="Main">
-<f:if condition="{gallery.rows}">
-	<f:variable name="column">{gallery.rows.1.columns.1}</f:variable>
+
 	<div class="ce-image ce-{gallery.position.horizontal} ce-{gallery.position.vertical}">
-		<div class="ce-gallery{f:if(condition: data.imageborder, then: ' ce-border')}" data-ce-columns="{gallery.count.columns}" data-ce-images="{gallery.count.files}">
-		<f:if condition="{gallery.position.horizontal} == 'center'">
-			<div class="ce-outer">
-				<div class="ce-inner">
-		</f:if>
-					<div class="ce-row">
-						<div class="ce-column">
-							<figure class="image">
-								<f:image image="{column.media}"
-												 width="{column.dimensions.width}"
-												 height="{column.dimensions.height}"
-												 alt="{column.media.alternative}"
-												 title="{column.media.title}"
-												 usemap="#{imageMapName}"
-												 class="image-embed-item"/>
-								<f:if condition="{imageMap}">
-									<map name="{imageMapName}">
-									<f:for each="{imageMap}" as="area"><area href="{f:uri.typolink(parameter: area.link)}" {f:render(section: "area", arguments: "{_all}")}></f:for>
-									</map>
-								</f:if>
-								<f:if condition="{column.media.description}">
-									<figcaption class="image-caption">
-										{column.media.description}
-									</figcaption>
-								</f:if>
-							</figure>
-						</div>
-					</div>
-		<f:if condition="{gallery.position.horizontal} == 'center'">
+	<f:if condition="{gallery.rows}">
+		<f:variable name="column">{gallery.rows.1.columns.1}</f:variable>
+		<f:variable name="file">{column.media}</f:variable>
+		<f:variable name="dimensions">{column.dimensions}</f:variable>
+
+		<f:variable name="row">
+			<div class="ce-row">
+				<div class="ce-column">
+					<figure class="image">
+						<f:if condition="{imageMap}">
+						<f:then>
+						<f:media class="image-embed-item"
+										 file="{file}"
+										 width="{dimensions.width}"
+										 height="{dimensions.height}"
+										 alt="{file.alternative}"
+										 title="{file.title}"
+										 additionalAttributes="{usemap: '#{imageMapName}'}"/>
+						</f:then>
+						<f:else>
+						<f:media class="image-embed-item"
+										 file="{file}"
+										 width="{dimensions.width}"
+										 height="{dimensions.height}"
+										 alt="{file.alternative}"
+										 title="{file.title}"/>
+						</f:else>
+						</f:if>
+						<f:if condition="{file.description}">
+						<figcaption class="image-caption">
+							{file.description}
+						</figcaption>
+						</f:if>
+					</figure>
+					<f:if condition="{imageMap}"><f:spaceless>
+						<map name="{imageMapName}">
+							<f:for each="{imageMap}" as="area">
+								<area href="{f:uri.typolink(parameter: area.link)}" {f:render(section: "attributes", arguments: "{_all}")}>
+							</f:for>
+						</map>
+					</f:spaceless></f:if>
 				</div>
 			</div>
+		</f:variable>
+
+		<div class="ce-gallery{f:if(condition: data.imageborder, then: ' ce-border')}" data-ce-columns="{gallery.count.columns}" data-ce-images="{gallery.count.files}">
+		<f:if condition="{gallery.position.horizontal} == 'center'">
+			<f:then>
+			<div class="ce-outer">
+				<div class="ce-inner">
+					{row -> f:format.raw()}
+				</div>
+			</div>
+			</f:then>
+			<f:else>
+			{row -> f:format.raw()}
+			</f:else>
 		</f:if>
 		</div>
+	</f:if>
 	</div>
-</f:if>
+
 </f:section>
 
-<f:section name="area"><f:for each="{area}" as="value" key="attribute"><f:if condition="{attribute} == 'link'"><f:else> <f:if condition="{i:inArray(haystack: imageMapAttributes, needle: attribute)}"><f:else>data-</f:else></f:if>{attribute}="{value}"</f:else></f:if></f:for></f:section>
-<f:section name="areao"><f:for each="{imageMapAttributes}" as="attribute"><f:if condition="{area.attributes.{attribute}}"> {attribute}="{area.attributes.{attribute}}"</f:if></f:for></f:section>
+<f:section name="attributes"><f:for each="{area}" as="value" key="attribute">
+	<f:if condition="{attribute} == 'link'"><f:else> <f:if condition="{i:inArray(haystack: imageMapAttributes, needle: attribute)}"><f:else>data-</f:else></f:if>{attribute}="{value}"</f:else></f:if></f:for></f:section>
 
 </html>

@@ -4,6 +4,35 @@ tt_content.imagemap {
 
   templateName = ImageMap
 
+  variables.imageMapAttributes {
+    1 = shape
+    2 = coords
+    3 = href
+    4 = target
+    5 = nohref
+    6 = alt
+    7 = title
+    8 = accesskey
+    9 = tabindex
+    10 = onfocus
+    11 = onblur
+    12 = id
+    13 = class
+    14 = style
+    15 = lang
+    16 = dir
+    17 = onclick
+    18 = ondblclick
+    19 = onmousedown
+    20 = onmouseup
+    21 = onmouseover
+    22 = onmousemove
+    23 = onmouseout
+    24 = onkeypress
+    25 = onkeydown
+    26 = onkeyup
+  }
+
   dataProcessing {
     30 = Evoweb\Imagemap\DataProcessing\ImagemapProcessor
     30 {
