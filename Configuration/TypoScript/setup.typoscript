@@ -51,9 +51,4 @@ tt_content.imagemap {
       }
     }
   }
-
-  imgMax = 1
-  maxW >
-  1.imageLinkWrap >
-  1.params = usemap="####IMAGEMAP_USEMAP###"
 }

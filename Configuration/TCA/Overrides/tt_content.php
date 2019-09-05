@@ -26,7 +26,7 @@ $tempColumns = [
                     ]
                 ],
             ],
-            'softref' => 'tx_imagemap_softrefparser',
+            'softref' => 'imagemap',
         ],
     ],
 ];

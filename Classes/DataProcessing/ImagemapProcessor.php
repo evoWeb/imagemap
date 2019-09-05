@@ -1,5 +1,6 @@
 <?php
 declare(strict_types = 1);
+namespace Evoweb\Imagemap\DataProcessing;
 
 /**
  * This file is developed by evoWeb.
@@ -11,8 +12,6 @@ declare(strict_types = 1);
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-
-namespace Evoweb\Imagemap\DataProcessing;
 
 class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcessorInterface
 {
@@ -59,12 +58,7 @@ class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcess
         return $processedData;
     }
 
-    /**
-     * Returns global frontend controller
-     *
-     * @return \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController|null
-     */
-    protected function getTypoScriptFrontendController()
+    protected function getTypoScriptFrontendController():? \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController
     {
         return $GLOBALS['TSFE'] ?? null;
     }

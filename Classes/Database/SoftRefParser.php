@@ -1,5 +1,6 @@
 <?php
 declare(strict_types = 1);
+namespace Evoweb\Imagemap\Database;
 
 /**
  * This file is developed by evoWeb.
@@ -11,8 +12,6 @@ declare(strict_types = 1);
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-
-namespace Evoweb\Imagemap\Database;
 
 class SoftRefParser extends \TYPO3\CMS\Core\Database\SoftReferenceIndex
 {
@@ -30,7 +29,7 @@ class SoftRefParser extends \TYPO3\CMS\Core\Database\SoftReferenceIndex
      *
      * @return array the Array which describes what references we found and where ...
      */
-    public function findRef($table, $field, $uid, $content, $spKey, $spParams, $structurePath = ''): array
+    public function findRef($table, $field, $uid, $content, $spKey, $spParams, $structurePath = '')
     {
         $this->tokenID_basePrefix = $table . ':' . $uid . ':' . $field . ':' . $structurePath . ':' . $spKey;
 
@@ -58,10 +57,10 @@ class SoftRefParser extends \TYPO3\CMS\Core\Database\SoftReferenceIndex
             reset($data['areas']);
         }
 
-        $resultArray = [
+        $retVal = [
             'content' => \json_encode($data),
             'elements' => $elements
         ];
-        return $resultArray;
+        return $retVal;
     }
 }
