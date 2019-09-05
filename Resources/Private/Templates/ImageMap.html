@@ -42,7 +42,7 @@
 					<f:if condition="{imageMap}"><f:spaceless>
 						<map name="{imageMapName}">
 							<f:for each="{imageMap}" as="area">
-								<area href="{f:uri.typolink(parameter: area.link)}" {f:render(section: "attributes", arguments: "{_all}")}>
+								<area href="{f:uri.typolink(parameter: area.link)}" {f:render(section: "attributes", arguments: {attributes: area.attributes})}>
 							</f:for>
 						</map>
 					</f:spaceless></f:if>
@@ -69,7 +69,6 @@
 
 </f:section>
 
-<f:section name="attributes"><f:for each="{area}" as="value" key="attribute">
-	<f:if condition="{attribute} == 'link'"><f:else> <f:if condition="{i:inArray(haystack: imageMapAttributes, needle: attribute)}"><f:else>data-</f:else></f:if>{attribute}="{value}"</f:else></f:if></f:for></f:section>
+<f:section name="attributes"><f:for each="{attributes}" as="value" key="attribute"> {attribute}="{value}"</f:for></f:section>
 
 </html>
