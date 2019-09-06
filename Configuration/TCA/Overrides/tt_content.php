@@ -12,6 +12,15 @@ $GLOBALS['TCA']['tt_content']['ctrl']['typeicon_classes']['imagemap'] = 'extensi
     ]
 );
 
+$GLOBALS['TCA']['tt_content']['types']['imagemap'] = $GLOBALS['TCA']['tt_content']['types']['image'];
+$GLOBALS['TCA']['tt_content']['types']['imagemap']['columnsOverrides'] = [
+    'image' => [
+        'config' => [
+            'maxitems' => 1,
+        ]
+    ]
+];
+
 $tempColumns = [
     'tx_imagemap_links' => [
         'label' => 'LLL:EXT:imagemap/Resources/Private/Language/locallang.xlf:tt_content.tx_imagemap_links',
@@ -25,7 +34,6 @@ $tempColumns = [
 ];
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns('tt_content', $tempColumns);
 
-$GLOBALS['TCA']['tt_content']['types']['imagemap'] = $GLOBALS['TCA']['tt_content']['types']['image'];
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addToAllTCAtypes(
     'tt_content',
     'tx_imagemap_links',
