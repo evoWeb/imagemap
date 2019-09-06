@@ -31,17 +31,25 @@ call_user_func(function () {
         );
     }
 
-    $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['typo3/backend.php']['renderPreProcess'][] =
-        \Evoweb\Imagemap\Hook\CssLoader::class . '->addCssFile';
+    /** @var \TYPO3\CMS\Extbase\SignalSlot\Dispatcher $signalSlotDispatcher */
+    $signalSlotDispatcher = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+        \TYPO3\CMS\Extbase\SignalSlot\Dispatcher::class
+    );
+    $signalSlotDispatcher->connect(
+        \TYPO3\CMS\Backend\Controller\EditDocumentController::class,
+        'initAfter',
+        \Evoweb\Imagemap\Hook\CssLoader::class,
+        'addCssFile'
+    );
 
     $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1549738969] = [
         'nodeName' => 'imagemap',
-        'priority' => '70',
+        'priority' => 70,
         'class' => \Evoweb\Imagemap\Form\Element\ImagemapElement::class,
     ];
     $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1549819420] = [
-        'nodeName' => 'imagemapPopup',
-        'priority' => '70',
-        'class' => \Evoweb\Imagemap\Form\FieldControl\EditControl::class,
+        'nodeName' => 'imagemapEditControl',
+        'priority' => 70,
+        'class' => \Evoweb\Imagemap\Form\FieldControl\ImagemapEditControl::class,
     ];
 });
