@@ -1,5 +1,6 @@
 <?php
 declare(strict_types = 1);
+namespace Evoweb\Imagemap\Form\Element;
 
 /**
  * This file is developed by evoWeb.
@@ -12,14 +13,53 @@ declare(strict_types = 1);
  * LICENSE.txt file that was distributed with this source code.
  */
 
-namespace Evoweb\Imagemap\Form\Element;
-
-use Evoweb\Imagemap\Domain\Model\Data;
-use TYPO3\CMS\Core\Utility\ArrayUtility;
+use TYPO3\CMS\Backend\Routing\UriBuilder;
+use TYPO3\CMS\Core\Imaging\ImageManipulation\Area;
+use TYPO3\CMS\Core\Imaging\ImageManipulation\CropVariantCollection;
+use TYPO3\CMS\Core\Imaging\ImageManipulation\InvalidConfigurationException;
+use TYPO3\CMS\Core\Resource\File;
+use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\MathUtility;
+use TYPO3\CMS\Core\Utility\StringUtility;
+use TYPO3\CMS\Fluid\View\StandaloneView;
 
 class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElement
 {
+    /**
+     * @var string
+     */
+    private $wizardRouteName = 'imagemap_modal';
+
+    /**
+     * Default element configuration
+     *
+     * @var array
+     */
+    protected static $defaultConfig = [
+        'tableName' => 'tt_content',
+        'fieldName' => 'image',
+        'allowedExtensions' => null, // default: $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext']
+        'mapAreas' => [
+            'default' => [
+             ]
+        ]
+    ];
+
+    /**
+     * Default field controls for this element.
+     *
+     * @var array
+     */
+    protected $oldDefaultFieldControl = [
+        'editControl' => [
+            'renderType' => 'imagemapEditControl',
+            'options' => [
+                'windowOpenParameters' => 'height=700,width=780,status=0,menubar=0,scrollbars=1',
+            ]
+        ],
+    ];
+
     /**
      * Default field wizards enabled for this element.
      *
@@ -44,51 +84,47 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
     ];
 
     /**
-     * @var \TYPO3\CMS\Fluid\View\StandaloneView
+     * @var StandaloneView
      */
     protected $templateView;
+
+    /**
+     * @var UriBuilder
+     */
+    protected $uriBuilder;
 
     public function __construct(\TYPO3\CMS\Backend\Form\NodeFactory $nodeFactory, array $data)
     {
         parent::__construct($nodeFactory, $data);
-
-        $this->templateView = GeneralUtility::makeInstance(\TYPO3\CMS\Fluid\View\StandaloneView::class);
-        $this->templateView->setTemplate('FormEngine/ImagemapElement');
-        $this->templateView->setTemplateRootPaths(['EXT:imagemap/Resources/Private/Templates/']);
+        // Would be great, if we could inject the view here, but since the constructor is in the interface, we can't
+        $this->templateView = GeneralUtility::makeInstance(StandaloneView::class);
+        $this->templateView->setLayoutRootPaths(['EXT:imagemap/Resources/Private/Layouts/']);
+        $this->templateView->setTemplatePathAndFilename(
+            'EXT:imagemap/Resources/Private/Templates/FormEngine/ImagemapElement.html'
+        );
+        $this->uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
     }
 
     public function render(): array
     {
-        $this->getBackendUser()->setAndSaveSessionData('imagemap.value', null);
-
-        /** @var Data $data */
-        $data = GeneralUtility::makeInstance(
-            Data::class,
-            $this->data['tableName'],
-            $this->data['fieldName'],
-            (int)$this->data['databaseRow']['uid'],
-            $this->data['parameterArray']['itemFormElValue']
-        );
-        $data->setFieldConf($this->data['parameterArray']['fieldConf']);
-
         $resultArray = $this->initializeResultArray();
-        if (!$data->hasValidImageFile()) {
+        $parameterArray = $this->data['parameterArray'];
+        $config = $this->populateConfiguration($parameterArray['fieldConf']['config']);
+
+        $file = $this->getFile($this->data['databaseRow'], $config);
+        if (!$file) {
+            // Early return in case we do not find a file
             $resultArray['html'] = $this->getLanguageService()->sL(
                 'LLL:EXT:imagemap/Resources/Private/Language/locallang.xlf:imagemap.element.no_image'
             );
-        } else {
-            $resultArray = $this->renderElementWithControl($resultArray, $data);
+            return $resultArray;
         }
 
-        return $resultArray;
-    }
+        $config = $this->processConfiguration($config, $parameterArray['itemFormElValue'], $file);
 
-    protected function renderElementWithControl(array $resultArray, Data $data): array
-    {
-        $resultArray['requireJsModules'][] = [
-            'TYPO3/CMS/Imagemap/FormElement' => 'function (FormElement) { new FormElement(); }'
-        ];
-        $resultArray['stylesheetFiles']['imagemapElement'] = 'EXT:imagemap/Resources/Public/Stylesheets/imagemap.css';
+        $fieldInformationResult = $this->renderFieldInformation();
+        $fieldInformationHtml = $fieldInformationResult['html'];
+        $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldInformationResult, false);
 
         $fieldControlResult = $this->renderFieldControl();
         $fieldControlHtml = $fieldControlResult['html'];
@@ -99,62 +135,176 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
         $resultArray = $this->mergeChildReturnIntoExistingResult($resultArray, $fieldWizardResult, false);
 
         $arguments = [
+            'fieldInformation' => $fieldInformationHtml,
+            'fieldControl' => $fieldControlHtml,
+            'fieldWizard' => $fieldWizardHtml,
+            'isAllowedFileExtension' => in_array(
+                strtolower($file->getExtension()),
+                GeneralUtility::trimExplode(',', strtolower($config['allowedExtensions'])),
+                true
+            ),
+            'image' => $file,
             'formEngine' => [
                 'field' => [
-                    'tablename' => $this->data['tableName'],
-                    'fieldname' => $this->data['fieldName'],
-                    'uid' => (int)$this->data['databaseRow']['uid'],
-                    'value' => htmlspecialchars($data->getCurrentData()),
-                    'name' => $this->data['parameterArray']['itemFormElName'],
-                    'id' => 'imagemap' . GeneralUtility::shortMD5(rand(1, 100000)),
-                    'existingAreas' => \json_encode($data->getMap()),
-                ]
+                    'value' => htmlspecialchars($this->data['databaseRow'][$this->data['fieldName']]),
+                    'name' => $parameterArray['itemFormElName'],
+                    'existingAreas' => $this->getExistingAreas(),
+                ],
+                'validation' => '[]'
             ],
-            'thumbnailScale' => $data->getThumbnailScale('previewImageMaxWH', 400),
-            'thumbnail' => $data->renderThumbnail('previewImageMaxWH', 400),
-            'fieldControlHtml' => $fieldControlHtml,
-            'fieldWizardHtml' => $fieldWizardHtml,
+            'config' => $config,
+            'wizardUri' => $this->getWizardUri(),
+            'wizardPayload' => \json_encode($this->getWizardPayload($parameterArray)),
+            'previewUrl' => $this->getPreviewUrl($this->data['databaseRow'], $file),
         ];
 
+        if ($arguments['isAllowedFileExtension']) {
+            $resultArray['requireJsModules'][] = [
+                'TYPO3/CMS/Imagemap/FormElement' => 'function (FormElement) { new FormElement(); }'
+            ];
+            $arguments['formEngine']['field']['id'] = StringUtility::getUniqueId('formengine-image-manipulation-');
+            if (GeneralUtility::inList($config['eval'], 'required')) {
+                $arguments['formEngine']['validation'] = $this->getValidationDataAsJsonString(['required' => true]);
+            }
+        }
         $this->templateView->assignMultiple($arguments);
         $resultArray['html'] = $this->templateView->render();
 
         return $resultArray;
     }
 
-    /**
-     * Override field control rendering to have a custom button
-     *
-     * @return array Result array
-     */
-    protected function renderFieldControl(): array
+    protected function getFile(array $row, array $config):? File
     {
-        $options = $this->data;
-        $fieldControl = $this->defaultFieldControl;
-        $fieldControlFromTca = $options['parameterArray']['fieldConf']['config']['fieldControl'] ?? [];
-        ArrayUtility::mergeRecursiveWithOverrule($fieldControl, $fieldControlFromTca);
-        $options['renderType'] = 'imagemapPopup';
-        $options['renderData']['fieldControl'] = $fieldControl;
-        return $this->nodeFactory->create($options)->render();
+        $file = null;
+        $fileUid = !empty($row[$config['fieldName']]) ? $row[$config['fieldName']] : null;
+        if (is_array($fileUid) && isset($fileUid[0]['uid'])) {
+            $fileUid = $fileUid[0]['uid'];
+        }
+        if (MathUtility::canBeInterpretedAsInteger($fileUid)) {
+            try {
+                $file = ResourceFactory::getInstance()->getFileReferenceObject($fileUid)->getOriginalFile();
+            } catch (\InvalidArgumentException $e) {
+            }
+        } else {
+            try {
+                $fileRepository = GeneralUtility::makeInstance(\TYPO3\CMS\Core\Resource\FileRepository::class);
+                $file = $fileRepository->findByRelation(
+                    $config['tableName'],
+                    $config['fieldName'],
+                    $row['uid']
+                )[0];
+            } catch (\Throwable $e) {
+            }
+        }
+        return $file;
+    }
+
+    protected function getPreviewUrl(array $databaseRow, File $file): string
+    {
+        $previewUrl = '';
+        // Hook to generate a preview URL
+        $hookParameters = [
+            'databaseRow' => $databaseRow,
+            'file' => $file,
+            'previewUrl' => $previewUrl,
+        ];
+        $scOptions = $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS'];
+        foreach ($scOptions['Backend/Form/Element/ImageManipulationElement']['previewUrl'] ?? [] as $listener) {
+            $previewUrl = GeneralUtility::callUserFunction($listener, $hookParameters, $this);
+        }
+        return $previewUrl;
     }
 
     /**
-     * Returns an instance of Backend User Authentication
-     *
-     * @return \TYPO3\CMS\Core\Authentication\BackendUserAuthentication|null
+     * @param array $baseConfiguration
+     * @return array
+     * @throws InvalidConfigurationException
      */
-    protected function getBackendUser()
+    protected function populateConfiguration(array $baseConfiguration): array
     {
-        return $GLOBALS['BE_USER'] ?? null;
+        $defaultConfig = self::$defaultConfig;
+
+        // If ratios are set do not add default options
+        if (isset($baseConfiguration['mapAreas'])) {
+            unset($defaultConfig['mapAreas']);
+        }
+
+        $config = array_replace_recursive($defaultConfig, $baseConfiguration);
+
+        if (!is_array($config['mapAreas'])) {
+            throw new InvalidConfigurationException('Map areas configuration must be an array', 1485377267);
+        }
+
+        $mapAreas = [];
+        foreach ($config['mapAreas'] as $id => $cropVariant) {
+            // Ignore disabled crop variants
+            if (!empty($cropVariant['disabled'])) {
+                continue;
+            }
+            // Enforce a crop area (default is full image)
+            if (empty($cropVariant['mapArea'])) {
+                $cropVariant['mapArea'] = Area::createEmpty()->asArray();
+            }
+            $mapAreas[$id] = $cropVariant;
+        }
+
+        $config['mapAreas'] = $mapAreas;
+
+        // By default we allow all image extensions that can be handled by the GFX functionality
+        if ($config['allowedExtensions'] === null) {
+            $config['allowedExtensions'] = $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext'];
+        }
+        return $config;
     }
 
     /**
-     * Returns an instance of LanguageService
-     *
-     * @return \TYPO3\CMS\Core\Localization\LanguageService|null
+     * @param array $config
+     * @param string $elementValue
+     * @param File $file
+     * @return array
+     * @throws \TYPO3\CMS\Core\Imaging\ImageManipulation\InvalidConfigurationException
      */
-    protected function getLanguageService()
+    protected function processConfiguration(array $config, string &$elementValue, File $file): array
     {
-        return $GLOBALS['LANG'] ?? null;
+        $mapAreaCollection = CropVariantCollection::create($elementValue, $config['mapAreas']);
+        if (empty($config['readOnly']) && !empty($file->getProperty('width'))) {
+            $mapAreaCollection = $mapAreaCollection->applyRatioRestrictionToSelectedCropArea($file);
+            $elementValue = (string)$mapAreaCollection;
+        }
+        $config['mapAreas'] = $mapAreaCollection->asArray();
+        $config['allowedExtensions'] = implode(
+            ', ',
+            GeneralUtility::trimExplode(',', $config['allowedExtensions'], true)
+        );
+        return $config;
+    }
+
+    protected function getWizardUri(): string
+    {
+        return (string)$this->uriBuilder->buildUriFromRoute($this->wizardRouteName);
+    }
+
+    protected function getWizardPayload(array $parameterArray): array
+    {
+        $uriArguments = [
+            'P' => [
+                'tableName' => $this->data['tableName'],
+                'uid' => $this->data['databaseRow']['uid'],
+                'pid' => $this->data['databaseRow']['pid'],
+                'fieldName' => $this->data['fieldName'],
+                'formName' => 'editform',
+                'itemName' => $parameterArray['itemFormElName'],
+                'hmac' => GeneralUtility::hmac('editform' . $parameterArray['itemFormElName'], 'wizard_js'),
+                'fieldChangeFunc' => $parameterArray['fieldChangeFunc'],
+                'fieldChangeFuncHash' => GeneralUtility::hmac(serialize($parameterArray['fieldChangeFunc'])),
+            ],
+        ];
+
+        return $uriArguments;
+    }
+
+    protected function getExistingAreas(): string
+    {
+        return $this->data['databaseRow'][$this->data['fieldName']];
     }
 }

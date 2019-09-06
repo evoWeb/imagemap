@@ -14,6 +14,7 @@ declare(strict_types = 1);
 
 namespace Evoweb\Imagemap\Domain\Model;
 
+use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class Data
@@ -149,10 +150,7 @@ class Data
         $environment->initializeTSFE($this->getLivePid());
         // render like in FE with WS-preview etc...
         $environment->pushEnvironment();
-        $path = class_exists('TYPO3\\CMS\\Core\\Core\\Environment') ?
-            (\TYPO3\CMS\Core\Core\Environment::getPublicPath() . '/') :
-            PATH_site;
-        $environment->prepareEnvironment($path);
+        $environment->prepareEnvironment(Environment::getPublicPath() . '/');
         $environment->resetEnableColumns('pages');
         $environment->resetEnableColumns($this->table);
 

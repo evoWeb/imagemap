@@ -56,10 +56,7 @@ class Environment
                 0
             );
             $GLOBALS['TSFE'] = $controller;
-            $controller->connectToDB();
-            $controller->initFEuser();
             $controller->determineId();
-            $controller->initTemplate();
             $controller->getConfigArray();
             $controller->newCObj();
         }
@@ -162,16 +159,18 @@ class Environment
      */
     public function getBackPath(): string
     {
-        $path = class_exists('TYPO3\\CMS\\Core\\Core\\Environment') ?
-            (\TYPO3\CMS\Core\Core\Environment::getPublicPath() . '/') :
-            PATH_site;
-        $scriptPath = class_exists('TYPO3\\CMS\\Core\\Core\\Environment') ?
-            (\TYPO3\CMS\Core\Core\Environment::getCurrentScript() . '/') :
-            PATH_thisScript;
+        // @todo replace this
         return preg_replace(
             '@([^/]+)/@',
             '..',
-            str_replace([$path, basename($scriptPath)], ['', ''], $scriptPath)
+            str_replace(
+                [
+                    \TYPO3\CMS\Core\Core\Environment::getPublicPath() . '/',
+                    basename(\TYPO3\CMS\Core\Core\Environment::getCurrentScript())
+                ],
+                ['', ''],
+                \TYPO3\CMS\Core\Core\Environment::getCurrentScript()
+            )
         );
     }
 
@@ -185,7 +184,7 @@ class Environment
      */
     public function getExtConfValue(string $confKey, $default)
     {
-        $conf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['imagemap']);
-        return is_array($conf) && isset($conf[$confKey]) ? $conf[$confKey] : $default;
+        $configuration = $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['imagemap'] ?? [];
+        return isset($configuration[$confKey]) ? $configuration[$confKey] : $default;
     }
 }

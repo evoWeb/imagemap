@@ -1,46 +1,77 @@
-<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+			xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+			data-namespace-typo3-fluid="true">
+	<f:layout name="Imagemap" />
 
-<div class="formengine-field-item t3js-formengine-field-item">
-
-	<div class="form-control-wrap imagemap-control">
-		<div class="form-wizards-wrap">
-			<div class="form-wizards-element pictureWrap" id="{formEngine.field.id}">
-				<div id="{formEngine.field.id}-canvas"
-						 class="picture"
-						 data-thumbnail-scale="{thumbnailScale}"
-						 data-existing-areas='{formEngine.field.existingAreas}'>
-					<div class="image">{thumbnail -> f:format.raw()}</div>
-					<canvas id="canvas" class="canvas"></canvas>
-					<div class="modifiedState alert alert-warning">
-						<div class="media">
-							<div class="media-left">
-								<span class="fa-stack fa-lg">
-									<span class="fa fa-circle fa-stack-2x"></span>
-									<span class="fa fa-exclamation fa-stack-1x"></span>
-								</span>
+	<f:section name="Main">
+		<f:if condition="{isAllowedFileExtension} && {image.properties.width}">
+			<f:then>
+				<f:if condition="{config.readOnly}">
+					<f:else>
+						<div class="form-control-wrap">
+							<input type="hidden" id="{formEngine.field.id}"
+										 name="{formEngine.field.name}"
+										 value="{formEngine.field.value}"
+										 data-formengine-validation-rules="{formEngine.validation}"/>
+							<button class="btn btn-default t3js-area-wizard-trigger"
+											data-url="{wizardUri}"
+											data-payload="{wizardPayload}"
+											data-preview-url="{previewUrl}"
+											data-severity="notice"
+											data-modal-title="{f:render(section: 'ModalTitle', arguments: _all)}"
+											data-image-uid="{image.uid}"
+											data-button-addrect-text="{f:translate(id: 'LLL:EXT:imagemap/Resources/Private/Language/locallang.xlf:imagemap.form.addrect')}"
+											data-button-addcircle-text="{f:translate(id: 'LLL:EXT:imagemap/Resources/Private/Language/locallang.xlf:imagemap.form.addcircle')}"
+											data-button-addpoly-text="{f:translate(id: 'LLL:EXT:imagemap/Resources/Private/Language/locallang.xlf:imagemap.form.addpoly')}"
+											data-button-dismiss-text="{f:translate(id: 'LLL:EXT:imagemap/Resources/Private/Language/locallang.xlf:imagemap.form.dismiss')}"
+											data-button-save-text="{f:translate(id: 'LLL:EXT:imagemap/Resources/Private/Language/locallang.xlf:imagemap.form.save')}"
+											data-tablename="{formEngine.field.tablename}"
+											data-fieldname="{formEngine.field.fieldname}"
+											data-field="{formEngine.field.id}">
+								<core:icon identifier="extensions-imagemap-poly" alternativeMarkupIdentifier="inline" />
+								<f:translate id="LLL:EXT:imagemap/Resources/Private/Language/locallang.xlf:imagemap.control.open.editor"/>
+							</button>
+						</div>
+					</f:else>
+				</f:if>
+				<div class="form-control-wrap">
+					<div class="form-wizards-element pictureWrap" id="{formEngine.field.id}_wrap">
+						<div id="{formEngine.field.id}-canvas"
+								 class="picture"
+								 data-thumbnail-scale="{thumbnailScale}"
+								 data-existing-areas='{formEngine.field.existingAreas}'>
+							<div class="image">
+								<f:image image="{image}" crop="{formEngine.field.value}"
+												 cropVariant="{cropVariant.id}"
+												 maxWidth="400"
+												 class=""
+												 additionalAttributes="{data-crop-variant: '{cropVariant -> f:format.json()}', data-crop-variant-id: cropVariant.id}"/>
 							</div>
-							<div class="media-body">
-								<f:translate id="imagemap.element.is_modified" extensionName="imagemap"/>
+							<canvas id="canvas" class="canvas"></canvas>
+							<div class="modifiedState alert alert-warning">
+								<div class="media">
+									<div class="media-left">
+							<span class="fa-stack fa-lg">
+								<span class="fa fa-circle fa-stack-2x"></span>
+								<span class="fa fa-exclamation fa-stack-1x"></span>
+							</span>
+									</div>
+									<div class="media-body">
+										<f:translate id="LLL:EXT:imagemap/Resources/Private/Language/locallang.xlf:imagemap.element.is_modified"/>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-			</div>
-		<f:if condition="{fieldControlHtml}">
-			<div class="form-wizards-items-aside">
-				<div class="btn-group">{fieldControlHtml -> f:format.raw()}</div>
-			</div>
+			</f:then>
 		</f:if>
-		<f:if condition="{fieldWizardHtml}">
-			<div class="form-wizards-items-bottom">{fieldWizardHtml -> f:format.raw()}</div>
-		</f:if>
-		</div>
-		<input type="hidden" name="{formEngine.field.name}" value="{formEngine.field.value}"
-					 data-tablename="{formEngine.field.tablename}"
-					 data-fieldname="{formEngine.field.fieldname}"
-					 data-uid="{formEngine.field.uid}" />
-	</div>
+	</f:section>
 
-</div>
+	<f:section name="ModalTitle">
+		<f:translate id="LLL:EXT:imagemap/Resources/Private/Language/locallang.xlf:imwizard.image-manipulation" />
+		: <f:if condition="{image.properties.title}"><f:then>{image.properties.title} &mdash; {image.name}</f:then><f:else>{image.name}</f:else></f:if>
+		({image.properties.width} × {image.properties.height})
+	</f:section>
 
 </html>
