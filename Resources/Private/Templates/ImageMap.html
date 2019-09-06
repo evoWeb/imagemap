@@ -42,7 +42,7 @@
 					<f:if condition="{imageMap}"><f:spaceless>
 						<map name="{imageMapName}">
 							<f:for each="{imageMap}" as="area">
-								<area href="{f:uri.typolink(parameter: area.link)}" {f:render(section: "attributes", arguments: {attributes: area.attributes})}>
+								<area href="{f:uri.typolink(parameter: area.link)}" {f:render(section: 'attributes', arguments: {attributes: area.attributes})}>
 							</f:for>
 						</map>
 					</f:spaceless></f:if>

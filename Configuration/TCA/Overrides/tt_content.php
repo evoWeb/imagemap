@@ -2,10 +2,15 @@
 
 $GLOBALS['TCA']['tt_content']['ctrl']['typeicon_classes']['imagemap'] = 'extensions-imagemap-content';
 
-$GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'][] = [
-    0 => 'LLL:EXT:imagemap/Resources/Private/Language/locallang.xlf:imagemap.title',
-    1 => 'imagemap'
-];
+\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTcaSelectItem(
+    'tt_content',
+    'CType',
+    [
+        'LLL:EXT:imagemap/Resources/Private/Language/locallang.xlf:imagemap.title',
+        'imagemap',
+        'extensions-imagemap-content',
+    ]
+);
 
 $tempColumns = [
     'tx_imagemap_links' => [
@@ -14,18 +19,6 @@ $tempColumns = [
             'type' => 'input',
             'renderType' => 'imagemap',
             'default' => '',
-            'userImage' => [
-                'field' => 'image'
-            ],
-            'fieldControl' => [
-                'editControl' => [
-                    'renderType' => 'imagemapPopup',
-                    'options' => [
-                        'title' => 'ImageMap',
-                        'windowOpenParameters' => 'height=700,width=780,status=0,menubar=0,scrollbars=1',
-                    ]
-                ],
-            ],
             'softref' => 'imagemap',
         ],
     ],
