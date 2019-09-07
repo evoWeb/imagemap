@@ -1,4 +1,5 @@
 <?php
+namespace Evoweb\Imagemap\Tests;
 
 /**
  * This file is developed by evoWeb.
@@ -11,9 +12,9 @@
  * LICENSE.txt file that was distributed with this source code.
  */
 
-namespace Evoweb\Imagemap\Tests;
+use Evoweb\Imagemap\DataProcessing\ImagemapProcessor;
 
-class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTestCase
+class ImagemapProcessorTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTestCase
 {
     /**
      * @var array
@@ -21,30 +22,25 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
     protected $testExtensionsToLoad = ['typo3conf/ext/imagemap'];
 
     /**
-     * @var \Evoweb\Imagemap\Utility\Mapper
+     * @var ImagemapProcessor
      */
-    protected $mapper;
+    protected $imagemapProcessor;
 
     /**
      * @var \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer|\PHPUnit\Framework\MockObject\MockObject
      */
     protected $cObj;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->importDataSet(__DIR__ . '/../Fixtures/pages.xml');
         $this->importDataSet(__DIR__ . '/../Fixtures/sys_template.xml');
 
-        $this->mapper = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\Evoweb\Imagemap\Utility\Mapper::class);
+        $this->imagemapProcessor = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(ImagemapProcessor::class);
         $this->cObj = $this->getMockBuilder(\TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer::class)
-            ->setMethods(['typoLink', 'LOAD_REGISTER'])
+            ->onlyMethods(['typoLink', 'LOAD_REGISTER'])
             ->getMock();
-    }
-
-    protected function tearDown()
-    {
-        unset($this->mapper);
     }
 
     /**
@@ -58,9 +54,9 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
         foreach ($strings as $key => $string) {
             $this->assertEquals(
                 1,
-                preg_match($regExAttr, $this->mapper->createValidNameAttribute($string)),
+                preg_match($regExAttr, $this->imagemapProcessor->createValidNameAttribute($string)),
                 'Attribute (' . $key . ') is not cleaned as supposed...['
-                . $this->mapper->createValidNameAttribute($string) . ']'
+                . $this->imagemapProcessor->createValidNameAttribute($string) . ']'
             );
         }
     }
@@ -75,12 +71,12 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
 
         $this->assertEquals(
             true,
-            $this->mapper->compareJsonEncodedAreas($map1, $map1),
+            $this->imagemapProcessor->compareJsonEncodedAreas($map1, $map1),
             'Equal maps are not recognized when compared...'
         );
         $this->assertEquals(
             false,
-            $this->mapper->compareJsonEncodedAreas($map1, $map2),
+            $this->imagemapProcessor->compareJsonEncodedAreas($map1, $map2),
             'Different maps are not recognized when compared...'
         );
     }
@@ -95,7 +91,7 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
 
         $this->assertEquals(
             true,
-            $this->mapper->compareJsonEncodedAreas($map1, $map2),
+            $this->imagemapProcessor->compareJsonEncodedAreas($map1, $map2),
             'Equal maps are not recognized when compared...'
         );
     }
@@ -111,17 +107,17 @@ class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTes
 
         $this->assertEquals(
             false,
-            $this->mapper->compareJsonEncodedAreas($map1, $map2),
+            $this->imagemapProcessor->compareJsonEncodedAreas($map1, $map2),
             'Different structured maps are not processed as supposed'
         );
         $this->assertEquals(
             false,
-            $this->mapper->compareJsonEncodedAreas($map1, $map3),
+            $this->imagemapProcessor->compareJsonEncodedAreas($map1, $map3),
             'Different structured maps are not processed as supposed'
         );
         $this->assertEquals(
             false,
-            $this->mapper->compareJsonEncodedAreas($map2, $map3),
+            $this->imagemapProcessor->compareJsonEncodedAreas($map2, $map3),
             'Different structured maps are not processed as supposed'
         );
     }

@@ -47,9 +47,4 @@ call_user_func(function () {
         'priority' => 70,
         'class' => \Evoweb\Imagemap\Form\Element\ImagemapElement::class,
     ];
-    $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1549819420] = [
-        'nodeName' => 'imagemapEditControl',
-        'priority' => 70,
-        'class' => \Evoweb\Imagemap\Form\FieldControl\ImagemapEditControl::class,
-    ];
 });

@@ -39,25 +39,12 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
     protected static $defaultConfig = [
         'tableName' => 'tt_content',
         'fieldName' => 'image',
-        'allowedExtensions' => null, // default: $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext']
+        // default: $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext']
+        'allowedExtensions' => null,
         'mapAreas' => [
             'default' => [
              ]
         ]
-    ];
-
-    /**
-     * Default field controls for this element.
-     *
-     * @var array
-     */
-    protected $oldDefaultFieldControl = [
-        'editControl' => [
-            'renderType' => 'imagemapEditControl',
-            'options' => [
-                'windowOpenParameters' => 'height=700,width=780,status=0,menubar=0,scrollbars=1',
-            ]
-        ],
     ];
 
     /**

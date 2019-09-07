@@ -1,5 +1,6 @@
 <?php
 declare(strict_types = 1);
+namespace Evoweb\Imagemap\Controller;
 
 /**
  * This file is developed by evoWeb.
@@ -12,11 +13,10 @@ declare(strict_types = 1);
  * LICENSE.txt file that was distributed with this source code.
  */
 
-namespace Evoweb\Imagemap\Controller;
-
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Http\Response;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -36,23 +36,10 @@ class AjaxController
         $this->getBackendUser()->setAndSaveSessionData('imagemap.value', $parameters['value']);
 
         try {
-            /** @var \Evoweb\Imagemap\Domain\Model\Data $data */
-            $data = GeneralUtility::makeInstance(
-                \Evoweb\Imagemap\Domain\Model\Data::class,
-                $parameters['tableName'],
-                $parameters['fieldName'],
-                $parameters['uid'],
-                $parameters['value']
-            );
-            $data->setMap($parameters['value']);
+            $record = BackendUtility::getRecord($parameters['tableName'], $parameters['uid']);
+            $map = $record[$parameters['fieldName']];
 
-            $config = $GLOBALS['TCA'][$parameters['tableName']]['columns'][$parameters['fieldName']];
-            $data->setFieldConf($config);
-
-            $content = '';
-            if ($data->hasValidImageFile()) {
-                $content = \json_encode($data->getMap());
-            }
+            $content = \json_encode($map);
             $response->getBody()->write($content);
         } catch (\Exception $e) {
         }

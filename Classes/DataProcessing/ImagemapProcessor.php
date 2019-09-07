@@ -2,6 +2,8 @@
 declare(strict_types = 1);
 namespace Evoweb\Imagemap\DataProcessing;
 
+use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
+
 /**
  * This file is developed by evoWeb.
  *
@@ -18,7 +20,7 @@ class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcess
     /**
      * Process data of a record to resolve imagemap
      *
-     * @param \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer $cObj The data of the content element or page
+     * @param ContentObjectRenderer $cObj The data of the content element or page
      * @param array $contentObjectConfiguration The configuration of Content Object
      * @param array $processorConfiguration The configuration of this processor
      * @param array $processedData Key/value store of processed data (e.g. to be passed to a Fluid View)
@@ -26,26 +28,19 @@ class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcess
      * @return array the processed data as key/value store
      */
     public function process(
-        \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer $cObj,
+        ContentObjectRenderer $cObj,
         array $contentObjectConfiguration,
         array $processorConfiguration,
         array $processedData
     ): array {
         if (!empty($processedData['files'])) {
             $attributes = $contentObjectConfiguration['variables.']['imageMapAttributes.'] ?? [];
-            $mapName = $cObj->cObjGetSingle(
-                $processorConfiguration['name'],
-                $processorConfiguration['name.']
-            );
-
-            /* @var $mapper \Evoweb\Imagemap\Utility\Mapper */
-            $mapper = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\Evoweb\Imagemap\Utility\Mapper::class);
-            $mapName = $mapper->createValidNameAttribute($mapName);
+            $mapName = $this->getMapName($cObj, $processorConfiguration);
 
             $mapData = $cObj->getData($processorConfiguration['data'], $cObj->data);
             $mapArray = $mapData ? \json_decode($mapData, true) : [];
             if (count($mapArray)) {
-                if ($this->getTypoScriptFrontendController()->config['config']['xhtmlDoctype'] !== '') {
+                if ($this->getTypoScriptFrontendController()->xhtmlDoctype !== '') {
                     // remove target attribute to have xhtml-strict output
                     $attributes = array_diff($attributes, ['target']);
                 }
@@ -74,6 +69,16 @@ class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcess
             $processedData['imageMapName'] = $mapName;
         }
         return $processedData;
+    }
+
+    protected function getMapName(ContentObjectRenderer $cObj, array $processorConfiguration): string
+    {
+        $mapName = $cObj->cObjGetSingle($processorConfiguration['name'], $processorConfiguration['name.']);
+        $mapName = rtrim(preg_replace('/[^a-zA-Z0-9\-_]/i', '-', $mapName), '-');
+        while (!preg_match('/^[a-zA-Z]{3}/', $mapName)) {
+            $mapName = chr(rand(97, 122)) . $mapName;
+        }
+        return $mapName;
     }
 
     protected function getTypoScriptFrontendController():? \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController

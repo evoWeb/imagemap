@@ -1,5 +1,6 @@
 <?php
 declare(strict_types = 1);
+namespace Evoweb\Imagemap\Controller;
 
 /**
  * This file is developed by evoWeb.
@@ -12,11 +13,9 @@ declare(strict_types = 1);
  * LICENSE.txt file that was distributed with this source code.
  */
 
-namespace Evoweb\Imagemap\Controller;
-
-use Evoweb\Imagemap\Domain\Model\Data;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Http\Response;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
@@ -56,20 +55,16 @@ class ModalController
         }
 
         try {
-            /** @var Data $data */
-            $data = GeneralUtility::makeInstance(
-                Data::class,
-                $parameters['tableName'],
-                $parameters['fieldName'],
-                $parameters['uid'],
-                $this->getBackendUser()->getSessionData('imagemap.value')
-            );
+            $record = BackendUtility::getRecord($parameters['tableName'], $parameters['uid']);
+            $map = $record[$parameters['fieldName']];
+            $maxWidth = $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['imagemap']['imageMaxWH'] ?? 800;
+
             $formName = 'imagemap' . GeneralUtility::shortMD5(rand(1, 100000));
             $this->templateView
                 ->assign('parameters', $parameters)
-                ->assign('configuration', \json_encode($this->getConfiguration($parameters, $data, $formName)))
-                ->assign('data', $data)
-                ->assign('scaleFactor', $data->getEnvironment()->getExtConfValue('imageMaxWH', 800) / 1000)
+                ->assign('configuration', \json_encode($this->getConfiguration($parameters, $record, $formName, $map)))
+                ->assign('data', $map)
+                ->assign('scaleFactor', $maxWidth / 1000)
                 ->assign('formName', $formName);
         } catch (\Exception $exception) {
         }
@@ -81,21 +76,25 @@ class ModalController
         return $response;
     }
 
-    protected function getConfiguration(array $parameters, Data $data, string $formName): array
-    {
+    protected function getConfiguration(
+        array $parameters,
+        array $record,
+        string $formName,
+        string $map
+    ): array {
         $browseLinkConfiguration = [
             'returnUrl' => GeneralUtility::linkThisScript(),
             'formName' => $formName,
             'tableName' => $parameters['tableName'],
             'fieldName' => $parameters['fieldName'],
-            'pid' => $data->getRow()['pid'],
+            'pid' => $record['pid'],
         ];
 
         return [
             'formName' => $formName,
             'itemName' => $parameters['itemName'],
             'fieldChangeFunc' => $parameters['fieldChangeFunc'] ?? [],
-            'existingAreas' => $data->getMap(),
+            'existingAreas' => $map,
             'browseLink' => $browseLinkConfiguration
         ];
     }
