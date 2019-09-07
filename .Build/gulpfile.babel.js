@@ -9,8 +9,8 @@ import sourcemaps from 'gulp-sourcemaps';
 import uglify from 'gulp-uglify';
 
 const dirs = {
-	src: 'Private',
-	dest: 'Public'
+	src: 'Sources',
+	dest: '../Resources/Public'
 };
 
 const sassPaths = {
