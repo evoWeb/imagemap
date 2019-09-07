@@ -1,31 +1,35 @@
 {
   "name": "imagemap",
-  "description": "Bundles all resources for the usage",
   "version": "9.1.0",
-  "license": "GPL-2.0+",
-  "repository": "https://github.com/evoWeb/sf_register.git",
-  "homepage": "http://www.evoweb.de/",
-  "author": {
-    "name": "Sebastian Fischer",
-    "email": "typo3@evoweb.de"
+  "description": "Bundles all resources for the usage",
+  "main": "gulpfile.js",
+  "repository": "https://github.com/evoWeb/imagemap.git",
+  "author": "Sebastian Fischer",
+  "license": "GPL-2.0-or-later",
+  "homepage": "https://github.com/evoWeb/imagemap/",
+  "engines": {
+    "node": ">=8.0.0 <12.0.0",
+    "yarn": "^1.10.0"
   },
   "dependencies": {
-    "fabric": "^2.6.0"
+    "fabric": "^3.4.0",
+    "@types/jquery": "2.0.47"
   },
   "devDependencies": {
-    "@babel/core": "^7.3.3",
+    "@babel/core": "^7.4.5",
     "@babel/plugin-proposal-class-properties": "^7.3.4",
-    "@babel/preset-env": "^7.3.1",
+    "@babel/preset-env": "^7.4.5",
     "@babel/register": "^7.0.0",
-    "gulp": "^4.0.0",
-    "gulp-autoprefixer": "^6.0.0",
-    "gulp-babel": "^8.0.0",
-    "gulp-cli": "^2.0.1",
-    "gulp-concat": "^2.6.1",
+    "autoprefixer": "^9.6.1",
+    "gulp": "^4.0.2",
+    "gulp-postcss": "^8.0.0",
     "gulp-sass": "^4.0.2",
-    "gulp-sourcemaps": "^2.6.4",
-    "gulp-uglify": "^3.0.1",
-    "sass": "^1.17.0"
+    "gulp-sourcemaps": "^2.6.5",
+    "gulp-typescript": "^5.0.1",
+    "gulplog": "^1.0.0",
+    "node-normalize-scss": "^8.0.1",
+    "sass": "^1.22.10",
+    "typescript": "^3.6.2"
   },
   "babel": {
     "presets": [
@@ -33,8 +37,8 @@
     ]
   },
   "scripts": {
-    "build": "gulp default",
-    "styles": "gulp styles",
-    "babel": "gulp babel"
+    "css": "gulp scss",
+    "js": "gulp typescript",
+    "build": "gulp build"
   }
 }

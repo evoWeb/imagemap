@@ -1,94 +1,99 @@
 'use strict';
 
 import gulp from 'gulp';
-import autoPrefixer from 'gulp-autoprefixer';
-import babel from 'gulp-babel';
-import concat from 'gulp-concat';
-import sass from 'gulp-sass';
-import sourcemaps from 'gulp-sourcemaps';
-import uglify from 'gulp-uglify';
+import log from 'gulplog';
 
-const dirs = {
-	src: 'Sources',
+import sourcemaps from 'gulp-sourcemaps';
+import typescript from 'gulp-typescript';
+
+import postcss from 'gulp-postcss';
+import autoprefixer from 'autoprefixer';
+import sass from 'gulp-sass';
+
+const paths = {
+	src: './Sources',
 	dest: '../Resources/Public'
 };
 
-const sassPaths = {
-	src: `${dirs.src}/Sass/*.scss`,
-	dest: `${dirs.dest}/Stylesheets/`
-};
-
-const javascriptPaths = {
-	'Fabric.js': {
-		src: `node_modules/fabric/dist/fabric.js`,
-		dest: `${dirs.dest}/JavaScript/`,
-		name: 'Fabric.js'
+const tasks = {
+	typescript: {
+		'AreaEditor.ts': {
+			src: `${paths.src}/TypeScript/AreaEditor.ts`,
+			dest: `${paths.dest}/JavaScript/`,
+			name: 'AreaEditor.js'
+		},
+		'EditControl.ts': {
+			src: `${paths.src}/TypeScript/EditControl.ts`,
+			dest: `${paths.dest}/JavaScript/`,
+			name: 'EditControl.js'
+		},
+		'FormElement.ts': {
+			src: `${paths.src}/TypeScript/FormElement.ts`,
+			dest: `${paths.dest}/JavaScript/`,
+			name: 'FormElement.js'
+		}
 	},
-	'AreaEditor.es6': {
-		src: `${dirs.src}/Scripts/AreaEditor.es6`,
-		dest: `${dirs.dest}/JavaScript/`,
-		name: 'AreaEditor.js'
+	copy: {
+		src: [`node_modules/fabric/dist/fabric.js`],
+		dest: `${paths.dest}/JavaScript/vendor/`
 	},
-	'EditControl.es6': {
-		src: `${dirs.src}/Scripts/EditControl.es6`,
-		dest: `${dirs.dest}/JavaScript/`,
-		name: 'EditControl.js'
-	},
-	'FormElement.es6': {
-		src: `${dirs.src}/Scripts/FormElement.es6`,
-		dest: `${dirs.dest}/JavaScript/`,
-		name: 'FormElement.js'
+	scss: {
+		src: `${paths.src}/Sass/*.scss`,
+		dest: `${paths.dest}/Stylesheets/`
 	}
 };
 
-let stylesTask = () => {
-	return gulp.src(sassPaths.src)
-		.pipe(sourcemaps.init())
-		.pipe(sass({outputStyle: 'compressed'}).on('error', sass.logError))
-		.pipe(autoPrefixer())
-		.pipe(sourcemaps.write('.'))
-		.pipe(gulp.dest(sassPaths.dest));
+let copyFilesTask = () => {
+	return gulp.src(tasks.copy.src, { base: './node_modules/fabric/dist' })
+		.pipe(gulp.dest(tasks.copy.dest));
 };
 
-let babelTask = (done) => {
-	let position = process.argv.indexOf('--file'),
+let typescriptTask = (done) => {
+	const position = process.argv.indexOf('--file'),
 		file = position > -1 ? process.argv[position + 1] : null;
 
-	let tasks = [];
-	Object.keys(javascriptPaths).map((key) => {
+	let seriesTasks = [];
+	Object.keys(tasks.typescript).map((key) => {
 		if (file == null || file === key) {
-			let paths = javascriptPaths[key];
-			let buildJavascript = () => {
-				return gulp.src(paths.src)
-					.pipe(sourcemaps.init())
-					.pipe(concat(paths.name))
-					.pipe(babel({
-						compact: false,
-						presets: [
-							['@babel/env', {modules: false}]
-						],
-						plugins: [
-							'@babel/plugin-proposal-class-properties'
-						]
-					}))
-					//.pipe(uglify())
-					.pipe(sourcemaps.write('.'))
-					.pipe(gulp.dest(paths.dest));
-			};
+			let localPaths = tasks.typescript[key];
+			let buildJavascript = (done) => {
+				let tsProject = typescript.createProject('tsconfig.json');
 
-			buildJavascript.displayName = `${paths.name}`;
-			tasks.push(buildJavascript);
+				gulp.src(localPaths.src)
+					.pipe(tsProject())
+					.js.pipe(gulp.dest(localPaths.dest));
+				done();
+			};
+			buildJavascript.displayName = `${localPaths.name}`;
+
+			seriesTasks.push(buildJavascript);
 		}
 	});
 
-	return gulp.series(...tasks, (seriesDone) => {
+	return gulp.series(...seriesTasks, (seriesDone) => {
 		seriesDone();
 		done();
 	})();
 };
 
-exports.babel = babelTask;
+let stylesTask = () => {
+	return gulp.src(tasks.scss.src)
+		.pipe(sourcemaps.init())
+		.pipe(
+			sass({
+				outputStyle: 'compressed',
+				includePaths: require('node-normalize-scss').includePaths
+			}).on('error', log.error)
+		)
+		.pipe(postcss([autoprefixer()]))
+		.pipe(sourcemaps.write('./'))
+		.pipe(gulp.dest(tasks.scss.dest));
+};
 
-exports.styles = stylesTask;
+exports.copyFiles = copyFilesTask;
 
-exports.default = gulp.series(babelTask, stylesTask);
+exports.typescript = typescriptTask;
+
+exports.scss = stylesTask;
+
+exports.build = gulp.series(copyFilesTask, typescriptTask, stylesTask);

@@ -16,7 +16,9 @@ namespace Evoweb\Imagemap\Controller;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Http\Response;
+use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 
@@ -60,12 +62,13 @@ class ModalController
             $maxWidth = $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['imagemap']['imageMaxWH'] ?? 800;
 
             $formName = 'imagemap' . GeneralUtility::shortMD5(rand(1, 100000));
-            $this->templateView
-                ->assign('parameters', $parameters)
-                ->assign('configuration', \json_encode($this->getConfiguration($parameters, $record, $formName, $map)))
-                ->assign('data', $map)
-                ->assign('scaleFactor', $maxWidth / 1000)
-                ->assign('formName', $formName);
+            $this->templateView->assignMultiple([
+                'parameters' => $parameters,
+                'data' => $map,
+                'scaleFactor' => $maxWidth / 1000,
+                'formName' => $formName,
+                'configuration' => \json_encode($this->getConfiguration($parameters, $record, $formName, $map))
+            ]);
         } catch (\Exception $exception) {
         }
 
@@ -99,22 +102,12 @@ class ModalController
         ];
     }
 
-    /**
-     * Returns an instance of Backend User Authentication
-     *
-     * @return \TYPO3\CMS\Core\Authentication\BackendUserAuthentication|null
-     */
-    protected function getBackendUser()
+    protected function getBackendUser():? BackendUserAuthentication
     {
         return $GLOBALS['BE_USER'] ?? null;
     }
 
-    /**
-     * Returns an instance of LanguageService
-     *
-     * @return \TYPO3\CMS\Core\Localization\LanguageService|null
-     */
-    protected function getLanguageService()
+    protected function getLanguageService():? LanguageService
     {
         return $GLOBALS['LANG'] ?? null;
     }

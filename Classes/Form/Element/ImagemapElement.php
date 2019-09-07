@@ -147,7 +147,10 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
 
         if ($arguments['isAllowedFileExtension']) {
             $resultArray['requireJsModules'][] = [
-                'TYPO3/CMS/Imagemap/FormElement' => 'function (FormElement) { new FormElement(); }'
+                'TYPO3/CMS/Imagemap/FormElement' => 'function (FormElement) { new FormElement(); }',
+            ];
+            $resultArray['requireJsModules'][] = [
+                'TYPO3/CMS/Imagemap/EditControl' => 'function (EditControl) { new EditControl(); }',
             ];
             $arguments['formEngine']['field']['id'] = StringUtility::getUniqueId('formengine-image-manipulation-');
             if (GeneralUtility::inList($config['eval'], 'required')) {
@@ -244,13 +247,6 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
         return $config;
     }
 
-    /**
-     * @param array $config
-     * @param string $elementValue
-     * @param File $file
-     * @return array
-     * @throws \TYPO3\CMS\Core\Imaging\ImageManipulation\InvalidConfigurationException
-     */
     protected function processConfiguration(array $config, string &$elementValue, File $file): array
     {
         $mapAreaCollection = CropVariantCollection::create($elementValue, $config['mapAreas']);
