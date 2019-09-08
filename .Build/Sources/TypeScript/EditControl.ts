@@ -21,43 +21,43 @@ import * as Modal from 'TYPO3/CMS/Backend/Modal';
 import * as FormEngineValidation from 'TYPO3/CMS/Backend/FormEngineValidation';
 
 class EditControl {
-  areaEditor: AreaEditor;
+  private areaEditor: AreaEditor;
 
-  configuration: EditorConfiguration;
+  private configuration: EditorConfiguration;
 
-  editorOptions: EditorOptions;
+  private editorOptions: EditorOptions;
 
-  currentModal: Modal;
+  private currentModal: Modal;
 
-  trigger: JQuery;
+  private trigger: JQuery;
 
-  image: JQuery;
+  private image: JQuery;
 
-  buttonAddRect: JQuery;
+  private buttonAddRect: JQuery;
 
-  buttonAddCircle: JQuery;
+  private buttonAddCircle: JQuery;
 
-  buttonAddPoly: JQuery;
+  private buttonAddPoly: JQuery;
 
-  buttonDismiss: JQuery;
+  private buttonDismiss: JQuery;
 
-  buttonSave: JQuery;
+  private buttonSave: JQuery;
 
   constructor() {
     this.initializeTrigger();
   }
 
-  initializeTrigger() {
+  private initializeTrigger() {
     $('.t3js-area-wizard-trigger').off('click').on('click', this.triggerHandler.bind(this));
   }
 
-  triggerHandler(event: JQueryEventObject) {
+  private triggerHandler(event: JQueryEventObject) {
     event.preventDefault();
     this.trigger = $(event.currentTarget);
     this.show();
   }
 
-  show() {
+  private show() {
     let modalTitle = this.trigger.data('modalTitle'),
       buttonAddrectText = this.trigger.data('buttonAddrectText'),
       buttonAddcircleText = this.trigger.data('buttonAddcircleText'),
@@ -130,7 +130,7 @@ class EditControl {
     });
   }
 
-  initialize() {
+  private initialize() {
     this.image = this.currentModal.find('.image img');
     this.configuration = this.currentModal.find('.picture').data('configuration');
     this.buttonAddRect = this.currentModal.find('.button-add-rect').off('click').on('click', this.buttonAddRectHandler.bind(this));
@@ -146,7 +146,7 @@ class EditControl {
     });
   }
 
-  initializeArea() {
+  private initializeArea() {
     let scaleFactor = this.currentModal.find('.picture').data('scale-factor'),
       width = parseInt(this.image.css('width')),
       height = parseInt(this.image.css('height'));
@@ -194,7 +194,7 @@ class EditControl {
     this.areaEditor.initializeAreas(this.configuration.existingAreas);
   }
 
-  destroy() {
+  private destroy() {
     if (this.currentModal) {
       this.currentModal = null;
       this.areaEditor.form.destroy();
@@ -202,7 +202,7 @@ class EditControl {
     }
   }
 
-  buttonAddRectHandler(event: JQueryEventObject) {
+  private buttonAddRectHandler(event: JQueryEventObject) {
     event.stopPropagation();
     event.preventDefault();
 
@@ -215,7 +215,7 @@ class EditControl {
     }]);
   }
 
-  buttonAddCircleHandler(event: JQueryEventObject) {
+  private buttonAddCircleHandler(event: JQueryEventObject) {
     event.stopPropagation();
     event.preventDefault();
 
@@ -228,7 +228,7 @@ class EditControl {
     }]);
   }
 
-  buttonAddPolyHandler(event: JQueryEventObject) {
+  private buttonAddPolyHandler(event: JQueryEventObject) {
     event.stopPropagation();
     event.preventDefault();
 
@@ -244,14 +244,14 @@ class EditControl {
     }]);
   }
 
-  buttonDismissHandler(event: JQueryEventObject) {
+  private buttonDismissHandler(event: JQueryEventObject) {
     event.stopPropagation();
     event.preventDefault();
 
     this.currentModal.modal('hide');
   }
 
-  buttonSaveHandler(event: JQueryEventObject) {
+  private buttonSaveHandler(event: JQueryEventObject) {
     event.stopPropagation();
     event.preventDefault();
 
@@ -261,7 +261,7 @@ class EditControl {
     this.currentModal.modal('hide');
   }
 
-  hideColorSwatch(event: JQueryEventObject) {
+  private hideColorSwatch(event: JQueryEventObject) {
     if (!$(event.target).parents().add(event.target).hasClass('minicolors')) {
       // Hides all dropdown panels
       top.window.$('.minicolors-focus').each(() => {
