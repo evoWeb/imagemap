@@ -49,24 +49,24 @@ class FormElement {
     this.initializeAreas(this.canvas.data('existing-areas'));
   }
 
-  initializeAreaEditor(editorOptions: object) {
+  private initializeAreaEditor(editorOptions: object) {
     let canvas = (this.control.find('#canvas')[0] as HTMLElement);
     this.areaEditor = new AreaEditor(editorOptions, canvas, '', window.document);
   }
 
-  initializeScaleFactor(scaleFactor: number) {
+  private initializeScaleFactor(scaleFactor: number) {
     this.areaEditor.setScale(scaleFactor);
   }
 
-  initializeEvents() {
+  private initializeEvents() {
     this.control.find('input[type=hidden]').on('imagemap:changed', this.imagemapChangedHandler.bind(this));
   }
 
-  initializeAreas(areas: Array<any>) {
+  private initializeAreas(areas: Array<any>) {
     this.areaEditor.initializeAreas(areas);
   }
 
-  imagemapChangedHandler(event: JQueryEventObject) {
+  private imagemapChangedHandler(event: JQueryEventObject) {
     let $field = $(event.currentTarget);
 
     $.ajax({
