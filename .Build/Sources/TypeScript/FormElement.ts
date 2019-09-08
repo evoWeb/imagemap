@@ -15,15 +15,15 @@ import * as $ from 'jquery';
 import AreaEditor from './AreaEditor';
 
 class FormElement {
-  editorOptions: EditorOptions;
+  private editorOptions: EditorOptions;
 
-  areaEditor: AreaEditor;
+  private areaEditor: AreaEditor;
 
-  control: JQuery;
+  private control: JQuery;
 
-  image: JQuery;
+  private image: JQuery;
 
-  canvas: JQuery;
+  private canvas: JQuery;
 
   constructor() {
     this.control = $('.imagemap-control:eq(0)');
@@ -33,7 +33,7 @@ class FormElement {
     this.initialize();
   }
 
-  initialize() {
+  private initialize() {
     this.editorOptions = {
       canvas: {
         width: parseInt(this.image.css('width')),
