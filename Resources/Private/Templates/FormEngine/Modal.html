@@ -9,7 +9,13 @@
 			<span class="zoomout hide" title="{f:translate(id: 'imagemap.form.zoomout', extensionName: 'imagemap')}"><core:icon identifier="extensions-imagemap-zoomout" size="default" /></span>
 		</div>
 		<div class="picture" data-scale-factor="1" data-configuration="{configuration}">
-			<div class="image">{data.image -> f:format.raw()}</div>
+			<div class="image">
+				<f:image image="{image}" crop="{formEngine.field.value}"
+								 cropVariant="{cropVariant.id}"
+								 maxWidth="{maxWidth}"
+								 class=""
+								 additionalAttributes="{data-crop-variant: '{cropVariant -> f:format.json()}', data-crop-variant-id: cropVariant.id}"/>
+			</div>
 			<canvas id="modal-canvas" class="canvas"></canvas>
 		</div>
 	</div>
@@ -39,7 +45,7 @@
 					<input class="form-control t3js-field t3js-color-picker" type="hidden" id="color" value=""/>
 				</div>
 				<input type="text" id="alt" class="t3js-field form-control" placeholder="{f:translate(id: 'imagemap.form.area.label', extensionName: 'imagemap')}" />
-				<f:render section="controls" arguments="{returnUrl: returnUrl, formName: formName}"/>
+				<f:render section="controls"/>
 			</div>
 
 			<div class="moreOptions hide">
@@ -92,7 +98,7 @@
 					<input class="form-control t3js-field t3js-color-picker" type="hidden" id="color" value=""/>
 				</div>
 				<input type="text" id="alt" class="t3js-field form-control" placeholder="{f:translate(id: 'imagemap.form.area.label', extensionName: 'imagemap')}" />
-				<f:render section="controls" arguments="{returnUrl: returnUrl, formName: formName}"/>
+				<f:render section="controls"/>
 			</div>
 
 			<div class="moreOptions hide">
@@ -140,7 +146,7 @@
 					<input class="form-control t3js-field t3js-color-picker" type="hidden" id="color" value=""/>
 				</div>
 				<input type="text" id="alt" class="t3js-field form-control" placeholder="{f:translate(id: 'imagemap.form.area.label', extensionName: 'imagemap')}" />
-				<f:render section="controls" arguments="{returnUrl: returnUrl, formName: formName}"/>
+				<f:render section="controls"/>
 			</div>
 
 			<div class="moreOptions hide">

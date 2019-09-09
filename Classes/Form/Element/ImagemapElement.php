@@ -15,8 +15,6 @@ namespace Evoweb\Imagemap\Form\Element;
 
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Imaging\ImageManipulation\Area;
-use TYPO3\CMS\Core\Imaging\ImageManipulation\CropVariantCollection;
-use TYPO3\CMS\Core\Imaging\ImageManipulation\InvalidConfigurationException;
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -36,7 +34,7 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
      *
      * @var array
      */
-    protected static $defaultConfig = [
+    public static $defaultConfig = [
         'tableName' => 'tt_content',
         'fieldName' => 'image',
         // default: $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext']
@@ -107,7 +105,7 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
             return $resultArray;
         }
 
-        $config = $this->processConfiguration($config, $parameterArray['itemFormElValue'], $file);
+        $config = $this->processConfiguration($config, $parameterArray['itemFormElValue']);
 
         $fieldInformationResult = $this->renderFieldInformation();
         $fieldInformationHtml = $fieldInformationResult['html'];
@@ -173,7 +171,7 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
         if (MathUtility::canBeInterpretedAsInteger($fileUid)) {
             try {
                 $file = ResourceFactory::getInstance()->getFileReferenceObject($fileUid)->getOriginalFile();
-            } catch (\InvalidArgumentException $e) {
+            } catch (\throwable $e) {
             }
         } else {
             try {
@@ -208,7 +206,6 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
     /**
      * @param array $baseConfiguration
      * @return array
-     * @throws InvalidConfigurationException
      */
     protected function populateConfiguration(array $baseConfiguration): array
     {
@@ -222,7 +219,7 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
         $config = array_replace_recursive($defaultConfig, $baseConfiguration);
 
         if (!is_array($config['mapAreas'])) {
-            throw new InvalidConfigurationException('Map areas configuration must be an array', 1485377267);
+            $config['mapAreas'] = [];
         }
 
         $mapAreas = [];
@@ -247,14 +244,9 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
         return $config;
     }
 
-    protected function processConfiguration(array $config, string &$elementValue, File $file): array
+    protected function processConfiguration(array $config, string &$elementValue): array
     {
-        $mapAreaCollection = CropVariantCollection::create($elementValue, $config['mapAreas']);
-        if (empty($config['readOnly']) && !empty($file->getProperty('width'))) {
-            $mapAreaCollection = $mapAreaCollection->applyRatioRestrictionToSelectedCropArea($file);
-            $elementValue = (string)$mapAreaCollection;
-        }
-        $config['mapAreas'] = $mapAreaCollection->asArray();
+        $config['mapAreas'] = empty($elementValue) ? [] : json_decode($elementValue, true);
         $config['allowedExtensions'] = implode(
             ', ',
             GeneralUtility::trimExplode(',', $config['allowedExtensions'], true)
@@ -264,7 +256,10 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
 
     protected function getWizardUri(): string
     {
-        return (string)$this->uriBuilder->buildUriFromRoute($this->wizardRouteName);
+        try {
+            $url = (string)$this->uriBuilder->buildUriFromRoute($this->wizardRouteName);
+        } catch (\throwable $e) {}
+        return $url ?? '';
     }
 
     protected function getWizardPayload(array $parameterArray): array

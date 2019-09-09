@@ -13,13 +13,16 @@ namespace Evoweb\Imagemap\Controller;
  * LICENSE.txt file that was distributed with this source code.
  */
 
+use Evoweb\Imagemap\Form\Element\ImagemapElement;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Http\Response;
-use TYPO3\CMS\Core\Localization\LanguageService;
+use TYPO3\CMS\Core\Resource\File;
+use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 
 class ModalController
@@ -31,12 +34,10 @@ class ModalController
 
     public function __construct(StandaloneView $templateView = null)
     {
-        $this->getLanguageService()->includeLLFile('EXT:imagemap/Resources/Private/Language/locallang.xlf');
-
         if (!$templateView) {
             $templateView = GeneralUtility::makeInstance(StandaloneView::class);
-            $templateView->setTemplate('FormEngine/Modal');
             $templateView->setTemplateRootPaths(['EXT:imagemap/Resources/Private/Templates/']);
+            $templateView->setTemplate('FormEngine/Modal');
         }
         $this->templateView = $templateView;
     }
@@ -61,22 +62,47 @@ class ModalController
             $map = $record[$parameters['fieldName']];
             $maxWidth = $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['imagemap']['imageMaxWH'] ?? 800;
 
+            $config = $this->getFieldConfiguration($parameters['tableName'], $parameters['fieldName']);
+
+            $file = $this->getFile($config['tableName'], $config['fieldName'], $parameters['uid']);
+
             $formName = 'imagemap' . GeneralUtility::shortMD5(rand(1, 100000));
             $this->templateView->assignMultiple([
                 'parameters' => $parameters,
                 'data' => $map,
-                'scaleFactor' => $maxWidth / 1000,
+                'image' => $file,
+                'maxWidth' => $maxWidth,
                 'formName' => $formName,
                 'configuration' => \json_encode($this->getConfiguration($parameters, $record, $formName, $map))
             ]);
         } catch (\Exception $exception) {
         }
 
-        $response = new Response;
-        $a = $this->templateView->render();
-        $response->getBody()->write($a);
+        $response = GeneralUtility::makeInstance(Response::class);
+        $content = $this->templateView->render();
+        $response->getBody()->write($content);
 
         return $response;
+    }
+
+    protected function getFile($tableName, $fieldName, $uid):? File
+    {
+        $fileRepository = GeneralUtility::makeInstance(\TYPO3\CMS\Core\Resource\FileRepository::class);
+        $fileReferences = $fileRepository->findByRelation($tableName, $fieldName, $uid);
+        return $fileReferences ? $fileReferences[0]->getOriginalFile() : null;
+    }
+
+    protected function getFieldConfiguration($tableName, $fieldName): array
+    {
+        $defaultConfig = ImagemapElement::$defaultConfig;
+
+        $baseConfiguration = [];
+        if (isset($GLOBALS['TCA'][$tableName]) && isset($GLOBALS['TCA'][$tableName][$fieldName])) {
+            $baseConfiguration = $GLOBALS['TCA'][$tableName][$fieldName];
+        }
+
+        $config = array_replace_recursive($defaultConfig, $baseConfiguration);
+        return $config;
     }
 
     protected function getConfiguration(
@@ -105,10 +131,5 @@ class ModalController
     protected function getBackendUser():? BackendUserAuthentication
     {
         return $GLOBALS['BE_USER'] ?? null;
-    }
-
-    protected function getLanguageService():? LanguageService
-    {
-        return $GLOBALS['LANG'] ?? null;
     }
 }

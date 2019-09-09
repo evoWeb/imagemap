@@ -25,6 +25,9 @@
 				<source>Open Area Editor</source>
 			</trans-unit>
 
+			<trans-unit id="imagemap.modal.title">
+				<source>Imagemap area manipulation</source>
+			</trans-unit>
 			<trans-unit id="imagemap.form.addrect">
 				<source>Rect-Area</source>
 			</trans-unit>

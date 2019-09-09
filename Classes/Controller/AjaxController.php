@@ -17,6 +17,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Http\JsonResponse;
 use TYPO3\CMS\Core\Http\Response;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -53,6 +54,7 @@ class AjaxController
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
+     * @throws \TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException
      */
     public function browselinkUrlAction(ServerRequestInterface $request): ResponseInterface
     {
@@ -77,11 +79,13 @@ class AjaxController
             serialize($linkParameters['P']['fieldChangeFunc'])
         );
 
+        /** @var UriBuilder $uriBuilder */
         $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
-        $response = new Response('php://temp', 200, ['Content-Type' => 'application/json; charset=utf-8']);
-        $response->getBody()->write(\json_encode([
-            'url' => (string)$uriBuilder->buildUriFromRoute('wizard_link', $linkParameters)
-        ]));
+        $data = ['url' => (string)$uriBuilder->buildUriFromRoute('wizard_link', $linkParameters)];
+        /** @var JsonResponse $response */
+        $response = GeneralUtility::makeInstance(JsonResponse::class, $data, 200, [
+            'Content-Type' => 'application/json; charset=utf-8'
+        ]);
 
         return $response;
     }

@@ -13,7 +13,6 @@
 		"noImplicitThis": true,
 		"noImplicitReturns": true,
 		"pretty": true,
-		"baseUrl": "Sources/TypeScript",
 
 		"typeRoots": [
 			"node_modules/@types",
