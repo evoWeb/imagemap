@@ -397,9 +397,6 @@ class Circle extends Aggregation(fabric.Circle, AreaFormElement) {
 class Poly extends Aggregation(fabric.Polygon, AreaFormElement) {
   name: string = 'poly';
 
-  /**
-   * @type {Array}
-   */
   controls: Array<any> = [];
 
   constructor(points: Array<any>, options: AreaConfiguration) {
@@ -864,10 +861,10 @@ export default class AreaEditor {
   }
 
   initializeAreas(areas: Array<AreaConfiguration>) {
-    if (areas !== undefined) {
-      areas.forEach((area: AreaConfiguration) => {
-        area.color = AreaEditor.getRandomColor(area.color);
-        let areaElement,
+    areas = areas || [];
+    areas.forEach((area: AreaConfiguration) => {
+      area.color = AreaEditor.getRandomColor(area.color);
+      let areaElement,
           configuration = {
             ...area,
             ...this.areaConfig,
@@ -878,27 +875,26 @@ export default class AreaEditor {
             fill: AreaEditor.hexToRgbA(area.color, 0.3)
           };
 
-        switch (configuration.shape) {
-          case 'rect':
-            areaElement = this.addRect(configuration);
-            break;
+      switch (configuration.shape) {
+        case 'rect':
+          areaElement = this.addRect(configuration);
+          break;
 
-          case 'circle':
-            areaElement = this.addCircle(configuration);
-            break;
+        case 'circle':
+          areaElement = this.addCircle(configuration);
+          break;
 
-          case 'poly':
-            areaElement = this.addPoly(configuration);
-            break;
-        }
+        case 'poly':
+          areaElement = this.addPoly(configuration);
+          break;
+      }
 
-        area.editor = this;
-        this.areas.push(areaElement);
-        if (this.form) {
-          this.form.addArea(areaElement);
-        }
-      });
-    }
+      area.editor = this;
+      this.areas.push(areaElement);
+      if (this.form) {
+        this.form.addArea(areaElement);
+      }
+    });
   }
 
   removeAllAreas() {

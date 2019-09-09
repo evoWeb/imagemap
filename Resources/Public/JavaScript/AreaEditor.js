@@ -386,9 +386,6 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
         function Poly(points, options) {
             var _this = _super.call(this, points, options) || this;
             _this.name = 'poly';
-            /**
-             * @type {Array}
-             */
             _this.controls = [];
             _this.on('moved', _this.polygonMoved.bind(_this));
             return _this;
@@ -721,28 +718,27 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
         };
         AreaEditor.prototype.initializeAreas = function (areas) {
             var _this = this;
-            if (areas !== undefined) {
-                areas.forEach(function (area) {
-                    area.color = AreaEditor.getRandomColor(area.color);
-                    var areaElement, configuration = __assign(__assign(__assign({}, area), _this.areaConfig), { selectable: !_this.preview, hasControls: !_this.preview, stroke: area.color, strokeWidth: 1, fill: AreaEditor.hexToRgbA(area.color, 0.3) });
-                    switch (configuration.shape) {
-                        case 'rect':
-                            areaElement = _this.addRect(configuration);
-                            break;
-                        case 'circle':
-                            areaElement = _this.addCircle(configuration);
-                            break;
-                        case 'poly':
-                            areaElement = _this.addPoly(configuration);
-                            break;
-                    }
-                    area.editor = _this;
-                    _this.areas.push(areaElement);
-                    if (_this.form) {
-                        _this.form.addArea(areaElement);
-                    }
-                });
-            }
+            areas = areas || [];
+            areas.forEach(function (area) {
+                area.color = AreaEditor.getRandomColor(area.color);
+                var areaElement, configuration = __assign(__assign(__assign({}, area), _this.areaConfig), { selectable: !_this.preview, hasControls: !_this.preview, stroke: area.color, strokeWidth: 1, fill: AreaEditor.hexToRgbA(area.color, 0.3) });
+                switch (configuration.shape) {
+                    case 'rect':
+                        areaElement = _this.addRect(configuration);
+                        break;
+                    case 'circle':
+                        areaElement = _this.addCircle(configuration);
+                        break;
+                    case 'poly':
+                        areaElement = _this.addPoly(configuration);
+                        break;
+                }
+                area.editor = _this;
+                _this.areas.push(areaElement);
+                if (_this.form) {
+                    _this.form.addArea(areaElement);
+                }
+            });
         };
         AreaEditor.prototype.removeAllAreas = function () {
             var _this = this;
