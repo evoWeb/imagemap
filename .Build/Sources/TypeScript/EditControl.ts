@@ -25,11 +25,9 @@ class EditControl {
 
   private configuration: EditorConfiguration;
 
-  private editorOptions: EditorOptions;
-
   private currentModal: Modal;
 
-  private trigger: JQuery;
+  private button: JQuery;
 
   private image: JQuery;
 
@@ -44,95 +42,108 @@ class EditControl {
   private buttonSave: JQuery;
 
   constructor() {
-    this.initializeTrigger();
+    this.button = $('.t3js-area-wizard-trigger');
+
+    this.initialize();
   }
 
-  private initializeTrigger() {
-    $('.t3js-area-wizard-trigger').off('click').on('click', this.triggerHandler.bind(this));
+  private initialize() {
+    this.initializeEvents();
   }
 
-  private triggerHandler(event: JQueryEventObject) {
+  private initializeEvents() {
+    this.button.off('click').on('click', this.areaWizardTiggerClickHandler.bind(this));
+  }
+
+  private areaWizardTiggerClickHandler(event: JQueryEventObject) {
     event.preventDefault();
-    this.trigger = $(event.currentTarget);
-    this.show();
+    this.openModal();
   }
 
-  private show() {
-    let modalTitle = this.trigger.data('modalTitle'),
-      buttonAddrectText = this.trigger.data('buttonAddrectText'),
-      buttonAddcircleText = this.trigger.data('buttonAddcircleText'),
-      buttonAddpolyText = this.trigger.data('buttonAddpolyText'),
-      buttonDismissText = this.trigger.data('buttonDismissText'),
-      buttonSaveText = this.trigger.data('buttonSaveText'),
-      wizardUri = this.trigger.data('url'),
-      payload = this.trigger.data('payload'),
-      initWizardModal = this.initialize.bind(this);
-
+  private openModal() {
     Icons.getIcon(
       'spinner-circle',
       Icons.sizes.default,
       null,
       null,
       Icons.markupIdentifiers.inline
-    ).done((icon: string) => {
-      /**
-       * Open modal with areas to edit
-       */
-      this.currentModal = Modal.advanced({
-        additionalCssClasses: ['modal-area-wizard modal-image-manipulation'],
-        buttons: [
-          {
-            btnClass: 'btn-default pull-left button-add-rect',
-            icon: 'extensions-imagemap-rect',
-            text: buttonAddrectText,
-          },
-          {
-            btnClass: 'btn-default pull-left button-add-circle',
-            icon: 'extensions-imagemap-circle',
-            text: buttonAddcircleText,
-          },
-          {
-            btnClass: 'btn-default pull-left button-add-poly',
-            icon: 'extensions-imagemap-poly',
-            text: buttonAddpolyText,
-          },
-          {
-            btnClass: 'btn-default button-dismiss',
-            icon: 'actions-close',
-            text: buttonDismissText,
-          },
-          {
-            btnClass: 'btn-primary button-save',
-            icon: 'actions-document-save',
-            text: buttonSaveText,
-          },
-        ],
-        callback: (currentModal: JQuery) => {
-          $.post({
-            url: wizardUri,
-            data: payload
-          }).done((response) => {
-            currentModal.find('.t3js-modal-body').html(response).addClass('area-editor');
-            initWizardModal();
-          });
-        },
-        content: $('<div class="modal-loading">').append(icon),
-        size: Modal.sizes.full,
-        style: Modal.styles.dark,
-        title: modalTitle,
-      });
-
-      this.currentModal.on('hide.bs.modal', () => {
-        this.destroy();
-      });
-      // do not dismiss the modal when clicking beside it to avoid data loss
-      this.currentModal.data('bs.modal').options.backdrop = 'static';
-    });
+    ).done(this.iconLoaded.bind(this));
   }
 
-  private initialize() {
+  private iconLoaded(icon: string) {
+    let modalTitle: string = this.button.data('modalTitle'),
+      buttonAddRectangleText: string = this.button.data('buttonAddrectText'),
+      buttonAddCircleText: string = this.button.data('buttonAddcircleText'),
+      buttonAddPolygonText: string = this.button.data('buttonAddpolyText'),
+      buttonDismissText: string = this.button.data('buttonDismissText'),
+      buttonSaveText: string = this.button.data('buttonSaveText'),
+      wizardUri: string = this.button.data('url'),
+      payload: string = this.button.data('payload');
+
+    /**
+     * Open modal with areas to edit
+     */
+    this.currentModal = Modal.advanced({
+      additionalCssClasses: ['modal-area-wizard modal-image-manipulation'],
+      buttons: [
+        {
+          btnClass: 'btn-default pull-left button-add-rect',
+          icon: 'extensions-imagemap-rect',
+          text: buttonAddRectangleText,
+        },
+        {
+          btnClass: 'btn-default pull-left button-add-circle',
+          icon: 'extensions-imagemap-circle',
+          text: buttonAddCircleText,
+        },
+        {
+          btnClass: 'btn-default pull-left button-add-poly',
+          icon: 'extensions-imagemap-poly',
+          text: buttonAddPolygonText,
+        },
+        {
+          btnClass: 'btn-default button-dismiss',
+          icon: 'actions-close',
+          text: buttonDismissText,
+        },
+        {
+          btnClass: 'btn-primary button-save',
+          icon: 'actions-document-save',
+          text: buttonSaveText,
+        },
+      ],
+      content: $('<div class="modal-loading">').append(icon),
+      size: Modal.sizes.full,
+      style: Modal.styles.dark,
+      title: modalTitle,
+      callback: (currentModal: JQuery) => {
+        this.currentModal = currentModal;
+
+        $.post({
+          url: wizardUri,
+          data: payload
+        }).done(this.modalLoaded.bind(this));
+      },
+    });
+
+    this.currentModal.on('hide.bs.modal', () => {
+      this.destroy();
+    });
+    // do not dismiss the modal when clicking beside it to avoid data loss
+    this.currentModal.data('bs.modal').options.backdrop = 'static';
+  }
+
+  private modalLoaded(response: string) {
+    this.currentModal
+      .find('.t3js-modal-body')
+      .html(response)
+      .addClass('area-editor');
+    this.initializeModal();
+  }
+
+  private initializeModal() {
     this.image = this.currentModal.find('.image img');
-    this.configuration = this.currentModal.find('.picture').data('configuration');
+    this.configuration = this.currentModal.find('.image').data('configuration');
     this.buttonAddRect = this.currentModal.find('.button-add-rect').off('click').on('click', this.buttonAddRectHandler.bind(this));
     this.buttonAddCircle = this.currentModal.find('.button-add-circle').off('click').on('click', this.buttonAddCircleHandler.bind(this));
     this.buttonAddPoly = this.currentModal.find('.button-add-poly').off('click').on('click', this.buttonAddPolyHandler.bind(this));
@@ -142,56 +153,28 @@ class EditControl {
     $([document, top.document]).on('mousedown.minicolors touchstart.minicolors', this.hideColorSwatch);
 
     this.image.on('load', () => {
-      setTimeout(this.initializeArea.bind(this), 100);
+      setTimeout(() => {
+        this.initializeAreaEditor(
+          {
+            canvas: {
+              width: parseInt(this.image.css('width')),
+              height: parseInt(this.image.css('height')),
+              top: parseInt(this.image.css('height')) * -1,
+            },
+            fauxFormDocument: window.document,
+            browseLinkUrlAjaxUrl: window.TYPO3.settings.ajaxUrls.imagemap_browselink_url,
+            browseLink: this.configuration.browseLink
+          },
+          $('.picture').data('existingAreas')
+        );
+      }, 100);
     });
   }
 
-  private initializeArea() {
-    let scaleFactor = this.currentModal.find('.picture').data('scale-factor'),
-      width = parseInt(this.image.css('width')),
-      height = parseInt(this.image.css('height'));
-    this.editorOptions = {
-      fauxFormDocument: window.document,
-      canvas: {
-        width: width,
-        height: height,
-        top: height * -1,
-      },
-      browseLinkUrlAjaxUrl: window.TYPO3.settings.ajaxUrls.imagemap_browselink_url,
-      browseLink: this.configuration.browseLink
-    };
-console.log(this.editorOptions.fauxFormDocument);
+  private initializeAreaEditor(editorOptions: EditorOptions, areas: Array<any>) {
     let canvas = (this.currentModal.find('#modal-canvas')[0] as HTMLElement);
-    this.areaEditor = new AreaEditor(this.editorOptions, canvas, '#areasForm', this.currentModal[0]);
-
-    window.imagemap = { areaEditor: this.areaEditor };
-
-    ((scaleFactor) => {
-      this.areaEditor.setScale(scaleFactor);
-
-      let that = this,
-        $magnify = $('#magnify'),
-        $zoomOut = $magnify.find('.zoomout'),
-        $zoomIn = $magnify.find('.zoomin');
-
-      if (scaleFactor < 1) {
-        $zoomIn.removeClass('hide');
-
-        $zoomIn.click(() => {
-          that.areaEditor.setScale(1);
-          $zoomIn.hide();
-          $zoomOut.show();
-        });
-
-        $zoomOut.click(() => {
-          that.areaEditor.setScale(scaleFactor);
-          $zoomOut.hide();
-          $zoomIn.show();
-        });
-      }
-    })(scaleFactor);
-
-    this.areaEditor.initializeAreas(this.configuration.existingAreas);
+    this.areaEditor = new AreaEditor(editorOptions, canvas, '#areasForm', this.currentModal[0]);
+    this.areaEditor.initializeAreas(areas);
   }
 
   private destroy() {

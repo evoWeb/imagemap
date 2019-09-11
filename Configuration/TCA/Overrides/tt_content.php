@@ -44,5 +44,5 @@ $tempColumns = [
 // CSH context sensitive help
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addLLrefForTCAdescr(
     'tt_content',
-    'EXT:imagemap/Resources/Private/Language/locallang_csh_ttc.xlf'
+    'EXT:imagemap/Resources/Private/Language/locallang_csh_ttcontent.xlf'
 );

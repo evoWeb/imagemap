@@ -19,20 +19,6 @@
         padding: 20px;
         width: 100%;
 
-        #magnify {
-            z-index: 150;
-            position: absolute;
-            right: 10px;
-            top: 10px;
-            cursor: pointer;
-            width: 32px;
-
-            .zoomin, .zoomout {
-                height: 32px;
-                width: 32px;
-            }
-        }
-
         img {
             max-width: 100%
         }

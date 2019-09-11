@@ -10,4 +10,9 @@ return [
         'path' => '/imagemap/browselink/url',
         'target' => \Evoweb\Imagemap\Controller\AjaxController::class . '::browselinkUrlAction'
     ],
+
+    'wizard_imagemap_area' => [
+        'path' => '/imagemap/modal',
+        'target' => \Evoweb\Imagemap\Controller\Wizard\ImagemapAreaController::class . '::getWizardContent'
+    ],
 ];

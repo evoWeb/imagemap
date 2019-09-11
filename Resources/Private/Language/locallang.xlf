@@ -29,25 +29,19 @@
 				<source>Imagemap area manipulation</source>
 			</trans-unit>
 			<trans-unit id="imagemap.form.addrect">
-				<source>Rect-Area</source>
+				<source>Rectange</source>
 			</trans-unit>
 			<trans-unit id="imagemap.form.addcircle">
-				<source>Circle-Area</source>
+				<source>Circle</source>
 			</trans-unit>
 			<trans-unit id="imagemap.form.addpoly">
-				<source>Poly-Area</source>
+				<source>Polygon</source>
 			</trans-unit>
 			<trans-unit id="imagemap.form.dismiss">
 				<source>Cancel</source>
 			</trans-unit>
 			<trans-unit id="imagemap.form.save">
 				<source>Accept</source>
-			</trans-unit>
-			<trans-unit id="imagemap.form.zoomin">
-				<source>Zoom image to 100%</source>
-			</trans-unit>
-			<trans-unit id="imagemap.form.zoomout">
-				<source>Zoom image to fit the Wizard popup.</source>
 			</trans-unit>
 			<trans-unit id="imagemap.form.area.label">
 				<source>Label</source>

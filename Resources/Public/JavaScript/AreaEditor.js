@@ -67,7 +67,9 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
                 for (var _i = 0; _i < arguments.length; _i++) {
                     args[_i] = arguments[_i];
                 }
-                var _this = _super.apply(this, __spread(args)) || this;
+                var _this = this;
+                console.log(args);
+                _this = _super.apply(this, __spread(args)) || this;
                 mixins.forEach(function (mixin) {
                     copyProperties(_this, (new mixin));
                 });
@@ -98,13 +100,22 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
         function AreaFormElement() {
             var _this = _super !== null && _super.apply(this, arguments) || this;
             _this.id = 0;
-            _this.name = '';
+            _this.shape = '';
+            _this.coords = '';
             _this.link = '';
+            _this.color = '';
+            _this.alt = '';
+            _this.title = '';
+            _this.name = '';
             _this.eventDelay = 0;
             _this.attributes = {};
             return _this;
         }
-        AreaFormElement.prototype.postAddToForm = function () {
+        AreaFormElement.prototype.addForm = function (form) {
+            this.form = form;
+            this.postAddForm();
+        };
+        AreaFormElement.prototype.postAddForm = function () {
             this.id = fabric.Object.__uid++;
             this.initializeElement();
             this.updateFields();
@@ -248,7 +259,7 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
          * Add faux input as target for browselink which listens for changes and writes value to real field
          */
         AreaFormElement.prototype.addFauxInput = function () {
-            if (this.form.fauxForm !== null) {
+            if (typeof this.form.fauxForm !== 'undefined') {
                 var fauxInput = this.editor.fauxFormDocument.createElement('input');
                 fauxInput.setAttribute('id', 'link' + this.id);
                 fauxInput.setAttribute('data-formengine-input-name', 'link' + this.id);
@@ -571,10 +582,6 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
                 area.initializeArrows();
             });
         };
-        AreaForm.prototype.addArea = function (area) {
-            area.form = this;
-            area.postAddToForm();
-        };
         AreaForm.prototype.moveArea = function (area, offset) {
             var index = this.editor.areas.indexOf(area), newIndex = index + offset, parent = area.element.parentNode;
             if (newIndex > -1 && newIndex < this.editor.areas.length) {
@@ -656,64 +663,68 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
             this.canvas.setZoom(this.canvas.getZoom() * (scaling ? scaling : 1));
         };
         AreaEditor.prototype.initializeCanvas = function (canvas, options) {
+            this.canvas = new fabric.Canvas(canvas, __assign(__assign({}, options.canvas), { selection: false, preserveObjectStacking: true, hoverCursor: this.preview ? 'default' : 'move' }));
+            this.canvas.on('object:moving', this.canvasObjectMoving);
+            this.canvas.on('selection:created', this.canvasSelectionCreated);
+            this.canvas.on('selection:updated', this.canvasSelectionUpdated);
+        };
+        AreaEditor.prototype.canvasObjectMoving = function (event) {
+            var element = event.target;
+            switch (element.type) {
+                case 'control':
+                    var center = element.getCenterPoint();
+                    element.point.x = center.x - element.polygon.left;
+                    element.point.y = center.y - element.polygon.top;
+                    break;
+                case 'polygon':
+                    element.controls.forEach(function (control) {
+                        control.left = element.left + control.point.x;
+                        control.top = element.top + control.point.y;
+                    });
+                    break;
+            }
+        };
+        AreaEditor.prototype.canvasSelectionCreated = function (event) {
+            var activePolygon = null;
+            if (event.target.type === 'polygon') {
+                activePolygon = event.target;
+                // show controls of active polygon
+                activePolygon.controls.forEach(function (control) {
+                    control.opacity = 1;
+                });
+                this.canvas.renderAll();
+            }
+        };
+        AreaEditor.prototype.canvasSelectionUpdated = function (event) {
             var _this = this;
             var activePolygon = null;
-            this.canvas = new fabric.Canvas(canvas, __assign(__assign({}, options.canvas), { selection: false, preserveObjectStacking: true, hoverCursor: this.preview ? 'default' : 'move' }));
-            this.canvas.on('object:moving', function (event) {
-                var element = event.target;
-                switch (element.type) {
-                    case 'control':
-                        var center = element.getCenterPoint();
-                        element.point.x = center.x - element.polygon.left;
-                        element.point.y = center.y - element.polygon.top;
-                        break;
-                    case 'polygon':
-                        element.controls.forEach(function (control) {
-                            control.left = element.left + control.point.x;
-                            control.top = element.top + control.point.y;
-                        });
-                        break;
+            event.deselected.forEach(function (element) {
+                if (element.type === 'polygon' && event.selected[0].type !== 'control') {
+                    // hide controls of active polygon
+                    element.controls.forEach(function (control) {
+                        control.opacity = 0;
+                    });
+                    activePolygon = null;
+                    _this.canvas.renderAll();
+                }
+                else if (element.type === 'control') {
+                    // hide controls of active polygon
+                    activePolygon.controls.forEach(function (control) {
+                        control.opacity = 0;
+                    });
+                    activePolygon = null;
+                    _this.canvas.renderAll();
                 }
             });
-            this.canvas.on('selection:created', function (event) {
-                if (event.target.type === 'polygon') {
-                    activePolygon = event.target;
-                    // show controls of active polygon
-                    activePolygon.controls.forEach(function (control) {
+            event.selected.forEach(function (element) {
+                if (element.type === 'polygon') {
+                    activePolygon = element;
+                    // hide controls of active polygon
+                    element.controls.forEach(function (control) {
                         control.opacity = 1;
                     });
                     _this.canvas.renderAll();
                 }
-            });
-            this.canvas.on('selection:updated', function (event) {
-                event.deselected.forEach(function (element) {
-                    if (element.type === 'polygon' && event.selected[0].type !== 'control') {
-                        // hide controls of active polygon
-                        element.controls.forEach(function (control) {
-                            control.opacity = 0;
-                        });
-                        activePolygon = null;
-                        _this.canvas.renderAll();
-                    }
-                    else if (element.type === 'control') {
-                        // hide controls of active polygon
-                        activePolygon.controls.forEach(function (control) {
-                            control.opacity = 0;
-                        });
-                        activePolygon = null;
-                        _this.canvas.renderAll();
-                    }
-                });
-                event.selected.forEach(function (element) {
-                    if (element.type === 'polygon') {
-                        activePolygon = element;
-                        // hide controls of active polygon
-                        element.controls.forEach(function (control) {
-                            control.opacity = 1;
-                        });
-                        _this.canvas.renderAll();
-                    }
-                });
             });
         };
         AreaEditor.prototype.initializeAreas = function (areas) {
@@ -724,19 +735,19 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
                 var areaElement, configuration = __assign(__assign(__assign({}, area), _this.areaConfig), { selectable: !_this.preview, hasControls: !_this.preview, stroke: area.color, strokeWidth: 1, fill: AreaEditor.hexToRgbA(area.color, 0.3) });
                 switch (configuration.shape) {
                     case 'rect':
-                        areaElement = _this.addRect(configuration);
+                        areaElement = _this.addRectangle(configuration);
                         break;
                     case 'circle':
                         areaElement = _this.addCircle(configuration);
                         break;
                     case 'poly':
-                        areaElement = _this.addPoly(configuration);
+                        areaElement = _this.addPolygon(configuration);
                         break;
                 }
                 area.editor = _this;
                 _this.areas.push(areaElement);
                 if (_this.form) {
-                    _this.form.addArea(areaElement);
+                    areaElement.addForm(_this.form);
                 }
             });
         };
@@ -744,7 +755,7 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
             var _this = this;
             this.areas.forEach(function (area) { _this.deleteArea(area); });
         };
-        AreaEditor.prototype.addRect = function (configuration) {
+        AreaEditor.prototype.addRectangle = function (configuration) {
             var _a = __read(configuration.coords.split(','), 4), left = _a[0], top = _a[1], right = _a[2], bottom = _a[3], area = new Rect(__assign(__assign({}, configuration), { left: parseInt(left), top: parseInt(top), width: parseInt(right) - parseInt(left), height: parseInt(bottom) - parseInt(top) }));
             this.canvas.add(area);
             return area;
@@ -760,7 +771,7 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
             this.canvas.add(area);
             return area;
         };
-        AreaEditor.prototype.addPoly = function (configuration) {
+        AreaEditor.prototype.addPolygon = function (configuration) {
             var options = __assign(__assign({}, configuration), { selectable: true, hasControls: false, objectCaching: false, controlConfig: this.areaConfig }), points = [], coordsXY = options.coords.split(','), left = 100000, top = 100000, i = 0;
             if (coordsXY.length % 2) {
                 throw new Error('Bad coords count');

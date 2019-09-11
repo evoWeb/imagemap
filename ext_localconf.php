@@ -17,8 +17,6 @@ call_user_func(function () {
     $iconRegistry = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Imaging\IconRegistry::class);
     $icons = [
         'content' => 'content-imagemap.svg',
-        'zoomin' => 'search-plus.svg',
-        'zoomout' => 'search-minus.svg',
         'circle' => 'draw-circle.svg',
         'poly' => 'draw-polygon.svg',
         'rect' => 'draw-square.svg',

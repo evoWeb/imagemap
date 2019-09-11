@@ -12,43 +12,38 @@ define(["require", "exports", "jquery", "./AreaEditor"], function (require, expo
     "use strict";
     var FormElement = /** @class */ (function () {
         function FormElement() {
+            this.previewRerenderAjaxUrl = '';
             this.control = $('.imagemap-control:eq(0)');
-            this.image = this.control.find('.image img');
+            this.image = this.control.find('.image');
             this.canvas = this.control.find('.picture');
+            this.previewRerenderAjaxUrl = window.TYPO3.settings.ajaxUrls.imagemap_preview_rerender;
             this.initialize();
         }
         FormElement.prototype.initialize = function () {
-            this.editorOptions = {
+            this.initializeEvents();
+            this.initializeAreaEditor({
                 canvas: {
                     width: parseInt(this.image.css('width')),
                     height: parseInt(this.image.css('height')),
                     top: parseInt(this.image.css('height')) * -1,
                 },
-                previewRerenderAjaxUrl: window.TYPO3.settings.ajaxUrls.imagemap_preview_rerender
-            };
-            this.initializeAreaEditor(this.editorOptions);
-            this.initializeEvents();
-            this.initializeScaleFactor(this.canvas.data('thumbnail-scale'));
-            this.initializeAreas(this.canvas.data('existing-areas'));
+            }, this.canvas.data('existingAreas'));
         };
-        FormElement.prototype.initializeAreaEditor = function (editorOptions) {
+        FormElement.prototype.initializeAreaEditor = function (editorOptions, areas) {
             var canvas = this.control.find('#canvas')[0];
             this.areaEditor = new AreaEditor_1.default(editorOptions, canvas, '', window.document);
-        };
-        FormElement.prototype.initializeScaleFactor = function (scaleFactor) {
-            this.areaEditor.setScale(scaleFactor);
+            this.areaEditor.initializeAreas(areas);
         };
         FormElement.prototype.initializeEvents = function () {
-            this.control.find('input[type=hidden]').on('imagemap:changed', this.imagemapChangedHandler.bind(this));
-        };
-        FormElement.prototype.initializeAreas = function (areas) {
-            this.areaEditor.initializeAreas(areas);
+            this.control
+                .find('.imagemap-hidden-value')
+                .on('imagemap:changed', this.imagemapChangedHandler.bind(this));
         };
         FormElement.prototype.imagemapChangedHandler = function (event) {
             var _this = this;
             var $field = $(event.currentTarget);
             $.ajax({
-                url: this.editorOptions.previewRerenderAjaxUrl,
+                url: this.previewRerenderAjaxUrl,
                 method: 'POST',
                 data: {
                     P: {

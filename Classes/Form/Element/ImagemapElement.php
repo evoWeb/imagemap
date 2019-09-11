@@ -14,12 +14,12 @@ namespace Evoweb\Imagemap\Form\Element;
  */
 
 use TYPO3\CMS\Backend\Routing\UriBuilder;
-use TYPO3\CMS\Core\Imaging\ImageManipulation\Area;
-use TYPO3\CMS\Core\Resource\File;
+use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
 use TYPO3\CMS\Core\Utility\StringUtility;
+use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 
 class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElement
@@ -27,7 +27,7 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
     /**
      * @var string
      */
-    private $wizardRouteName = 'imagemap_modal';
+    private $wizardRouteName = 'ajax_wizard_imagemap_area';
 
     /**
      * Default element configuration
@@ -96,12 +96,10 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
         $parameterArray = $this->data['parameterArray'];
         $config = $this->populateConfiguration($parameterArray['fieldConf']['config']);
 
-        $file = $this->getFile($this->data['databaseRow'], $config);
-        if (!$file) {
+        $fileReference = $this->getFileReference($this->data['databaseRow'], $config);
+        if (!$fileReference) {
             // Early return in case we do not find a file
-            $resultArray['html'] = $this->getLanguageService()->sL(
-                'LLL:EXT:imagemap/Resources/Private/Language/locallang.xlf:imagemap.element.no_image'
-            );
+            $resultArray['html'] = LocalizationUtility::translate('imagemap.element.no_image', 'imagemap');
             return $resultArray;
         }
 
@@ -124,14 +122,15 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
             'fieldControl' => $fieldControlHtml,
             'fieldWizard' => $fieldWizardHtml,
             'isAllowedFileExtension' => in_array(
-                strtolower($file->getExtension()),
+                strtolower($fileReference->getOriginalFile()->getExtension()),
                 GeneralUtility::trimExplode(',', strtolower($config['allowedExtensions'])),
                 true
             ),
-            'image' => $file,
+            'image' => $fileReference,
+            'maxWidth' => $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['imagemap']['previewImageMaxWH'] ?? 400,
             'formEngine' => [
                 'field' => [
-                    'value' => htmlspecialchars($this->data['databaseRow'][$this->data['fieldName']]),
+                    'value' => htmlspecialchars(trim($this->data['databaseRow'][$this->data['fieldName']])),
                     'name' => $parameterArray['itemFormElName'],
                     'existingAreas' => $this->getExistingAreas(),
                 ],
@@ -139,8 +138,7 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
             ],
             'config' => $config,
             'wizardUri' => $this->getWizardUri(),
-            'wizardPayload' => \json_encode($this->getWizardPayload($parameterArray)),
-            'previewUrl' => $this->getPreviewUrl($this->data['databaseRow'], $file),
+            'wizardPayload' => \json_encode($this->getWizardPayload($fileReference)),
         ];
 
         if ($arguments['isAllowedFileExtension']) {
@@ -161,22 +159,22 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
         return $resultArray;
     }
 
-    protected function getFile(array $row, array $config):? File
+    protected function getFileReference(array $row, array $config):? FileReference
     {
-        $file = null;
+        $fileReference = null;
         $fileUid = !empty($row[$config['fieldName']]) ? $row[$config['fieldName']] : null;
         if (is_array($fileUid) && isset($fileUid[0]['uid'])) {
             $fileUid = $fileUid[0]['uid'];
         }
         if (MathUtility::canBeInterpretedAsInteger($fileUid)) {
             try {
-                $file = ResourceFactory::getInstance()->getFileReferenceObject($fileUid)->getOriginalFile();
+                $fileReference = ResourceFactory::getInstance()->getFileReferenceObject($fileUid);
             } catch (\throwable $e) {
             }
         } else {
             try {
                 $fileRepository = GeneralUtility::makeInstance(\TYPO3\CMS\Core\Resource\FileRepository::class);
-                $file = $fileRepository->findByRelation(
+                $fileReference = $fileRepository->findByRelation(
                     $config['tableName'],
                     $config['fieldName'],
                     $row['uid']
@@ -184,29 +182,9 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
             } catch (\Throwable $e) {
             }
         }
-        return $file;
+        return $fileReference;
     }
 
-    protected function getPreviewUrl(array $databaseRow, File $file): string
-    {
-        $previewUrl = '';
-        // Hook to generate a preview URL
-        $hookParameters = [
-            'databaseRow' => $databaseRow,
-            'file' => $file,
-            'previewUrl' => $previewUrl,
-        ];
-        $scOptions = $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS'];
-        foreach ($scOptions['Backend/Form/Element/ImageManipulationElement']['previewUrl'] ?? [] as $listener) {
-            $previewUrl = GeneralUtility::callUserFunction($listener, $hookParameters, $this);
-        }
-        return $previewUrl;
-    }
-
-    /**
-     * @param array $baseConfiguration
-     * @return array
-     */
     protected function populateConfiguration(array $baseConfiguration): array
     {
         $defaultConfig = self::$defaultConfig;
@@ -223,16 +201,8 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
         }
 
         $mapAreas = [];
-        foreach ($config['mapAreas'] as $id => $cropVariant) {
-            // Ignore disabled crop variants
-            if (!empty($cropVariant['disabled'])) {
-                continue;
-            }
-            // Enforce a crop area (default is full image)
-            if (empty($cropVariant['mapArea'])) {
-                $cropVariant['mapArea'] = Area::createEmpty()->asArray();
-            }
-            $mapAreas[$id] = $cropVariant;
+        foreach ($config['mapAreas'] as $id => $mapArea) {
+            $mapAreas[$id] = $mapArea;
         }
 
         $config['mapAreas'] = $mapAreas;
@@ -258,24 +228,22 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
     {
         try {
             $url = (string)$this->uriBuilder->buildUriFromRoute($this->wizardRouteName);
-        } catch (\throwable $e) {}
+        } catch (\throwable $e) {
+        }
         return $url ?? '';
     }
 
-    protected function getWizardPayload(array $parameterArray): array
+    protected function getWizardPayload(FileReference $fileReference): array
     {
+        $arguments = [
+            'image' => $fileReference->getUid(),
+            'tableName' => $this->data['tableName'],
+            'fieldName' => $this->data['fieldName'],
+            'uid' => $this->data['databaseRow']['uid']
+        ];
         $uriArguments = [
-            'P' => [
-                'tableName' => $this->data['tableName'],
-                'uid' => $this->data['databaseRow']['uid'],
-                'pid' => $this->data['databaseRow']['pid'],
-                'fieldName' => $this->data['fieldName'],
-                'formName' => 'editform',
-                'itemName' => $parameterArray['itemFormElName'],
-                'hmac' => GeneralUtility::hmac('editform' . $parameterArray['itemFormElName'], 'wizard_js'),
-                'fieldChangeFunc' => $parameterArray['fieldChangeFunc'],
-                'fieldChangeFuncHash' => GeneralUtility::hmac(serialize($parameterArray['fieldChangeFunc'])),
-            ],
+            'arguments' => json_encode($arguments),
+            'signature' => GeneralUtility::hmac(json_encode($arguments), $this->wizardRouteName)
         ];
 
         return $uriArguments;
@@ -283,6 +251,6 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
 
     protected function getExistingAreas(): string
     {
-        return $this->data['databaseRow'][$this->data['fieldName']];
+        return htmlspecialchars(trim($this->data['databaseRow'][$this->data['fieldName']]));
     }
 }

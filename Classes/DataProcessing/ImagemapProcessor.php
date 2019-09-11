@@ -2,8 +2,6 @@
 declare(strict_types = 1);
 namespace Evoweb\Imagemap\DataProcessing;
 
-use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
-
 /**
  * This file is developed by evoWeb.
  *
@@ -14,6 +12,8 @@ use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
+
+use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 
 class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcessorInterface
 {

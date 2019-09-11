@@ -10,4 +10,4 @@ mod.wizards.newContentElement.wizardItems.common {
   show := addToList(imagemap)
 }
 
-mod.web_layout.tt_content.preview.list.sfregister_form = EXT:sf_register/Resources/Private/Templates/Preview/Form.html
+mod.web_layout.tt_content.preview.imagemap = EXT:sf_register/Resources/Private/Templates/Preview/Imagemap.html
