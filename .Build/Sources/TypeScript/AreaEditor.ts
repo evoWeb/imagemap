@@ -28,7 +28,6 @@ let Aggregation = (baseClass: any, ...mixins: Array<any>) => {
 
 		// this function copies all properties and symbols, filtering out some special ones
 		let copyProperties = (target: any, source: any) => {
-			/** @type {Array} */
 			let propertySymbols = (Object.getOwnPropertySymbols(source) as unknown as Array<string>);
 			Object.getOwnPropertyNames(source)
 				.concat(propertySymbols)
@@ -397,6 +396,8 @@ class Circle extends Aggregation(fabric.Circle, AreaFormElement) {
 class Poly extends Aggregation(fabric.Polygon, AreaFormElement) {
   name: string = 'poly';
 
+  points: Array<any> = [];
+
   controls: Array<any> = [];
 
   constructor(points: Array<any>, options: AreaConfiguration) {
@@ -697,7 +698,7 @@ class AreaForm {
       url: this.editor.browseLinkUrlAjaxUrl,
       context: area,
       data: data
-    }).done((response) => {
+    }).done((response: {url: string}) => {
       let vHWin = window.open(
         response.url,
         '',

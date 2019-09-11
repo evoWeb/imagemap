@@ -30,7 +30,7 @@ define(["require", "exports", "jquery", "./AreaEditor", "TYPO3/CMS/Backend/Icons
                  * Open modal with areas to edit
                  */
                 _this.currentModal = Modal.advanced({
-                    additionalCssClasses: ['modal-area-wizard'],
+                    additionalCssClasses: ['modal-area-wizard modal-image-manipulation'],
                     buttons: [
                         {
                             btnClass: 'btn-default pull-left button-add-rect',
@@ -106,6 +106,7 @@ define(["require", "exports", "jquery", "./AreaEditor", "TYPO3/CMS/Backend/Icons
                 browseLinkUrlAjaxUrl: window.TYPO3.settings.ajaxUrls.imagemap_browselink_url,
                 browseLink: this.configuration.browseLink
             };
+            console.log(this.editorOptions.fauxFormDocument);
             var canvas = this.currentModal.find('#modal-canvas')[0];
             this.areaEditor = new AreaEditor_1.default(this.editorOptions, canvas, '#areasForm', this.currentModal[0]);
             window.imagemap = { areaEditor: this.areaEditor };

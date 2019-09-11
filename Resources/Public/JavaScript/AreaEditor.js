@@ -77,7 +77,6 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
         }(baseClass));
         // this function copies all properties and symbols, filtering out some special ones
         var copyProperties = function (target, source) {
-            /** @type {Array} */
             var propertySymbols = Object.getOwnPropertySymbols(source);
             Object.getOwnPropertyNames(source)
                 .concat(propertySymbols)
@@ -386,6 +385,7 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
         function Poly(points, options) {
             var _this = _super.call(this, points, options) || this;
             _this.name = 'poly';
+            _this.points = [];
             _this.controls = [];
             _this.on('moved', _this.polygonMoved.bind(_this));
             return _this;

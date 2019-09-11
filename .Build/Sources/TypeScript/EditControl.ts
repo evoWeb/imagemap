@@ -79,7 +79,7 @@ class EditControl {
        * Open modal with areas to edit
        */
       this.currentModal = Modal.advanced({
-        additionalCssClasses: ['modal-area-wizard'],
+        additionalCssClasses: ['modal-area-wizard modal-image-manipulation'],
         buttons: [
           {
             btnClass: 'btn-default pull-left button-add-rect',
@@ -160,7 +160,7 @@ class EditControl {
       browseLinkUrlAjaxUrl: window.TYPO3.settings.ajaxUrls.imagemap_browselink_url,
       browseLink: this.configuration.browseLink
     };
-
+console.log(this.editorOptions.fauxFormDocument);
     let canvas = (this.currentModal.find('#modal-canvas')[0] as HTMLElement);
     this.areaEditor = new AreaEditor(this.editorOptions, canvas, '#areasForm', this.currentModal[0]);
 
