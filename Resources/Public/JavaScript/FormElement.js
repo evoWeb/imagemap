@@ -13,36 +13,34 @@ define(["require", "exports", "jquery", "./AreaManipulation"], function (require
     var FormElement = /** @class */ (function () {
         function FormElement() {
             this.previewRerenderAjaxUrl = '';
+            this.previewRerenderAjaxUrl = window.TYPO3.settings.ajaxUrls.imagemap_preview_rerender;
             this.control = $('.imagemap-control:eq(0)');
             this.image = this.control.find('.image');
-            this.previewRerenderAjaxUrl = window.TYPO3.settings.ajaxUrls.imagemap_preview_rerender;
             this.initializeEvents();
-            this.initializeAreaEditor();
+            this.initializeAreaManipulation();
         }
-        FormElement.prototype.initializeAreaEditor = function () {
-            this.areaManipulation = new AreaManipulation_1.default(this.control[0], {
-                canvas: {
-                    width: parseInt(this.image.css('width')),
-                    height: parseInt(this.image.css('height')),
-                    top: parseInt(this.image.css('height')) * -1,
-                },
-                canvasSelector: '#canvas',
-            });
-            this.areaManipulation.initializeAreas(this.control.find('.picture').data('existingAreas'));
-        };
         FormElement.prototype.initializeEvents = function () {
             this.control
                 .find('.imagemap-hidden-value')
                 .on('imagemap:changed', this.imagemapChangedHandler.bind(this));
         };
+        FormElement.prototype.initializeAreaManipulation = function () {
+            this.areaManipulation = new AreaManipulation_1.default(this.control[0], {
+                canvas: {
+                    width: parseInt(this.image.css('width')),
+                    height: parseInt(this.image.css('height')),
+                },
+                canvasSelector: '#canvas',
+            });
+            this.areaManipulation.initializeAreas(this.control.find('.picture').data('existingAreas'));
+        };
         FormElement.prototype.imagemapChangedHandler = function (event) {
-            var _this = this;
             var $field = $(event.currentTarget);
-            $.ajax({
+            var request = $.ajax({
                 url: this.previewRerenderAjaxUrl,
                 method: 'POST',
                 data: {
-                    P: {
+                    arguments: {
                         itemFormElName: $field.attr('name'),
                         tableName: $field.data('tablename'),
                         fieldName: $field.data('fieldname'),
@@ -50,15 +48,17 @@ define(["require", "exports", "jquery", "./AreaManipulation"], function (require
                         value: $field.val()
                     }
                 }
-            }).done(function (data, textStatus) {
-                if (textStatus === 'success') {
-                    _this.control
-                        .find('.modifiedState')
-                        .css('display', 'block');
-                    _this.areaManipulation.removeAllAreas();
-                    _this.areaManipulation.initializeAreas(data);
-                }
             });
+            request.done(this.renderPreviewAreas.bind(this));
+        };
+        FormElement.prototype.renderPreviewAreas = function (data, textStatus) {
+            if (textStatus === 'success') {
+                this.control
+                    .find('.modifiedState')
+                    .css('display', 'block');
+                this.areaManipulation.removeAllAreas();
+                this.areaManipulation.initializeAreas(data);
+            }
         };
         return FormElement;
     }());

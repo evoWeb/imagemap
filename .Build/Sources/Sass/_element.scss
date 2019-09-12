@@ -6,13 +6,11 @@
         position: relative;
     }
 
-    .canvas {
-        display: none;
+    .canvas-container {
         left: 0;
-        overflow: hidden;
-        position: relative;
         top: 0;
-        width: 100%;
+        overflow: hidden;
+        z-index: 2;
     }
 
     .modifiedState {

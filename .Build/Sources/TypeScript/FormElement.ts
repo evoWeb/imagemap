@@ -29,7 +29,7 @@ class FormElement {
     this.image = this.control.find('.image');
 
     this.initializeEvents();
-    this.initializeAreaEditor();
+    this.initializeAreaManipulation();
   }
 
   private initializeEvents() {
@@ -38,14 +38,13 @@ class FormElement {
       .on('imagemap:changed', this.imagemapChangedHandler.bind(this));
   }
 
-  private initializeAreaEditor() {
+  private initializeAreaManipulation() {
     this.areaManipulation = new AreaManipulation(
       this.control[0],
       {
         canvas: {
           width: parseInt(this.image.css('width')),
           height: parseInt(this.image.css('height')),
-          top: parseInt(this.image.css('height')) * -1,
         },
         canvasSelector: '#canvas',
       }

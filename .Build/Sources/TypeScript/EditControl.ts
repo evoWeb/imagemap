@@ -52,10 +52,12 @@ class EditControl {
   }
 
   private initializeEvents() {
-    this.button.off('click').on('click', this.areaWizardTiggerClickHandler.bind(this));
+    this.button
+      .off('click')
+      .on('click', this.areaWizardTriggerClickHandler.bind(this));
   }
 
-  private areaWizardTiggerClickHandler(event: JQueryEventObject) {
+  private areaWizardTriggerClickHandler(event: JQueryEventObject) {
     event.preventDefault();
     this.openModal();
   }
@@ -87,27 +89,42 @@ class EditControl {
       additionalCssClasses: ['modal-area-wizard modal-image-manipulation'],
       buttons: [
         {
-          btnClass: 'btn-default pull-left button-add-rect',
+          btnClass: 'btn-default pull-left',
+          dataAttributes: {
+            method: 'add-rectangle',
+          },
           icon: 'extensions-imagemap-rect',
           text: buttonAddRectangleText,
         },
         {
-          btnClass: 'btn-default pull-left button-add-circle',
+          btnClass: 'btn-default pull-left',
+          dataAttributes: {
+            method: 'add-circle',
+          },
           icon: 'extensions-imagemap-circle',
           text: buttonAddCircleText,
         },
         {
-          btnClass: 'btn-default pull-left button-add-poly',
+          btnClass: 'btn-default pull-left',
+          dataAttributes: {
+            method: 'add-polygon',
+          },
           icon: 'extensions-imagemap-poly',
           text: buttonAddPolygonText,
         },
         {
           btnClass: 'btn-default button-dismiss',
+          dataAttributes: {
+            method: 'dismiss',
+          },
           icon: 'actions-close',
           text: buttonDismissText,
         },
         {
           btnClass: 'btn-primary button-save',
+          dataAttributes: {
+            method: 'save',
+          },
           icon: 'actions-document-save',
           text: buttonSaveText,
         },
@@ -144,38 +161,35 @@ class EditControl {
   private initializeModal() {
     this.image = this.currentModal.find('.image img');
     this.configuration = this.currentModal.find('.image').data('configuration');
-    this.buttonAddRect = this.currentModal.find('.button-add-rect').off('click').on('click', this.buttonAddRectHandler.bind(this));
-    this.buttonAddCircle = this.currentModal.find('.button-add-circle').off('click').on('click', this.buttonAddCircleHandler.bind(this));
-    this.buttonAddPoly = this.currentModal.find('.button-add-poly').off('click').on('click', this.buttonAddPolyHandler.bind(this));
-    this.buttonDismiss = this.currentModal.find('.button-dismiss').off('click').on('click', this.buttonDismissHandler.bind(this));
-    this.buttonSave = this.currentModal.find('.button-save').off('click').on('click', this.buttonSaveHandler.bind(this));
+    this.buttonAddRect = this.currentModal.find('[data-method=rectangle]').off('click').on('click', this.buttonAddRectHandler.bind(this));
+    this.buttonAddCircle = this.currentModal.find('[data-method=circle]').off('click').on('click', this.buttonAddCircleHandler.bind(this));
+    this.buttonAddPoly = this.currentModal.find('[data-method=polygon]').off('click').on('click', this.buttonAddPolyHandler.bind(this));
+    this.buttonDismiss = this.currentModal.find('[data-method=dismiss]').off('click').on('click', this.buttonDismissHandler.bind(this));
+    this.buttonSave = this.currentModal.find('[data-method=save]').off('click').on('click', this.buttonSaveHandler.bind(this));
 
     $([document, top.document]).on('mousedown.minicolors touchstart.minicolors', this.hideColorSwatch);
 
     this.image.on('load', () => {
-      setTimeout(() => {
-        this.initializeAreaEditor(
-          {
-            canvas: {
-              width: parseInt(this.image.css('width')),
-              height: parseInt(this.image.css('height')),
-              top: parseInt(this.image.css('height')) * -1,
-            },
-            fauxFormDocument: top.window.document,
-            browseLinkUrlAjaxUrl: window.TYPO3.settings.ajaxUrls.imagemap_browselink_url,
-            browseLink: this.configuration.browseLink,
-            formSelector: '#areasForm',
-            canvasSelector: '#modal-canvas',
-          },
-          $('.picture').data('existingAreas')
-        );
-      }, 100);
+      AreaManipulation.wait(this.initializeAreaManipulation, 100);
     });
   }
 
-  private initializeAreaEditor(editorOptions: EditorOptions, areas: Array<any>) {
-    this.areaManipulation = new AreaManipulation(this.currentModal[0], editorOptions);
-    this.areaManipulation.initializeAreas(areas);
+  private initializeAreaManipulation() {
+    this.areaManipulation = new AreaManipulation(
+      this.currentModal[0],
+      {
+        canvas: {
+          width: parseInt(this.image.css('width')),
+          height: parseInt(this.image.css('height')),
+        },
+        fauxFormDocument: top.window.document,
+        browseLinkUrlAjaxUrl: window.TYPO3.settings.ajaxUrls.imagemap_browselink_url,
+        browseLink: this.configuration.browseLink,
+        formSelector: '#areasForm',
+        canvasSelector: '#modal-canvas',
+      }
+    );
+    this.areaManipulation.initializeAreas($('.picture').data('existingAreas'));
   }
 
   private destruct() {

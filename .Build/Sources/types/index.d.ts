@@ -12,12 +12,26 @@
 declare interface EditorOptions {
   fauxFormDocument?: Document,
   canvas?: {
+    width: number,
+    height: number
   }
   previewRerenderAjaxUrl?: string,
   browseLinkUrlAjaxUrl?: string,
   browseLink?: object
   formSelector?: string
   canvasSelector: string
+}
+
+declare interface CanvasOptions {
+  width: number,
+  height: number,
+  selection: boolean,
+  preserveObjectStacking: boolean,
+  hoverCursor: string,
+}
+
+declare interface FormOptions {
+  formSelector: string
 }
 
 declare interface EditorConfiguration {
