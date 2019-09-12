@@ -67,9 +67,7 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
                 for (var _i = 0; _i < arguments.length; _i++) {
                     args[_i] = arguments[_i];
                 }
-                var _this = this;
-                console.log(args);
-                _this = _super.apply(this, __spread(args)) || this;
+                var _this = _super.apply(this, __spread(args)) || this;
                 mixins.forEach(function (mixin) {
                     copyProperties(_this, (new mixin));
                 });

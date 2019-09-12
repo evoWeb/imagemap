@@ -14,6 +14,9 @@
 										 id="{formEngine.field.id}"
 										 name="{formEngine.field.name}"
 										 value="{formEngine.field.value -> f:format.raw()}"
+										 data-tablename="{formEngine.field.tablename}"
+										 data-fieldname="{formEngine.field.fieldname}"
+										 data-uid="{formEngine.field.uid}"
 										 data-formengine-validation-rules="{formEngine.validation}"/>
 							<button class="btn btn-default t3js-area-wizard-trigger"
 											data-url="{wizardUri}"
@@ -25,8 +28,6 @@
 											data-button-addpoly-text="{f:translate(id: 'imagemap.form.addpoly', extensionName: 'imagemap')}"
 											data-button-dismiss-text="{f:translate(id: 'imagemap.form.dismiss', extensionName: 'imagemap')}"
 											data-button-save-text="{f:translate(id: 'imagemap.form.save', extensionName: 'imagemap')}"
-											data-tablename="{formEngine.field.tablename}"
-											data-fieldname="{formEngine.field.fieldname}"
 											data-field="{formEngine.field.id}">
 								<core:icon identifier="extensions-imagemap-poly" alternativeMarkupIdentifier="inline" />
 								<f:translate id="imagemap.control.open.editor" extensionName="imagemap"/>
@@ -36,8 +37,7 @@
 				</f:if>
 				<div class="form-control-wrap">
 					<div class="form-wizards-element pictureWrap" id="{formEngine.field.id}_wrap">
-						<div id="{formEngine.field.id}-canvas"
-								 class="picture"
+						<div id="{formEngine.field.id}-canvas" class="picture"
 								 data-existing-areas='{formEngine.field.existingAreas -> f:format.raw()}'>
 							<f:image image="{image}" treatIdAsReference="true" class="image" maxWidth="400"/>
 							<canvas id="canvas" class="canvas"></canvas>

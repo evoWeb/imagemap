@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "jquery", "./AreaEditor", "TYPO3/CMS/Backend/Icons", "TYPO3/CMS/Backend/Modal", "TYPO3/CMS/Backend/FormEngineValidation"], function (require, exports, $, AreaEditor_1, Icons, Modal, FormEngineValidation) {
+define(["require", "exports", "jquery", "./AreaManipulation", "TYPO3/CMS/Backend/Icons", "TYPO3/CMS/Backend/Modal", "TYPO3/CMS/Backend/FormEngineValidation"], function (require, exports, $, AreaManipulation_1, Icons, Modal, FormEngineValidation) {
     "use strict";
     var EditControl = /** @class */ (function () {
         function EditControl() {
@@ -76,7 +76,7 @@ define(["require", "exports", "jquery", "./AreaEditor", "TYPO3/CMS/Backend/Icons
                 },
             });
             this.currentModal.on('hide.bs.modal', function () {
-                _this.destroy();
+                _this.destruct();
             });
             // do not dismiss the modal when clicking beside it to avoid data loss
             this.currentModal.data('bs.modal').options.backdrop = 'static';
@@ -106,30 +106,31 @@ define(["require", "exports", "jquery", "./AreaEditor", "TYPO3/CMS/Backend/Icons
                             height: parseInt(_this.image.css('height')),
                             top: parseInt(_this.image.css('height')) * -1,
                         },
-                        fauxFormDocument: window.document,
+                        fauxFormDocument: top.window.document,
                         browseLinkUrlAjaxUrl: window.TYPO3.settings.ajaxUrls.imagemap_browselink_url,
-                        browseLink: _this.configuration.browseLink
+                        browseLink: _this.configuration.browseLink,
+                        formSelector: '#areasForm',
+                        canvasSelector: '#modal-canvas',
                     }, $('.picture').data('existingAreas'));
                 }, 100);
             });
         };
         EditControl.prototype.initializeAreaEditor = function (editorOptions, areas) {
-            var canvas = this.currentModal.find('#modal-canvas')[0];
-            this.areaEditor = new AreaEditor_1.default(editorOptions, canvas, '#areasForm', this.currentModal[0]);
-            this.areaEditor.initializeAreas(areas);
+            this.areaManipulation = new AreaManipulation_1.default(this.currentModal[0], editorOptions);
+            this.areaManipulation.initializeAreas(areas);
         };
-        EditControl.prototype.destroy = function () {
+        EditControl.prototype.destruct = function () {
             if (this.currentModal) {
                 this.currentModal = null;
-                this.areaEditor.form.destroy();
-                this.areaEditor = null;
+                this.areaManipulation.destruct();
+                this.areaManipulation = null;
             }
         };
         EditControl.prototype.buttonAddRectHandler = function (event) {
             event.stopPropagation();
             event.preventDefault();
             var width = parseInt(this.image.css('width')), height = parseInt(this.image.css('height'));
-            this.areaEditor.initializeAreas([{
+            this.areaManipulation.initializeAreas([{
                     shape: 'rect',
                     coords: (width / 2 - 50) + ',' + (height / 2 - 50) + ',' + (width / 2 + 50) + ',' + (height / 2 + 50),
                 }]);
@@ -138,7 +139,7 @@ define(["require", "exports", "jquery", "./AreaEditor", "TYPO3/CMS/Backend/Icons
             event.stopPropagation();
             event.preventDefault();
             var width = parseInt(this.image.css('width')), height = parseInt(this.image.css('height'));
-            this.areaEditor.initializeAreas([{
+            this.areaManipulation.initializeAreas([{
                     shape: 'circle',
                     coords: (width / 2) + ',' + (height / 2) + ',50',
                 }]);
@@ -147,7 +148,7 @@ define(["require", "exports", "jquery", "./AreaEditor", "TYPO3/CMS/Backend/Icons
             event.stopPropagation();
             event.preventDefault();
             var width = parseInt(this.image.css('width')), height = parseInt(this.image.css('height'));
-            this.areaEditor.initializeAreas([{
+            this.areaManipulation.initializeAreas([{
                     shape: 'poly',
                     coords: (width / 2) + ',' + (height / 2 - 50)
                         + ',' + (width / 2 + 50) + ',' + (height / 2 + 50)
@@ -163,8 +164,8 @@ define(["require", "exports", "jquery", "./AreaEditor", "TYPO3/CMS/Backend/Icons
         EditControl.prototype.buttonSaveHandler = function (event) {
             event.stopPropagation();
             event.preventDefault();
-            var hiddenField = $("input[name=\"" + this.configuration.itemName + "\"]");
-            hiddenField.val(this.areaEditor.getMapData()).trigger('imagemap:changed');
+            var areasData = this.areaManipulation.getAreasData(), hiddenField = $("input[name=\"" + this.configuration.itemName + "\"]");
+            hiddenField.val(areasData).trigger('imagemap:changed');
             FormEngineValidation.markFieldAsChanged(hiddenField);
             this.currentModal.modal('hide');
         };

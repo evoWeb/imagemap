@@ -12,7 +12,7 @@
 /// <reference types="../types/index"/>
 
 import * as $ from 'jquery';
-import AreaEditor from './AreaEditor';
+import AreaManipulation from './AreaManipulation';
 // @ts-ignore
 import * as Icons from 'TYPO3/CMS/Backend/Icons';
 // @ts-ignore
@@ -21,7 +21,7 @@ import * as Modal from 'TYPO3/CMS/Backend/Modal';
 import * as FormEngineValidation from 'TYPO3/CMS/Backend/FormEngineValidation';
 
 class EditControl {
-  private areaEditor: AreaEditor;
+  private areaManipulation: AreaManipulation;
 
   private configuration: EditorConfiguration;
 
@@ -127,7 +127,7 @@ class EditControl {
     });
 
     this.currentModal.on('hide.bs.modal', () => {
-      this.destroy();
+      this.destruct();
     });
     // do not dismiss the modal when clicking beside it to avoid data loss
     this.currentModal.data('bs.modal').options.backdrop = 'static';
@@ -161,9 +161,11 @@ class EditControl {
               height: parseInt(this.image.css('height')),
               top: parseInt(this.image.css('height')) * -1,
             },
-            fauxFormDocument: window.document,
+            fauxFormDocument: top.window.document,
             browseLinkUrlAjaxUrl: window.TYPO3.settings.ajaxUrls.imagemap_browselink_url,
-            browseLink: this.configuration.browseLink
+            browseLink: this.configuration.browseLink,
+            formSelector: '#areasForm',
+            canvasSelector: '#modal-canvas',
           },
           $('.picture').data('existingAreas')
         );
@@ -172,16 +174,15 @@ class EditControl {
   }
 
   private initializeAreaEditor(editorOptions: EditorOptions, areas: Array<any>) {
-    let canvas = (this.currentModal.find('#modal-canvas')[0] as HTMLElement);
-    this.areaEditor = new AreaEditor(editorOptions, canvas, '#areasForm', this.currentModal[0]);
-    this.areaEditor.initializeAreas(areas);
+    this.areaManipulation = new AreaManipulation(this.currentModal[0], editorOptions);
+    this.areaManipulation.initializeAreas(areas);
   }
 
-  private destroy() {
+  private destruct() {
     if (this.currentModal) {
       this.currentModal = null;
-      this.areaEditor.form.destroy();
-      this.areaEditor = null;
+      this.areaManipulation.destruct();
+      this.areaManipulation = null;
     }
   }
 
@@ -192,7 +193,7 @@ class EditControl {
     let width = parseInt(this.image.css('width')),
       height = parseInt(this.image.css('height'));
 
-    this.areaEditor.initializeAreas([{
+    this.areaManipulation.initializeAreas([{
       shape: 'rect',
       coords: (width / 2 - 50) + ',' + (height / 2 - 50) + ',' + (width / 2 + 50) + ',' + (height / 2 + 50),
     }]);
@@ -205,7 +206,7 @@ class EditControl {
     let width = parseInt(this.image.css('width')),
       height = parseInt(this.image.css('height'));
 
-    this.areaEditor.initializeAreas([{
+    this.areaManipulation.initializeAreas([{
       shape: 'circle',
       coords: (width / 2) + ',' + (height / 2) + ',50',
     }]);
@@ -218,7 +219,7 @@ class EditControl {
     let width = parseInt(this.image.css('width')),
       height = parseInt(this.image.css('height'));
 
-    this.areaEditor.initializeAreas([{
+    this.areaManipulation.initializeAreas([{
       shape: 'poly',
       coords: (width / 2) + ',' + (height / 2 - 50)
         + ',' + (width / 2 + 50) + ',' + (height / 2 + 50)
@@ -238,8 +239,9 @@ class EditControl {
     event.stopPropagation();
     event.preventDefault();
 
-    const hiddenField = $(`input[name="${this.configuration.itemName}"]`);
-    hiddenField.val(this.areaEditor.getMapData()).trigger('imagemap:changed');
+    const areasData = this.areaManipulation.getAreasData(),
+      hiddenField = $(`input[name="${this.configuration.itemName}"]`);
+    hiddenField.val(areasData).trigger('imagemap:changed');
     FormEngineValidation.markFieldAsChanged(hiddenField);
     this.currentModal.modal('hide');
   }

@@ -8,31 +8,27 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "jquery", "./AreaEditor"], function (require, exports, $, AreaEditor_1) {
+define(["require", "exports", "jquery", "./AreaManipulation"], function (require, exports, $, AreaManipulation_1) {
     "use strict";
     var FormElement = /** @class */ (function () {
         function FormElement() {
             this.previewRerenderAjaxUrl = '';
             this.control = $('.imagemap-control:eq(0)');
             this.image = this.control.find('.image');
-            this.canvas = this.control.find('.picture');
             this.previewRerenderAjaxUrl = window.TYPO3.settings.ajaxUrls.imagemap_preview_rerender;
-            this.initialize();
-        }
-        FormElement.prototype.initialize = function () {
             this.initializeEvents();
-            this.initializeAreaEditor({
+            this.initializeAreaEditor();
+        }
+        FormElement.prototype.initializeAreaEditor = function () {
+            this.areaManipulation = new AreaManipulation_1.default(this.control[0], {
                 canvas: {
                     width: parseInt(this.image.css('width')),
                     height: parseInt(this.image.css('height')),
                     top: parseInt(this.image.css('height')) * -1,
                 },
-            }, this.canvas.data('existingAreas'));
-        };
-        FormElement.prototype.initializeAreaEditor = function (editorOptions, areas) {
-            var canvas = this.control.find('#canvas')[0];
-            this.areaEditor = new AreaEditor_1.default(editorOptions, canvas, '', window.document);
-            this.areaEditor.initializeAreas(areas);
+                canvasSelector: '#canvas',
+            });
+            this.areaManipulation.initializeAreas(this.control.find('.picture').data('existingAreas'));
         };
         FormElement.prototype.initializeEvents = function () {
             this.control
@@ -56,9 +52,11 @@ define(["require", "exports", "jquery", "./AreaEditor"], function (require, expo
                 }
             }).done(function (data, textStatus) {
                 if (textStatus === 'success') {
-                    _this.control.find('.modifiedState').css('display', 'block');
-                    _this.areaEditor.removeAllAreas();
-                    _this.areaEditor.initializeAreas(data);
+                    _this.control
+                        .find('.modifiedState')
+                        .css('display', 'block');
+                    _this.areaManipulation.removeAllAreas();
+                    _this.areaManipulation.initializeAreas(data);
                 }
             });
         };

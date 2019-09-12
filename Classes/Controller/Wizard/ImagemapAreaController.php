@@ -20,6 +20,7 @@ use TYPO3\CMS\Core\Http\HtmlResponse;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
+use TYPO3\CMS\Core\Utility\StringUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 
 class ImagemapAreaController
@@ -36,7 +37,7 @@ class ImagemapAreaController
             $templateView->setLayoutRootPaths(['EXT:imagemap/Resources/Private/Layouts/']);
             $templateView->setPartialRootPaths(['EXT:imagemap/Resources/Private/Partials/']);
             $templateView->setTemplatePathAndFilename(GeneralUtility::getFileAbsFileName(
-                'EXT:imagemap/Resources/Private/Templates/FormEngine/ImagemapAreaWizard.html'
+                'EXT:imagemap/Resources/Private/Templates/FormEngine/ImagemapWizard.html'
             ));
         }
         $this->templateView = $templateView;
@@ -78,7 +79,7 @@ class ImagemapAreaController
         array $parameters,
         array $record
     ): array {
-        $formName = 'imagemap' . GeneralUtility::shortMD5(rand(1, 100000));
+        $formName = 'imagemap' . StringUtility::getUniqueId('imagemap-area-manipulation-');
         $browseLinkConfiguration = [
             'returnUrl' => GeneralUtility::linkThisScript(),
             'formName' => $formName,

@@ -16,6 +16,8 @@ declare interface EditorOptions {
   previewRerenderAjaxUrl?: string,
   browseLinkUrlAjaxUrl?: string,
   browseLink?: object
+  formSelector?: string
+  canvasSelector: string
 }
 
 declare interface EditorConfiguration {

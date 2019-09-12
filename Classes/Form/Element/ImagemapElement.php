@@ -132,6 +132,9 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
                 'field' => [
                     'value' => htmlspecialchars(trim($this->data['databaseRow'][$this->data['fieldName']])),
                     'name' => $parameterArray['itemFormElName'],
+                    'uid' => $this->data['databaseRow']['uid'],
+                    'tablename' => $this->data['tableName'],
+                    'fieldname' => $this->data['fieldName'],
                     'existingAreas' => $this->getExistingAreas(),
                 ],
                 'validation' => '[]'
@@ -148,7 +151,7 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
             $resultArray['requireJsModules'][] = [
                 'TYPO3/CMS/Imagemap/EditControl' => 'function (EditControl) { new EditControl(); }',
             ];
-            $arguments['formEngine']['field']['id'] = StringUtility::getUniqueId('formengine-image-manipulation-');
+            $arguments['formEngine']['field']['id'] = StringUtility::getUniqueId('imagemap-area-manipulation-');
             if (GeneralUtility::inList($config['eval'], 'required')) {
                 $arguments['formEngine']['validation'] = $this->getValidationDataAsJsonString(['required' => true]);
             }

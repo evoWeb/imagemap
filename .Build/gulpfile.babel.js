@@ -17,10 +17,10 @@ const paths = {
 
 const tasks = {
 	typescript: {
-		'AreaEditor.ts': {
-			src: `${paths.src}/TypeScript/AreaEditor.ts`,
+		'AreaManipulation.ts': {
+			src: `${paths.src}/TypeScript/AreaManipulation.ts`,
 			dest: `${paths.dest}/JavaScript/`,
-			name: 'AreaEditor.js'
+			name: 'AreaManipulation.js'
 		},
 		'EditControl.ts': {
 			src: `${paths.src}/TypeScript/EditControl.ts`,

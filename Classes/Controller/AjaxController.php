@@ -33,7 +33,7 @@ class AjaxController
     public function rerenderPreviewAction(ServerRequestInterface $request): ResponseInterface
     {
         $response = new Response('php://temp', 200, ['Content-Type' => 'application/json; charset=utf-8']);
-        $parameters = $request->getParsedBody()['P'];
+        $parameters = $request->getParsedBody()['arguments'];
         $this->getBackendUser()->setAndSaveSessionData('imagemap.value', $parameters['value']);
 
         try {

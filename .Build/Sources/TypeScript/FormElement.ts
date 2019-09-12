@@ -12,46 +12,24 @@
 /// <reference types="../types/index"/>
 
 import * as $ from 'jquery';
-import AreaEditor from './AreaEditor';
+import AreaManipulation from './AreaManipulation';
 
 class FormElement {
-  private previewRerenderAjaxUrl: string = '';
+  readonly previewRerenderAjaxUrl: string = '';
 
-  private areaEditor: AreaEditor;
-
-  private control: JQuery;
+  readonly control: JQuery;
 
   private image: JQuery;
 
-  private canvas: JQuery;
+  private areaManipulation: AreaManipulation;
 
   constructor() {
+    this.previewRerenderAjaxUrl = window.TYPO3.settings.ajaxUrls.imagemap_preview_rerender;
     this.control = $('.imagemap-control:eq(0)');
     this.image = this.control.find('.image');
-    this.canvas = this.control.find('.picture');
-    this.previewRerenderAjaxUrl = window.TYPO3.settings.ajaxUrls.imagemap_preview_rerender;
 
-    this.initialize();
-  }
-
-  private initialize() {
     this.initializeEvents();
-    this.initializeAreaEditor(
-      {
-        canvas: {
-          width: parseInt(this.image.css('width')),
-          height: parseInt(this.image.css('height')),
-          top: parseInt(this.image.css('height')) * -1,
-        },
-      },
-      this.canvas.data('existingAreas')
-    );
-  }
-
-  private initializeAreaEditor(editorOptions: EditorOptions, areas: Array<any>) {
-    let canvas = (this.control.find('#canvas')[0] as HTMLElement);
-    this.areaEditor = new AreaEditor(editorOptions, canvas, '', window.document);
-    this.areaEditor.initializeAreas(areas);
+    this.initializeAreaEditor();
   }
 
   private initializeEvents() {
@@ -60,14 +38,28 @@ class FormElement {
       .on('imagemap:changed', this.imagemapChangedHandler.bind(this));
   }
 
+  private initializeAreaEditor() {
+    this.areaManipulation = new AreaManipulation(
+      this.control[0],
+      {
+        canvas: {
+          width: parseInt(this.image.css('width')),
+          height: parseInt(this.image.css('height')),
+          top: parseInt(this.image.css('height')) * -1,
+        },
+        canvasSelector: '#canvas',
+      }
+    );
+    this.areaManipulation.initializeAreas(this.control.find('.picture').data('existingAreas'));
+  }
+
   private imagemapChangedHandler(event: JQueryEventObject) {
     let $field = $(event.currentTarget);
-
-    $.ajax({
+    let request = $.ajax({
       url: this.previewRerenderAjaxUrl,
       method: 'POST',
       data: {
-        P: {
+        arguments: {
           itemFormElName: $field.attr('name'),
           tableName: $field.data('tablename'),
           fieldName: $field.data('fieldname'),
@@ -75,13 +67,18 @@ class FormElement {
           value: $field.val()
         }
       }
-    }).done((data, textStatus) => {
-      if (textStatus === 'success') {
-        this.control.find('.modifiedState').css('display', 'block');
-        this.areaEditor.removeAllAreas();
-        this.areaEditor.initializeAreas(data);
-      }
     });
+    request.done(this.renderPreviewAreas.bind(this));
+  }
+
+  private renderPreviewAreas(data: Array<any>, textStatus: string) {
+    if (textStatus === 'success') {
+      this.control
+        .find('.modifiedState')
+        .css('display', 'block');
+      this.areaManipulation.removeAllAreas();
+      this.areaManipulation.initializeAreas(data);
+    }
   }
 }
 
