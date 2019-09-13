@@ -1,4 +1,11 @@
 .picture {
     overflow: hidden;
     position: relative;
+
+    .canvas-container {
+        left: 0;
+        top: 0;
+        overflow: hidden;
+        z-index: 2;
+    }
 }

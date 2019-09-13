@@ -67,7 +67,8 @@ class ImagemapAreaController
             $record = BackendUtility::getRecord($parsedBody['tableName'], $parsedBody['uid']);
             $viewData = [
                 'image' => $image,
-                'configuration' => \json_encode($this->getConfiguration($parsedBody, $record))
+                'configuration' => \json_encode($this->getConfiguration($parsedBody, $record)),
+                'existingAreas' => $record[$parsedBody['fieldName']],
             ];
             $content = $this->templateView->renderSection('Main', $viewData);
             return new HtmlResponse($content);
@@ -85,13 +86,13 @@ class ImagemapAreaController
             'formName' => $formName,
             'tableName' => $parameters['tableName'],
             'fieldName' => $parameters['fieldName'],
+            'uid' => $record['uid'],
             'pid' => $record['pid'],
         ];
         return [
             'formName' => $formName,
             'itemName' => $parameters['itemName'],
             'fieldChangeFunc' => $parameters['fieldChangeFunc'] ?? [],
-            'existingAreas' => $record[$parameters['fieldName']],
             'browseLink' => $browseLinkConfiguration
         ];
     }

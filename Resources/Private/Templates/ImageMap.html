@@ -1,4 +1,6 @@
-<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+			xmlns:i="http://typo3.org/ns/Evoweb/Imagemap/ViewHelpers"
+			data-namespace-typo3-fluid="true">
 
 <f:layout name="Default" />
 
@@ -16,33 +18,32 @@
 					<figure class="image">
 						<f:if condition="{imageMap}">
 						<f:then>
-						<f:media class="image-embed-item"
-										 file="{file}"
-										 width="{dimensions.width}"
-										 height="{dimensions.height}"
-										 alt="{file.alternative}"
-										 title="{file.title}"
-										 additionalAttributes="{usemap: '#{imageMapName}'}"/>
+							<f:media class="image-embed-item"
+											 file="{file}"
+											 width="{dimensions.width}"
+											 height="{dimensions.height}"
+											 alt="{file.alternative}"
+											 title="{file.title}"
+											 additionalAttributes="{usemap: '#{imageMapName}'}"/>
 						</f:then>
 						<f:else>
-						<f:media class="image-embed-item"
-										 file="{file}"
-										 width="{dimensions.width}"
-										 height="{dimensions.height}"
-										 alt="{file.alternative}"
-										 title="{file.title}"/>
+							<f:media class="image-embed-item"
+											 file="{file}"
+											 width="{dimensions.width}"
+											 height="{dimensions.height}"
+											 alt="{file.alternative}"
+											 title="{file.title}"/>
 						</f:else>
 						</f:if>
 						<f:if condition="{file.description}">
-						<figcaption class="image-caption">
-							{file.description}
-						</figcaption>
+						<figcaption class="image-caption">{file.description}</figcaption>
 						</f:if>
 					</figure>
+
 					<f:if condition="{imageMap}"><f:spaceless>
 						<map name="{imageMapName}">
 							<f:for each="{imageMap}" as="area">
-								<area href="{f:uri.typolink(parameter: area.link)}" {f:render(section: 'attributes', arguments: {attributes: area.attributes})}>
+								<i:area href="{f:uri.typolink(parameter: area.href)}" shape="{area.shape}" coords="{area.coords}" alt="{area.alt}" data="{area.data}"/>
 							</f:for>
 						</map>
 					</f:spaceless></f:if>
@@ -68,7 +69,5 @@
 	</div>
 
 </f:section>
-
-<f:section name="attributes"><f:for each="{attributes}" as="value" key="attribute"> {attribute}="{value}"</f:for></f:section>
 
 </html>

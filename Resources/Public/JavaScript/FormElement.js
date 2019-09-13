@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "jquery", "./AreaManipulation"], function (require, exports, $, AreaManipulation_1) {
+define(["require", "exports", "jquery", "./AreaManipulation"], function (require, exports, $, AreaEditor) {
     "use strict";
     var FormElement = /** @class */ (function () {
         function FormElement() {
@@ -25,7 +25,7 @@ define(["require", "exports", "jquery", "./AreaManipulation"], function (require
                 .on('imagemap:changed', this.imagemapChangedHandler.bind(this));
         };
         FormElement.prototype.initializeAreaManipulation = function () {
-            this.areaManipulation = new AreaManipulation_1.default(this.control[0], {
+            this.areaManipulation = new AreaEditor.AreaManipulation(this.control[0], {
                 canvas: {
                     width: parseInt(this.image.css('width')),
                     height: parseInt(this.image.css('height')),

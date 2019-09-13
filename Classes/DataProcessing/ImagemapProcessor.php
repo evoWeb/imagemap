@@ -48,19 +48,15 @@ class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcess
                 $areas = [];
                 foreach ($mapArray as &$area) {
                     $areaAttributes = $area;
-                    unset($areaAttributes['link']);
 
                     foreach ($areaAttributes as $key => $value) {
                         if (!in_array($key, $attributes)) {
-                            $areaAttributes['data-' . $key] = $value;
+                            $areaAttributes['data'][$key] = $value;
                             unset($areaAttributes[$key]);
                         }
                     }
 
-                    $areas[] = [
-                        'link' => $area['link'],
-                        'attributes' => $areaAttributes,
-                    ];
+                    $areas[] = $area;
                 }
 
                 $processedData['imageMap'] = $areas;

@@ -12,16 +12,18 @@
 /// <reference types="../types/index"/>
 
 import * as $ from 'jquery';
-import AreaManipulation from './AreaManipulation';
+import * as AreaEditor from './AreaManipulation';
 // @ts-ignore
 import * as Icons from 'TYPO3/CMS/Backend/Icons';
 // @ts-ignore
 import * as Modal from 'TYPO3/CMS/Backend/Modal';
 // @ts-ignore
 import * as FormEngineValidation from 'TYPO3/CMS/Backend/FormEngineValidation';
+// @ts-ignore
+import * as ImagesLoaded from 'TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min';
 
 class EditControl {
-  private areaManipulation: AreaManipulation;
+  private areaManipulation: AreaEditor.AreaManipulation;
 
   private configuration: EditorConfiguration;
 
@@ -40,6 +42,8 @@ class EditControl {
   private buttonDismiss: JQuery;
 
   private buttonSave: JQuery;
+
+  private canvasSize: CanvasSize;
 
   constructor() {
     this.button = $('.t3js-area-wizard-trigger');
@@ -91,7 +95,7 @@ class EditControl {
         {
           btnClass: 'btn-default pull-left',
           dataAttributes: {
-            method: 'add-rectangle',
+            method: 'rectangle',
           },
           icon: 'extensions-imagemap-rect',
           text: buttonAddRectangleText,
@@ -99,7 +103,7 @@ class EditControl {
         {
           btnClass: 'btn-default pull-left',
           dataAttributes: {
-            method: 'add-circle',
+            method: 'circle',
           },
           icon: 'extensions-imagemap-circle',
           text: buttonAddCircleText,
@@ -107,7 +111,7 @@ class EditControl {
         {
           btnClass: 'btn-default pull-left',
           dataAttributes: {
-            method: 'add-polygon',
+            method: 'polygon',
           },
           icon: 'extensions-imagemap-poly',
           text: buttonAddPolygonText,
@@ -159,8 +163,8 @@ class EditControl {
   }
 
   private initializeModal() {
-    this.image = this.currentModal.find('.image img');
-    this.configuration = this.currentModal.find('.image').data('configuration');
+    this.image = this.currentModal.find('.picture img');
+    this.configuration = this.currentModal.find('#t3js-imagemap-container').data('configuration');
     this.buttonAddRect = this.currentModal.find('[data-method=rectangle]').off('click').on('click', this.buttonAddRectHandler.bind(this));
     this.buttonAddCircle = this.currentModal.find('[data-method=circle]').off('click').on('click', this.buttonAddCircleHandler.bind(this));
     this.buttonAddPoly = this.currentModal.find('[data-method=polygon]').off('click').on('click', this.buttonAddPolyHandler.bind(this));
@@ -169,32 +173,36 @@ class EditControl {
 
     $([document, top.document]).on('mousedown.minicolors touchstart.minicolors', this.hideColorSwatch);
 
-    this.image.on('load', () => {
-      AreaManipulation.wait(this.initializeAreaManipulation, 100);
+    ImagesLoaded(this.image as any, (): void => {
+      AreaEditor.AreaUtility.wait(this.initializeAreaManipulation.bind(this), 100);
     });
   }
 
   private initializeAreaManipulation() {
-    this.areaManipulation = new AreaManipulation(
+    this.canvasSize = {
+      width: parseInt(this.image.css('width')),
+      height: parseInt(this.image.css('height')),
+    };
+
+    this.areaManipulation = new AreaEditor.AreaManipulation(
       this.currentModal[0],
       {
-        canvas: {
-          width: parseInt(this.image.css('width')),
-          height: parseInt(this.image.css('height')),
-        },
-        fauxFormDocument: top.window.document,
-        browseLinkUrlAjaxUrl: window.TYPO3.settings.ajaxUrls.imagemap_browselink_url,
-        browseLink: this.configuration.browseLink,
-        formSelector: '#areasForm',
+        canvas: this.canvasSize,
         canvasSelector: '#modal-canvas',
+        fauxFormDocument: top.window.document,
+        browseLink: this.configuration.browseLink,
+        browseLinkUrlAjaxUrl: top.window.TYPO3.settings.ajaxUrls.imagemap_browselink_url,
+        formSelector: '#areasForm',
       }
     );
-    this.areaManipulation.initializeAreas($('.picture').data('existingAreas'));
+    this.areaManipulation.initializeAreas(this.currentModal.find('.picture').data('existingAreas'));
   }
 
   private destruct() {
     if (this.currentModal) {
       this.currentModal = null;
+    }
+    if (this.areaManipulation) {
       this.areaManipulation.destruct();
       this.areaManipulation = null;
     }
@@ -209,7 +217,13 @@ class EditControl {
 
     this.areaManipulation.initializeAreas([{
       shape: 'rect',
-      coords: (width / 2 - 50) + ',' + (height / 2 - 50) + ',' + (width / 2 + 50) + ',' + (height / 2 + 50),
+      data: { color: '' },
+      coords: {
+        left: (width / 2 - 50),
+        top: (height / 2 - 50),
+        right: (width / 2 + 50),
+        bottom: (height / 2 + 50)
+      },
     }]);
   }
 
@@ -222,7 +236,12 @@ class EditControl {
 
     this.areaManipulation.initializeAreas([{
       shape: 'circle',
-      coords: (width / 2) + ',' + (height / 2) + ',50',
+      data: { color: '' },
+      coords: {
+        left: (width / 2),
+        top: (height / 2),
+        radius: 50
+      }
     }]);
   }
 
@@ -235,10 +254,15 @@ class EditControl {
 
     this.areaManipulation.initializeAreas([{
       shape: 'poly',
-      coords: (width / 2) + ',' + (height / 2 - 50)
-        + ',' + (width / 2 + 50) + ',' + (height / 2 + 50)
-        + ',' + (width / 2) + ',' + (height / 2 + 70)
-        + ',' + (width / 2 - 50) + ',' + (height / 2 + 50)
+      data: { color: '' },
+      coords: {
+        points: [
+          { x: (width / 2), y: (height / 2 - 50)},
+          { x: (width / 2 + 50), y: (height / 2 + 50)},
+          { x: (width / 2), y: (height / 2 + 70)},
+          { x: (width / 2 - 50), y: (height / 2 + 50)},
+        ]
+      }
     }]);
   }
 
@@ -255,8 +279,12 @@ class EditControl {
 
     const areasData = this.areaManipulation.getAreasData(),
       hiddenField = $(`input[name="${this.configuration.itemName}"]`);
-    hiddenField.val(areasData).trigger('imagemap:changed');
+
+    hiddenField
+      .val(areasData)
+      .trigger('imagemap:changed');
     FormEngineValidation.markFieldAsChanged(hiddenField);
+
     this.currentModal.modal('hide');
   }
 

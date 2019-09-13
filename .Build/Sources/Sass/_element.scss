@@ -1,20 +1,7 @@
 .imagemap-control {
     max-width: 400px;
 
-    .form-wizards-element {
-        overflow: hidden;
-        position: relative;
-    }
-
-    .canvas-container {
-        left: 0;
-        top: 0;
-        overflow: hidden;
-        z-index: 2;
-    }
-
     .modifiedState {
         display: none;
     }
 }
-

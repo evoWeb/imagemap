@@ -254,6 +254,51 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
 
     protected function getExistingAreas(): string
     {
+        $t = json_encode([
+            [
+                "shape" => "rect",
+                "coords" => [
+                    "left" => 22,
+                    "top" => 184,
+                    "right" => 219,
+                    "bottom" => 381,
+                ],
+                "href" => "t3://page?uid=7",
+                "alt" => "Bücher",
+                "data" => [
+                    "color" => "#339900"
+                ]
+            ],
+            [
+                "shape" => "circle",
+                "coords" => [
+                    "left" => 298,
+                    "top" => 104,
+                    "radius" => 102,
+                ],
+                "href" => "t3://page?uid=8",
+                "alt" => "Suche",
+                "data" => [
+                    "color" => "#003399"
+                ]
+            ],
+            [
+                "shape" => "poly",
+                "coords" => [
+                    "points" => [
+                        ["x" => 9, "y" => 97],
+                        ["x" => 130, "y" => 6],
+                        ["x" => 130, "y" => 39],
+                        ["x" => 36, "y" => 107],
+                    ],
+                ],
+                "href" => "t3://page?uid=9",
+                "alt" => "Autoren",
+                "data" => [
+                    "color" => "#990033"
+                ]
+            ]
+        ]);
         return htmlspecialchars(trim($this->data['databaseRow'][$this->data['fieldName']]));
     }
 }

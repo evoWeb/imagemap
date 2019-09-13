@@ -39,6 +39,8 @@ call_user_func(function () {
         \Evoweb\Imagemap\Hook\CssLoader::class,
         'addCssFile'
     );
+    $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['typo3/backend.php']['renderPreProcess'][] =
+        \Evoweb\Imagemap\Hook\CssLoader::class . '->addCssFile';
 
     $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1549738969] = [
         'nodeName' => 'imagemap',

@@ -12,7 +12,7 @@
 /// <reference types="../types/index"/>
 
 import * as $ from 'jquery';
-import AreaManipulation from './AreaManipulation';
+import * as AreaEditor from './AreaManipulation';
 
 class FormElement {
   readonly previewRerenderAjaxUrl: string = '';
@@ -21,7 +21,7 @@ class FormElement {
 
   private image: JQuery;
 
-  private areaManipulation: AreaManipulation;
+  private areaManipulation: AreaEditor.AreaManipulation;
 
   constructor() {
     this.previewRerenderAjaxUrl = window.TYPO3.settings.ajaxUrls.imagemap_preview_rerender;
@@ -39,7 +39,7 @@ class FormElement {
   }
 
   private initializeAreaManipulation() {
-    this.areaManipulation = new AreaManipulation(
+    this.areaManipulation = new AreaEditor.AreaManipulation(
       this.control[0],
       {
         canvas: {

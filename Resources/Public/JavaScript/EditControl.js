@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "jquery", "./AreaManipulation", "TYPO3/CMS/Backend/Icons", "TYPO3/CMS/Backend/Modal", "TYPO3/CMS/Backend/FormEngineValidation"], function (require, exports, $, AreaManipulation_1, Icons, Modal, FormEngineValidation) {
+define(["require", "exports", "jquery", "./AreaManipulation", "TYPO3/CMS/Backend/Icons", "TYPO3/CMS/Backend/Modal", "TYPO3/CMS/Backend/FormEngineValidation", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min"], function (require, exports, $, AreaEditor, Icons, Modal, FormEngineValidation, ImagesLoaded) {
     "use strict";
     var EditControl = /** @class */ (function () {
         function EditControl() {
@@ -42,7 +42,7 @@ define(["require", "exports", "jquery", "./AreaManipulation", "TYPO3/CMS/Backend
                     {
                         btnClass: 'btn-default pull-left',
                         dataAttributes: {
-                            method: 'add-rectangle',
+                            method: 'rectangle',
                         },
                         icon: 'extensions-imagemap-rect',
                         text: buttonAddRectangleText,
@@ -50,7 +50,7 @@ define(["require", "exports", "jquery", "./AreaManipulation", "TYPO3/CMS/Backend
                     {
                         btnClass: 'btn-default pull-left',
                         dataAttributes: {
-                            method: 'add-circle',
+                            method: 'circle',
                         },
                         icon: 'extensions-imagemap-circle',
                         text: buttonAddCircleText,
@@ -58,7 +58,7 @@ define(["require", "exports", "jquery", "./AreaManipulation", "TYPO3/CMS/Backend
                     {
                         btnClass: 'btn-default pull-left',
                         dataAttributes: {
-                            method: 'add-polygon',
+                            method: 'polygon',
                         },
                         icon: 'extensions-imagemap-poly',
                         text: buttonAddPolygonText,
@@ -107,35 +107,38 @@ define(["require", "exports", "jquery", "./AreaManipulation", "TYPO3/CMS/Backend
         };
         EditControl.prototype.initializeModal = function () {
             var _this = this;
-            this.image = this.currentModal.find('.image img');
-            this.configuration = this.currentModal.find('.image').data('configuration');
+            this.image = this.currentModal.find('.picture img');
+            this.configuration = this.currentModal.find('#t3js-imagemap-container').data('configuration');
             this.buttonAddRect = this.currentModal.find('[data-method=rectangle]').off('click').on('click', this.buttonAddRectHandler.bind(this));
             this.buttonAddCircle = this.currentModal.find('[data-method=circle]').off('click').on('click', this.buttonAddCircleHandler.bind(this));
             this.buttonAddPoly = this.currentModal.find('[data-method=polygon]').off('click').on('click', this.buttonAddPolyHandler.bind(this));
             this.buttonDismiss = this.currentModal.find('[data-method=dismiss]').off('click').on('click', this.buttonDismissHandler.bind(this));
             this.buttonSave = this.currentModal.find('[data-method=save]').off('click').on('click', this.buttonSaveHandler.bind(this));
             $([document, top.document]).on('mousedown.minicolors touchstart.minicolors', this.hideColorSwatch);
-            this.image.on('load', function () {
-                AreaManipulation_1.default.wait(_this.initializeAreaManipulation, 100);
+            ImagesLoaded(this.image, function () {
+                AreaEditor.AreaUtility.wait(_this.initializeAreaManipulation.bind(_this), 100);
             });
         };
         EditControl.prototype.initializeAreaManipulation = function () {
-            this.areaManipulation = new AreaManipulation_1.default(this.currentModal[0], {
-                canvas: {
-                    width: parseInt(this.image.css('width')),
-                    height: parseInt(this.image.css('height')),
-                },
-                fauxFormDocument: top.window.document,
-                browseLinkUrlAjaxUrl: window.TYPO3.settings.ajaxUrls.imagemap_browselink_url,
-                browseLink: this.configuration.browseLink,
-                formSelector: '#areasForm',
+            this.canvasSize = {
+                width: parseInt(this.image.css('width')),
+                height: parseInt(this.image.css('height')),
+            };
+            this.areaManipulation = new AreaEditor.AreaManipulation(this.currentModal[0], {
+                canvas: this.canvasSize,
                 canvasSelector: '#modal-canvas',
+                fauxFormDocument: top.window.document,
+                browseLink: this.configuration.browseLink,
+                browseLinkUrlAjaxUrl: top.window.TYPO3.settings.ajaxUrls.imagemap_browselink_url,
+                formSelector: '#areasForm',
             });
-            this.areaManipulation.initializeAreas($('.picture').data('existingAreas'));
+            this.areaManipulation.initializeAreas(this.currentModal.find('.picture').data('existingAreas'));
         };
         EditControl.prototype.destruct = function () {
             if (this.currentModal) {
                 this.currentModal = null;
+            }
+            if (this.areaManipulation) {
                 this.areaManipulation.destruct();
                 this.areaManipulation = null;
             }
@@ -146,7 +149,13 @@ define(["require", "exports", "jquery", "./AreaManipulation", "TYPO3/CMS/Backend
             var width = parseInt(this.image.css('width')), height = parseInt(this.image.css('height'));
             this.areaManipulation.initializeAreas([{
                     shape: 'rect',
-                    coords: (width / 2 - 50) + ',' + (height / 2 - 50) + ',' + (width / 2 + 50) + ',' + (height / 2 + 50),
+                    data: { color: '' },
+                    coords: {
+                        left: (width / 2 - 50),
+                        top: (height / 2 - 50),
+                        right: (width / 2 + 50),
+                        bottom: (height / 2 + 50)
+                    },
                 }]);
         };
         EditControl.prototype.buttonAddCircleHandler = function (event) {
@@ -155,7 +164,12 @@ define(["require", "exports", "jquery", "./AreaManipulation", "TYPO3/CMS/Backend
             var width = parseInt(this.image.css('width')), height = parseInt(this.image.css('height'));
             this.areaManipulation.initializeAreas([{
                     shape: 'circle',
-                    coords: (width / 2) + ',' + (height / 2) + ',50',
+                    data: { color: '' },
+                    coords: {
+                        left: (width / 2),
+                        top: (height / 2),
+                        radius: 50
+                    }
                 }]);
         };
         EditControl.prototype.buttonAddPolyHandler = function (event) {
@@ -164,10 +178,15 @@ define(["require", "exports", "jquery", "./AreaManipulation", "TYPO3/CMS/Backend
             var width = parseInt(this.image.css('width')), height = parseInt(this.image.css('height'));
             this.areaManipulation.initializeAreas([{
                     shape: 'poly',
-                    coords: (width / 2) + ',' + (height / 2 - 50)
-                        + ',' + (width / 2 + 50) + ',' + (height / 2 + 50)
-                        + ',' + (width / 2) + ',' + (height / 2 + 70)
-                        + ',' + (width / 2 - 50) + ',' + (height / 2 + 50)
+                    data: { color: '' },
+                    coords: {
+                        points: [
+                            { x: (width / 2), y: (height / 2 - 50) },
+                            { x: (width / 2 + 50), y: (height / 2 + 50) },
+                            { x: (width / 2), y: (height / 2 + 70) },
+                            { x: (width / 2 - 50), y: (height / 2 + 50) },
+                        ]
+                    }
                 }]);
         };
         EditControl.prototype.buttonDismissHandler = function (event) {
@@ -179,7 +198,9 @@ define(["require", "exports", "jquery", "./AreaManipulation", "TYPO3/CMS/Backend
             event.stopPropagation();
             event.preventDefault();
             var areasData = this.areaManipulation.getAreasData(), hiddenField = $("input[name=\"" + this.configuration.itemName + "\"]");
-            hiddenField.val(areasData).trigger('imagemap:changed');
+            hiddenField
+                .val(areasData)
+                .trigger('imagemap:changed');
             FormEngineValidation.markFieldAsChanged(hiddenField);
             this.currentModal.modal('hide');
         };

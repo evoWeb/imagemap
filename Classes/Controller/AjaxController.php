@@ -58,30 +58,29 @@ class AjaxController
      */
     public function browselinkUrlAction(ServerRequestInterface $request): ResponseInterface
     {
-        $parameters = $request->getQueryParams();
-        $linkParameters = [
-            'act' => strpos($parameters['currentValue'], 'http') !== false ? 'url' : 'page',
-            'mode' => 'wizard',
-            'field' => $parameters['itemName'],
-            'P' => [
-                'returnUrl' => $parameters['returnUrl'],
-                'formName' => $parameters['formName'],
-                'itemName' => $parameters['itemName'],
-                'currentValue' => $parameters['currentValue'],
-                'pid' => $parameters['pid'],
-                'fieldChangeFunc' => [
-                    'focus' => 'focus()',
-                    'callback' => 'imagemap.areaEditor.triggerLinkChanged("' . $parameters['objectId'] . '")'
-                ]
-            ]
-        ];
-        $linkParameters['P']['fieldChangeFuncHash'] = GeneralUtility::hmac(
-            serialize($linkParameters['P']['fieldChangeFunc'])
-        );
+        $parsedBody = $request->getQueryParams();
 
-        /** @var UriBuilder $uriBuilder */
-        $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
-        $data = ['url' => (string)$uriBuilder->buildUriFromRoute('wizard_link', $linkParameters)];
+        $itemName = $parsedBody['itemFormElName'];
+
+        $urlParameters = [
+            'P' => [
+                'params' => [],
+                'table' => $parsedBody['tableName'],
+                'uid' => (int)$parsedBody['uid'],
+                'pid' => (int)$parsedBody['pid'],
+                'field' => $parsedBody['fieldName'],
+                'formName' => 'editform',
+                'itemName' => $itemName,
+                'hmac' => GeneralUtility::hmac($itemName, 'wizard_js'),
+                'fieldChangeFunc' => $parsedBody['fieldChangeFunc'],
+                'fieldChangeFuncHash' => GeneralUtility::hmac(serialize($parsedBody['fieldChangeFunc'])),
+            ],
+        ];
+        /** @var \TYPO3\CMS\Backend\Routing\UriBuilder $uriBuilder */
+        $uriBuilder = GeneralUtility::makeInstance(\TYPO3\CMS\Backend\Routing\UriBuilder::class);
+        $url = (string)$uriBuilder->buildUriFromRoute('wizard_link', $urlParameters);
+
+        $data = ['url' => $url];
         /** @var JsonResponse $response */
         $response = GeneralUtility::makeInstance(JsonResponse::class, $data, 200, [
             'Content-Type' => 'application/json; charset=utf-8'

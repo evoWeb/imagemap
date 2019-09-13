@@ -2,16 +2,28 @@
 			xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
 			data-namespace-typo3-fluid="true">
 
-<div class="input-group-btn">
-	<span id="up" class="t3js-btn btn btn-default disabled" title="{f:translate(id: 'imagemap.form.area.up', extensionName: 'imagemap')}"><core:icon identifier="actions-move-up"/></span>
-	<span id="down" class="t3js-btn btn btn-default disabled" title="{f:translate(id: 'imagemap.form.area.down', extensionName: 'imagemap')}"><core:icon identifier="actions-move-down"/></span>
-	<f:comment>
-		<span id="undo" class="t3js-btn btn btn-default disabled" title="{f:translate(id: 'imagemap.form.area.undo', extensionName: 'imagemap')}"><core:icon identifier="actions-edit-undo"/></span>
-		<span id="redo" class="t3js-btn btn btn-default disabled" title="{f:translate(id: 'imagemap.form.area.redo', extensionName: 'imagemap')}"><core:icon identifier="actions-edit-redo"/></span>
-	</f:comment>
-	<span id="delete" class="t3js-btn btn btn-default" title="{f:translate(id: 'imagemap.form.area.remove', extensionName: 'imagemap')}"><core:icon identifier="actions-delete"/></span>
-	<span id="expand" class="t3js-btn btn btn-default" title="{f:translate(id: 'imagemap.form.area.expand', extensionName: 'imagemap')}"><core:icon identifier="actions-view-list-expand"/></span>
-	<span id="collapse" class="t3js-btn btn btn-default hide" title="{f:translate(id: 'imagemap.form.area.collapse', extensionName: 'imagemap')}"><core:icon identifier="actions-view-list-collapse"/></span>
+<div class="input-group">
+	<div class="input-group-addon">
+		<input class="form-control t3js-field t3js-color-picker color" type="hidden" value=""/>
+	</div>
+	<input type="text" class="t3js-field form-control alt" placeholder="{f:translate(id: 'imagemap.form.area.label', extensionName: 'imagemap')}" />
+
+	<div class="input-group-btn">
+		<span data-action="up" class="t3js-btn btn btn-default disabled"
+					title="{f:translate(id: 'imagemap.form.area.up', extensionName: 'imagemap')}"><core:icon identifier="actions-move-up"/></span>
+		<span data-action="down" class="t3js-btn btn btn-default disabled"
+					title="{f:translate(id: 'imagemap.form.area.down', extensionName: 'imagemap')}"><core:icon identifier="actions-move-down"/></span>
+		<f:comment>
+			<span data-action="undo" class="t3js-btn btn btn-default disabled" title="{f:translate(id: 'imagemap.form.area.undo', extensionName: 'imagemap')}"><core:icon identifier="actions-edit-undo"/></span>
+			<span data-action="redo" class="t3js-btn btn btn-default disabled" title="{f:translate(id: 'imagemap.form.area.redo', extensionName: 'imagemap')}"><core:icon identifier="actions-edit-redo"/></span>
+		</f:comment>
+		<span data-action="delete" class="t3js-btn btn btn-default"
+					title="{f:translate(id: 'imagemap.form.area.remove', extensionName: 'imagemap')}"><core:icon identifier="actions-delete"/></span>
+		<span data-action="expand" class="t3js-btn btn btn-default"
+					title="{f:translate(id: 'imagemap.form.area.expand', extensionName: 'imagemap')}"><core:icon identifier="actions-view-list-expand"/></span>
+		<span data-action="collapse" class="t3js-btn btn btn-default hide"
+					title="{f:translate(id: 'imagemap.form.area.collapse', extensionName: 'imagemap')}"><core:icon identifier="actions-view-list-collapse"/></span>
+	</div>
 </div>
 
 </html>

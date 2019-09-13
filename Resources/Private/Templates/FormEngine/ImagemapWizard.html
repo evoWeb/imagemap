@@ -3,9 +3,10 @@
 	<f:section name="Main">
 
 		<div class="modal-panel-main">
-			<div id="t3js-imagemap-container" data-configuration="{configuration}">
+			<div id="t3js-imagemap-container" class="picture"
+					 data-configuration="{configuration}" data-existing-areas="{existingAreas}">
 				<f:image image="{image}" treatIdAsReference="true" class="image" maxWidth="1000" maxHeight="1000"/>
-				<canvas id="canvas" class="canvas"></canvas>
+				<canvas id="modal-canvas" class="canvas"></canvas>
 			</div>
 		</div>
 
