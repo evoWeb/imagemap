@@ -290,6 +290,10 @@ abstract class FormArea {
     this.updateFields(this.configuration);
   }
 
+  public changeLink(a: any) {
+    console.log(a);
+  }
+
   protected abstract updateFields(configuration: HTML5Area): void;
 
   public abstract updateCanvas(event: Event): void;
@@ -660,7 +664,11 @@ class AreaForm {
     let data = {
       ...this.options.browseLink,
       objectId: area.id,
-      itemName: 'link' + area.id
+      formName: 'areasForm',
+      itemFormElName: 'link' + area.id,
+      fieldChangeFunc: [
+        'FormArea.changeLink();',
+      ]
     };
 
     $.ajax({
@@ -671,6 +679,7 @@ class AreaForm {
       const url = response.url
         + '&P[currentValue]=' + encodeURIComponent(area.getFieldValue('.href'))
         + '&P[currentSelectedValues]=' + encodeURIComponent(area.getFieldValue('.href'));
+      window.FormArea = area;
 
       Modal.advanced({
         type: Modal.types.iframe,

@@ -283,6 +283,9 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
             this.link = field.value;
             this.updateFields(this.configuration);
         };
+        FormArea.prototype.changeLink = function (a) {
+            console.log(a);
+        };
         return FormArea;
     }());
     var FormRectangle = /** @class */ (function (_super) {
@@ -587,26 +590,10 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
         };
         AreaForm.prototype.openLinkBrowser = function (link, area) {
             link.blur();
-            /*let data = {
-              ...this.options.browseLink,
-              objectId: area.id,
-              itemName: 'link' + area.id,
-              currentValue: area.getFieldValue('.href')
-            };
-        
-            $.ajax({
-              url: this.options.browseLinkUrlAjaxUrl,
-              context: area,
-              data: data
-            }).done((response: {url: string}) => {
-              let vHWin = window.open(
-                response.url,
-                '',
-                'height=600,width=500,status=0,menubar=0,scrollbars=1'
-              );
-              vHWin.focus()
-            });*/
-            var data = __assign(__assign({}, this.options.browseLink), { objectId: area.id, itemName: 'link' + area.id });
+            var data = __assign(__assign({}, this.options.browseLink), { objectId: area.id, formName: 'areasForm', itemFormElName: 'link' + area.id, fieldChangeFunc: [
+                    'FormArea.changeLink();',
+                    'console.log(\'test\');'
+                ] });
             $.ajax({
                 url: this.options.browseLinkUrlAjaxUrl,
                 context: area,
@@ -615,6 +602,7 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
                 var url = response.url
                     + '&P[currentValue]=' + encodeURIComponent(area.getFieldValue('.href'))
                     + '&P[currentSelectedValues]=' + encodeURIComponent(area.getFieldValue('.href'));
+                window.FormArea = area;
                 Modal.advanced({
                     type: Modal.types.iframe,
                     content: url,

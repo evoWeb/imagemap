@@ -60,16 +60,31 @@ class AjaxController
     {
         $parsedBody = $request->getQueryParams();
 
+        $options = $GLOBALS['TCA'][$parsedBody['tableName']]['columns'][
+            $parsedBody['fieldName']
+        ]['config']['fieldControlOptions'] ?? [];
+
         $itemName = $parsedBody['itemFormElName'];
+
+        $linkBrowserArguments = [];
+        if (isset($options['blindLinkOptions'])) {
+            $linkBrowserArguments['blindLinkOptions'] = $options['blindLinkOptions'];
+        }
+        if (isset($options['blindLinkFields'])) {
+            $linkBrowserArguments['blindLinkFields'] = $options['blindLinkFields'];
+        }
+        if (isset($options['allowedExtensions'])) {
+            $linkBrowserArguments['allowedExtensions'] = $options['allowedExtensions'];
+        }
 
         $urlParameters = [
             'P' => [
-                'params' => [],
+                'params' => $linkBrowserArguments,
                 'table' => $parsedBody['tableName'],
                 'uid' => (int)$parsedBody['uid'],
                 'pid' => (int)$parsedBody['pid'],
                 'field' => $parsedBody['fieldName'],
-                'formName' => 'editform',
+                'formName' => $parsedBody['formName'],
                 'itemName' => $itemName,
                 'hmac' => GeneralUtility::hmac($itemName, 'wizard_js'),
                 'fieldChangeFunc' => $parsedBody['fieldChangeFunc'],

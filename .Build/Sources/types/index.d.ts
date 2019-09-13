@@ -134,9 +134,21 @@ declare interface Window {
       }
     }
   },
-  imagemap: {
+  imagemap?: {
     areaEditor: any
-  }
+  },
+  FormArea?: any
+}
+
+declare interface AreaConfiguration {
+  shape?: string,
+  color?: string,
+  cornerColor?: string,
+  cornerStrokeColor?: string,
+  editor?: object,
+  coords?: string,
+  left?: number,
+  top?: number,
 }
 
 declare interface AreaConfiguration {
