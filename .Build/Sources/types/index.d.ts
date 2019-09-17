@@ -15,7 +15,7 @@ declare interface CanvasSize {
 }
 
 declare interface EditorOptions {
-  fauxFormDocument?: Document,
+  editControlDocument?: Document,
   canvas?: CanvasSize
   previewRerenderAjaxUrl?: string,
   browseLinkUrlAjaxUrl?: string,
@@ -34,7 +34,7 @@ declare interface CanvasOptions {
 }
 
 declare interface FormOptions {
-  fauxFormDocument: Document,
+  formDocument: Document,
   formSelector: string,
   browseLink: BrowseLinkConfiguration,
   browseLinkUrlAjaxUrl: string

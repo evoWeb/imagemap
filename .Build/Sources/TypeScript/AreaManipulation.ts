@@ -264,18 +264,18 @@ abstract class FormArea {
   /**
    * Add faux input as target for browselink which listens for changes and writes value to real field
    */
-  addFauxInput() {
+  private addFauxInput() {
     if (this.form.fauxForm) {
-      let fauxInput = this.form.fauxFormDocument.createElement('input');
+      let fauxInput = this.form.fauxDocument.createElement('input');
       fauxInput.setAttribute('id', 'link' + this.id);
       fauxInput.setAttribute('data-formengine-input-name', 'link' + this.id);
-      fauxInput.setAttribute('value', this.link);
-      fauxInput.addEventListener('change', this.fauxInputChanged.bind(this));
+      fauxInput.setAttribute('value', this.configuration.href);
+      fauxInput.onchange = this.fauxInputChanged.bind(this);
       this.form.fauxForm.appendChild(fauxInput);
     }
   }
 
-  removeFauxInput() {
+  private removeFauxInput() {
     if (this.form && this.form.fauxForm) {
       let field = this.form.fauxForm.querySelector('#link' + this.id);
       if (field) {
@@ -284,17 +284,13 @@ abstract class FormArea {
     }
   }
 
-  fauxInputChanged(event: Event) {
-    let field = (event.currentTarget as HTMLInputElement);
-    this.link = field.value;
+  private fauxInputChanged() {
+    let field = (this.form.fauxDocument.querySelector('#link' + this.id) as HTMLInputElement);
+    this.configuration.href = field.value;
     this.updateFields(this.configuration);
   }
 
-  public changeLink(a: any) {
-    console.log(a);
-  }
-
-  protected abstract updateFields(configuration: HTML5Area): void;
+  public abstract updateFields(configuration: HTML5Area): void;
 
   public abstract updateCanvas(event: Event): void;
 
@@ -304,7 +300,7 @@ abstract class FormArea {
 class FormRectangle extends FormArea {
   protected name: string = 'rectangle';
 
-  protected updateFields(configuration: HTML5Area) {
+  public updateFields(configuration: HTML5Area) {
     this.setFieldValue('.color', configuration.data.color);
     this.setFieldValue('.alt', configuration.alt);
     this.setFieldValue('.href', configuration.href);
@@ -371,7 +367,7 @@ class FormRectangle extends FormArea {
 class FormCircle extends FormArea {
   protected name: string = 'circle';
 
-  protected updateFields(configuration: HTML5Area) {
+  public updateFields(configuration: HTML5Area) {
     this.setFieldValue('.color', configuration.data.color);
     this.setFieldValue('.alt', configuration.alt);
     this.setFieldValue('.href', configuration.href);
@@ -420,7 +416,7 @@ class FormCircle extends FormArea {
 class FormPolygon extends FormArea {
   protected name: string = 'polygon';
 
-  protected updateFields(configuration: HTML5Area) {
+  public updateFields(configuration: HTML5Area) {
     this.setFieldValue('.color', configuration.data.color);
     this.setFieldValue('.alt', configuration.alt);
     this.setFieldValue('.href', configuration.href);
@@ -559,17 +555,17 @@ class AreaForm {
   /**
    * Element needed to add inputs that act as target for browselink finalizeFunction target
    */
-  readonly fauxFormDocument: Document;
+  readonly fauxDocument: Document;
 
   public fauxForm: HTMLFormElement;
 
   constructor(options: FormOptions, editor: AreaManipulation) {
     this.options = options;
-    this.fauxFormDocument = this.options.fauxFormDocument;
+    this.fauxDocument = this.options.formDocument;
     this._element = editor.container.querySelector(options.formSelector);
     this._areaZone = this.element.querySelector('#areaZone');
 
-    this.addFauxFormForLinkBrowser(this.options.browseLink);
+    this.addFauxFormForLinkBrowser();
   }
 
   get element() {
@@ -643,18 +639,21 @@ class AreaForm {
   }
 
   /**
-   * Triggers change event after faux field was changed by browselink
+   * Create form element that is reachable for LinkBrowser.finalizeFunction
    */
-  private addFauxFormForLinkBrowser(configuration: BrowseLinkConfiguration) {
-    if (top.document !== this.fauxFormDocument) {
-      this.fauxForm = this.fauxFormDocument.createElement('form');
-      this.fauxForm.setAttribute('name', configuration.formName);
-
-      let fauxFormContainer = this.fauxFormDocument.querySelector('#fauxFormContainer');
-      while (fauxFormContainer.firstChild) {
-        fauxFormContainer.removeChild(fauxFormContainer.firstChild);
+  private addFauxFormForLinkBrowser() {
+    if (top.document !== this.fauxDocument) {
+      if (!(this.fauxForm = this.fauxDocument.querySelector(this.options.formSelector))) {
+        this.fauxForm = this.fauxDocument.createElement('form');
+        this.fauxForm.setAttribute('name', 'areasForm');
+        this.fauxForm.setAttribute('id', 'fauxForm');
+        this.fauxDocument.body.appendChild(this.fauxForm);
       }
-      fauxFormContainer.appendChild(this.fauxForm);
+
+      // empty previously created fauxForm
+      while (this.fauxForm.firstChild) {
+        this.fauxForm.removeChild(this.fauxForm.firstChild);
+      }
     }
   }
 
@@ -665,10 +664,7 @@ class AreaForm {
       ...this.options.browseLink,
       objectId: area.id,
       formName: 'areasForm',
-      itemFormElName: 'link' + area.id,
-      fieldChangeFunc: [
-        'FormArea.changeLink();',
-      ]
+      itemFormElName: 'link' + area.id
     };
 
     $.ajax({
@@ -1034,7 +1030,7 @@ export class AreaManipulation {
     if (this.interactive) {
       this.form = new AreaForm({
         formSelector: this.options.formSelector,
-        fauxFormDocument: this.options.fauxFormDocument,
+        formDocument: this.options.editControlDocument,
         browseLink: this.options.browseLink,
         browseLinkUrlAjaxUrl: this.options.browseLinkUrlAjaxUrl,
       }, this);

@@ -262,11 +262,11 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
          */
         FormArea.prototype.addFauxInput = function () {
             if (this.form.fauxForm) {
-                var fauxInput = this.form.fauxFormDocument.createElement('input');
+                var fauxInput = this.form.fauxDocument.createElement('input');
                 fauxInput.setAttribute('id', 'link' + this.id);
                 fauxInput.setAttribute('data-formengine-input-name', 'link' + this.id);
-                fauxInput.setAttribute('value', this.link);
-                fauxInput.addEventListener('change', this.fauxInputChanged.bind(this));
+                fauxInput.setAttribute('value', this.configuration.href);
+                fauxInput.onchange = this.fauxInputChanged.bind(this);
                 this.form.fauxForm.appendChild(fauxInput);
             }
         };
@@ -278,13 +278,10 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
                 }
             }
         };
-        FormArea.prototype.fauxInputChanged = function (event) {
-            var field = event.currentTarget;
-            this.link = field.value;
+        FormArea.prototype.fauxInputChanged = function () {
+            var field = this.form.fauxDocument.querySelector('#link' + this.id);
+            this.configuration.href = field.value;
             this.updateFields(this.configuration);
-        };
-        FormArea.prototype.changeLink = function (a) {
-            console.log(a);
         };
         return FormArea;
     }());
@@ -507,10 +504,10 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
         function AreaForm(options, editor) {
             this.areas = [];
             this.options = options;
-            this.fauxFormDocument = this.options.fauxFormDocument;
+            this.fauxDocument = this.options.formDocument;
             this._element = editor.container.querySelector(options.formSelector);
             this._areaZone = this.element.querySelector('#areaZone');
-            this.addFauxFormForLinkBrowser(this.options.browseLink);
+            this.addFauxFormForLinkBrowser();
         }
         Object.defineProperty(AreaForm.prototype, "element", {
             get: function () {
@@ -575,25 +572,25 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
             });
         };
         /**
-         * Triggers change event after faux field was changed by browselink
+         * Create form element that is reachable for LinkBrowser.finalizeFunction
          */
-        AreaForm.prototype.addFauxFormForLinkBrowser = function (configuration) {
-            if (top.document !== this.fauxFormDocument) {
-                this.fauxForm = this.fauxFormDocument.createElement('form');
-                this.fauxForm.setAttribute('name', configuration.formName);
-                var fauxFormContainer = this.fauxFormDocument.querySelector('#fauxFormContainer');
-                while (fauxFormContainer.firstChild) {
-                    fauxFormContainer.removeChild(fauxFormContainer.firstChild);
+        AreaForm.prototype.addFauxFormForLinkBrowser = function () {
+            if (top.document !== this.fauxDocument) {
+                if (!(this.fauxForm = this.fauxDocument.querySelector(this.options.formSelector))) {
+                    this.fauxForm = this.fauxDocument.createElement('form');
+                    this.fauxForm.setAttribute('name', 'areasForm');
+                    this.fauxForm.setAttribute('id', 'fauxForm');
+                    this.fauxDocument.body.appendChild(this.fauxForm);
                 }
-                fauxFormContainer.appendChild(this.fauxForm);
+                // empty previously created fauxForm
+                while (this.fauxForm.firstChild) {
+                    this.fauxForm.removeChild(this.fauxForm.firstChild);
+                }
             }
         };
         AreaForm.prototype.openLinkBrowser = function (link, area) {
             link.blur();
-            var data = __assign(__assign({}, this.options.browseLink), { objectId: area.id, formName: 'areasForm', itemFormElName: 'link' + area.id, fieldChangeFunc: [
-                    'FormArea.changeLink();',
-                    'console.log(\'test\');'
-                ] });
+            var data = __assign(__assign({}, this.options.browseLink), { objectId: area.id, formName: 'areasForm', itemFormElName: 'link' + area.id });
             $.ajax({
                 url: this.options.browseLinkUrlAjaxUrl,
                 context: area,
@@ -888,7 +885,7 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
             if (this.interactive) {
                 this.form = new AreaForm({
                     formSelector: this.options.formSelector,
-                    fauxFormDocument: this.options.fauxFormDocument,
+                    formDocument: this.options.editControlDocument,
                     browseLink: this.options.browseLink,
                     browseLinkUrlAjaxUrl: this.options.browseLinkUrlAjaxUrl,
                 }, this);

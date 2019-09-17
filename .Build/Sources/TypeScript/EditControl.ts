@@ -189,10 +189,10 @@ class EditControl {
       {
         canvas: this.canvasSize,
         canvasSelector: '#modal-canvas',
-        fauxFormDocument: top.window.document,
+        editControlDocument: window.document,
         browseLink: this.configuration.browseLink,
         browseLinkUrlAjaxUrl: top.window.TYPO3.settings.ajaxUrls.imagemap_browselink_url,
-        formSelector: '#areasForm',
+        formSelector: '[name="areasForm"]',
       }
     );
     this.areaManipulation.initializeAreas(this.currentModal.find('.picture').data('existingAreas'));
