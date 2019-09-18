@@ -266,7 +266,7 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
                 fauxInput.setAttribute('id', 'link' + this.id);
                 fauxInput.setAttribute('data-formengine-input-name', 'link' + this.id);
                 fauxInput.setAttribute('value', this.configuration.href);
-                fauxInput.onchange = this.fauxInputChanged.bind(this);
+                fauxInput.onchange = this.changedFauxInput.bind(this);
                 this.form.fauxForm.appendChild(fauxInput);
             }
         };
@@ -278,10 +278,15 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
                 }
             }
         };
-        FormArea.prototype.fauxInputChanged = function () {
+        FormArea.prototype.changedFauxInput = function () {
             var field = this.form.fauxDocument.querySelector('#link' + this.id);
             this.configuration.href = field.value;
             this.updateFields(this.configuration);
+        };
+        FormArea.prototype.destroy = function () {
+            this.element.remove();
+            this.removeFauxInput();
+            this.form.deleteArea(this);
         };
         return FormArea;
     }());
@@ -293,6 +298,7 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
             return _this;
         }
         FormRectangle.prototype.updateFields = function (configuration) {
+            this.configuration = configuration;
             this.setFieldValue('.color', configuration.data.color);
             this.setFieldValue('.alt', configuration.alt);
             this.setFieldValue('.href', configuration.href);
@@ -357,6 +363,7 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
             return _this;
         }
         FormCircle.prototype.updateFields = function (configuration) {
+            this.configuration = configuration;
             this.setFieldValue('.color', configuration.data.color);
             this.setFieldValue('.alt', configuration.alt);
             this.setFieldValue('.href', configuration.href);
@@ -405,6 +412,7 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
         }
         FormPolygon.prototype.updateFields = function (configuration) {
             var _this = this;
+            this.configuration = configuration;
             this.setFieldValue('.color', configuration.data.color);
             this.setFieldValue('.alt', configuration.alt);
             this.setFieldValue('.href', configuration.href);
@@ -420,6 +428,7 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
             });
         };
         FormPolygon.prototype.updateCanvas = function (event) {
+            console.log(event);
             var field = (event.currentTarget || event.target), _a = __read(field.id.split('_'), 2), point = _a[1], control = this.controls[parseInt(point)], x = control.getCenterPoint().x, y = control.getCenterPoint().y;
             if (field.id.indexOf('x') > -1) {
                 x = parseInt(field.value);
@@ -605,6 +614,11 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
                     content: url,
                     size: Modal.sizes.large,
                 });
+            });
+        };
+        AreaForm.prototype.destroy = function () {
+            this.areas.forEach(function (area) {
+                area.destroy();
             });
         };
         return AreaForm;
@@ -859,6 +873,12 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
             this.canvas.remove(area);
             area = null;
         };
+        AreaCanvas.prototype.destroy = function () {
+            var _this = this;
+            this.areas.forEach(function (area) {
+                _this.deleteArea(area);
+            });
+        };
         return AreaCanvas;
     }());
     var AreaManipulation = /** @class */ (function () {
@@ -919,8 +939,13 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
             });
             return data;
         };
-        AreaManipulation.prototype.destruct = function () {
-            // this.form.destroy();
+        AreaManipulation.prototype.destroy = function () {
+            this.canvas.destroy();
+            this.canvas = null;
+            if (this.form) {
+                this.form.destroy();
+                this.form = null;
+            }
         };
         return AreaManipulation;
     }());

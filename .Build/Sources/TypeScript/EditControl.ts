@@ -148,7 +148,7 @@ class EditControl {
     });
 
     this.currentModal.on('hide.bs.modal', () => {
-      this.destruct();
+      this.destroy();
     });
     // do not dismiss the modal when clicking beside it to avoid data loss
     this.currentModal.data('bs.modal').options.backdrop = 'static';
@@ -198,12 +198,12 @@ class EditControl {
     this.areaManipulation.initializeAreas(this.currentModal.find('.picture').data('existingAreas'));
   }
 
-  private destruct() {
+  private destroy() {
     if (this.currentModal) {
       this.currentModal = null;
     }
     if (this.areaManipulation) {
-      this.areaManipulation.destruct();
+      this.areaManipulation.destroy();
       this.areaManipulation = null;
     }
   }

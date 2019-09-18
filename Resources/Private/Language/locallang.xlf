@@ -44,7 +44,7 @@
 				<source>Accept</source>
 			</trans-unit>
 			<trans-unit id="imagemap.form.area.label">
-				<source>Label</source>
+				<source>Alternative Label</source>
 			</trans-unit>
 			<trans-unit id="imagemap.form.area.link">
 				<source>Link</source>

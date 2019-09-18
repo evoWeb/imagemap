@@ -52,8 +52,8 @@
 				<target>Übernehmen</target>
 			</trans-unit>
 			<trans-unit id="imagemap.form.area.label">
-				<source>Label</source>
-				<target>Label</target>
+				<source>Alternative Label</source>
+				<target>Alternative Bezeichnung</target>
 			</trans-unit>
 			<trans-unit id="imagemap.form.area.link">
 				<source>Link</source>

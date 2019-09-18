@@ -270,7 +270,7 @@ abstract class FormArea {
       fauxInput.setAttribute('id', 'link' + this.id);
       fauxInput.setAttribute('data-formengine-input-name', 'link' + this.id);
       fauxInput.setAttribute('value', this.configuration.href);
-      fauxInput.onchange = this.fauxInputChanged.bind(this);
+      fauxInput.onchange = this.changedFauxInput.bind(this);
       this.form.fauxForm.appendChild(fauxInput);
     }
   }
@@ -284,7 +284,7 @@ abstract class FormArea {
     }
   }
 
-  private fauxInputChanged() {
+  private changedFauxInput() {
     let field = (this.form.fauxDocument.querySelector('#link' + this.id) as HTMLInputElement);
     this.configuration.href = field.value;
     this.updateFields(this.configuration);
@@ -295,12 +295,20 @@ abstract class FormArea {
   public abstract updateCanvas(event: Event): void;
 
   public abstract getData(): HTML5Area;
+
+  public destroy() {
+    this.element.remove();
+    this.removeFauxInput();
+    this.form.deleteArea(this);
+  }
 }
 
 class FormRectangle extends FormArea {
   protected name: string = 'rectangle';
 
   public updateFields(configuration: HTML5Area) {
+    this.configuration = configuration;
+
     this.setFieldValue('.color', configuration.data.color);
     this.setFieldValue('.alt', configuration.alt);
     this.setFieldValue('.href', configuration.href);
@@ -368,6 +376,8 @@ class FormCircle extends FormArea {
   protected name: string = 'circle';
 
   public updateFields(configuration: HTML5Area) {
+    this.configuration = configuration;
+
     this.setFieldValue('.color', configuration.data.color);
     this.setFieldValue('.alt', configuration.alt);
     this.setFieldValue('.href', configuration.href);
@@ -417,6 +427,8 @@ class FormPolygon extends FormArea {
   protected name: string = 'polygon';
 
   public updateFields(configuration: HTML5Area) {
+    this.configuration = configuration;
+
     this.setFieldValue('.color', configuration.data.color);
     this.setFieldValue('.alt', configuration.alt);
     this.setFieldValue('.href', configuration.href);
@@ -683,6 +695,12 @@ class AreaForm {
         size: Modal.sizes.large,
       });
     });
+  }
+
+  public destroy() {
+    this.areas.forEach((area: FormArea) => {
+      area.destroy();
+    })
   }
 }
 
@@ -989,6 +1007,12 @@ class AreaCanvas {
     this.canvas.remove(area);
     area = null;
   }
+
+  public destroy() {
+    this.areas.forEach((area: CanvasRectangle|CanvasPolygon|CanvasCircle) => {
+      this.deleteArea(area);
+    })
+  }
 }
 
 export class AreaManipulation {
@@ -1068,7 +1092,12 @@ export class AreaManipulation {
     return data;
   }
 
-  public destruct() {
-    // this.form.destroy();
+  public destroy() {
+    this.canvas.destroy();
+    this.canvas = null;
+    if (this.form) {
+      this.form.destroy();
+      this.form = null;
+    }
   }
 }
