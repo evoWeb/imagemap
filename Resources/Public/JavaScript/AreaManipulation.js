@@ -216,7 +216,7 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
                 this.configuration.data[property] = field.value;
             }
         };
-        FormArea.prototype.initializeArrows = function () {
+        FormArea.prototype.updateArrowsState = function () {
             var areaZone = this.form.areaZone;
             this.getElement('[data-action="up"]').classList[areaZone.firstChild !== this.element ? 'remove' : 'add']('disabled');
             this.getElement('[data-action="down"]').classList[areaZone.lastChild !== this.element ? 'remove' : 'add']('disabled');
@@ -308,34 +308,45 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
             this.setFieldValue('#bottom', configuration.coords.bottom);
         };
         FormRectangle.prototype.updateCanvas = function (event) {
-            var field = (event.currentTarget || event.target), value = parseInt(field.value);
+            var coords = this.configuration.coords, field = (event.currentTarget || event.target), value = parseInt(field.value), scaledWidth = this.canvasArea.getScaledWidth(), scaledHeight = this.canvasArea.getScaledHeight(), property = '';
             switch (field.id) {
                 case 'left':
-                    this.getElement('#right').value = value + this.getScaledWidth();
-                    this.set({ left: value });
+                    this.getElement('#right').value = value + scaledWidth;
+                    coords.right = value + scaledWidth;
+                    coords.left = value;
+                    property = 'left';
                     break;
                 case 'top':
-                    this.getElement('#bottom').value = value + this.getScaledHeight();
-                    this.set({ top: value });
+                    this.getElement('#bottom').value = value + scaledHeight;
+                    coords.bottom = value + scaledWidth;
+                    coords.top = value;
+                    property = 'top';
                     break;
                 case 'right':
-                    value -= this.left;
+                    value -= coords.left;
+                    coords.right = value;
                     if (value < 0) {
                         value = 10;
-                        field.value = this.left + value;
+                        field.value = (coords.left + value).toString();
                     }
-                    this.set({ width: value });
+                    property = 'width';
                     break;
                 case 'bottom':
-                    value -= this.top;
+                    value -= coords.top;
+                    coords.bottom = value;
                     if (value < 0) {
                         value = 10;
-                        field.value = this.top + value;
+                        field.value = (coords.top + value).toString();
                     }
-                    this.set({ height: value });
+                    property = 'height';
                     break;
             }
-            this.canvas.renderAll();
+            if (property && value) {
+                var set = {};
+                set[property] = value;
+                this.canvasArea.set(set);
+                this.canvasArea.canvas.renderAll();
+            }
         };
         FormRectangle.prototype.getData = function () {
             return {
@@ -372,19 +383,27 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
             this.setFieldValue('#radius', configuration.coords.radius);
         };
         FormCircle.prototype.updateCanvas = function (event) {
-            var field = (event.currentTarget || event.target), value = parseInt(field.value);
+            var coords = this.configuration.coords, field = (event.currentTarget || event.target), value = parseInt(field.value), property = '';
             switch (field.id) {
                 case 'left':
-                    this.set({ left: value });
+                    coords.left = value;
+                    property = 'left';
                     break;
                 case 'top':
-                    this.set({ top: value });
+                    coords.left = value;
+                    property = 'top';
                     break;
                 case 'radius':
-                    this.set({ radius: value });
+                    coords.left = value;
+                    property = 'radius';
                     break;
             }
-            this.canvas.renderAll();
+            if (property && value) {
+                var set = {};
+                set[property] = value;
+                this.canvasArea.set(set);
+                this.canvasArea.canvas.renderAll();
+            }
         };
         FormCircle.prototype.getData = function () {
             return {
@@ -428,18 +447,33 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
             });
         };
         FormPolygon.prototype.updateCanvas = function (event) {
-            console.log(event);
-            var field = (event.currentTarget || event.target), _a = __read(field.id.split('_'), 2), point = _a[1], control = this.controls[parseInt(point)], x = control.getCenterPoint().x, y = control.getCenterPoint().y;
+            var coords = this.configuration.coords, field = (event.currentTarget || event.target), value = parseInt(field.value), _a = __read(field.id.split('_'), 2), point = _a[1];
+            console.log([
+                coords,
+                field,
+                value,
+                point,
+                this.canvasArea
+            ]);
             if (field.id.indexOf('x') > -1) {
-                x = parseInt(field.value);
+                x = value;
             }
             if (field.id.indexOf('y') > -1) {
-                y = parseInt(field.value);
+                y = value;
             }
+            console.log([
+                coords,
+                field,
+                value,
+                point,
+                control,
+                x,
+                y
+            ]);
             control.set('left', x);
             control.set('top', y);
             control.setCoords();
-            this.points[control.name] = { x: x, y: y };
+            coords[control.name] = { x: x, y: y };
             this.canvas.renderAll();
         };
         FormPolygon.prototype.getData = function () {
@@ -564,7 +598,7 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
             this.areas = areas;
             area.canvasArea.canvas.remove(area.canvasArea);
             area = null;
-            this.initializeArrows();
+            this.updateArrowsState();
         };
         AreaForm.prototype.moveArea = function (area, offset) {
             var index = this.areas.indexOf(area), newIndex = index + offset, parent = area.element.parentNode;
@@ -573,11 +607,11 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
                 this.areas.splice(newIndex, 0, removedArea);
                 parent.childNodes[index][offset < 0 ? 'after' : 'before'](parent.childNodes[newIndex]);
             }
-            this.initializeArrows();
+            this.updateArrowsState();
         };
-        AreaForm.prototype.initializeArrows = function () {
+        AreaForm.prototype.updateArrowsState = function () {
             this.areas.forEach(function (area) {
-                area.initializeArrows();
+                area.updateArrowsState();
             });
         };
         /**
@@ -922,7 +956,7 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
                 }
             });
             if (this.form) {
-                this.form.initializeArrows();
+                this.form.updateArrowsState();
             }
         };
         AreaManipulation.prototype.removeAllAreas = function () {

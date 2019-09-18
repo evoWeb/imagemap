@@ -211,7 +211,7 @@ abstract class FormArea {
     }
   }
 
-  public initializeArrows() {
+  public updateArrowsState() {
     let areaZone = this.form.areaZone;
     this.getElement('[data-action="up"]').classList[areaZone.firstChild !== this.element ? 'remove' : 'add']('disabled');
     this.getElement('[data-action="down"]').classList[areaZone.lastChild !== this.element ? 'remove' : 'add']('disabled');
@@ -319,39 +319,55 @@ class FormRectangle extends FormArea {
   }
 
   public updateCanvas(event: Event) {
-    let field = ((event.currentTarget || event.target) as HTMLInputElement),
-      value = parseInt(field.value);
+    let coords = this.configuration.coords,
+      field = ((event.currentTarget || event.target) as HTMLInputElement),
+      value = parseInt(field.value),
+      scaledWidth = this.canvasArea.getScaledWidth(),
+      scaledHeight = this.canvasArea.getScaledHeight(),
+      property = '';
 
     switch (field.id) {
       case 'left':
-        this.getElement('#right').value = value + this.getScaledWidth();
-        this.set({left: value});
+        this.getElement('#right').value = value + scaledWidth;
+        coords.right = value + scaledWidth;
+        coords.left = value;
+        property = 'left';
         break;
 
       case 'top':
-        this.getElement('#bottom').value = value + this.getScaledHeight();
-        this.set({top: value});
+        this.getElement('#bottom').value = value + scaledHeight;
+        coords.bottom = value + scaledWidth;
+        coords.top = value;
+        property = 'top';
         break;
 
       case 'right':
-        value -= this.left;
+        value -= coords.left;
+        coords.right = value;
         if (value < 0) {
           value = 10;
-          field.value = this.left + value;
+          field.value = (coords.left + value).toString();
         }
-        this.set({width: value});
+        property = 'width';
         break;
 
       case 'bottom':
-        value -= this.top;
+        value -= coords.top;
+        coords.bottom = value;
         if (value < 0) {
           value = 10;
-          field.value = this.top + value;
+          field.value = (coords.top + value).toString();
         }
-        this.set({height: value});
+        property = 'height';
         break;
     }
-    this.canvas.renderAll();
+
+    if (property && value) {
+      let set = ({} as {[property: string]: any});
+      set[property] = value;
+      this.canvasArea.set(set);
+      this.canvasArea.canvas.renderAll();
+    }
   }
 
   public getData(): HTML5Area {
@@ -387,23 +403,33 @@ class FormCircle extends FormArea {
   }
 
   public updateCanvas(event: Event) {
-    let field = ((event.currentTarget || event.target) as HTMLInputElement),
-      value = parseInt(field.value);
+    let coords = this.configuration.coords,
+      field = ((event.currentTarget || event.target) as HTMLInputElement),
+      value = parseInt(field.value),
+      property = '';
 
     switch (field.id) {
       case 'left':
-        this.set({left: value});
+        coords.left = value;
+        property = 'left';
         break;
 
       case 'top':
-        this.set({top: value});
+        coords.left = value;
+        property = 'top';
         break;
 
       case 'radius':
-        this.set({radius: value});
+        coords.left = value;
+        property = 'radius';
         break;
     }
-    this.canvas.renderAll();
+    if (property && value) {
+      let set = ({} as {[property: string]: any});
+      set[property] = value;
+      this.canvasArea.set(set);
+      this.canvasArea.canvas.renderAll();
+    }
   }
 
   public getData(): HTML5Area {
@@ -448,23 +474,33 @@ class FormPolygon extends FormArea {
   }
 
   public updateCanvas(event: Event) {
-    let field = ((event.currentTarget || event.target) as HTMLInputElement),
+    let coords = this.configuration.coords,
+      field = ((event.currentTarget || event.target) as HTMLInputElement),
+      value = parseInt(field.value),
       [, point] = field.id.split('_'),
       control = this.controls[parseInt(point)],
       x = control.getCenterPoint().x,
       y = control.getCenterPoint().y;
 
     if (field.id.indexOf('x') > -1) {
-      x = parseInt(field.value);
+      x = value;
     }
     if (field.id.indexOf('y') > -1) {
-      y = parseInt(field.value);
+      y = value;
     }
-
+console.log([
+  coords,
+  field,
+  value,
+  point,
+  control,
+  x,
+  y
+]);
     control.set('left', x);
     control.set('top', y);
     control.setCoords();
-    this.points[control.name] = {x: x, y: y};
+    coords[control.name] = {x: x, y: y};
     this.canvas.renderAll();
   }
 
@@ -626,7 +662,7 @@ class AreaForm {
     this.areas = areas;
     area.canvasArea.canvas.remove(area.canvasArea);
     area = null;
-    this.initializeArrows();
+    this.updateArrowsState();
   }
 
   public moveArea(area: FormArea, offset: number) {
@@ -641,12 +677,12 @@ class AreaForm {
       parent.childNodes[index][offset < 0 ? 'after' : 'before'](parent.childNodes[newIndex]);
     }
 
-    this.initializeArrows();
+    this.updateArrowsState();
   }
 
-  public initializeArrows() {
+  public updateArrowsState() {
     this.areas.forEach((area: FormArea) => {
-      area.initializeArrows();
+      area.updateArrowsState();
     });
   }
 
@@ -1073,7 +1109,7 @@ export class AreaManipulation {
     });
 
     if (this.form) {
-      this.form.initializeArrows();
+      this.form.updateArrowsState();
     }
   }
 

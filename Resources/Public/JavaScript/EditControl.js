@@ -93,7 +93,7 @@ define(["require", "exports", "jquery", "./AreaManipulation", "TYPO3/CMS/Backend
                 },
             });
             this.currentModal.on('hide.bs.modal', function () {
-                _this.destruct();
+                _this.destroy();
             });
             // do not dismiss the modal when clicking beside it to avoid data loss
             this.currentModal.data('bs.modal').options.backdrop = 'static';
@@ -134,12 +134,12 @@ define(["require", "exports", "jquery", "./AreaManipulation", "TYPO3/CMS/Backend
             });
             this.areaManipulation.initializeAreas(this.currentModal.find('.picture').data('existingAreas'));
         };
-        EditControl.prototype.destruct = function () {
+        EditControl.prototype.destroy = function () {
             if (this.currentModal) {
                 this.currentModal = null;
             }
             if (this.areaManipulation) {
-                this.areaManipulation.destruct();
+                this.areaManipulation.destroy();
                 this.areaManipulation = null;
             }
         };
