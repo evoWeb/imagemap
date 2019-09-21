@@ -277,7 +277,7 @@ class EditControl {
     event.stopPropagation();
     event.preventDefault();
 
-    const areasData = this.areaManipulation.getAreasData(),
+    const areasData = JSON.stringify(this.areaManipulation.getAreasData()),
       hiddenField = $(`input[name="${this.configuration.itemName}"]`);
 
     hiddenField

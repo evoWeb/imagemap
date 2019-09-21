@@ -1,5 +1,7 @@
 .area-editor {
     .modal-panel-sidebar {
+        min-height: 100%;
+
         .minicolors-swatch {
             left: 0;
             height: 18px;
@@ -24,7 +26,8 @@
 
             &.buttons {
                 .form-control {
-                    min-width: 115px;
+                    min-width: 100px;
+                    max-width: 115px;
                 }
             }
         }
@@ -51,7 +54,7 @@
             border-top-right-radius: 0;
 
             .positionOptions {
-                padding: 6px 26px 0 6px;
+                padding: 6px 6px 0 6px;
 
                 > .input-group-btn {
                     padding-bottom: 6px;
@@ -72,8 +75,5 @@
                 }
             }
         }
-
-        .rectForm .moreOptions .positionOptions { padding: 6px 84px 0 6px; }
-        .polyForm .moreOptions .positionOptions { padding: 6px 14px 0 6px; }
     }
 }

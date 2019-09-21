@@ -32,6 +32,17 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+};
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
     if (!m) return o;
@@ -103,6 +114,24 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
             }
             return array;
         };
+        AreaUtility.highestIndexOfArray = function (array) {
+            var e_1, _a;
+            var index = 0, iterator = array.keys();
+            try {
+                for (var iterator_1 = __values(iterator), iterator_1_1 = iterator_1.next(); !iterator_1_1.done; iterator_1_1 = iterator_1.next()) {
+                    var key = iterator_1_1.value;
+                    index = Math.max(index, key);
+                }
+            }
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (iterator_1_1 && !iterator_1_1.done && (_a = iterator_1.return)) _a.call(iterator_1);
+                }
+                finally { if (e_1) throw e_1.error; }
+            }
+            return index;
+        };
         AreaUtility.before = -1;
         AreaUtility.after = 1;
         return AreaUtility;
@@ -113,8 +142,8 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
             this.id = 0;
             this.form = form;
             this.configuration = configuration;
-            this._canvasArea = canvasArea;
-            this._canvasArea.formArea = this;
+            this.canvasArea = canvasArea;
+            this.canvasArea.formArea = this;
             this.id = canvasArea.id;
         }
         FormArea.prototype.initialize = function () {
@@ -124,16 +153,6 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
             this.initializeEvents();
             this.addFauxInput();
         };
-        Object.defineProperty(FormArea.prototype, "canvasArea", {
-            get: function () {
-                return this._canvasArea;
-            },
-            set: function (value) {
-                this._canvasArea = value;
-            },
-            enumerable: true,
-            configurable: true
-        });
         Object.defineProperty(FormArea.prototype, "element", {
             get: function () {
                 return this._element;
@@ -141,10 +160,13 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
             enumerable: true,
             configurable: true
         });
-        FormArea.prototype.getFormElement = function (selector, id) {
+        FormArea.prototype.getFormElement = function (selector, id, point) {
             var template = this.form.element
                 .querySelector(selector)
                 .innerHTML.replace(new RegExp('_ID', 'g'), String(id ? id : this.id));
+            if (typeof point !== 'undefined') {
+                template = template.replace(new RegExp('_POINT', 'g'), point.toString());
+            }
             return (new DOMParser()).parseFromString(template, 'text/html').body.firstChild;
         };
         FormArea.prototype.prepareAreaTemplate = function () {
@@ -179,27 +201,28 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
         };
         FormArea.prototype.colorPickerAction = function (value) {
             this.getElement('.t3js-color-picker').value = value;
-            this.canvasArea.set('borderColor', value);
-            this.canvasArea.set('stroke', value);
-            this.canvasArea.set('fill', AreaUtility.hexToRgbA(value, 0.2));
-            this.canvasArea.canvas.renderAll();
+            this.canvasArea.setProperties({
+                borderColor: value,
+                stroke: value,
+                fill: AreaUtility.hexToRgbA(value, 0.2),
+            });
         };
         FormArea.prototype.initializeEvents = function () {
-            // this.on('moved', this.updateFields.bind(this));
-            // this.on('modified', this.updateFields.bind(this));
             var _this = this;
-            this.getElements('.positionOptions .t3js-field').forEach(function (field) {
-                field.addEventListener('keyup', _this.fieldKeyUpHandler.bind(_this));
-            });
             this.getElements('.basicOptions .t3js-field').forEach(function (field) {
                 field.addEventListener('keyup', _this.updateProperties.bind(_this));
             });
-            this.getElements('.t3js-btn').forEach(function (button) {
-                var action = button.dataset.action + 'Action';
-                button.addEventListener('click', _this[action].bind(_this));
+            this.getElements('.positionOptions .t3js-field').forEach(function (field) {
+                field.addEventListener('input', _this.fieldInputHandler.bind(_this));
             });
+            this.getElements('.t3js-btn').forEach(this.buttonEventHandler.bind(this));
         };
-        FormArea.prototype.fieldKeyUpHandler = function (event) {
+        FormArea.prototype.buttonEventHandler = function (button) {
+            var action = button.dataset.action + 'Action';
+            button.removeEventListener('click', this[action]);
+            button.addEventListener('click', this[action].bind(this));
+        };
+        FormArea.prototype.fieldInputHandler = function (event) {
             var _this = this;
             clearTimeout(this.eventDelay);
             this.eventDelay = AreaUtility.wait(function () { _this.updateCanvas(event); }, 500);
@@ -258,7 +281,15 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
         FormArea.prototype.redoAction = function () {
         };
         /**
-         * Add faux input as target for browselink which listens for changes and writes value to real field
+         * Add faux input as target for browselink which listens for changes and writes value to real field.
+         *
+         * Browselink uses the concept of opener which is a parent frame. In case the browselink was opened
+         * in the modal (which resides in the top frame) still the opener frame it the iframe with the "Open
+         * Area Editor" button.
+         *
+         * With help of the faux document and faux input, browselink finds the field to change link in, which
+         * is then set in the modal to the originating link field, which then again is used to get the value
+         * of once the save button is clicked.
          */
         FormArea.prototype.addFauxInput = function () {
             if (this.form.fauxForm) {
@@ -308,61 +339,43 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
             this.setFieldValue('#bottom', configuration.coords.bottom);
         };
         FormRectangle.prototype.updateCanvas = function (event) {
-            var coords = this.configuration.coords, field = (event.currentTarget || event.target), value = parseInt(field.value), scaledWidth = this.canvasArea.getScaledWidth(), scaledHeight = this.canvasArea.getScaledHeight(), property = '';
+            var coords = this.configuration.coords, field = (event.currentTarget || event.target), value = parseInt(field.value), property = '';
             switch (field.id) {
                 case 'left':
-                    this.getElement('#right').value = value + scaledWidth;
-                    coords.right = value + scaledWidth;
+                    coords.right = coords.right - coords.left + value;
+                    this.getElement('#right').value = coords.right.toString();
                     coords.left = value;
                     property = 'left';
                     break;
                 case 'top':
-                    this.getElement('#bottom').value = value + scaledHeight;
-                    coords.bottom = value + scaledWidth;
+                    coords.bottom = coords.bottom - coords.top + value;
+                    this.getElement('#bottom').value = coords.bottom.toString();
                     coords.top = value;
                     property = 'top';
                     break;
                 case 'right':
-                    value -= coords.left;
-                    coords.right = value;
-                    if (value < 0) {
-                        value = 10;
-                        field.value = (coords.left + value).toString();
+                    if (value <= coords.left) {
+                        value = coords.left + 10;
+                        field.value = value.toString();
                     }
+                    coords.right = value;
+                    value = coords.right - coords.left;
                     property = 'width';
                     break;
                 case 'bottom':
-                    value -= coords.top;
-                    coords.bottom = value;
-                    if (value < 0) {
-                        value = 10;
-                        field.value = (coords.top + value).toString();
+                    if (value <= coords.top) {
+                        value = coords.top + 10;
+                        field.value = value.toString();
                     }
+                    coords.bottom = value;
+                    value = coords.bottom - coords.top;
                     property = 'height';
                     break;
             }
-            if (property && value) {
-                var set = {};
-                set[property] = value;
-                this.canvasArea.set(set);
-                this.canvasArea.canvas.renderAll();
-            }
+            this.canvasArea.setProperty(property, value);
         };
         FormRectangle.prototype.getData = function () {
-            return {
-                shape: 'rect',
-                href: this.getFieldValue('.href'),
-                alt: this.getFieldValue('.alt'),
-                coords: {
-                    left: parseInt(this.getFieldValue('#left')),
-                    top: parseInt(this.getFieldValue('#top')),
-                    right: parseInt(this.getFieldValue('#right')),
-                    bottom: parseInt(this.getFieldValue('#bottom'))
-                },
-                data: {
-                    color: this.getFieldValue('.color')
-                }
-            };
+            return this.configuration;
         };
         return FormRectangle;
     }(FormArea));
@@ -390,35 +403,18 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
                     property = 'left';
                     break;
                 case 'top':
-                    coords.left = value;
+                    coords.top = value;
                     property = 'top';
                     break;
                 case 'radius':
-                    coords.left = value;
+                    coords.radius = value;
                     property = 'radius';
                     break;
             }
-            if (property && value) {
-                var set = {};
-                set[property] = value;
-                this.canvasArea.set(set);
-                this.canvasArea.canvas.renderAll();
-            }
+            this.canvasArea.setProperty(property, value);
         };
         FormCircle.prototype.getData = function () {
-            return {
-                shape: 'circle',
-                href: this.getFieldValue('.href'),
-                alt: this.getFieldValue('.alt'),
-                coords: {
-                    left: parseInt(this.getFieldValue('#left')),
-                    top: parseInt(this.getFieldValue('#top')),
-                    radius: parseInt(this.getFieldValue('#radius'))
-                },
-                data: {
-                    color: this.getFieldValue('.color')
-                }
-            };
+            return this.configuration;
         };
         return FormCircle;
     }(FormArea));
@@ -435,82 +431,49 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
             this.setFieldValue('.color', configuration.data.color);
             this.setFieldValue('.alt', configuration.alt);
             this.setFieldValue('.href', configuration.href);
-            var parentElement = this.getElement('.positionOptions');
+            var parent = this.getElement('.positionOptions');
             configuration.coords.points.forEach(function (point, index) {
-                point.id = point.id ? point.id : 'p' + _this.id + '_' + index;
-                if (!point.hasOwnProperty('element')) {
-                    point.element = _this.getFormElement('#polyCoords', point.id);
-                    parentElement.append(point.element);
+                if (!(point.element = parent.querySelector('#p' + point.id))) {
+                    _this.canvasArea.points[index].id = point.id = fabric.Object.__uid++;
+                    point.element = _this.getFormElement('#polyCoords', point.id, index);
+                    parent.append(point.element);
                 }
-                point.element.querySelector('#x' + point.id).value = point.x + _this.canvasArea.left;
-                point.element.querySelector('#y' + point.id).value = point.y + _this.canvasArea.top;
+                _this.getElement('#x' + point.id).value = point.x.toString();
+                _this.getElement('#y' + point.id).value = point.y.toString();
             });
         };
         FormPolygon.prototype.updateCanvas = function (event) {
-            var coords = this.configuration.coords, field = (event.currentTarget || event.target), value = parseInt(field.value), _a = __read(field.id.split('_'), 2), point = _a[1];
-            console.log([
-                coords,
-                field,
-                value,
-                point,
-                this.canvasArea
-            ]);
-            if (field.id.indexOf('x') > -1) {
-                x = value;
-            }
-            if (field.id.indexOf('y') > -1) {
-                y = value;
-            }
-            console.log([
-                coords,
-                field,
-                value,
-                point,
-                control,
-                x,
-                y
-            ]);
-            control.set('left', x);
-            control.set('top', y);
-            control.setCoords();
-            coords[control.name] = { x: x, y: y };
-            this.canvas.renderAll();
+            var field = (event.currentTarget || event.target), point = parseInt(field.dataset.index), fields = this.getElements('[data-point="' + field.dataset.index + '"]'), x = 0, y = 0;
+            fields.forEach(function (field) {
+                if (field.dataset.field == 'x') {
+                    x = parseInt(field.value);
+                }
+                if (field.dataset.field == 'y') {
+                    y = parseInt(field.value);
+                }
+            });
+            this.configuration.coords.points[point] = { x: x, y: y };
+            this.canvasArea.setPointProperties(point, this.configuration.coords.points[point]);
         };
         FormPolygon.prototype.getData = function () {
-            var coords = [], xCoords = this.getElements('.x-coord'), yCoords = this.getElements('.y-coord');
-            xCoords.forEach(function (x, index) {
-                var y = yCoords[index], point = {
-                    x: parseInt(x.value),
-                    y: parseInt(y.value)
-                };
-                coords.push(point);
-            });
-            return {
-                shape: 'poly',
-                href: this.getFieldValue('.href'),
-                alt: this.getFieldValue('.alt'),
-                coords: coords,
-                data: {
-                    color: this.getFieldValue('.color')
+            this.configuration.coords.points.forEach(function (point) {
+                delete point.id;
+                delete point.element;
+                if (point.hasOwnProperty('control')) {
+                    delete point.control;
                 }
-            };
+            });
+            return this.configuration;
+        };
+        FormPolygon.prototype.initialize = function () {
+            _super.prototype.initialize.call(this);
+            this.canvasArea.addControls();
         };
         FormPolygon.prototype.addPointBeforeAction = function (event) {
-            var direction = AreaUtility.before, index = this.points.length, parentElement = this.getElement('.positionOptions'), _a = __read(this.getPointElementAndCurrentPoint(event, direction), 4), point = _a[0], element = _a[1], currentPointIndex = _a[2], currentPoint = _a[3];
-            parentElement.insertBefore(element, currentPoint.element);
-            this.points = AreaUtility.addElementToArrayWithPosition(this.points, point, currentPointIndex + direction);
-            this.addControl(this.editor.areaConfig, point, index, currentPointIndex + direction);
+            this.addPointInDirection(event, AreaUtility.before);
         };
         FormPolygon.prototype.addPointAfterAction = function (event) {
-            var direction = AreaUtility.after, index = this.points.length, parentElement = this.getElement('.positionOptions'), _a = __read(this.getPointElementAndCurrentPoint(event, direction), 4), point = _a[0], element = _a[1], currentPointIndex = _a[2], currentPoint = _a[3];
-            if (currentPoint.element.nextSibling) {
-                parentElement.insertBefore(element, currentPoint.element.nextSibling);
-            }
-            else {
-                parentElement.append(element);
-            }
-            this.points = AreaUtility.addElementToArrayWithPosition(this.points, point, currentPointIndex + direction);
-            this.addControl(this.editor.areaConfig, point, index, currentPointIndex + direction);
+            this.addPointInDirection(event, AreaUtility.after);
         };
         FormPolygon.prototype.removePointAction = function (event) {
             var _this = this;
@@ -540,6 +503,55 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
                 this.controls = controls_1;
                 this.canvas.renderAll();
             }
+        };
+        FormPolygon.prototype.addPointInDirection = function (event, direction) {
+            var points = this.configuration.coords.points, index = AreaUtility.highestIndexOfArray(points) + 1, parentElement = this.getElement('.positionOptions'), _a = __read(this.getCurrentAndNewPoint(event, direction, index), 3), currentPoint = _a[0], newPoint = _a[1], currentPointIndex = _a[2];
+            if (direction == AreaUtility.before || currentPoint.element.nextSibling) {
+                parentElement.insertBefore(newPoint.element, currentPoint.element.nextSibling);
+            }
+            else {
+                parentElement.append(newPoint.element);
+            }
+            this.getElement('#x' + newPoint.id).value = newPoint.x.toString();
+            this.getElement('#y' + newPoint.id).value = newPoint.y.toString();
+            newPoint.element.querySelectorAll('.t3js-btn').forEach(this.buttonEventHandler.bind(this));
+            this.configuration.coords.points = AreaUtility.addElementToArrayWithPosition(points, newPoint, currentPointIndex + direction);
+            var canvasPoint = {
+                x: newPoint.x - this.canvasArea.configuration.left,
+                y: newPoint.y - this.canvasArea.configuration.top,
+                id: newPoint.id,
+            };
+            this.canvasArea.points = AreaUtility.addElementToArrayWithPosition(this.canvasArea.points, canvasPoint, currentPointIndex + direction);
+            this.canvasArea.addControl(this.canvasArea.configuration, canvasPoint, index, currentPointIndex + direction);
+        };
+        FormPolygon.prototype.getCurrentAndNewPoint = function (event, direction, index) {
+            var currentPointId = parseInt(event.currentTarget.dataset.point), _a = __read(this.getCurrentAndNextPoint(currentPointId, direction), 3), currentPoint = _a[0], nextPoint = _a[1], currentPointIndex = _a[2], id = fabric.Object.__uid++, newPoint = {
+                x: Math.floor((currentPoint.x + nextPoint.x) / 2),
+                y: Math.floor((currentPoint.y + nextPoint.y) / 2),
+                id: id,
+                element: this.getFormElement('#polyCoords', id, index)
+            };
+            return [currentPoint, newPoint, currentPointIndex];
+        };
+        FormPolygon.prototype.getCurrentAndNextPoint = function (currentPointId, direction) {
+            var points = this.configuration.coords.points, currentPointIndex = 0;
+            points.forEach(function (point, index) {
+                if (point.id === currentPointId) {
+                    currentPointIndex = index;
+                }
+            });
+            var nextPointIndex = currentPointIndex + direction;
+            if (nextPointIndex < 0) {
+                nextPointIndex = points.length - 1;
+            }
+            if (nextPointIndex >= points.length) {
+                nextPointIndex = 0;
+            }
+            return [
+                points[currentPointIndex],
+                points[nextPointIndex],
+                currentPointIndex
+            ];
         };
         return FormPolygon;
     }(FormArea));
@@ -596,7 +608,7 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
                 }
             });
             this.areas = areas;
-            area.canvasArea.canvas.remove(area.canvasArea);
+            area.canvasArea.areaCanvas.canvas.remove(area.canvasArea);
             area = null;
             this.updateArrowsState();
         };
@@ -663,28 +675,30 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
             var _this = _super.call(this, options) || this;
             _this.id = 0;
             _this.id = fabric.Object.__uid++;
+            _this.on('modified', _this.rectangleMoved.bind(_this));
+            _this.on('moved', _this.rectangleMoved.bind(_this));
             return _this;
         }
-        Object.defineProperty(CanvasRectangle.prototype, "canvas", {
-            get: function () {
-                return this._canvas;
-            },
-            set: function (value) {
-                this._canvas = value;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(CanvasRectangle.prototype, "formArea", {
-            get: function () {
-                return this._formArea;
-            },
-            set: function (value) {
-                this._formArea = value;
-            },
-            enumerable: true,
-            configurable: true
-        });
+        CanvasRectangle.prototype.setProperty = function (property, value) {
+            var set = {};
+            set[property] = value;
+            this.set(set);
+            this.canvas.renderAll();
+        };
+        CanvasRectangle.prototype.setProperties = function (properties) {
+            this.set(properties);
+            this.canvas.renderAll();
+        };
+        CanvasRectangle.prototype.rectangleMoved = function () {
+            var configuration = JSON.parse(JSON.stringify(this.formArea.configuration));
+            configuration.coords = {
+                left: Math.round(this.left),
+                top: Math.round(this.top),
+                right: Math.round(this.getScaledWidth() + this.left),
+                bottom: Math.round(this.getScaledHeight() + this.top),
+            };
+            this.formArea.updateFields(configuration);
+        };
         return CanvasRectangle;
     }(fabric.Rect));
     var CanvasCircle = /** @class */ (function (_super) {
@@ -693,59 +707,127 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
             var _this = _super.call(this, options) || this;
             _this.id = 0;
             _this.id = fabric.Object.__uid++;
+            _this.on('modified', _this.circleMoved.bind(_this));
+            _this.on('moved', _this.circleMoved.bind(_this));
             return _this;
         }
-        Object.defineProperty(CanvasCircle.prototype, "canvas", {
-            get: function () {
-                return this._canvas;
-            },
-            set: function (value) {
-                this._canvas = value;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(CanvasCircle.prototype, "formArea", {
-            get: function () {
-                return this._formArea;
-            },
-            set: function (value) {
-                this._formArea = value;
-            },
-            enumerable: true,
-            configurable: true
-        });
+        CanvasCircle.prototype.setProperty = function (property, value) {
+            var set = {};
+            set[property] = value;
+            this.set(set);
+            this.canvas.renderAll();
+        };
+        CanvasCircle.prototype.setProperties = function (properties) {
+            this.set(properties);
+            this.canvas.renderAll();
+        };
+        CanvasCircle.prototype.circleMoved = function () {
+            var configuration = JSON.parse(JSON.stringify(this.formArea.configuration));
+            configuration.coords = {
+                left: Math.round(this.left),
+                top: Math.round(this.top),
+                radius: Math.round(this.getRadiusX()),
+            };
+            this.formArea.updateFields(configuration);
+        };
         return CanvasCircle;
     }(fabric.Circle));
     var CanvasPolygon = /** @class */ (function (_super) {
         __extends(CanvasPolygon, _super);
-        function CanvasPolygon(options, points) {
-            var _this = _super.call(this, points, options) || this;
+        function CanvasPolygon(points, configuration) {
+            var _this = _super.call(this, points, configuration) || this;
             _this.id = 0;
+            _this.controls = [];
+            _this.configuration = configuration;
             _this.id = fabric.Object.__uid++;
+            _this.on('modified', _this.polygonMoved.bind(_this));
+            _this.on('moved', _this.polygonMoved.bind(_this));
             return _this;
         }
-        Object.defineProperty(CanvasPolygon.prototype, "canvas", {
-            get: function () {
-                return this._canvas;
-            },
-            set: function (value) {
-                this._canvas = value;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(CanvasPolygon.prototype, "formArea", {
-            get: function () {
-                return this._formArea;
-            },
-            set: function (value) {
-                this._formArea = value;
-            },
-            enumerable: true,
-            configurable: true
-        });
+        CanvasPolygon.prototype.setProperty = function (property, value) {
+            var set = {};
+            set[property] = value;
+            this.set(set);
+            this.canvas.renderAll();
+        };
+        CanvasPolygon.prototype.setProperties = function (properties) {
+            this.set(properties);
+            this.canvas.renderAll();
+        };
+        CanvasPolygon.prototype.setPointProperties = function (pointIndex, properties) {
+            this.points[pointIndex] = {
+                x: properties.x - this.configuration.left,
+                y: properties.y - this.configuration.top,
+            };
+            this.controls[pointIndex].set({
+                left: properties.x - this.configuration.left,
+                top: properties.y - this.configuration.top,
+            });
+            this.controls[pointIndex].setCoords();
+            this.canvas.renderAll();
+        };
         CanvasPolygon.prototype.addControls = function () {
+            var _this = this;
+            if (!this.configuration.interactive) {
+                return;
+            }
+            this.points.forEach(function (point, index) {
+                _this.addControl(_this.configuration, point, index, 100000);
+            });
+        };
+        CanvasPolygon.prototype.addControl = function (areaConfig, point, index, newControlIndex) {
+            var circle = new fabric.Circle(__assign(__assign({}, areaConfig), { hasControls: false, radius: 5, fill: areaConfig.cornerColor, stroke: areaConfig.cornerStrokeColor, originX: 'center', originY: 'center', name: index, polygon: this, point: point, type: 'control', opacity: this.controls.length === 0 ? 0 : this.controls[0].opacity, 
+                // set control position relative to polygon
+                left: this.configuration.left + point.x, top: this.configuration.top + point.y }));
+            circle.on('moved', this.pointMoved.bind(this));
+            point.control = circle;
+            this.controls = AreaUtility.addElementToArrayWithPosition(this.controls, circle, newControlIndex);
+            this.areaCanvas.canvas.add(circle);
+            this.areaCanvas.canvas.renderAll();
+        };
+        CanvasPolygon.prototype.removePoint = function (event) {
+            var _this = this;
+            if (this.points.length > 3) {
+                var element_2 = event.currentTarget.parentNode.parentNode, points_2 = [], controls_2 = [];
+                this.points.forEach(function (point, index) {
+                    if (element_2.id !== point.id) {
+                        points_2.push(point);
+                        controls_2.push(_this.controls[index]);
+                    }
+                    else {
+                        point.element.remove();
+                        _this.areaCanvas.canvas.remove(_this.controls[index]);
+                    }
+                });
+                points_2.forEach(function (point, index) {
+                    point.id = 'p' + _this.id + '_' + index;
+                    controls_2[index].name = index;
+                });
+                this.points = points_2;
+                this.controls = controls_2;
+                this.areaCanvas.canvas.renderAll();
+            }
+        };
+        CanvasPolygon.prototype.pointMoved = function (event) {
+            var configuration = JSON.parse(JSON.stringify(this.formArea.configuration)), control = event.target, id = control.point.id, center = control.getCenterPoint();
+            configuration.coords.points.forEach(function (point) {
+                if (point.id == id) {
+                    point.x = Math.round(center.x);
+                    point.y = Math.round(center.y);
+                }
+            });
+            this.formArea.updateFields(configuration);
+        };
+        CanvasPolygon.prototype.polygonMoved = function () {
+            var configuration = JSON.parse(JSON.stringify(this.formArea.configuration));
+            this.controls.forEach(function (control, index) {
+                configuration.coords.points[index] = {
+                    x: Math.round(control.left),
+                    y: Math.round(control.top),
+                    id: control.point.id,
+                };
+            });
+            this.formArea.updateFields(configuration);
         };
         return CanvasPolygon;
     }(fabric.Polygon));
@@ -763,14 +845,21 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
             };
             this.areas = [];
             this.options = options;
-            this.canvas = new fabric.Canvas(element, options);
-            fabric.util.setStyle(this.canvas.wrapperEl, {
+            this._canvas = new fabric.Canvas(element, options);
+            fabric.util.setStyle(this._canvas.wrapperEl, {
                 position: 'absolute',
             });
-            this.canvas.on('object:moving', this.canvasObjectMoving);
-            this.canvas.on('selection:created', this.canvasSelectionCreated);
-            this.canvas.on('selection:updated', this.canvasSelectionUpdated);
+            this._canvas.on('object:moving', this.canvasObjectMoving.bind(this));
+            this._canvas.on('selection:created', this.canvasSelectionCreated.bind(this));
+            this._canvas.on('selection:updated', this.canvasSelectionUpdated.bind(this));
         }
+        Object.defineProperty(AreaCanvas.prototype, "canvas", {
+            get: function () {
+                return this._canvas;
+            },
+            enumerable: true,
+            configurable: true
+        });
         AreaCanvas.prototype.canvasObjectMoving = function (event) {
             var element = event.target;
             switch (element.type) {
@@ -795,12 +884,22 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
                 activePolygon.controls.forEach(function (control) {
                     control.opacity = 1;
                 });
-                this.canvas.renderAll();
+                this._canvas.renderAll();
             }
         };
         AreaCanvas.prototype.canvasSelectionUpdated = function (event) {
             var _this = this;
             var activePolygon = null;
+            this._canvas.on('selection:created', function (event) {
+                if (event.target.type === 'polygon') {
+                    activePolygon = event.target;
+                    // show controls of active polygon
+                    activePolygon.controls.forEach(function (control) {
+                        control.opacity = 1;
+                    });
+                    _this.canvas.renderAll();
+                }
+            });
             event.deselected.forEach(function (element) {
                 if (element.type === 'polygon' && event.selected[0].type !== 'control') {
                     // hide controls of active polygon
@@ -808,15 +907,16 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
                         control.opacity = 0;
                     });
                     activePolygon = null;
-                    _this.canvas.renderAll();
+                    _this._canvas.renderAll();
                 }
                 else if (element.type === 'control') {
+                    activePolygon = element.polygon;
                     // hide controls of active polygon
                     activePolygon.controls.forEach(function (control) {
                         control.opacity = 0;
                     });
                     activePolygon = null;
-                    _this.canvas.renderAll();
+                    _this._canvas.renderAll();
                 }
             });
             event.selected.forEach(function (element) {
@@ -826,7 +926,7 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
                     element.controls.forEach(function (control) {
                         control.opacity = 1;
                     });
-                    _this.canvas.renderAll();
+                    _this._canvas.renderAll();
                 }
             });
         };
@@ -853,8 +953,8 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
                     break;
                 case 'default':
             }
-            canvasArea.canvas = this;
-            this.canvas.add(canvasArea);
+            canvasArea.areaCanvas = this;
+            this._canvas.add(canvasArea);
             this.areas.push(canvasArea);
             return canvasArea;
         };
@@ -877,7 +977,7 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
             return canvasArea;
         };
         AreaCanvas.prototype.createPolygon = function (configuration) {
-            var left = 100000, top = 100000, options = __assign(__assign(__assign({}, this.areaConfig), configuration), { left: 0, top: 0, selectable: true, hasControls: false, objectCaching: false, controlConfig: this.areaConfig });
+            var left = 100000, top = 100000, options = __assign(__assign(__assign({}, this.areaConfig), configuration), { left: 0, top: 0, selectable: true, hasControls: false, objectCaching: false, controlConfig: this.areaConfig, interactive: this.options.interactive });
             // get top and left corner of polygon
             options.coords.points.forEach(function (point) {
                 left = Math.min(left, point.x);
@@ -890,11 +990,7 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
             });
             options.left = left;
             options.top = top;
-            var canvasArea = new CanvasPolygon(options, options.coords.points);
-            if (this.options.interactive) {
-                canvasArea.addControls();
-            }
-            return canvasArea;
+            return new CanvasPolygon(options.coords.points, options);
         };
         AreaCanvas.prototype.deleteArea = function (area) {
             var areas = [];
@@ -904,7 +1000,7 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
                 }
             });
             this.areas = areas;
-            this.canvas.remove(area);
+            this._canvas.remove(area);
             area = null;
         };
         AreaCanvas.prototype.destroy = function () {
@@ -950,9 +1046,9 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
             areas = areas || [];
             areas.forEach(function (area) {
                 area.data.color = AreaUtility.getRandomColor(area.data.color);
-                var canvasArea = _this.canvas.addArea(area);
+                var formArea = JSON.parse(JSON.stringify(area)), canvasArea = _this.canvas.addArea(area);
                 if (_this.form) {
-                    _this.form.addArea(area, canvasArea);
+                    _this.form.addArea(formArea, canvasArea);
                 }
             });
             if (this.form) {
@@ -971,6 +1067,7 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
             this.form.areas.forEach(function (area) {
                 data.push(area.getData());
             });
+            console.log(data);
             return data;
         };
         AreaManipulation.prototype.destroy = function () {

@@ -3,17 +3,18 @@
 			data-namespace-typo3-fluid="true">
 
 <script type="text/template" id="polyCoords">
-	<div class="input-group coord" id="_ID">
+	<div class="input-group coord" id="p_ID">
 		<label for="x_ID" class="input-group-addon">X:</label>
-		<input type="text" id="x_ID" class="t3js-field form-control ignored-attribute x-coord" autocomplete="off" pattern="\d*"/>
+		<input type="number" id="x_ID" data-index="_POINT" data-field="x" class="t3js-field form-control" autocomplete="off" />
 
 		<label for="y_ID" class="input-group-addon">Y:</label>
-		<input type="text" id="y_ID" class="t3js-field form-control ignored-attribute y-coord" autocomplete="off" pattern="\d*"/>
+		<input type="number" id="y_ID" data-index="_POINT" data-field="y" class="t3js-field form-control" autocomplete="off" />
 
 		<div class="input-group-btn">
-			<span data-action="addPointBefore" class="t3js-btn btn btn-default" title="{f:translate(id: 'imagemap.form.poly.addEdgeBefore', extensionName: 'imagemap')}"><core:icon identifier="actions-view-go-up"/></span>
-			<span data-action="addPointAfter" class="t3js-btn btn btn-default" title="{f:translate(id: 'imagemap.form.poly.addEdgeAfter', extensionName: 'imagemap')}"><core:icon identifier="actions-view-go-down"/></span>
-			<span data-action="removePoint" class="t3js-btn btn btn-default" title="{f:translate(id: 'imagemap.form.poly.removeEdge', extensionName: 'imagemap')}"><core:icon identifier="actions-close"/></span>
+			<span data-action="addPointAfter" class="t3js-btn btn btn-default" data-point="_ID"
+						title="{f:translate(id: 'imagemap.form.poly.addEdgeAfter', extensionName: 'imagemap')}"><core:icon identifier="actions-view-go-down"/></span>
+			<span data-action="removePoint" class="t3js-btn btn btn-default"
+						title="{f:translate(id: 'imagemap.form.poly.removeEdge', extensionName: 'imagemap')}"><core:icon identifier="actions-close"/></span>
 		</div>
 	</div>
 </script>

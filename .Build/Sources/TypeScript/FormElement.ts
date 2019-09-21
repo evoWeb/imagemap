@@ -70,7 +70,7 @@ class FormElement {
     request.done(this.renderPreviewAreas.bind(this));
   }
 
-  private renderPreviewAreas(data: Array<any>, textStatus: string) {
+  private renderPreviewAreas(data: any[], textStatus: string) {
     if (textStatus === 'success') {
       this.control
         .find('.modifiedState')

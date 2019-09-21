@@ -14,9 +14,9 @@
 
 // @ts-ignore
 import * as fabric from './vendor/fabric';
-import 'TYPO3/CMS/Core/Contrib/jquery.minicolors';
 // @ts-ignore
 import * as Modal from 'TYPO3/CMS/Backend/Modal';
+import 'TYPO3/CMS/Core/Contrib/jquery.minicolors';
 
 export class AreaUtility {
   static before: number = -1;
@@ -59,7 +59,7 @@ export class AreaUtility {
     return window.setTimeout(callback, delay);
   }
 
-  static addElementToArrayWithPosition(array: Array<any>, item: any, newPointIndex: number) {
+  static addElementToArrayWithPosition(array: any[], item: any, newPointIndex: number) {
     if (newPointIndex < 0) {
       array.unshift(item);
     } else if (newPointIndex >= array.length) {
@@ -76,6 +76,15 @@ export class AreaUtility {
     }
     return array;
   }
+
+  static highestIndexOfArray(array: any[]): number {
+    let index: number = 0,
+      iterator: IterableIterator<number> = array.keys();
+    for (let key of iterator) {
+      index = Math.max(index, key);
+    }
+    return index;
+  }
 }
 
 abstract class FormArea {
@@ -87,11 +96,11 @@ abstract class FormArea {
 
   private _element: HTMLElement;
 
-  private _canvasArea: CanvasRectangle|CanvasCircle|CanvasPolygon|fabric.Object;
+  public canvasArea: CanvasRectangle|CanvasCircle|CanvasPolygon|fabric.Object;
 
   readonly form: AreaForm;
 
-  protected configuration: HTML5Area;
+  public configuration: HTML5Area;
 
   [property: string]: any;
 
@@ -99,8 +108,8 @@ abstract class FormArea {
     this.form = form;
     this.configuration = configuration;
 
-    this._canvasArea = canvasArea;
-    this._canvasArea.formArea = this;
+    this.canvasArea = canvasArea;
+    this.canvasArea.formArea = this;
     this.id = canvasArea.id;
   }
 
@@ -112,23 +121,19 @@ abstract class FormArea {
     this.addFauxInput();
   }
 
-  get canvasArea(): CanvasRectangle|CanvasCircle|CanvasPolygon|fabric.Object {
-    return this._canvasArea;
-  }
-  set canvasArea(value: CanvasRectangle|CanvasCircle|CanvasPolygon|fabric.Object) {
-    this._canvasArea = value;
-  }
-
   get element() {
     return this._element;
   }
 
-  protected getFormElement(selector: string, id: number): HTMLElement {
+  protected getFormElement(selector: string, id: number, point?: number): HTMLElement {
     let template = this.form.element
       .querySelector(selector)
       .innerHTML.replace(
         new RegExp('_ID', 'g'), String(id ? id : this.id)
       );
+    if (typeof point !== 'undefined') {
+      template = template.replace(new RegExp('_POINT', 'g'), point.toString());
+    }
     return (new DOMParser()).parseFromString(template, 'text/html').body.firstChild as HTMLElement;
   }
 
@@ -136,7 +141,7 @@ abstract class FormArea {
     this._element = this.getFormElement('#' + this.name + 'Form', this.id);
   }
 
-  protected getElement(selector: string): HTMLInputElement {
+  public getElement(selector: string): HTMLInputElement {
     return this.element.querySelector(selector);
   }
 
@@ -172,29 +177,30 @@ abstract class FormArea {
 
   private colorPickerAction(value: string) {
     (this.getElement('.t3js-color-picker') as HTMLInputElement).value = value;
-    this.canvasArea.set('borderColor', value);
-    this.canvasArea.set('stroke', value);
-    this.canvasArea.set('fill', AreaUtility.hexToRgbA(value, 0.2));
-    this.canvasArea.canvas.renderAll();
+    this.canvasArea.setProperties({
+      borderColor: value,
+      stroke: value,
+      fill: AreaUtility.hexToRgbA(value, 0.2),
+    });
   }
 
   private initializeEvents() {
-    // this.on('moved', this.updateFields.bind(this));
-    // this.on('modified', this.updateFields.bind(this));
-
-    this.getElements('.positionOptions .t3js-field').forEach((field: HTMLInputElement) => {
-      field.addEventListener('keyup', this.fieldKeyUpHandler.bind(this));
-    });
     this.getElements('.basicOptions .t3js-field').forEach((field: HTMLInputElement) => {
       field.addEventListener('keyup', this.updateProperties.bind(this));
     });
-    this.getElements('.t3js-btn').forEach((button: HTMLElement) => {
-      let action = button.dataset.action + 'Action';
-      button.addEventListener('click', (this[action] as Function).bind(this));
+    this.getElements('.positionOptions .t3js-field').forEach((field: HTMLInputElement) => {
+      field.addEventListener('input', this.fieldInputHandler.bind(this));
     });
+    this.getElements('.t3js-btn').forEach(this.buttonEventHandler.bind(this));
   }
 
-  private fieldKeyUpHandler(event: Event) {
+  protected buttonEventHandler(button: HTMLElement) {
+    let action = button.dataset.action + 'Action';
+    button.removeEventListener('click', this[action]);
+    button.addEventListener('click', this[action].bind(this));
+  }
+
+  private fieldInputHandler(event: Event) {
     clearTimeout(this.eventDelay);
     this.eventDelay = AreaUtility.wait(() => { this.updateCanvas(event); }, 500);
   }
@@ -262,7 +268,15 @@ abstract class FormArea {
   }
 
   /**
-   * Add faux input as target for browselink which listens for changes and writes value to real field
+   * Add faux input as target for browselink which listens for changes and writes value to real field.
+   *
+   * Browselink uses the concept of opener which is a parent frame. In case the browselink was opened
+   * in the modal (which resides in the top frame) still the opener frame it the iframe with the "Open
+   * Area Editor" button.
+   *
+   * With help of the faux document and faux input, browselink finds the field to change link in, which
+   * is then set in the modal to the originating link field, which then again is used to get the value
+   * of once the save button is clicked.
    */
   private addFauxInput() {
     if (this.form.fauxForm) {
@@ -322,69 +336,49 @@ class FormRectangle extends FormArea {
     let coords = this.configuration.coords,
       field = ((event.currentTarget || event.target) as HTMLInputElement),
       value = parseInt(field.value),
-      scaledWidth = this.canvasArea.getScaledWidth(),
-      scaledHeight = this.canvasArea.getScaledHeight(),
       property = '';
 
     switch (field.id) {
       case 'left':
-        this.getElement('#right').value = value + scaledWidth;
-        coords.right = value + scaledWidth;
+        coords.right = coords.right - coords.left + value;
+        this.getElement('#right').value = coords.right.toString();
         coords.left = value;
         property = 'left';
         break;
 
       case 'top':
-        this.getElement('#bottom').value = value + scaledHeight;
-        coords.bottom = value + scaledWidth;
+        coords.bottom = coords.bottom - coords.top + value;
+        this.getElement('#bottom').value = coords.bottom .toString();
         coords.top = value;
         property = 'top';
         break;
 
       case 'right':
-        value -= coords.left;
-        coords.right = value;
-        if (value < 0) {
-          value = 10;
-          field.value = (coords.left + value).toString();
+        if (value <= coords.left) {
+          value = coords.left + 10;
+          field.value = value.toString();
         }
+        coords.right = value;
+        value = coords.right - coords.left;
         property = 'width';
         break;
 
       case 'bottom':
-        value -= coords.top;
-        coords.bottom = value;
-        if (value < 0) {
-          value = 10;
-          field.value = (coords.top + value).toString();
+        if (value <= coords.top) {
+          value = coords.top + 10;
+          field.value = value.toString();
         }
+        coords.bottom = value;
+        value = coords.bottom - coords.top;
         property = 'height';
         break;
     }
 
-    if (property && value) {
-      let set = ({} as {[property: string]: any});
-      set[property] = value;
-      this.canvasArea.set(set);
-      this.canvasArea.canvas.renderAll();
-    }
+    this.canvasArea.setProperty(property, value);
   }
 
   public getData(): HTML5Area {
-    return {
-      shape: 'rect',
-      href: this.getFieldValue('.href'),
-      alt: this.getFieldValue('.alt'),
-      coords: {
-        left: parseInt(this.getFieldValue('#left')),
-        top: parseInt(this.getFieldValue('#top')),
-        right: parseInt(this.getFieldValue('#right')),
-        bottom: parseInt(this.getFieldValue('#bottom'))
-      },
-      data: {
-        color: this.getFieldValue('.color')
-      }
-    };
+    return this.configuration;
   }
 }
 
@@ -415,37 +409,21 @@ class FormCircle extends FormArea {
         break;
 
       case 'top':
-        coords.left = value;
+        coords.top = value;
         property = 'top';
         break;
 
       case 'radius':
-        coords.left = value;
+        coords.radius = value;
         property = 'radius';
         break;
     }
-    if (property && value) {
-      let set = ({} as {[property: string]: any});
-      set[property] = value;
-      this.canvasArea.set(set);
-      this.canvasArea.canvas.renderAll();
-    }
+
+    this.canvasArea.setProperty(property, value);
   }
 
   public getData(): HTML5Area {
-    return {
-      shape: 'circle',
-      href: this.getFieldValue('.href'),
-      alt: this.getFieldValue('.alt'),
-      coords: {
-        left: parseInt(this.getFieldValue('#left')),
-        top: parseInt(this.getFieldValue('#top')),
-        radius: parseInt(this.getFieldValue('#radius'))
-      },
-      data: {
-        color: this.getFieldValue('.color')
-      }
-    };
+    return this.configuration;
   }
 }
 
@@ -459,102 +437,61 @@ class FormPolygon extends FormArea {
     this.setFieldValue('.alt', configuration.alt);
     this.setFieldValue('.href', configuration.href);
 
-    let parentElement = this.getElement('.positionOptions');
+    let parent = this.getElement('.positionOptions');
     configuration.coords.points.forEach((point: fabric.Point, index: number) => {
-      point.id = point.id ? point.id : 'p' + this.id + '_' + index;
-
-      if (!point.hasOwnProperty('element')) {
-        point.element = this.getFormElement('#polyCoords', point.id);
-        parentElement.append(point.element);
+      if (!(point.element = parent.querySelector('#p' + point.id))) {
+        this.canvasArea.points[index].id = point.id = fabric.Object.__uid++;
+        point.element = this.getFormElement('#polyCoords', point.id, index);
+        parent.append(point.element);
       }
 
-      point.element.querySelector('#x' + point.id).value = point.x + this.canvasArea.left;
-      point.element.querySelector('#y' + point.id).value = point.y + this.canvasArea.top;
+      this.getElement('#x' + point.id).value = point.x.toString();
+      this.getElement('#y' + point.id).value = point.y.toString();
     });
   }
 
   public updateCanvas(event: Event) {
-    let coords = this.configuration.coords,
-      field = ((event.currentTarget || event.target) as HTMLInputElement),
-      value = parseInt(field.value),
-      [, point] = field.id.split('_'),
-      control = this.controls[parseInt(point)],
-      x = control.getCenterPoint().x,
-      y = control.getCenterPoint().y;
+    let  field = ((event.currentTarget || event.target) as HTMLInputElement),
+      point = parseInt(field.dataset.index),
+      fields = this.getElements('[data-point="' + field.dataset.index + '"]'),
+      x = 0,
+      y = 0;
 
-    if (field.id.indexOf('x') > -1) {
-      x = value;
-    }
-    if (field.id.indexOf('y') > -1) {
-      y = value;
-    }
-console.log([
-  coords,
-  field,
-  value,
-  point,
-  control,
-  x,
-  y
-]);
-    control.set('left', x);
-    control.set('top', y);
-    control.setCoords();
-    coords[control.name] = {x: x, y: y};
-    this.canvas.renderAll();
+    fields.forEach((field: HTMLInputElement) => {
+      if (field.dataset.field == 'x') {
+        x = parseInt(field.value);
+      }
+      if (field.dataset.field == 'y') {
+        y = parseInt(field.value);
+      }
+    });
+
+    this.configuration.coords.points[point] = {x: x, y: y};
+    this.canvasArea.setPointProperties(point, this.configuration.coords.points[point]);
   }
 
   public getData(): HTML5Area {
-    let coords = ([] as Array<any>),
-      xCoords = this.getElements('.x-coord'),
-      yCoords = this.getElements('.y-coord');
-
-    xCoords.forEach((x: HTMLInputElement, index: number) => {
-      let y = (yCoords[index] as HTMLInputElement),
-        point = {
-          x: parseInt(x.value),
-          y: parseInt(y.value)
-        };
-      coords.push(point);
-    });
-
-    return {
-      shape: 'poly',
-      href: this.getFieldValue('.href'),
-      alt: this.getFieldValue('.alt'),
-      coords: coords,
-      data: {
-        color: this.getFieldValue('.color')
+    this.configuration.coords.points.forEach((point: FabricPoint) => {
+      delete point.id;
+      delete point.element;
+      if (point.hasOwnProperty('control')) {
+        delete point.control;
       }
-    };
+    });
+    return this.configuration;
+  }
+
+  public initialize() {
+    super.initialize();
+    this.canvasArea.addControls();
   }
 
   private addPointBeforeAction(event: Event) {
-    let direction = AreaUtility.before,
-      index = this.points.length,
-      parentElement = this.getElement('.positionOptions'),
-      [point, element, currentPointIndex, currentPoint] = this.getPointElementAndCurrentPoint(event, direction);
-
-    parentElement.insertBefore(element, currentPoint.element);
-
-    this.points = AreaUtility.addElementToArrayWithPosition(this.points, point, currentPointIndex + direction);
-    this.addControl(this.editor.areaConfig, point, index, currentPointIndex + direction);
+    this.addPointInDirection(event, AreaUtility.before);
   }
 
   private addPointAfterAction(event: Event) {
-    let direction = AreaUtility.after,
-      index = this.points.length,
-      parentElement = this.getElement('.positionOptions'),
-      [point, element, currentPointIndex, currentPoint] = this.getPointElementAndCurrentPoint(event, direction);
-
-    if (currentPoint.element.nextSibling) {
-      parentElement.insertBefore(element, currentPoint.element.nextSibling);
-    } else {
-      parentElement.append(element);
-    }
-
-    this.points = AreaUtility.addElementToArrayWithPosition(this.points, point, currentPointIndex + direction);
-    this.addControl(this.editor.areaConfig, point, index, currentPointIndex + direction);
+    this.addPointInDirection(event, AreaUtility.after);
   }
 
   private removePointAction(event: Event) {
@@ -589,6 +526,84 @@ console.log([
       this.canvas.renderAll();
     }
   }
+
+  private addPointInDirection(event: Event, direction: number) {
+    let points = this.configuration.coords.points,
+      index = AreaUtility.highestIndexOfArray(points) + 1,
+      parentElement = this.getElement('.positionOptions'),
+      [currentPoint, newPoint, currentPointIndex] = this.getCurrentAndNewPoint(event, direction, index);
+
+    if (direction == AreaUtility.before || currentPoint.element.nextSibling) {
+      parentElement.insertBefore(newPoint.element, currentPoint.element.nextSibling);
+    } else {
+      parentElement.append(newPoint.element);
+    }
+
+    this.getElement('#x' + newPoint.id).value = newPoint.x.toString();
+    this.getElement('#y' + newPoint.id).value = newPoint.y.toString();
+    newPoint.element.querySelectorAll('.t3js-btn').forEach(this.buttonEventHandler.bind(this));
+
+    this.configuration.coords.points = AreaUtility.addElementToArrayWithPosition(
+      points,
+      newPoint,
+      currentPointIndex + direction
+    );
+
+    let canvasPoint = {
+      x: newPoint.x - this.canvasArea.configuration.left,
+      y: newPoint.y - this.canvasArea.configuration.top,
+      id: newPoint.id,
+    };
+    this.canvasArea.points = AreaUtility.addElementToArrayWithPosition(
+      this.canvasArea.points,
+      canvasPoint,
+      currentPointIndex + direction
+    );
+    this.canvasArea.addControl(this.canvasArea.configuration, canvasPoint, index, currentPointIndex + direction);
+  }
+
+  private getCurrentAndNewPoint(
+    event: Event,
+    direction: number,
+    index: number
+  ): [FabricPoint, FabricPoint, number] {
+    let currentPointId = parseInt((event.currentTarget as HTMLElement).dataset.point),
+      [currentPoint, nextPoint, currentPointIndex] = this.getCurrentAndNextPoint(currentPointId, direction),
+      id = fabric.Object.__uid++,
+      newPoint = {
+        x: Math.floor((currentPoint.x + nextPoint.x) / 2),
+        y: Math.floor((currentPoint.y + nextPoint.y) / 2),
+        id: id,
+        element: this.getFormElement('#polyCoords', id, index)
+      };
+
+    return [currentPoint, newPoint, currentPointIndex];
+  }
+
+  private getCurrentAndNextPoint(currentPointId: number, direction: number): [FabricPoint, FabricPoint, number] {
+    let points = this.configuration.coords.points,
+      currentPointIndex = 0;
+
+    points.forEach((point, index) => {
+      if (point.id === currentPointId) {
+        currentPointIndex = index;
+      }
+    });
+
+    let nextPointIndex = currentPointIndex + direction;
+    if (nextPointIndex < 0) {
+      nextPointIndex = points.length - 1;
+    }
+    if (nextPointIndex >= points.length) {
+      nextPointIndex = 0;
+    }
+
+    return [
+      points[currentPointIndex],
+      points[nextPointIndex],
+      currentPointIndex
+    ];
+  }
 }
 
 class AreaForm {
@@ -598,7 +613,7 @@ class AreaForm {
 
   readonly options: FormOptions;
 
-  public areas: Array<FormArea> = [];
+  public areas: FormArea[] = [];
 
   /**
    * Element needed to add inputs that act as target for browselink finalizeFunction target
@@ -653,14 +668,15 @@ class AreaForm {
   }
 
   public deleteArea(area: FormArea) {
-    let areas = ([] as Array<FormArea>);
+    let areas = ([] as FormArea[]);
     this.areas.forEach((currentArea) => {
       if (area !== currentArea) {
         areas.push(currentArea);
       }
     });
     this.areas = areas;
-    area.canvasArea.canvas.remove(area.canvasArea);
+
+    area.canvasArea.areaCanvas.canvas.remove(area.canvasArea);
     area = null;
     this.updateArrowsState();
   }
@@ -740,87 +756,256 @@ class AreaForm {
   }
 }
 
+interface CanvasRectangle {
+  canvas: fabric.Canvas;
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+
+  on(name: string, callback: Function): void;
+  set(value: {}): void;
+  getScaledHeight(): number;
+  getScaledWidth(): number;
+}
 class CanvasRectangle extends fabric.Rect {
   public id: number = 0;
 
-  private _canvas: AreaCanvas;
+  public areaCanvas: AreaCanvas;
 
-  private _formArea: FormArea;
+  public formArea: FormArea;
 
   constructor(options: CanvasAreaConfiguration) {
     super(options);
     this.id = fabric.Object.__uid++;
+
+    this.on('modified', this.rectangleMoved.bind(this));
+    this.on('moved', this.rectangleMoved.bind(this));
   }
 
-  get canvas(): AreaCanvas {
-    return this._canvas;
-  }
-  set canvas(value: AreaCanvas) {
-    this._canvas = value;
+  public setProperty(property: string, value: any) {
+    let set = ({} as { [property: string]: any });
+    set[property] = value;
+    this.set(set);
+    this.canvas.renderAll();
   }
 
-  get formArea(): FormArea {
-    return this._formArea;
+  public setProperties(properties: object) {
+    this.set(properties);
+    this.canvas.renderAll();
   }
-  set formArea(value: FormArea) {
-    this._formArea = value;
+
+  private rectangleMoved() {
+    let configuration = JSON.parse(JSON.stringify(this.formArea.configuration));
+    configuration.coords = {
+      left: Math.round(this.left),
+      top: Math.round(this.top),
+      right: Math.round(this.getScaledWidth() + this.left),
+      bottom: Math.round(this.getScaledHeight() + this.top),
+    };
+    this.formArea.updateFields(configuration);
   }
 }
 
+interface CanvasCircle {
+  canvas: fabric.Canvas;
+  left: number;
+  top: number;
+
+  on(name: string, callback: Function): void;
+  set(value: {}): void;
+  getRadiusX(): number;
+}
 class CanvasCircle extends fabric.Circle {
   public id: number = 0;
 
-  private _canvas: AreaCanvas;
+  public areaCanvas: AreaCanvas;
 
-  private _formArea: FormArea;
+  public formArea: FormArea;
 
   constructor(options: CanvasAreaConfiguration) {
     super(options);
     this.id = fabric.Object.__uid++;
+
+    this.on('modified', this.circleMoved.bind(this));
+    this.on('moved', this.circleMoved.bind(this));
   }
 
-  get canvas(): AreaCanvas {
-    return this._canvas;
-  }
-  set canvas(value: AreaCanvas) {
-    this._canvas = value;
+  public setProperty(property: string, value: any) {
+    let set = ({} as { [property: string]: any });
+    set[property] = value;
+    this.set(set);
+    this.canvas.renderAll();
   }
 
-  get formArea(): FormArea {
-    return this._formArea;
+  public setProperties(properties: object) {
+    this.set(properties);
+    this.canvas.renderAll();
   }
-  set formArea(value: FormArea) {
-    this._formArea = value;
+
+  private circleMoved() {
+    let configuration = JSON.parse(JSON.stringify(this.formArea.configuration));
+    configuration.coords = {
+      left: Math.round(this.left),
+      top: Math.round(this.top),
+      radius: Math.round(this.getRadiusX()),
+    };
+    this.formArea.updateFields(configuration);
   }
 }
 
-class CanvasPolygon extends fabric.Polygon {
+interface CanvasPolygon {
+  points: object[];
+  canvas: fabric.Canvas;
+
+  on(name: string, callback: Function): void;
+  set(value: {}): void;
+}
+class CanvasPolygon extends fabric.Polygon  {
+  readonly configuration: {
+    left?: 0,
+    top?: 0,
+    cornerColor?: '',
+    cornerStrokeColor?: '',
+    interactive?: false
+  };
+
   public id: number = 0;
 
-  private _canvas: AreaCanvas;
+  public areaCanvas: AreaCanvas;
 
-  private _formArea: FormArea;
+  public formArea: FormArea;
 
-  constructor(options: CanvasAreaConfiguration, points: Array<any>) {
-    super(points, options);
+  private controls: fabric.Circle[] = [];
+
+  constructor(points: any[], configuration: object) {
+    super(points, configuration);
+    this.configuration = configuration;
     this.id = fabric.Object.__uid++;
+
+    this.on('modified', this.polygonMoved.bind(this));
+    this.on('moved', this.polygonMoved.bind(this));
   }
 
-  get canvas(): AreaCanvas {
-    return this._canvas;
-  }
-  set canvas(value: AreaCanvas) {
-    this._canvas = value;
+  public setProperty(property: string, value: any) {
+    let set = ({} as { [property: string]: any });
+    set[property] = value;
+    this.set(set);
+    this.canvas.renderAll();
   }
 
-  get formArea(): FormArea {
-    return this._formArea;
+  public setProperties(properties: object) {
+    this.set(properties);
+    this.canvas.renderAll();
   }
-  set formArea(value: FormArea) {
-    this._formArea = value;
+
+  public setPointProperties(pointIndex: number, properties: {x: number, y: number}) {
+    this.points[pointIndex] = {
+      x: properties.x - this.configuration.left,
+      y: properties.y - this.configuration.top,
+    };
+    this.controls[pointIndex].set({
+      left: properties.x - this.configuration.left,
+      top: properties.y - this.configuration.top,
+    });
+    this.controls[pointIndex].setCoords();
+    this.canvas.renderAll();
   }
 
   public addControls() {
+    if (!this.configuration.interactive) {
+      return;
+    }
+    this.points.forEach((point: fabric.Object, index: number) => {
+      this.addControl(this.configuration, point, index, 100000);
+    });
+  }
+
+  private addControl(
+    areaConfig: {cornerColor?: '', cornerStrokeColor?: ''},
+    point: fabric.Object,
+    index: number,
+    newControlIndex: number
+  ) {
+    let circle = new fabric.Circle({
+      ...areaConfig,
+      hasControls: false,
+      radius: 5,
+      fill: areaConfig.cornerColor,
+      stroke: areaConfig.cornerStrokeColor,
+      originX: 'center',
+      originY: 'center',
+      name: index,
+      polygon: this,
+      point: point,
+      type: 'control',
+      opacity: this.controls.length === 0 ? 0 : this.controls[0].opacity,
+
+      // set control position relative to polygon
+      left: this.configuration.left + point.x,
+      top: this.configuration.top + point.y,
+    });
+    circle.on('moved', this.pointMoved.bind(this));
+
+    point.control = circle;
+
+    this.controls = AreaUtility.addElementToArrayWithPosition(this.controls, circle, newControlIndex);
+    this.areaCanvas.canvas.add(circle);
+    this.areaCanvas.canvas.renderAll();
+  }
+
+  public removePoint(event: Event) {
+    if (this.points.length > 3) {
+      let element = (event.currentTarget as HTMLElement).parentNode.parentNode as HTMLElement,
+        points = ([] as fabric.Point),
+        controls = ([] as fabric.Object);
+
+      this.points.forEach((point: fabric.Point, index: number) => {
+        if (element.id !== point.id) {
+          points.push(point);
+          controls.push(this.controls[index]);
+        } else {
+          point.element.remove();
+          this.areaCanvas.canvas.remove(this.controls[index]);
+        }
+      });
+
+      points.forEach((point: fabric.Point, index: number) => {
+        point.id = 'p' + this.id + '_' + index;
+        controls[index].name = index;
+      });
+
+      this.points = points;
+      this.controls = controls;
+      this.areaCanvas.canvas.renderAll();
+    }
+  }
+
+  private pointMoved(event: Event) {
+    let configuration = JSON.parse(JSON.stringify(this.formArea.configuration)),
+      control: fabric.Object = event.target,
+      id = control.point.id,
+      center = control.getCenterPoint();
+
+    configuration.coords.points.forEach((point: fabric.Point) => {
+      if (point.id == id) {
+        point.x = Math.round(center.x);
+        point.y = Math.round(center.y);
+      }
+    });
+    this.formArea.updateFields(configuration);
+  }
+
+  private polygonMoved() {
+    let configuration = JSON.parse(JSON.stringify(this.formArea.configuration));
+    this.controls.forEach((control, index) => {
+      configuration.coords.points[index] = {
+        x: Math.round(control.left),
+        y: Math.round(control.top),
+        id: control.point.id,
+      };
+    });
+    this.formArea.updateFields(configuration);
   }
 }
 
@@ -838,21 +1023,25 @@ class AreaCanvas {
 
   readonly options: CanvasOptions;
 
-  readonly canvas: fabric.Canvas;
+  readonly _canvas: fabric.Canvas;
 
   private areas: Array<CanvasRectangle|CanvasCircle|CanvasPolygon> = [];
 
   constructor(element: HTMLCanvasElement, options: CanvasOptions) {
     this.options = options;
 
-    this.canvas = new fabric.Canvas(element, options);
-    fabric.util.setStyle(this.canvas.wrapperEl, {
+    this._canvas = new fabric.Canvas(element, options);
+    fabric.util.setStyle(this._canvas.wrapperEl, {
       position: 'absolute',
     });
 
-    this.canvas.on('object:moving', this.canvasObjectMoving);
-    this.canvas.on('selection:created', this.canvasSelectionCreated);
-    this.canvas.on('selection:updated', this.canvasSelectionUpdated);
+    this._canvas.on('object:moving', this.canvasObjectMoving.bind(this));
+    this._canvas.on('selection:created', this.canvasSelectionCreated.bind(this));
+    this._canvas.on('selection:updated', this.canvasSelectionUpdated.bind(this));
+  }
+
+  get canvas(): fabric.Canvas {
+    return this._canvas;
   }
 
   private canvasObjectMoving(event: FabricEvent) {
@@ -882,12 +1071,23 @@ class AreaCanvas {
       activePolygon.controls.forEach((control: fabric.Object) => {
         control.opacity = 1;
       });
-      this.canvas.renderAll();
+      this._canvas.renderAll();
     }
   }
 
   private canvasSelectionUpdated(event: FabricEvent) {
     let activePolygon:fabric.Object = null;
+
+    this._canvas.on('selection:created', (event: Event) => {
+      if ((event.target as fabric.Polygon).type === 'polygon') {
+        activePolygon = event.target;
+        // show controls of active polygon
+        activePolygon.controls.forEach((control: fabric.Object) => {
+          control.opacity = 1;
+        });
+        this.canvas.renderAll();
+      }
+    });
 
     event.deselected.forEach((element: fabric.Object) => {
       if (element.type === 'polygon' && event.selected[0].type !== 'control') {
@@ -896,14 +1096,15 @@ class AreaCanvas {
           control.opacity = 0;
         });
         activePolygon = null;
-        this.canvas.renderAll();
+        this._canvas.renderAll();
       } else if (element.type === 'control') {
+        activePolygon = element.polygon;
         // hide controls of active polygon
         activePolygon.controls.forEach((control: fabric.Object) => {
           control.opacity = 0;
         });
         activePolygon = null;
-        this.canvas.renderAll();
+        this._canvas.renderAll();
       }
     });
 
@@ -914,7 +1115,7 @@ class AreaCanvas {
         element.controls.forEach((control: fabric.Object) => {
           control.opacity = 1;
         });
-        this.canvas.renderAll();
+        this._canvas.renderAll();
       }
     });
   }
@@ -948,8 +1149,8 @@ class AreaCanvas {
       case 'default':
     }
 
-    canvasArea.canvas = this;
-    this.canvas.add(canvasArea);
+    canvasArea.areaCanvas = this;
+    this._canvas.add(canvasArea);
     this.areas.push(canvasArea);
 
     return canvasArea;
@@ -994,7 +1195,7 @@ class AreaCanvas {
     return canvasArea;
   }
 
-  private createPolygon(configuration: CanvasAreaConfiguration) {
+  private createPolygon(configuration: CanvasAreaConfiguration): CanvasPolygon {
     let left = 100000,
       top = 100000,
       options = {
@@ -1006,6 +1207,7 @@ class AreaCanvas {
         hasControls: false,
         objectCaching: false,
         controlConfig: this.areaConfig,
+        interactive: this.options.interactive,
       };
 
     // get top and left corner of polygon
@@ -1023,13 +1225,7 @@ class AreaCanvas {
     options.left = left;
     options.top = top;
 
-    let canvasArea = new CanvasPolygon(options, options.coords.points);
-
-    if (this.options.interactive) {
-      canvasArea.addControls();
-    }
-
-    return canvasArea;
+    return new CanvasPolygon(options.coords.points, options);
   }
 
   public deleteArea(area: CanvasRectangle|CanvasCircle|CanvasPolygon) {
@@ -1040,7 +1236,7 @@ class AreaCanvas {
       }
     });
     this.areas = areas;
-    this.canvas.remove(area);
+    this._canvas.remove(area);
     area = null;
   }
 
@@ -1097,14 +1293,15 @@ export class AreaManipulation {
     }
   }
 
-  public initializeAreas(areas: Array<HTML5Area>) {
+  public initializeAreas(areas: HTML5Area[]) {
     areas = areas || [];
     areas.forEach((area: HTML5Area) => {
       area.data.color = AreaUtility.getRandomColor(area.data.color);
 
-      let canvasArea = this.canvas.addArea(area);
+      let formArea = JSON.parse(JSON.stringify(area)),
+        canvasArea = this.canvas.addArea(area);
       if (this.form) {
-        this.form.addArea(area, canvasArea);
+        this.form.addArea(formArea, canvasArea);
       }
     });
 
@@ -1120,11 +1317,12 @@ export class AreaManipulation {
     });
   }
 
-  public getAreasData(): Array<any> {
-    let data = ([] as Array<HTML5Area>);
+  public getAreasData(): HTML5Area[] {
+    let data = ([] as HTML5Area[]);
     this.form.areas.forEach((area: FormArea) => {
       data.push(area.getData());
     });
+    console.log(data);
     return data;
   }
 

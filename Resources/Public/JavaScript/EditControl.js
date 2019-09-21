@@ -197,7 +197,7 @@ define(["require", "exports", "jquery", "./AreaManipulation", "TYPO3/CMS/Backend
         EditControl.prototype.buttonSaveHandler = function (event) {
             event.stopPropagation();
             event.preventDefault();
-            var areasData = this.areaManipulation.getAreasData(), hiddenField = $("input[name=\"" + this.configuration.itemName + "\"]");
+            var areasData = JSON.stringify(this.areaManipulation.getAreasData()), hiddenField = $("input[name=\"" + this.configuration.itemName + "\"]");
             hiddenField
                 .val(areasData)
                 .trigger('imagemap:changed');

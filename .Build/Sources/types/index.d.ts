@@ -11,17 +11,17 @@
 
 declare interface CanvasSize {
   width: number,
-  height: number
+  height: number,
 }
 
 declare interface EditorOptions {
   editControlDocument?: Document,
-  canvas?: CanvasSize
+  canvas?: CanvasSize,
   previewRerenderAjaxUrl?: string,
   browseLinkUrlAjaxUrl?: string,
   browseLink?: object,
   formSelector?: string,
-  canvasSelector: string
+  canvasSelector: string,
 }
 
 declare interface CanvasOptions {
@@ -30,14 +30,14 @@ declare interface CanvasOptions {
   interactive: boolean,
   selection: boolean,
   preserveObjectStacking: boolean,
-  hoverCursor: string
+  hoverCursor: string,
 }
 
 declare interface FormOptions {
   formDocument: Document,
   formSelector: string,
   browseLink: BrowseLinkConfiguration,
-  browseLinkUrlAjaxUrl: string
+  browseLinkUrlAjaxUrl: string,
 }
 
 declare interface HTML5Area {
@@ -48,8 +48,8 @@ declare interface HTML5Area {
     right?: number,
     bottom?: number,
     radius?: number,
-    points?: Array<any>,
-    [property: string]: any;
+    points?: any[],
+    [property: string]: any,
   },
   shape: string,
 
@@ -64,15 +64,15 @@ declare interface HTML5Area {
 
   data?: {
     color: string,
-    [property: string]: any;
+    [property: string]: any,
   },
-  [property: string]: any;
+  [property: string]: any,
 }
 
 declare interface EditorConfiguration {
-  existingAreas: Array<any>,
+  existingAreas: any[],
   browseLink?: object,
-  itemName: string
+  itemName: string,
 }
 
 declare interface BrowseLinkConfiguration {
@@ -80,7 +80,7 @@ declare interface BrowseLinkConfiguration {
   formName?: string,
   tableName?: string,
   fieldName?: string,
-  pid?: number
+  pid?: number,
 }
 
 declare interface FormAreaConfiguration {
@@ -96,24 +96,32 @@ declare interface FormAreaConfiguration {
     right?: number,
     bottom?: number,
     radius?: number,
-    points?: Array<any>
+    points?: any[],
   },
   link?: string,
 }
 
+declare interface FabricPoint {
+  x: number,
+  y: number,
+  id: number,
+  element: HTMLElement,
+  control?: object,
+}
+
 declare interface CanvasAreaConfiguration {
-  coords: {
+  coords?: {
     top?: number,
     left?: number,
     right?: number,
     bottom?: number,
     radius?: number,
-    points?: Array<any>
+    points?: any[],
   },
   selectable: boolean,
   hasControls: boolean,
   stroke: string,
-  fill: string
+  fill: string,
 }
 
 declare interface FabricEvent {
@@ -121,8 +129,8 @@ declare interface FabricEvent {
     type: string
   },
   transform?: object,
-  deselected?: Array<any>
-  selected?: Array<any>
+  deselected?: any[],
+  selected?: any[],
 }
 
 declare interface Window {
@@ -135,9 +143,9 @@ declare interface Window {
     }
   },
   imagemap?: {
-    areaEditor: any
+    areaEditor: any,
   },
-  FormArea?: any
+  FormArea?: any,
 }
 
 declare interface AreaConfiguration {
