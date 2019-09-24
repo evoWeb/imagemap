@@ -844,6 +844,7 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
                 transparentCorners: false
             };
             this.areas = [];
+            this.activePolygon = null;
             this.options = options;
             this._canvas = new fabric.Canvas(element, options);
             fabric.util.setStyle(this._canvas.wrapperEl, {
@@ -877,11 +878,10 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
             }
         };
         AreaCanvas.prototype.canvasSelectionCreated = function (event) {
-            var activePolygon = null;
             if (event.target.type === 'polygon') {
-                activePolygon = event.target;
+                this.activePolygon = event.target;
                 // show controls of active polygon
-                activePolygon.controls.forEach(function (control) {
+                this.activePolygon.controls.forEach(function (control) {
                     control.opacity = 1;
                 });
                 this._canvas.renderAll();
@@ -889,39 +889,28 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
         };
         AreaCanvas.prototype.canvasSelectionUpdated = function (event) {
             var _this = this;
-            var activePolygon = null;
-            this._canvas.on('selection:created', function (event) {
-                if (event.target.type === 'polygon') {
-                    activePolygon = event.target;
-                    // show controls of active polygon
-                    activePolygon.controls.forEach(function (control) {
-                        control.opacity = 1;
-                    });
-                    _this.canvas.renderAll();
-                }
-            });
             event.deselected.forEach(function (element) {
                 if (element.type === 'polygon' && event.selected[0].type !== 'control') {
                     // hide controls of active polygon
                     element.controls.forEach(function (control) {
                         control.opacity = 0;
                     });
-                    activePolygon = null;
+                    _this.activePolygon = null;
                     _this._canvas.renderAll();
                 }
                 else if (element.type === 'control') {
-                    activePolygon = element.polygon;
+                    _this.activePolygon = element.polygon;
                     // hide controls of active polygon
-                    activePolygon.controls.forEach(function (control) {
+                    _this.activePolygon.controls.forEach(function (control) {
                         control.opacity = 0;
                     });
-                    activePolygon = null;
+                    _this.activePolygon = null;
                     _this._canvas.renderAll();
                 }
             });
             event.selected.forEach(function (element) {
                 if (element.type === 'polygon') {
-                    activePolygon = element;
+                    _this.activePolygon = element;
                     // hide controls of active polygon
                     element.controls.forEach(function (control) {
                         control.opacity = 1;
@@ -1067,7 +1056,6 @@ define(["require", "exports", "./vendor/fabric", "TYPO3/CMS/Backend/Modal", "TYP
             this.form.areas.forEach(function (area) {
                 data.push(area.getData());
             });
-            console.log(data);
             return data;
         };
         AreaManipulation.prototype.destroy = function () {

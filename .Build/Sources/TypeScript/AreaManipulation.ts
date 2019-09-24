@@ -1027,6 +1027,8 @@ class AreaCanvas {
 
   private areas: Array<CanvasRectangle|CanvasCircle|CanvasPolygon> = [];
 
+  private activePolygon:fabric.Object = null;
+
   constructor(element: HTMLCanvasElement, options: CanvasOptions) {
     this.options = options;
 
@@ -1063,12 +1065,10 @@ class AreaCanvas {
   }
 
   private canvasSelectionCreated(event: FabricEvent) {
-    let activePolygon:fabric.Object = null;
-
-    if (event.target.type === 'polygon') {
-      activePolygon = event.target;
+    if ((event.target as fabric.Polygon).type === 'polygon') {
+      this.activePolygon = event.target;
       // show controls of active polygon
-      activePolygon.controls.forEach((control: fabric.Object) => {
+      this.activePolygon.controls.forEach((control: fabric.Object) => {
         control.opacity = 1;
       });
       this._canvas.renderAll();
@@ -1076,41 +1076,28 @@ class AreaCanvas {
   }
 
   private canvasSelectionUpdated(event: FabricEvent) {
-    let activePolygon:fabric.Object = null;
-
-    this._canvas.on('selection:created', (event: Event) => {
-      if ((event.target as fabric.Polygon).type === 'polygon') {
-        activePolygon = event.target;
-        // show controls of active polygon
-        activePolygon.controls.forEach((control: fabric.Object) => {
-          control.opacity = 1;
-        });
-        this.canvas.renderAll();
-      }
-    });
-
     event.deselected.forEach((element: fabric.Object) => {
       if (element.type === 'polygon' && event.selected[0].type !== 'control') {
         // hide controls of active polygon
         element.controls.forEach((control: fabric.Object) => {
           control.opacity = 0;
         });
-        activePolygon = null;
+        this.activePolygon = null;
         this._canvas.renderAll();
       } else if (element.type === 'control') {
-        activePolygon = element.polygon;
+        this.activePolygon = element.polygon;
         // hide controls of active polygon
-        activePolygon.controls.forEach((control: fabric.Object) => {
+        this.activePolygon.controls.forEach((control: fabric.Object) => {
           control.opacity = 0;
         });
-        activePolygon = null;
+        this.activePolygon = null;
         this._canvas.renderAll();
       }
     });
 
     event.selected.forEach((element: fabric.Object) => {
       if (element.type === 'polygon') {
-        activePolygon = element;
+        this.activePolygon = element;
         // hide controls of active polygon
         element.controls.forEach((control: fabric.Object) => {
           control.opacity = 1;
@@ -1322,7 +1309,6 @@ export class AreaManipulation {
     this.form.areas.forEach((area: FormArea) => {
       data.push(area.getData());
     });
-    console.log(data);
     return data;
   }
 
