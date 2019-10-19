@@ -1,11 +1,27 @@
-.picture {
-    overflow: hidden;
+.pictureWrap {
     position: relative;
+    display: inline-block;
+    overflow: hidden;
+    clear: both;
+}
 
-    .canvas-container {
-        left: 0;
-        top: 0;
-        overflow: hidden;
-        z-index: 2;
-    }
+.picture {
+    float: left;
+    position: relative;
+    overflow: hidden;
+}
+
+.image {
+    float: left;
+    position: relative;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+.canvas-container {
+    display: block;
+    left: 0;
+    top: -100%;
+    z-index: 100;
 }

@@ -13,6 +13,6 @@ return [
 
     'wizard_imagemap_area' => [
         'path' => '/imagemap/modal',
-        'target' => \Evoweb\Imagemap\Controller\Wizard\ImagemapAreaController::class . '::getWizardContent'
+        'target' => \Evoweb\Imagemap\Controller\Wizard\ImagemapManipulationController::class . '::getWizardContent'
     ],
 ];

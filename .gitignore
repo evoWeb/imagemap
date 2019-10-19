@@ -1,9 +1,8 @@
 .idea
-.Build/bin/
-.Build/vendor/
-.Build/Web/
-.Build/node_modules/
-.Build/package-lock.json
+.Build/node_modules/**
+.Build/bin/**
+.Build/vendor/**
+.Build/Web/**
 var/*
 composer.*
 !composer.json

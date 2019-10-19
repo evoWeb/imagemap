@@ -9,16 +9,23 @@
  * LICENSE.txt file that was distributed with this source code.
  */
 
-//
-// !!! ONLY SOURCE TO BE COPIED FROM TO AreaManipulation !!!
-//
-
 /// <reference types="../types/index"/>
 
 import * as $ from 'jquery';
 // @ts-ignore
-import * as fabric from './vendor/fabric';
+import * as fabric from './vendor/Fabric';
+// @ts-ignore
+import * as Modal from 'TYPO3/CMS/Backend/Modal';
+// @ts-ignore
 import 'TYPO3/CMS/Core/Contrib/jquery.minicolors';
+
+// needed to access top frame elements
+let d = top.document || document,
+  w = top.window || window;
+if (typeof d !== 'undefined' && typeof w !== 'undefined') {
+  fabric.document = d;
+  fabric.window = w;
+}
 
 let Aggregation = (baseClass: any, ...mixins: Array<any>) => {
   class base extends baseClass {
@@ -32,6 +39,7 @@ let Aggregation = (baseClass: any, ...mixins: Array<any>) => {
 
   // this function copies all properties and symbols, filtering out some special ones
   let copyProperties = (target: any, source: any) => {
+    /** @type {Array} */
     let propertySymbols = (Object.getOwnPropertySymbols(source) as unknown as Array<string>);
     Object.getOwnPropertyNames(source)
       .concat(propertySymbols)
@@ -58,25 +66,21 @@ class AreaFormElement extends fabric.Object {
 
   static after: number = 1;
 
-  id: number = 0;
+  protected name: string = '';
 
-  name: string = '';
+  public element: HTMLElement;
 
-  link: string = '';
+  private eventDelay: number = 0;
 
-  element: HTMLElement;
+  public form: AreaForm;
 
-  eventDelay: number = 0;
+  public editor: AreaEditor;
 
-  attributes: {[k: string]: any} = {};
-
-  form: AreaForm;
-
-  editor: AreaEditor;
+  protected attributes: {[k: string]: any} = {};
 
   [property: string]: any;
 
-  postAddToForm() {
+  public postAddToForm() {
     this.id = fabric.Object.__uid++;
 
     this.initializeElement();
@@ -86,13 +90,13 @@ class AreaFormElement extends fabric.Object {
     this.addFauxInput();
   }
 
-  initializeElement() {
+  private initializeElement() {
     this.element = this.getFormElement('#' + this.name + 'Form', this.id);
     this.form.areaZone.append(this.element);
-    this.form.initializeArrows();
+    this.form.updateArrowsState();
   }
 
-  initializeColorPicker() {
+  private initializeColorPicker() {
     ($(this.getElement('.t3js-color-picker')) as any).minicolors({
       format: 'hex',
       position: 'left',
@@ -102,46 +106,44 @@ class AreaFormElement extends fabric.Object {
     });
   }
 
-  initializeEvents() {
+  private initializeEvents() {
     this.on('moved', this.updateFields.bind(this));
     this.on('modified', this.updateFields.bind(this));
 
-    this.getElements('.positionOptions .t3js-field').forEach(this.coordinateFieldHandler.bind(this));
-    this.getElements('.basicOptions .t3js-field, .attributes .t3js-field').forEach(this.attributeFieldHandler.bind(this));
-    this.getElements('.t3js-btn').forEach(this.buttonHandler.bind(this));
+    this.getElements('.basicOptions .t3js-field').forEach((field: HTMLInputElement) => {
+      field.addEventListener('keyup', this.updateProperties.bind(this));
+    });
+    this.getElements('.positionOptions .t3js-field').forEach((field: HTMLInputElement) => {
+      field.addEventListener('input', this.fieldInputHandler.bind(this));
+    });
+    this.getElements('.t3js-btn').forEach(this.buttonEventHandler.bind(this));
   }
 
-  coordinateFieldHandler(field: HTMLInputElement) {
-    field.addEventListener('keyup', this.fieldKeyUpHandler.bind(this));
-  }
-
-  fieldKeyUpHandler(event: Event) {
+  private fieldInputHandler(event: Event) {
     clearTimeout(this.eventDelay);
     this.eventDelay = AreaFormElement.wait(() => { this.updateCanvas(event); }, 500);
   }
 
-  attributeFieldHandler(field: HTMLInputElement) {
-    field.addEventListener('keyup', this.updateProperties.bind(this));
+  private buttonEventHandler(button: HTMLElement) {
+    let action = button.dataset.action + 'Action';
+    button.removeEventListener('click', this[action]);
+    button.addEventListener('click', this[action].bind(this));
   }
 
-  buttonHandler(button: HTMLElement) {
-    button.addEventListener('click', this[button.id + 'Action'].bind(this));
-  }
-
-  initializeArrows() {
+  public updateArrowsState() {
     let areaZone = this.form.areaZone;
-    this.getElement('#up').classList[areaZone.firstChild !== this.element ? 'remove' : 'add']('disabled');
-    this.getElement('#down').classList[areaZone.lastChild !== this.element ? 'remove' : 'add']('disabled');
+    this.getElement('[data-action="up"]').classList[areaZone.firstChild !== this.element ? 'remove' : 'add']('disabled');
+    this.getElement('[data-action="down"]').classList[areaZone.lastChild !== this.element ? 'remove' : 'add']('disabled');
   }
 
-  updateFields() {
+  public updateFields() {
   }
 
-  updateProperties(event: Event) {
+  private updateProperties(event: Event) {
     let field = (event.currentTarget as HTMLInputElement),
       property = field.id;
-    if (field.classList.contains('link')) {
-      this.link = field.value;
+    if (field.classList.contains('href')) {
+      this.href = field.value;
     } else if (this.hasOwnProperty(property)) {
       this[property] = field.value;
     } else if (this.attributes.hasOwnProperty(property)) {
@@ -149,51 +151,51 @@ class AreaFormElement extends fabric.Object {
     }
   }
 
-  updateCanvas(event: Event) {
+  public updateCanvas(event: Event) {
   }
 
-  linkAction(event: Event) {
+  private linkAction(event: Event) {
     this.form.openLinkBrowser((event.currentTarget as HTMLElement), this);
   }
 
-  upAction() {
+  private upAction() {
     this.form.moveArea(this, AreaFormElement.before);
   }
 
-  downAction() {
+  private downAction() {
     this.form.moveArea(this, AreaFormElement.after);
   }
 
-  undoAction() {
-  }
-
-  redoAction() {
-  }
-
-  deleteAction() {
+  private deleteAction() {
     if (this.element) {
       this.element.remove();
     }
     if (this.form) {
-      this.form.initializeArrows();
+      this.form.updateArrowsState();
     }
     this.removeFauxInput();
     this.editor.deleteArea(this);
   }
 
-  expandAction() {
+  private expandAction() {
     this.showElement('.moreOptions');
-    this.hideElement('#expand');
-    this.showElement('#collapse');
+    this.showElement('[data-action="collapse"]');
+    this.hideElement('[data-action="expand"]');
   }
 
-  collapseAction() {
+  private collapseAction() {
     this.hideElement('.moreOptions');
-    this.hideElement('#collapse');
-    this.showElement('#expand');
+    this.hideElement('[data-action="collapse"]');
+    this.showElement('[data-action="expand"]');
   }
 
-  colorPickerAction(value: string) {
+  private undoAction() {
+  }
+
+  private redoAction() {
+  }
+
+  private colorPickerAction(value: string) {
     (this.getElement('.t3js-color-picker') as HTMLInputElement).value = value;
     this.set('borderColor', value);
     this.set('stroke', value);
@@ -201,45 +203,49 @@ class AreaFormElement extends fabric.Object {
     this.editor.canvas.renderAll();
   }
 
-
-  getFormElement(selector: string, id: number): HTMLElement {
+  protected getFormElement(selector: string, id: number): HTMLElement {
     let template = this.form.element.querySelector(selector)
       .innerHTML.replace(new RegExp('_ID', 'g'), String(id ? id : this.id));
     return (new DOMParser()).parseFromString(template, 'text/html').body.firstChild as HTMLElement;
   }
 
-  getElement(selector: string) {
+  public getElement(selector: string): HTMLInputElement {
     return this.element.querySelector(selector);
   }
 
-  getElements(selector: string) {
+  protected getElements(selector: string) {
     return this.element.querySelectorAll(selector);
   }
 
-  hideElement(selector: string) {
+  private hideElement(selector: string) {
     this.getElement(selector).classList.add('hide');
   }
 
-  showElement(selector: string) {
+  private showElement(selector: string) {
     this.getElement(selector).classList.remove('hide');
   }
 
+  public getFieldValue(selector: string): string {
+    return this.getElement(selector).value;
+  }
 
-  getMapData(): object {
+  public getData(): object {
     let attributes = this.getAdditionalAttributes();
     return {
       ...attributes,
       shape: this.name,
       coords: this.getAreaCoords(),
-      link: this.getLink()
+      href: this.getLink()
     };
   }
 
-  getAreaCoords(): string {
+  // @todo deprecated
+  protected getAreaCoords(): string {
     return '';
   }
 
-  getAdditionalAttributes() {
+  // @todo deprecated
+  private getAdditionalAttributes() {
     let result = ({} as any);
 
     this.getElements('.t3js-field').forEach((field: HTMLInputElement) => {
@@ -251,37 +257,38 @@ class AreaFormElement extends fabric.Object {
     return result;
   }
 
-  getLink() {
-    return (this.getElement('.link') as HTMLInputElement).value;
+  // @todo deprecated
+  public getLink() {
+    return this.getElement('.href').value;
   }
 
   /**
    * Add faux input as target for browselink which listens for changes and writes value to real field
    */
-  addFauxInput() {
-    if (this.form.fauxForm !== null) {
+  private addFauxInput() {
+    if (this.form.fauxForm) {
       let fauxInput = this.editor.fauxFormDocument.createElement('input');
-      fauxInput.setAttribute('id', 'link' + this.id);
-      fauxInput.setAttribute('data-formengine-input-name', 'link' + this.id);
-      fauxInput.setAttribute('value', this.link);
-      fauxInput.addEventListener('change', this.fauxInputChanged.bind(this));
+      fauxInput.setAttribute('id', 'href' + this.id);
+      fauxInput.setAttribute('data-formengine-input-name', 'href' + this.id);
+      fauxInput.setAttribute('value', this.href);
+      fauxInput.onchange = this.changedFauxInput.bind(this);
       this.form.fauxForm.appendChild(fauxInput);
     }
   }
 
-  fauxInputChanged(event: Event) {
-    let field = (event.currentTarget as HTMLInputElement);
-    this.link = field.value;
-    this.updateFields();
-  }
-
-  removeFauxInput() {
+  private removeFauxInput() {
     if (this.form && this.form.fauxForm !== null) {
-      let field = this.form.fauxForm.querySelector('#link' + this.id);
+      let field = this.form.fauxForm.querySelector('#href' + this.id);
       if (field) {
         field.remove();
       }
     }
+  }
+
+  private changedFauxInput() {
+    let field = (this.form.fauxForm.querySelector('#href' + this.id) as HTMLInputElement);
+    this.href = field.value;
+    this.updateFields();
   }
 
   static wait(callback: Function, delay: number) {
@@ -290,12 +297,12 @@ class AreaFormElement extends fabric.Object {
 }
 
 class Rect extends Aggregation(fabric.Rect, AreaFormElement) {
-  name = 'rect';
+  protected name: string = 'rectangle';
 
-  updateFields() {
-    this.getElement('#color').value = this.color;
-    this.getElement('#alt').value = this.alt || '';
-    this.getElement('.link').value = this.link || '';
+  public updateFields() {
+    this.getElement('.color').value = this.data.color;
+    this.getElement('.alt').value = this.alt || '';
+    this.getElement('.href').value = this.href || '';
     this.getElement('#left').value = Math.floor(this.left + 0);
     this.getElement('#top').value = Math.floor(this.top + 0);
     this.getElement('#right').value = Math.floor(this.left + this.getScaledWidth());
@@ -306,7 +313,7 @@ class Rect extends Aggregation(fabric.Rect, AreaFormElement) {
     });
   }
 
-  updateCanvas(event: Event) {
+  protected updateCanvas(event: Event) {
     let field = ((event.currentTarget || event.target) as HTMLInputElement),
       value = parseInt(field.value);
 
@@ -342,23 +349,23 @@ class Rect extends Aggregation(fabric.Rect, AreaFormElement) {
     this.canvas.renderAll();
   }
 
-  getAreaCoords() {
-    return [
-      Math.floor(this.left + 0),
-      Math.floor(this.top + 0),
-      Math.floor(this.left + this.getScaledWidth() - 1),
-      Math.floor(this.top + this.getScaledHeight() - 1)
-    ].join(',');
+  protected getAreaCoords(): object {
+    return {
+      left: Math.floor(this.left + 0),
+      top: Math.floor(this.top + 0),
+      right: Math.floor(this.left + this.getScaledWidth() - 1),
+      bottom: Math.floor(this.top + this.getScaledHeight() - 1)
+    };
   }
 }
 
 class Circle extends Aggregation(fabric.Circle, AreaFormElement) {
-  name = 'circle';
+  protected name: string = 'circle';
 
-  updateFields() {
-    this.getElement('#color').value = this.color;
-    this.getElement('#alt').value = this.alt || '';
-    this.getElement('.link').value = this.link || '';
+  public updateFields() {
+    this.getElement('.color').value = this.data.color;
+    this.getElement('.alt').value = this.alt || '';
+    this.getElement('.href').value = this.href || '';
     this.getElement('#left').value = Math.floor(this.left + 0);
     this.getElement('#top').value = Math.floor(this.top + 0);
     this.getElement('#radius').value = Math.floor(this.getRadiusX());
@@ -368,51 +375,52 @@ class Circle extends Aggregation(fabric.Circle, AreaFormElement) {
     });
   }
 
-  updateCanvas(event: Event) {
+  protected updateCanvas(event: Event) {
     let field = ((event.currentTarget || event.target) as HTMLInputElement),
-      value = parseInt(field.value);
+      value = 0;
 
     switch (field.id) {
       case 'left':
+        value = parseInt(field.value);
         this.set({left: value});
         break;
 
       case 'top':
+        value = parseInt(field.value);
         this.set({top: value});
         break;
 
       case 'radius':
+        value = parseInt(field.value);
         this.set({radius: value});
         break;
     }
     this.canvas.renderAll();
   }
 
-  getAreaCoords() {
-    return [
-      Math.floor(this.left + this.getRadiusX()),
-      Math.floor(this.top + this.getRadiusX()),
-      Math.floor(this.getRadiusX())
-    ].join(',');
+  protected getAreaCoords(): object {
+    return {
+      left: Math.floor(this.left + this.getRadiusX()),
+      top: Math.floor(this.top + this.getRadiusX()),
+      radius: Math.floor(this.getRadiusX())
+    };
   }
 }
 
 class Poly extends Aggregation(fabric.Polygon, AreaFormElement) {
-  name: string = 'poly';
+  protected name: string = 'polygon';
 
-  points: Array<any> = [];
-
-  controls: Array<any> = [];
+  public controls: Array<any> = [];
 
   constructor(points: Array<any>, options: AreaConfiguration) {
     super(points, options);
     this.on('moved', this.polygonMoved.bind(this));
   }
 
-  updateFields() {
-    this.getElement('#color').value = this.color;
-    this.getElement('#alt').value = this.alt || '';
-    this.getElement('.link').value = this.link || '';
+  public updateFields() {
+    this.getElement('.color').value = this.data.color;
+    this.getElement('.alt').value = this.alt || '';
+    this.getElement('.href').value = this.href || '';
 
     Object.entries(this.attributes).forEach((attribute) => {
       this.getElement('#' + attribute[0]).value = attribute[1] || '';
@@ -432,8 +440,8 @@ class Poly extends Aggregation(fabric.Polygon, AreaFormElement) {
     });
   }
 
-  updateCanvas(event: Event) {
-    let field = ((event.currentTarget || event.target) as HTMLInputElement),
+  protected updateCanvas(event: Event) {
+    let field = (event.currentTarget || event.target) as HTMLInputElement,
       [, point] = field.id.split('_'),
       control = this.controls[parseInt(point)],
       x = control.getCenterPoint().x,
@@ -453,25 +461,24 @@ class Poly extends Aggregation(fabric.Polygon, AreaFormElement) {
     this.canvas.renderAll();
   }
 
-  getAreaCoords() {
-    let result = ([] as Array<number>);
+  protected getAreaCoords(): object[] {
+    let result: object[] = [];
 
     this.controls.forEach((control) => {
       let center = control.getCenterPoint();
-      result.push(center.x);
-      result.push(center.y);
+      result.push({x: center.x, y: center.y});
     });
 
-    return result.join(',');
+    return result;
   }
 
-  addControls() {
+  public addControls() {
     this.points.forEach((point: fabric.Object, index: number) => {
       this.addControl(this.controlConfig, point, index, 100000);
     });
   }
 
-  addControl(areaConfig: AreaConfiguration, point: fabric.Object, index: number, newControlIndex: number) {
+  private addControl(areaConfig: AreaConfiguration, point: fabric.Object, index: number, newControlIndex: number) {
     let circle = new fabric.Circle({
       ...areaConfig,
       hasControls: false,
@@ -499,7 +506,7 @@ class Poly extends Aggregation(fabric.Polygon, AreaFormElement) {
     this.canvas.renderAll();
   }
 
-  pointMoved(event: FabricEvent) {
+  private pointMoved(event: FabricEvent) {
     let control = (event.target as fabric.Object),
       id = 'p' + control.polygon.id + '_' + control.name,
       center = control.getCenterPoint();
@@ -508,14 +515,14 @@ class Poly extends Aggregation(fabric.Polygon, AreaFormElement) {
     this.getElement('#y' + id).value = center.y;
   }
 
-  polygonMoved() {
+  private polygonMoved() {
     this.points.forEach((point: fabric.Object) => {
       this.getElement('#x' + point.id).value = this.left + point.x;
       this.getElement('#y' + point.id).value = this.top + point.y;
     });
   }
 
-  addPointBeforeAction(event: Event) {
+  protected addPointBeforeAction(event: Event) {
     let direction = AreaFormElement.before,
       index = this.points.length,
       parentElement = this.getElement('.positionOptions'),
@@ -527,7 +534,7 @@ class Poly extends Aggregation(fabric.Polygon, AreaFormElement) {
     this.addControl(this.editor.areaConfig, point, index, currentPointIndex + direction);
   }
 
-  addPointAfterAction(event: Event) {
+  protected addPointAfterAction(event: Event) {
     let direction = AreaFormElement.after,
       index = this.points.length,
       parentElement = this.getElement('.positionOptions'),
@@ -543,7 +550,7 @@ class Poly extends Aggregation(fabric.Polygon, AreaFormElement) {
     this.addControl(this.editor.areaConfig, point, index, currentPointIndex + direction);
   }
 
-  getPointElementAndCurrentPoint(event: Event, direction: number) {
+  private getPointElementAndCurrentPoint(event: Event, direction: number) {
     let currentPointId = ((event.currentTarget as HTMLElement).parentNode.parentNode as HTMLElement).id,
       [currentPoint, nextPoint, currentPointIndex] = this.getCurrentAndNextPoint(currentPointId, direction),
       index = this.points.length,
@@ -564,7 +571,7 @@ class Poly extends Aggregation(fabric.Polygon, AreaFormElement) {
     return [point, element, currentPointIndex, currentPoint];
   }
 
-  getCurrentAndNextPoint(currentPointId: string, direction: number) {
+  private getCurrentAndNextPoint(currentPointId: string, direction: number) {
     let currentPointIndex = 0;
 
     for (let i = 0; i < this.points.length; i++) {
@@ -586,11 +593,11 @@ class Poly extends Aggregation(fabric.Polygon, AreaFormElement) {
     return [this.points[currentPointIndex], this.points[nextPointIndex], currentPointIndex, nextPointIndex];
   }
 
-  removePointAction(event: Event) {
+  protected removePointAction(event: Event) {
     if (this.points.length > 3) {
       let element = (event.currentTarget as HTMLElement).parentNode.parentNode as HTMLElement,
-        points = ([] as fabric.Point),
-        controls = ([] as fabric.Object);
+        points: fabric.Point = [],
+        controls: fabric.Object = [];
 
       this.points.forEach((point: fabric.Point, index: number) => {
         if (element.id !== point.id) {
@@ -619,7 +626,7 @@ class Poly extends Aggregation(fabric.Polygon, AreaFormElement) {
     }
   }
 
-  static addElementToArrayWithPosition(array: Array<any>, item: any, newPointIndex: number) {
+  static addElementToArrayWithPosition(array: any[], item: any, newPointIndex: number) {
     if (newPointIndex < 0) {
       array.unshift(item);
     } else if (newPointIndex >= array.length) {
@@ -639,41 +646,41 @@ class Poly extends Aggregation(fabric.Polygon, AreaFormElement) {
 }
 
 class AreaForm {
-  areaZone: HTMLElement;
+  public areaZone: HTMLElement;
 
-  element: HTMLElement;
+  public element: HTMLElement;
+
+  private editor: AreaEditor;
 
   /**
    * Element needed to add inputs that act as target for browselink finalizeFunction target
    */
-  fauxForm: HTMLFormElement;
+  public fauxForm: HTMLFormElement;
 
-  editor: AreaEditor;
-
-  constructor(formElement: string, editor: AreaEditor) {
-    this.element = editor.document.querySelector(formElement);
+  constructor(formSelector: string, editor: AreaEditor) {
+    this.element = editor.document.querySelector(formSelector);
     this.areaZone = this.element.querySelector('#areaZone');
     this.editor = editor;
 
-    this.addFauxFormForLinkBrowser(this.editor.browseLink);
+    this.addFauxFormForLinkBrowser();
   }
 
-  destroy() {
+  public destroy() {
     this.removeFauxForm();
   }
 
-  initializeArrows() {
+  public updateArrowsState() {
     this.editor.areas.forEach((area) => {
-      area.initializeArrows();
+      area.updateArrowsState();
     });
   }
 
-  addArea(area: Rect|Circle|Poly) {
+  public addArea(area: Rect|Circle|Poly) {
     area.form = this;
     area.postAddToForm();
   }
 
-  moveArea(area: Rect|Circle|Poly, offset: number) {
+  public moveArea(area: AreaFormElement|Rect|Circle|Poly, offset: number) {
     let index = this.editor.areas.indexOf(area),
       newIndex = index + offset,
       parent = area.element.parentNode;
@@ -685,16 +692,17 @@ class AreaForm {
       parent.childNodes[index][offset < 0 ? 'after' : 'before'](parent.childNodes[newIndex]);
     }
 
-    this.initializeArrows();
+    this.updateArrowsState();
   }
 
-  openLinkBrowser(link: HTMLElement, area: AreaFormElement) {
+  public openLinkBrowser(link: HTMLElement, area: AreaFormElement|Rect|Circle|Poly) {
     link.blur();
 
     let data = {
       ...this.editor.browseLink,
       objectId: area.id,
-      itemName: 'link' + area.id,
+      formName: 'areasForm',
+      itemFormElName: 'href' + area.id,
       currentValue: area.getLink()
     };
 
@@ -703,48 +711,56 @@ class AreaForm {
       context: area,
       data: data
     }).done((response: {url: string}) => {
-      let vHWin = window.open(
-        response.url,
-        '',
-        'height=600,width=500,status=0,menubar=0,scrollbars=1'
-      );
-      vHWin.focus()
+      const url = response.url
+        + '&P[currentValue]=' + encodeURIComponent(area.getFieldValue('.href'))
+        + '&P[currentSelectedValues]=' + encodeURIComponent(area.getFieldValue('.href'));
+
+      if (this.editor.typo3Branch < 10) {
+        // @todo remove once TYPO3 9.x support gets removed
+        let vHWin = window.open(
+          url,
+          '',
+          'height=600,width=500,status=0,menubar=0,scrollbars=1'
+        );
+        vHWin.focus()
+      } else {
+        Modal.advanced({
+          type: Modal.types.iframe,
+          content: url,
+          size: Modal.sizes.large,
+        });
+      }
     });
   }
 
   /**
-   * Triggers change event after faux field was changed by browselink
+   * Create form element that is reachable for LinkBrowser.finalizeFunction
    */
-  addFauxFormForLinkBrowser(configuration: BrowseLinkConfiguration) {
+  private addFauxFormForLinkBrowser() {
     if (top.document !== this.editor.fauxFormDocument) {
-      this.fauxForm = this.editor.fauxFormDocument.createElement('form');
-      this.fauxForm.setAttribute('name', configuration.formName);
-
-      let fauxFormContainer = this.editor.fauxFormDocument.querySelector('#fauxFormContainer');
-      while (fauxFormContainer.firstChild) {
-        fauxFormContainer.removeChild(fauxFormContainer.firstChild);
+      if (!(this.fauxForm = this.editor.fauxFormDocument.querySelector(this.editor.formSelector))) {
+        this.fauxForm = this.editor.fauxFormDocument.createElement('form');
+        this.fauxForm.setAttribute('name', 'areasForm');
+        this.fauxForm.setAttribute('id', 'fauxForm');
+        this.editor.fauxFormDocument.body.appendChild(this.fauxForm);
       }
-      fauxFormContainer.appendChild(this.fauxForm);
+
+      // empty previously created fauxForm
+      while (this.fauxForm.firstChild) {
+        this.fauxForm.removeChild(this.fauxForm.firstChild);
+      }
     }
   }
 
-  removeFauxForm() {
+  private removeFauxForm() {
     if (this.fauxForm) {
       this.fauxForm.remove();
     }
   }
-
-  syncAreaLinkValue(id: string) {
-    this.editor.areas.forEach((area) => {
-      if (area.id === parseInt(id)) {
-        area.link = (area.getElement('.link') as HTMLInputElement).value;
-      }
-    });
-  }
 }
 
-export default class AreaEditor {
-  areaConfig = {
+class AreaEditor {
+  public areaConfig = {
     cornerColor: '#eee',
     cornerStrokeColor: '#bbb',
     cornerSize: 10,
@@ -754,21 +770,25 @@ export default class AreaEditor {
     transparentCorners: false
   };
 
-  document: Document;
+  public document: Document;
 
-  fauxFormDocument: Document;
+  public fauxFormDocument: Document;
 
-  browseLinkUrlAjaxUrl: string = '';
+  public formSelector: string = '';
 
-  preview: boolean = true;
+  public typo3Branch: number = 0;
 
-  browseLink: BrowseLinkConfiguration;
+  public browseLinkUrlAjaxUrl: string = '';
 
-  areas: Array<Rect|Circle|Poly> = [];
+  public browseLink: BrowseLinkConfiguration;
 
-  form: AreaForm;
+  readonly preview: boolean = true;
 
-  canvas: fabric.Canvas;
+  public areas: Array<AreaFormElement|Rect|Circle|Poly> = [];
+
+  public canvas: fabric.Canvas;
+
+  public form: AreaForm;
 
   [property: string]: any;
 
@@ -785,18 +805,14 @@ export default class AreaEditor {
     }
   }
 
-  setOptions(options: object) {
+  private setOptions(options: object) {
     Object.entries(options).forEach((option) => {
       this[option[0]] = option[1];
     });
   }
 
-  setScale(scaling: number) {
-    this.canvas.setZoom(this.canvas.getZoom() * (scaling ? scaling : 1));
-  }
-
-  initializeCanvas(canvas: HTMLElement, options: EditorOptions) {
-    let activePolygon:fabric.Object = null;
+  private initializeCanvas(canvas: HTMLElement, options: EditorOptions) {
+    let activePolygon: fabric.Object = null;
 
     this.canvas = new fabric.Canvas(canvas, {
       ...options.canvas,
@@ -806,7 +822,7 @@ export default class AreaEditor {
     });
 
     this.canvas.on('object:moving', (event: FabricEvent) => {
-      let element = (event.target as fabric.Object);
+      let element: fabric.Object = event.target;
       switch (element.type) {
         case 'control':
           let center = element.getCenterPoint();
@@ -865,68 +881,72 @@ export default class AreaEditor {
     });
   }
 
-  initializeAreas(areas: Array<AreaConfiguration>) {
-    areas = areas || [];
-    areas.forEach((area: AreaConfiguration) => {
-      area.color = AreaEditor.getRandomColor(area.color);
-      let areaElement,
-        configuration = {
-          ...area,
-          ...this.areaConfig,
-          selectable: !this.preview,
-          hasControls: !this.preview,
-          stroke: area.color,
-          strokeWidth: 1,
-          fill: AreaEditor.hexToRgbA(area.color, 0.3)
-        };
+  public initializeAreas(areas: Array<AreaConfiguration>) {
+    if (areas !== undefined) {
+      areas.forEach((area) => {
+        area.data.color = AreaEditor.getRandomColor(area.data.color);
+        let areaElement,
+          configuration = {
+            ...area,
+            ...this.areaConfig,
+            selectable: !this.preview,
+            hasControls: !this.preview,
+            stroke: area.data.color,
+            strokeWidth: 1,
+            fill: AreaEditor.hexToRgbA(area.data.color, 0.3)
+          };
 
-      switch (configuration.shape) {
-        case 'rect':
-          areaElement = this.addRect(configuration);
-          break;
+        switch (configuration.shape) {
+          case 'rect':
+          case 'rectangle':
+            areaElement = this.createRectangle(configuration);
+            break;
 
-        case 'circle':
-          areaElement = this.addCircle(configuration);
-          break;
+          case 'circ':
+          case 'circle':
+            areaElement = this.createCircle(configuration);
+            break;
 
-        case 'poly':
-          areaElement = this.addPoly(configuration);
-          break;
-      }
+          case 'poly':
+          case 'polygon':
+            areaElement = this.createPolygon(configuration);
+            break;
+        }
 
-      area.editor = this;
-      this.areas.push(areaElement);
-      if (this.form) {
-        this.form.addArea(areaElement);
-      }
-    });
+        areaElement.editor = this;
+        this.areas.push(areaElement);
+        if (this.form) {
+          this.form.addArea(areaElement);
+        }
+      });
+    }
   }
 
-  removeAllAreas() {
-    this.areas.forEach((area) => { this.deleteArea(area); });
+  public removeAllAreas() {
+    this.areas.forEach((area) => { area.deleteAction(); });
   }
 
-  addRect(configuration: AreaConfiguration) {
-    let [left, top, right, bottom] = configuration.coords.split(','),
+  private createRectangle(configuration: AreaConfiguration) {
+    let coords = configuration.coords,
       area = new Rect({
         ...configuration,
-        left: parseInt(left),
-        top: parseInt(top),
-        width: parseInt(right) - parseInt(left),
-        height: parseInt(bottom) - parseInt(top),
+        left: coords.left,
+        top: coords.top,
+        width: coords.right - coords.left,
+        height: coords.bottom - coords.top,
       });
 
     this.canvas.add(area);
     return area;
   }
 
-  addCircle(configuration: AreaConfiguration) {
-    let [left, top, radius] = configuration.coords.split(','),
+  private createCircle(configuration: AreaConfiguration) {
+    let coords = configuration.coords,
       area = new Circle({
         ...configuration,
-        left: parseInt(left) - parseInt(radius),
-        top: parseInt(top) - parseInt(radius),
-        radius: parseInt(radius),
+        left: coords.left - coords.radius,
+        top: coords.top - coords.radius,
+        radius: coords.radius,
       });
 
     // disable control points as these would stretch the circle
@@ -940,46 +960,15 @@ export default class AreaEditor {
     return area;
   }
 
-  addPoly(configuration: AreaConfiguration) {
-    let options = {
+  private createPolygon(configuration: AreaConfiguration) {
+    let points = configuration.coords.points || [],
+      area = new Poly(points, {
         ...configuration,
         selectable: true,
         hasControls: false,
         objectCaching: false,
         controlConfig: this.areaConfig,
-      },
-      points = [],
-      coordsXY = options.coords.split(','),
-      left = 100000,
-      top = 100000,
-      i = 0;
-
-    if (coordsXY.length % 2) {
-      throw new Error('Bad coords count');
-    }
-
-    // first get all coordinates and create point of odd even numbers
-    // and get top and left corner of polygon
-    for (; i < coordsXY.length; i = i + 2) {
-      let xy = {
-        x: parseInt(coordsXY[i]),
-        y: parseInt(coordsXY[i + 1])
-      };
-      points.push(xy);
-
-      left = Math.min(left, xy.x);
-      top = Math.min(top, xy.y);
-    }
-    options.left = left;
-    options.top = top;
-
-    // reduce point x/y values by top/left values
-    points.forEach((point) => {
-      point.x = point.x - options.left;
-      point.y = point.y - options.top;
-    });
-
-    let area = new Poly(points, options);
+      });
 
     this.canvas.add(area);
     if (this.form) {
@@ -988,16 +977,8 @@ export default class AreaEditor {
     return area;
   }
 
-  triggerLinkChanged(id: string) {
-    let selector = 'form[name="' + this.browseLink.formName + '"] [data-formengine-input-name="link' + id + '"]',
-      field = this.fauxFormDocument.querySelector(selector),
-      event = this.fauxFormDocument.createEvent('HTMLEvents');
-    event.initEvent('change', false, true);
-    field.dispatchEvent(event);
-  }
-
-  deleteArea(area: Rect|Circle|Poly) {
-    let areas = ([] as Array<Rect|Circle|Poly>);
+  public deleteArea(area: AreaFormElement|Rect|Circle|Poly) {
+    let areas: Array<AreaFormElement|Rect|Circle|Poly> = [];
     this.areas.forEach((currentArea) => {
       if (area !== currentArea) {
         areas.push(currentArea);
@@ -1005,14 +986,13 @@ export default class AreaEditor {
     });
     this.areas = areas;
     this.canvas.remove(area);
-    area = null;
   }
 
-  getMapData() {
-    let areas = ([] as Array<object>);
+  public getMapData() {
+    let areas: object[] = [];
 
     this.areas.forEach((area) => {
-      areas.push(area.getMapData());
+      areas.push(area.getData());
     });
 
     return JSON.stringify(areas);
@@ -1050,3 +1030,5 @@ export default class AreaEditor {
     throw new Error('Bad Hex');
   }
 }
+
+export = AreaEditor;

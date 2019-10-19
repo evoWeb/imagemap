@@ -11,7 +11,10 @@
 			</trans-unit>
 
 			<trans-unit id="tt_content.tx_imagemap_links">
-				<source>ImageMap Configuration</source>
+				<source>Imagemap manipulation</source>
+			</trans-unit>
+			<trans-unit id="imagemap.modal.title">
+				<source>Imagemap manipulation</source>
 			</trans-unit>
 
 			<trans-unit id="imagemap.element.no_image">
@@ -25,17 +28,14 @@
 				<source>Open Area Editor</source>
 			</trans-unit>
 
-			<trans-unit id="imagemap.modal.title">
-				<source>Imagemap area manipulation</source>
-			</trans-unit>
 			<trans-unit id="imagemap.form.addrect">
-				<source>Rectange</source>
+				<source>Rect-Area</source>
 			</trans-unit>
 			<trans-unit id="imagemap.form.addcircle">
-				<source>Circle</source>
+				<source>Circle-Area</source>
 			</trans-unit>
 			<trans-unit id="imagemap.form.addpoly">
-				<source>Polygon</source>
+				<source>Poly-Area</source>
 			</trans-unit>
 			<trans-unit id="imagemap.form.dismiss">
 				<source>Cancel</source>
@@ -43,8 +43,14 @@
 			<trans-unit id="imagemap.form.save">
 				<source>Accept</source>
 			</trans-unit>
+			<trans-unit id="imagemap.form.zoomin">
+				<source>Zoom image to 100%</source>
+			</trans-unit>
+			<trans-unit id="imagemap.form.zoomout">
+				<source>Zoom image to fit the Wizard popup.</source>
+			</trans-unit>
 			<trans-unit id="imagemap.form.area.label">
-				<source>Alternative Label</source>
+				<source>Label</source>
 			</trans-unit>
 			<trans-unit id="imagemap.form.area.link">
 				<source>Link</source>

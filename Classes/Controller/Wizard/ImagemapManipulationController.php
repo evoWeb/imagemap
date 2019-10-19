@@ -15,18 +15,17 @@ namespace Evoweb\Imagemap\Controller\Wizard;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Http\HtmlResponse;
+use TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
-use TYPO3\CMS\Core\Utility\StringUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 
-class ImagemapAreaController
+class ImagemapManipulationController
 {
     /**
-     * @var \TYPO3\CMS\Backend\View\BackendTemplateView
+     * @var StandaloneView
      */
     protected $templateView;
 
@@ -36,9 +35,9 @@ class ImagemapAreaController
             $templateView = GeneralUtility::makeInstance(StandaloneView::class);
             $templateView->setLayoutRootPaths(['EXT:imagemap/Resources/Private/Layouts/']);
             $templateView->setPartialRootPaths(['EXT:imagemap/Resources/Private/Partials/']);
-            $templateView->setTemplatePathAndFilename(GeneralUtility::getFileAbsFileName(
+            $templateView->setTemplatePathAndFilename(
                 'EXT:imagemap/Resources/Private/Templates/FormEngine/ImagemapWizard.html'
-            ));
+            );
         }
         $this->templateView = $templateView;
     }
@@ -54,47 +53,21 @@ class ImagemapAreaController
     {
         if ($this->isSignatureValid($request)) {
             $parsedBody = json_decode($request->getParsedBody()['arguments'], true);
-
             $fileUid = $parsedBody['image'];
             $image = null;
             if (MathUtility::canBeInterpretedAsInteger($fileUid)) {
                 try {
-                    $image = ResourceFactory::getInstance()->getFileReferenceObject($fileUid);
-                } catch (\throwable $e) {
+                    $image = ResourceFactory::getInstance()->getFileObject($fileUid);
+                } catch (FileDoesNotExistException $e) {
                 }
             }
-
-            $record = BackendUtility::getRecord($parsedBody['tableName'], $parsedBody['uid']);
             $viewData = [
                 'image' => $image,
-                'configuration' => \json_encode($this->getConfiguration($parsedBody, $record)),
-                'existingAreas' => $record[$parsedBody['fieldName']],
             ];
             $content = $this->templateView->renderSection('Main', $viewData);
             return new HtmlResponse($content);
         }
         return new HtmlResponse('', 403);
-    }
-
-    protected function getConfiguration(
-        array $parameters,
-        array $record
-    ): array {
-        $formName = 'imagemap' . StringUtility::getUniqueId('imagemap-area-manipulation-');
-        $browseLinkConfiguration = [
-            'returnUrl' => GeneralUtility::linkThisScript(),
-            'formName' => $formName,
-            'tableName' => $parameters['tableName'],
-            'fieldName' => $parameters['fieldName'],
-            'uid' => $record['uid'],
-            'pid' => $record['pid'],
-        ];
-        return [
-            'formName' => $formName,
-            'itemName' => $parameters['itemName'],
-            'fieldChangeFunc' => $parameters['fieldChangeFunc'] ?? [],
-            'browseLink' => $browseLinkConfiguration
-        ];
     }
 
     /**

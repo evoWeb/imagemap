@@ -7,65 +7,65 @@
 <f:section name="Main">
 
 	<div class="ce-image ce-{gallery.position.horizontal} ce-{gallery.position.vertical}">
-	<f:if condition="{gallery.rows}">
-		<f:variable name="column">{gallery.rows.1.columns.1}</f:variable>
-		<f:variable name="file">{column.media}</f:variable>
-		<f:variable name="dimensions">{column.dimensions}</f:variable>
+		<f:if condition="{gallery.rows}">
+			<f:variable name="column">{gallery.rows.1.columns.1}</f:variable>
+			<f:variable name="file">{column.media}</f:variable>
+			<f:variable name="dimensions">{column.dimensions}</f:variable>
 
-		<f:variable name="row">
-			<div class="ce-row">
-				<div class="ce-column">
-					<figure class="image">
-						<f:if condition="{imageMap}">
-						<f:then>
-							<f:media class="image-embed-item"
-											 file="{file}"
-											 width="{dimensions.width}"
-											 height="{dimensions.height}"
-											 alt="{file.alternative}"
-											 title="{file.title}"
-											 additionalAttributes="{usemap: '#{imageMapName}'}"/>
-						</f:then>
-						<f:else>
-							<f:media class="image-embed-item"
-											 file="{file}"
-											 width="{dimensions.width}"
-											 height="{dimensions.height}"
-											 alt="{file.alternative}"
-											 title="{file.title}"/>
-						</f:else>
-						</f:if>
-						<f:if condition="{file.description}">
-						<figcaption class="image-caption">{file.description}</figcaption>
-						</f:if>
-					</figure>
+			<f:variable name="row">
+				<div class="ce-row">
+					<div class="ce-column">
+						<figure class="image">
+							<f:if condition="{imageMap}">
+								<f:then>
+									<f:media class="image-embed-item"
+													 file="{file}"
+													 width="{dimensions.width}"
+													 height="{dimensions.height}"
+													 alt="{file.alternative}"
+													 title="{file.title}"
+													 additionalAttributes="{usemap: '#{imageMapName}'}"/>
+								</f:then>
+								<f:else>
+									<f:media class="image-embed-item"
+													 file="{file}"
+													 width="{dimensions.width}"
+													 height="{dimensions.height}"
+													 alt="{file.alternative}"
+													 title="{file.title}"/>
+								</f:else>
+							</f:if>
+							<f:if condition="{file.description}">
+								<figcaption class="image-caption">{file.description}</figcaption>
+							</f:if>
+						</figure>
 
-					<f:if condition="{imageMap}"><f:spaceless>
-						<map name="{imageMapName}">
-							<f:for each="{imageMap}" as="area">
-								<i:area href="{f:uri.typolink(parameter: area.href)}" shape="{area.shape}" coords="{area.coords}" alt="{area.alt}" data="{area.data}"/>
-							</f:for>
-						</map>
-					</f:spaceless></f:if>
+						<f:if condition="{imageMap}"><f:spaceless>
+							<map name="{imageMapName}">
+								<f:for each="{imageMap}" as="area">
+									<i:area href="{f:uri.typolink(parameter: area.href)}" shape="{area.shape}" coords="{area.coords}" alt="{area.alt}" data="{area.data}"/>
+								</f:for>
+							</map>
+						</f:spaceless></f:if>
+					</div>
 				</div>
-			</div>
-		</f:variable>
+			</f:variable>
 
-		<div class="ce-gallery{f:if(condition: data.imageborder, then: ' ce-border')}" data-ce-columns="{gallery.count.columns}" data-ce-images="{gallery.count.files}">
-		<f:if condition="{gallery.position.horizontal} == 'center'">
-			<f:then>
-			<div class="ce-outer">
-				<div class="ce-inner">
-					{row -> f:format.raw()}
-				</div>
+			<div class="ce-gallery{f:if(condition: data.imageborder, then: ' ce-border')}" data-ce-columns="{gallery.count.columns}" data-ce-images="{gallery.count.files}">
+				<f:if condition="{gallery.position.horizontal} == 'center'">
+					<f:then>
+						<div class="ce-outer">
+							<div class="ce-inner">
+								{row -> f:format.raw()}
+							</div>
+						</div>
+					</f:then>
+					<f:else>
+						{row -> f:format.raw()}
+					</f:else>
+				</f:if>
 			</div>
-			</f:then>
-			<f:else>
-			{row -> f:format.raw()}
-			</f:else>
 		</f:if>
-		</div>
-	</f:if>
 	</div>
 
 </f:section>

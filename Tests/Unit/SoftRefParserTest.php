@@ -1,4 +1,5 @@
 <?php
+namespace Evoweb\Imagemap\Tests\Unit;
 
 /**
  * This file is developed by evoWeb.
@@ -11,8 +12,6 @@
  * LICENSE.txt file that was distributed with this source code.
  */
 
-namespace Evoweb\Imagemap\Tests;
-
 class SoftRefParserTest extends \TYPO3\TestingFramework\Core\Unit\UnitTestCase
 {
     /**
@@ -20,14 +19,14 @@ class SoftRefParserTest extends \TYPO3\TestingFramework\Core\Unit\UnitTestCase
      */
     protected $processor;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->processor = $this->getMockBuilder(\Evoweb\Imagemap\Database\SoftRefParser::class)
             ->setMethods(['getTypoLinkParts'])
             ->getMock();
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         unset($this->processor);
     }

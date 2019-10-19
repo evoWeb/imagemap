@@ -4,7 +4,10 @@
   "description": "Bundles all resources for the usage",
   "main": "gulpfile.js",
   "repository": "https://github.com/evoWeb/imagemap.git",
-  "author": "Sebastian Fischer",
+  "author": {
+    "name": "Sebastian Fischer",
+    "email": "typo3@evoweb.de"
+  },
   "license": "GPL-2.0-or-later",
   "homepage": "https://github.com/evoWeb/imagemap/",
   "engines": {
@@ -14,16 +17,16 @@
   "dependencies": {
     "@types/fabric": "^3.0.1",
     "@types/jquery": "2.0.47",
-    "fabric": "^3.4.0"
+    "fabric": "^3.4.0-browser"
   },
   "devDependencies": {
     "@babel/core": "^7.4.5",
     "@babel/plugin-proposal-class-properties": "^7.3.4",
     "@babel/preset-env": "^7.4.5",
     "@babel/register": "^7.0.0",
-    "autoprefixer": "^9.6.1",
     "gulp": "^4.0.2",
-    "gulp-postcss": "^8.0.0",
+    "gulp-autoprefixer": "^6.0.0",
+    "gulp-rename": "^1.4.0",
     "gulp-sass": "^4.0.2",
     "gulp-sourcemaps": "^2.6.5",
     "gulp-typescript": "^5.0.1",
@@ -39,6 +42,7 @@
   },
   "scripts": {
     "css": "gulp scss",
+    "copy": "gulp copy",
     "js": "gulp typescript",
     "build": "gulp build"
   }

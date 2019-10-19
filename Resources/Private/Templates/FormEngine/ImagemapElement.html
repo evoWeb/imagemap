@@ -9,26 +9,28 @@
 				<f:if condition="{config.readOnly}">
 					<f:else>
 						<div class="form-control-wrap">
-							<input type="hidden"
-										 class="imagemap-hidden-value"
-										 id="{formEngine.field.id}"
+							<input type="hidden" id="{formEngine.field.id}"
 										 name="{formEngine.field.name}"
-										 value="{formEngine.field.value -> f:format.raw()}"
-										 data-tablename="{formEngine.field.tablename}"
-										 data-fieldname="{formEngine.field.fieldname}"
+										 value="{formEngine.field.value}"
+										 data-tablename="{formEngine.field.tableName}"
+										 data-fieldname="{formEngine.field.fieldName}"
 										 data-uid="{formEngine.field.uid}"
 										 data-formengine-validation-rules="{formEngine.validation}"/>
-							<button class="btn btn-default t3js-area-wizard-trigger"
+							<button class="btn btn-default t3js-area-wizard-trigger" id="{formEngine.field.id}-button"
 											data-url="{wizardUri}"
 											data-payload="{wizardPayload}"
 											data-severity="notice"
 											data-modal-title="{f:render(section: 'ModalTitle', arguments: _all)}"
+											data-image-uid="{image.uid}"
 											data-button-addrect-text="{f:translate(id: 'imagemap.form.addrect', extensionName: 'imagemap')}"
 											data-button-addcircle-text="{f:translate(id: 'imagemap.form.addcircle', extensionName: 'imagemap')}"
 											data-button-addpoly-text="{f:translate(id: 'imagemap.form.addpoly', extensionName: 'imagemap')}"
 											data-button-dismiss-text="{f:translate(id: 'imagemap.form.dismiss', extensionName: 'imagemap')}"
 											data-button-save-text="{f:translate(id: 'imagemap.form.save', extensionName: 'imagemap')}"
-											data-field="{formEngine.field.id}">
+											data-file-field="{config.fieldName}"
+											data-field="{formEngine.field.id}"
+											data-configuration="{formEngine.field.configuration}"
+											data-typo3-branch="{TYPO3_branch}">
 								<core:icon identifier="extensions-imagemap-poly" alternativeMarkupIdentifier="inline" />
 								<f:translate id="imagemap.control.open.editor" extensionName="imagemap"/>
 							</button>
@@ -37,9 +39,8 @@
 				</f:if>
 				<div class="form-control-wrap">
 					<div class="form-wizards-element pictureWrap" id="{formEngine.field.id}_wrap">
-						<div id="{formEngine.field.id}-canvas" class="picture"
-								 data-existing-areas='{formEngine.field.existingAreas -> f:format.raw()}'>
-							<f:image image="{image}" treatIdAsReference="true" class="image" maxWidth="400"/>
+						<div id="{formEngine.field.id}-canvas" class="picture">
+							<f:image image="{image}" treatIdAsReference="true" class="image" maxWidth="400" maxHeight="400"/>
 							<canvas id="canvas" class="canvas"></canvas>
 							<div class="modifiedState alert alert-warning">
 								<div class="media">
@@ -62,8 +63,11 @@
 	</f:section>
 
 	<f:section name="ModalTitle">
-		<f:translate id="imagemap.modal.title" extensionName="imagemap"/>
-		: <f:if condition="{image.properties.title}"><f:then>{image.properties.title} &mdash; {image.name}</f:then><f:else>{image.name}</f:else></f:if>
+		<f:translate id="imagemap.modal.title" extensionName="imagemap"/> :
+		<f:if condition="{image.properties.title}">
+			<f:then>{image.properties.title} &mdash; {image.name}</f:then>
+			<f:else>{image.name}</f:else>
+		</f:if>
 		({image.properties.width} × {image.properties.height})
 	</f:section>
 

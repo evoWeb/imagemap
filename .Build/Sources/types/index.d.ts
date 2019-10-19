@@ -9,70 +9,29 @@
  * LICENSE.txt file that was distributed with this source code.
  */
 
-declare interface CanvasSize {
-  width: number,
-  height: number,
-}
-
-declare interface EditorOptions {
-  editControlDocument?: Document,
-  canvas?: CanvasSize,
-  previewRerenderAjaxUrl?: string,
-  browseLinkUrlAjaxUrl?: string,
-  browseLink?: object,
-  formSelector?: string,
-  canvasSelector: string,
-}
-
-declare interface CanvasOptions {
-  width: number,
-  height: number,
-  interactive: boolean,
-  selection: boolean,
-  preserveObjectStacking: boolean,
-  hoverCursor: string,
-}
-
-declare interface FormOptions {
-  formDocument: Document,
-  formSelector: string,
-  browseLink: BrowseLinkConfiguration,
-  browseLinkUrlAjaxUrl: string,
-}
-
-declare interface HTML5Area {
-  areaId?: number,
-  coords: {
+declare interface AreaConfiguration {
+  shape?: string,
+  color?: string,
+  cornerColor?: string,
+  cornerStrokeColor?: string,
+  editor?: object,
+  coords?: {
     left?: number,
     top?: number,
     right?: number,
     bottom?: number,
     radius?: number,
-    points?: any[],
-    [property: string]: any,
+    points?: {x: number, y: number}[]
   },
-  shape: string,
-
-  href?: string,
-  alt?: string,
-  download?: boolean,
-  hreflang?: string,
-  media?: string,
-  ping?: string,
-  rel?: string,
-  target?: string,
-
+  left?: number,
+  top?: number,
   data?: {
     color: string,
-    [property: string]: any,
   },
-  [property: string]: any,
-}
-
-declare interface EditorConfiguration {
-  existingAreas: any[],
-  browseLink?: object,
-  itemName: string,
+  selectable?: boolean
+  hasControls?: boolean
+  objectCaching?: boolean
+  controlConfig?: any
 }
 
 declare interface BrowseLinkConfiguration {
@@ -83,45 +42,26 @@ declare interface BrowseLinkConfiguration {
   pid?: number,
 }
 
-declare interface FormAreaConfiguration {
+declare interface CanvasSize {
+  width: number,
+  height: number,
   top?: number,
-  left?: number,
-  right?: number,
-  bottom?: number,
-  color?: string,
-  shape?: string,
-  coords?: {
-    top?: number,
-    left?: number,
-    right?: number,
-    bottom?: number,
-    radius?: number,
-    points?: any[],
-  },
-  link?: string,
 }
 
-declare interface FabricPoint {
-  x: number,
-  y: number,
-  id: number,
-  element: HTMLElement,
-  control?: object,
+declare interface EditorConfiguration {
+  existingAreas: any[],
+  browseLink?: object,
+  itemName: string,
 }
 
-declare interface CanvasAreaConfiguration {
-  coords?: {
-    top?: number,
-    left?: number,
-    right?: number,
-    bottom?: number,
-    radius?: number,
-    points?: any[],
-  },
-  selectable: boolean,
-  hasControls: boolean,
-  stroke: string,
-  fill: string,
+declare interface EditorOptions {
+  canvas?: CanvasSize,
+  fauxFormDocument?: Document,
+  previewRerenderAjaxUrl?: string,
+  browseLink?: object,
+  browseLinkUrlAjaxUrl?: string,
+  formSelector?: string,
+  typo3Branch?: string,
 }
 
 declare interface FabricEvent {
@@ -142,30 +82,8 @@ declare interface Window {
       }
     }
   },
-  imagemap?: {
-    areaEditor: any,
+  imagemap: {
+    areaEditor: any
   },
   FormArea?: any,
-}
-
-declare interface AreaConfiguration {
-  shape?: string,
-  color?: string,
-  cornerColor?: string,
-  cornerStrokeColor?: string,
-  editor?: object,
-  coords?: string,
-  left?: number,
-  top?: number,
-}
-
-declare interface AreaConfiguration {
-  shape?: string,
-  color?: string,
-  cornerColor?: string,
-  cornerStrokeColor?: string,
-  editor?: object,
-  coords?: string,
-  left?: number,
-  top?: number,
 }

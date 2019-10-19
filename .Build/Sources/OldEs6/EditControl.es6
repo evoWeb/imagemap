@@ -9,6 +9,11 @@ define([
 
 	class EditControl {
 		/**
+		 * @type {string}
+		 */
+		fieldSelector = '';
+
+		/**
 		 * @type {jQuery}
 		 */
 		trigger = null;
@@ -60,12 +65,8 @@ define([
 			existingAreas: null
 		};
 
-		/**
-		 * @type {object}
-		 */
-		editorOptions = {};
-
-		constructor() {
+		constructor(fieldSelector) {
+			this.fieldSelector = fieldSelector;
 			this.initializeTrigger();
 		}
 
@@ -81,48 +82,69 @@ define([
 
 		show() {
 			let modalTitle = this.trigger.data('modalTitle'),
-				buttonAddrectText = this.trigger.data('buttonAddrectText'),
-				buttonAddcircleText = this.trigger.data('buttonAddcircleText'),
-				buttonAddpolyText = this.trigger.data('buttonAddpolyText'),
+				buttonAddRectangleText = this.trigger.data('buttonAddrectText'),
+				buttonAddCircleText = this.trigger.data('buttonAddcircleText'),
+				buttonAddPolygonText = this.trigger.data('buttonAddpolyText'),
 				buttonDismissText = this.trigger.data('buttonDismissText'),
 				buttonSaveText = this.trigger.data('buttonSaveText'),
 				wizardUri = this.trigger.data('url'),
 				payload = this.trigger.data('payload'),
 				initWizardModal = this.initialize.bind(this);
 
+			this.configuration = this.trigger.data('configuration');
+
 			Icons.getIcon('spinner-circle', Icons.sizes.default, null, null, Icons.markupIdentifiers.inline).done((icon) => {
 				/**
 				 * Open modal with areas to edit
 				 */
 				this.currentModal = Modal.advanced({
-					additionalCssClasses: ['modal-area-wizard'],
+					additionalCssClasses: ['modal-area-wizard modal-image-manipulation'],
 					buttons: [
 						{
-							btnClass: 'btn-default pull-left button-add-rect',
+							btnClass: 'btn-default pull-left',
+							dataAttributes: {
+								method: 'rectangle',
+							},
 							icon: 'extensions-imagemap-rect',
-							text: buttonAddrectText,
+							text: buttonAddRectangleText,
 						},
 						{
-							btnClass: 'btn-default pull-left button-add-circle',
+							btnClass: 'btn-default pull-left',
+							dataAttributes: {
+								method: 'circle',
+							},
 							icon: 'extensions-imagemap-circle',
-							text: buttonAddcircleText,
+							text: buttonAddCircleText,
 						},
 						{
-							btnClass: 'btn-default pull-left button-add-poly',
+							btnClass: 'btn-default pull-left',
+							dataAttributes: {
+								method: 'polygon',
+							},
 							icon: 'extensions-imagemap-poly',
-							text: buttonAddpolyText,
+							text: buttonAddPolygonText,
 						},
 						{
 							btnClass: 'btn-default button-dismiss',
+							dataAttributes: {
+								method: 'dismiss',
+							},
 							icon: 'actions-close',
 							text: buttonDismissText,
 						},
 						{
 							btnClass: 'btn-primary button-save',
+							dataAttributes: {
+								method: 'save',
+							},
 							icon: 'actions-document-save',
 							text: buttonSaveText,
 						},
 					],
+					content: $('<div class="modal-loading">').append(icon),
+					size: Modal.sizes.full,
+					style: Modal.styles.dark,
+					title: modalTitle,
 					callback: (currentModal) => {
 						$.post({
 							url: wizardUri,
@@ -132,10 +154,6 @@ define([
 							initWizardModal();
 						});
 					},
-					content: $('<div class="modal-loading">').append(icon),
-					size: Modal.sizes.full,
-					style: Modal.styles.dark,
-					title: modalTitle,
 				});
 
 				this.currentModal.on('hide.bs.modal', () => {
@@ -147,8 +165,7 @@ define([
 		}
 
 		initialize() {
-			this.image = this.currentModal.find('.image img');
-			this.configuration = this.currentModal.find('.picture').data('configuration');
+			this.image = this.currentModal.find('img.image');
 			this.buttonAddRect = this.currentModal.find('.button-add-rect').off('click').on('click', this.buttonAddRectHandler.bind(this));
 			this.buttonAddCircle = this.currentModal.find('.button-add-circle').off('click').on('click', this.buttonAddCircleHandler.bind(this));
 			this.buttonAddPoly = this.currentModal.find('.button-add-poly').off('click').on('click', this.buttonAddPolyHandler.bind(this));
@@ -163,51 +180,28 @@ define([
 		}
 
 		initializeArea() {
-			let scaleFactor = this.currentModal.find('.picture').data('scale-factor'),
-				width = parseInt(this.image.css('width')),
-				height = parseInt(this.image.css('height'));
-			this.editorOptions = {
-				fauxFormDocument: document,
-				canvas: {
-					width: width,
-					height: height,
-					top: height * -1,
-				},
-				browseLinkUrlAjaxUrl: window.TYPO3.settings.ajaxUrls.imagemap_browselink_url,
-				browseLink: this.configuration.browseLink
-			};
+			let width = parseInt(this.image.css('width')),
+				height = parseInt(this.image.css('height')),
+				editorOptions = {
+					canvas: {
+						width: width,
+						height: height,
+						top: height * -1,
+					},
+					fauxFormDocument: window.document,
+					browseLink: this.configuration.browseLink,
+					browseLinkUrlAjaxUrl: window.TYPO3.settings.ajaxUrls.imagemap_browselink_url,
+					formSelector: '[name="areasForm"]',
+				};
 
 			let canvas = this.currentModal.find('#modal-canvas')[0];
-			this.areaEditor = new AreaEditor(this.editorOptions, canvas, '#areasForm', this.currentModal[0]);
+			this.areaEditor = new AreaEditor(editorOptions, canvas, '#areasForm', this.currentModal[0]);
 
 			window.imagemap = { areaEditor: this.areaEditor };
 
-			((scaleFactor) => {
-				this.areaEditor.setScale(scaleFactor);
-
-				let that = this,
-					$magnify = $('#magnify'),
-					$zoomOut = $magnify.find('.zoomout'),
-					$zoomIn = $magnify.find('.zoomin');
-
-				if (scaleFactor < 1) {
-					$zoomIn.removeClass('hide');
-
-					$zoomIn.click(() => {
-						that.areaEditor.setScale(1);
-						$zoomIn.hide();
-						$zoomOut.show();
-					});
-
-					$zoomOut.click(() => {
-						that.areaEditor.setScale(scaleFactor);
-						$zoomOut.hide();
-						$zoomIn.show();
-					});
-				}
-			})(scaleFactor);
-
-			this.areaEditor.initializeAreas(this.configuration.existingAreas);
+			// @todo remove .areas to use all values
+			let areas = jQuery(this.fieldSelector).eq(0).val();
+			this.areaEditor.initializeAreas(JSON.parse(areas).areas);
 		}
 
 		destroy() {

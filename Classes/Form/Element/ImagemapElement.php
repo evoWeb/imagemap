@@ -14,7 +14,7 @@ namespace Evoweb\Imagemap\Form\Element;
  */
 
 use TYPO3\CMS\Backend\Routing\UriBuilder;
-use TYPO3\CMS\Core\Resource\FileReference;
+use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
@@ -41,7 +41,7 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
         'allowedExtensions' => null,
         'mapAreas' => [
             'default' => [
-             ]
+            ]
         ]
     ];
 
@@ -96,8 +96,8 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
         $parameterArray = $this->data['parameterArray'];
         $config = $this->populateConfiguration($parameterArray['fieldConf']['config']);
 
-        $fileReference = $this->getFileReference($this->data['databaseRow'], $config);
-        if (!$fileReference) {
+        $file = $this->getFile($this->data['databaseRow'], $config);
+        if (!$file) {
             // Early return in case we do not find a file
             $resultArray['html'] = LocalizationUtility::translate('imagemap.element.no_image', 'imagemap');
             return $resultArray;
@@ -122,36 +122,37 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
             'fieldControl' => $fieldControlHtml,
             'fieldWizard' => $fieldWizardHtml,
             'isAllowedFileExtension' => in_array(
-                strtolower($fileReference->getOriginalFile()->getExtension()),
+                strtolower($file->getExtension()),
                 GeneralUtility::trimExplode(',', strtolower($config['allowedExtensions'])),
                 true
             ),
-            'image' => $fileReference,
-            'maxWidth' => $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['imagemap']['previewImageMaxWH'] ?? 400,
+            'image' => $file,
             'formEngine' => [
                 'field' => [
-                    'value' => htmlspecialchars(trim($this->data['databaseRow'][$this->data['fieldName']])),
+                    'value' => $parameterArray['itemFormElValue'],
                     'name' => $parameterArray['itemFormElName'],
+                    'tableName' => $this->data['tableName'],
+                    'fieldName' => $this->data['fieldName'],
                     'uid' => $this->data['databaseRow']['uid'],
-                    'tablename' => $this->data['tableName'],
-                    'fieldname' => $this->data['fieldName'],
-                    'existingAreas' => $this->getExistingAreas(),
+                    'configuration' => \json_encode($this->getConfiguration()),
                 ],
                 'validation' => '[]'
             ],
             'config' => $config,
             'wizardUri' => $this->getWizardUri(),
-            'wizardPayload' => \json_encode($this->getWizardPayload($fileReference)),
+            'wizardPayload' => \json_encode($this->getWizardPayload($file)),
+            'TYPO3_branch' => TYPO3_branch,
         ];
 
         if ($arguments['isAllowedFileExtension']) {
+            $fieldId = StringUtility::getUniqueId('imagemap-area-manipulation-');
             $resultArray['requireJsModules'][] = [
-                'TYPO3/CMS/Imagemap/FormElement' => 'function (FormElement) { new FormElement(); }',
+                'TYPO3/CMS/Imagemap/EditControl' => 'function (ec) { new ec("#' . $fieldId . '"); }',
             ];
             $resultArray['requireJsModules'][] = [
-                'TYPO3/CMS/Imagemap/EditControl' => 'function (EditControl) { new EditControl(); }',
+                'TYPO3/CMS/Imagemap/FormElement' => 'function (fe) { new fe("#' . $fieldId . '"); }',
             ];
-            $arguments['formEngine']['field']['id'] = StringUtility::getUniqueId('imagemap-area-manipulation-');
+            $arguments['formEngine']['field']['id'] = $fieldId;
             if (GeneralUtility::inList($config['eval'], 'required')) {
                 $arguments['formEngine']['validation'] = $this->getValidationDataAsJsonString(['required' => true]);
             }
@@ -162,9 +163,9 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
         return $resultArray;
     }
 
-    protected function getFileReference(array $row, array $config):? FileReference
+    protected function getFile(array $row, array $config):? File
     {
-        $fileReference = null;
+        $file = null;
         $fileUid = !empty($row[$config['fieldName']]) ? $row[$config['fieldName']] : null;
         if (is_array($fileUid) && isset($fileUid[0]['uid'])) {
             $fileUid = $fileUid[0]['uid'];
@@ -172,20 +173,11 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
         if (MathUtility::canBeInterpretedAsInteger($fileUid)) {
             try {
                 $fileReference = ResourceFactory::getInstance()->getFileReferenceObject($fileUid);
-            } catch (\throwable $e) {
-            }
-        } else {
-            try {
-                $fileRepository = GeneralUtility::makeInstance(\TYPO3\CMS\Core\Resource\FileRepository::class);
-                $fileReference = $fileRepository->findByRelation(
-                    $config['tableName'],
-                    $config['fieldName'],
-                    $row['uid']
-                )[0];
-            } catch (\Throwable $e) {
+                $file = $fileReference ? $fileReference->getOriginalFile() : null;
+            } catch (\InvalidArgumentException $e) {
             }
         }
-        return $fileReference;
+        return $file;
     }
 
     protected function populateConfiguration(array $baseConfiguration): array
@@ -236,13 +228,10 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
         return $url ?? '';
     }
 
-    protected function getWizardPayload(FileReference $fileReference): array
+    protected function getWizardPayload(File $image): array
     {
         $arguments = [
-            'image' => $fileReference->getUid(),
-            'tableName' => $this->data['tableName'],
-            'fieldName' => $this->data['fieldName'],
-            'uid' => $this->data['databaseRow']['uid']
+            'image' => $image->getUid(),
         ];
         $uriArguments = [
             'arguments' => json_encode($arguments),
@@ -252,53 +241,22 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
         return $uriArguments;
     }
 
-    protected function getExistingAreas(): string
+    protected function getConfiguration(): array
     {
-        $t = json_encode([
-            [
-                "shape" => "rect",
-                "coords" => [
-                    "left" => 22,
-                    "top" => 184,
-                    "right" => 219,
-                    "bottom" => 381,
-                ],
-                "href" => "t3://page?uid=7",
-                "alt" => "Bücher",
-                "data" => [
-                    "color" => "#339900"
-                ]
-            ],
-            [
-                "shape" => "circle",
-                "coords" => [
-                    "left" => 298,
-                    "top" => 104,
-                    "radius" => 102,
-                ],
-                "href" => "t3://page?uid=8",
-                "alt" => "Suche",
-                "data" => [
-                    "color" => "#003399"
-                ]
-            ],
-            [
-                "shape" => "poly",
-                "coords" => [
-                    "points" => [
-                        ["x" => 9, "y" => 97],
-                        ["x" => 130, "y" => 6],
-                        ["x" => 130, "y" => 39],
-                        ["x" => 36, "y" => 107],
-                    ],
-                ],
-                "href" => "t3://page?uid=9",
-                "alt" => "Autoren",
-                "data" => [
-                    "color" => "#990033"
-                ]
-            ]
-        ]);
-        return htmlspecialchars(trim($this->data['databaseRow'][$this->data['fieldName']]));
+        $formName = 'imagemap' . StringUtility::getUniqueId('imagemap-area-manipulation-');
+        $browseLinkConfiguration = [
+            'returnUrl' => GeneralUtility::linkThisScript(),
+            'formName' => $formName,
+            'tableName' => $this->data['tableName'],
+            'fieldName' => $this->data['fieldName'],
+            'uid' => $this->data['databaseRow']['uid'],
+            'pid' => $this->data['databaseRow']['pid'],
+        ];
+        return [
+            'formName' => $formName,
+            'itemName' => $this->data['itemName'],
+            'fieldChangeFunc' => $this->data['fieldChangeFunc'] ?? [],
+            'browseLink' => $browseLinkConfiguration
+        ];
     }
 }

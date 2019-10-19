@@ -15,7 +15,6 @@ namespace Evoweb\Imagemap\Controller;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use TYPO3\CMS\Core\Http\Response;
@@ -34,7 +33,6 @@ class AjaxController
     {
         $response = new Response('php://temp', 200, ['Content-Type' => 'application/json; charset=utf-8']);
         $parameters = $request->getParsedBody()['arguments'];
-        $this->getBackendUser()->setAndSaveSessionData('imagemap.value', $parameters['value']);
 
         try {
             $record = BackendUtility::getRecord($parameters['tableName'], $parameters['uid']);
@@ -54,7 +52,6 @@ class AjaxController
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
-     * @throws \TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException
      */
     public function browselinkUrlAction(ServerRequestInterface $request): ResponseInterface
     {
@@ -62,7 +59,7 @@ class AjaxController
 
         $options = $GLOBALS['TCA'][$parsedBody['tableName']]['columns'][
             $parsedBody['fieldName']
-        ]['config']['fieldControlOptions'] ?? [];
+            ]['config']['fieldControlOptions'] ?? [];
 
         $itemName = $parsedBody['itemFormElName'];
 
@@ -102,15 +99,5 @@ class AjaxController
         ]);
 
         return $response;
-    }
-
-    /**
-     * Returns an instance of Backend User Authentication
-     *
-     * @return \TYPO3\CMS\Core\Authentication\BackendUserAuthentication|null
-     */
-    protected function getBackendUser()
-    {
-        return $GLOBALS['BE_USER'] ?? null;
     }
 }

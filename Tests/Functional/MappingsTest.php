@@ -1,5 +1,5 @@
 <?php
-namespace Evoweb\Imagemap\Tests;
+namespace Evoweb\Imagemap\Tests\Functional;
 
 /**
  * This file is developed by evoWeb.
@@ -12,19 +12,12 @@ namespace Evoweb\Imagemap\Tests;
  * LICENSE.txt file that was distributed with this source code.
  */
 
-use Evoweb\Imagemap\DataProcessing\ImagemapProcessor;
-
-class ImagemapProcessorTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTestCase
+class MappingsTest extends \TYPO3\TestingFramework\Core\Functional\FunctionalTestCase
 {
     /**
      * @var array
      */
     protected $testExtensionsToLoad = ['typo3conf/ext/imagemap'];
-
-    /**
-     * @var ImagemapProcessor
-     */
-    protected $imagemapProcessor;
 
     /**
      * @var \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer|\PHPUnit\Framework\MockObject\MockObject
@@ -37,10 +30,14 @@ class ImagemapProcessorTest extends \TYPO3\TestingFramework\Core\Functional\Func
         $this->importDataSet(__DIR__ . '/../Fixtures/pages.xml');
         $this->importDataSet(__DIR__ . '/../Fixtures/sys_template.xml');
 
-        $this->imagemapProcessor = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(ImagemapProcessor::class);
         $this->cObj = $this->getMockBuilder(\TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer::class)
-            ->onlyMethods(['typoLink', 'LOAD_REGISTER'])
+            ->setMethods(['typoLink', 'LOAD_REGISTER'])
             ->getMock();
+    }
+
+    protected function tearDown(): void
+    {
+        unset($this->mapper);
     }
 
     /**
@@ -54,9 +51,9 @@ class ImagemapProcessorTest extends \TYPO3\TestingFramework\Core\Functional\Func
         foreach ($strings as $key => $string) {
             $this->assertEquals(
                 1,
-                preg_match($regExAttr, $this->imagemapProcessor->createValidNameAttribute($string)),
+                preg_match($regExAttr, $this->mapper->createValidNameAttribute($string)),
                 'Attribute (' . $key . ') is not cleaned as supposed...['
-                . $this->imagemapProcessor->createValidNameAttribute($string) . ']'
+                . $this->mapper->createValidNameAttribute($string) . ']'
             );
         }
     }
@@ -71,12 +68,12 @@ class ImagemapProcessorTest extends \TYPO3\TestingFramework\Core\Functional\Func
 
         $this->assertEquals(
             true,
-            $this->imagemapProcessor->compareJsonEncodedAreas($map1, $map1),
+            $this->mapper->compareJsonEncodedAreas($map1, $map1),
             'Equal maps are not recognized when compared...'
         );
         $this->assertEquals(
             false,
-            $this->imagemapProcessor->compareJsonEncodedAreas($map1, $map2),
+            $this->mapper->compareJsonEncodedAreas($map1, $map2),
             'Different maps are not recognized when compared...'
         );
     }
@@ -91,7 +88,7 @@ class ImagemapProcessorTest extends \TYPO3\TestingFramework\Core\Functional\Func
 
         $this->assertEquals(
             true,
-            $this->imagemapProcessor->compareJsonEncodedAreas($map1, $map2),
+            $this->mapper->compareJsonEncodedAreas($map1, $map2),
             'Equal maps are not recognized when compared...'
         );
     }
@@ -107,18 +104,76 @@ class ImagemapProcessorTest extends \TYPO3\TestingFramework\Core\Functional\Func
 
         $this->assertEquals(
             false,
-            $this->imagemapProcessor->compareJsonEncodedAreas($map1, $map2),
+            $this->mapper->compareJsonEncodedAreas($map1, $map2),
             'Different structured maps are not processed as supposed'
         );
         $this->assertEquals(
             false,
-            $this->imagemapProcessor->compareJsonEncodedAreas($map1, $map3),
+            $this->mapper->compareJsonEncodedAreas($map1, $map3),
             'Different structured maps are not processed as supposed'
         );
         $this->assertEquals(
             false,
-            $this->imagemapProcessor->compareJsonEncodedAreas($map2, $map3),
+            $this->mapper->compareJsonEncodedAreas($map2, $map3),
             'Different structured maps are not processed as supposed'
         );
+    }
+
+    protected function getStubData(): string
+    {
+        $t = '{"image":{"width":1000,"height":800},"areas":[{"shape":"rect","coords":{"left":22,"top":184,"right":219,"bottom":381},"href":"t3:\/\/page?uid=7","alt":"B\u00fccher","data":{"color":"#339900"}},{"shape":"circle","coords":{"left":298,"top":104,"radius":102},"href":"t3:\/\/page?uid=8","alt":"Suche","data":{"color":"#003399"}},{"shape":"poly","coords":{"points":[{"x":9,"y":97},{"x":130,"y":6},{"x":130,"y":39},{"x":36,"y":107}]},"href":"t3:\/\/page?uid=9","alt":"Autoren","data":{"color":"#990033"}}]}';
+
+        return json_encode([
+            'image' => [
+                'width' => 1000,
+                'height' => 800,
+            ],
+            'areas' => [
+
+                [
+                    "shape" => "rect",
+                    "coords" => [
+                        "left" => 22,
+                        "top" => 184,
+                        "right" => 219,
+                        "bottom" => 381,
+                    ],
+                    "href" => "t3://page?uid=7",
+                    "alt" => "Bücher",
+                    "data" => [
+                        "color" => "#339900"
+                    ]
+                ],
+                [
+                    "shape" => "circle",
+                    "coords" => [
+                        "left" => 298,
+                        "top" => 104,
+                        "radius" => 102,
+                    ],
+                    "href" => "t3://page?uid=8",
+                    "alt" => "Suche",
+                    "data" => [
+                        "color" => "#003399"
+                    ]
+                ],
+                [
+                    "shape" => "poly",
+                    "coords" => [
+                        "points" => [
+                            ["x" => 9, "y" => 97],
+                            ["x" => 130, "y" => 6],
+                            ["x" => 130, "y" => 39],
+                            ["x" => 36, "y" => 107],
+                        ],
+                    ],
+                    "href" => "t3://page?uid=9",
+                    "alt" => "Autoren",
+                    "data" => [
+                        "color" => "#990033"
+                    ]
+                ]
+            ],
+        ]);
     }
 }

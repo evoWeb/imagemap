@@ -32,16 +32,16 @@
 			</trans-unit>
 
 			<trans-unit id="imagemap.form.addrect">
-				<source>Rectange</source>
-				<target>Rechteck</target>
+				<source>Rect-Area</source>
+				<target>Rect-Area</target>
 			</trans-unit>
 			<trans-unit id="imagemap.form.addcircle">
-				<source>Circle</source>
-				<target>Kreis</target>
+				<source>Circle-Area</source>
+				<target>Circle-Area</target>
 			</trans-unit>
 			<trans-unit id="imagemap.form.addpoly">
-				<source>Polygon</source>
-				<target>Polygon</target>
+				<source>Poly-Area</source>
+				<target>Poly-Area</target>
 			</trans-unit>
 			<trans-unit id="imagemap.form.dismiss">
 				<source>Cancel</source>
@@ -51,9 +51,17 @@
 				<source>Accept</source>
 				<target>Übernehmen</target>
 			</trans-unit>
+			<trans-unit id="imagemap.form.zoomin">
+				<source>Zoom image to 100%</source>
+				<target>Bild auf 100% zoomen.</target>
+			</trans-unit>
+			<trans-unit id="imagemap.form.zoomout">
+				<source>Zoom image to fit the Wizard popup.</source>
+				<target>Bild an Fenstergröße anpassen.</target>
+			</trans-unit>
 			<trans-unit id="imagemap.form.area.label">
-				<source>Alternative Label</source>
-				<target>Alternative Bezeichnung</target>
+				<source>Label</source>
+				<target>Label</target>
 			</trans-unit>
 			<trans-unit id="imagemap.form.area.link">
 				<source>Link</source>

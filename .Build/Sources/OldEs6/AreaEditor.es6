@@ -302,9 +302,9 @@ define([
 		name = 'rect';
 
 		updateFields() {
-			this.getElement('#color').value = this.color;
+			this.getElement('#color').value = this.data.color;
 			this.getElement('#alt').value = this.alt || '';
-			this.getElement('.link').value = this.link || '';
+			this.getElement('.link').value = this.href || '';
 			this.getElement('#left').value = Math.floor(this.left + 0);
 			this.getElement('#top').value = Math.floor(this.top + 0);
 			this.getElement('#right').value = Math.floor(this.left + this.getScaledWidth());
@@ -367,9 +367,9 @@ define([
 		name = 'circle';
 
 		updateFields() {
-			this.getElement('#color').value = this.color;
+			this.getElement('#color').value = this.data.color;
 			this.getElement('#alt').value = this.alt || '';
-			this.getElement('.link').value = this.link || '';
+			this.getElement('.link').value = this.href || '';
 			this.getElement('#left').value = Math.floor(this.left + 0);
 			this.getElement('#top').value = Math.floor(this.top + 0);
 			this.getElement('#radius').value = Math.floor(this.getRadiusX());
@@ -415,28 +415,15 @@ define([
 		name = 'poly';
 
 		constructor(points, options) {
-			let coordsXY = options.coords.split(','),
-				left = 100000,
-				top = 100000,
-				i = 0;
-
-			if (coordsXY.length % 2) {
-				throw new Error('Bad coords count');
-			}
+			let left = 100000,
+				top = 100000;
 
 			// first get all coordinates and create point of odd even numbers
 			// and get top and left corner of polygon
-			points = [];
-			for (; i < coordsXY.length; i = i + 2) {
-				let xy = {
-					x: parseInt(coordsXY[i]),
-					y: parseInt(coordsXY[i + 1])
-				};
-				points.push(xy);
-
-				left = Math.min(left, xy.x);
-				top = Math.min(top, xy.y);
-			}
+			points.forEach((point) => {
+				left = Math.min(left, point.x);
+				top = Math.min(top, point.y);
+			});
 			options.left = left;
 			options.top = top;
 
@@ -451,9 +438,9 @@ define([
 		}
 
 		updateFields() {
-			this.getElement('#color').value = this.color;
+			this.getElement('#color').value = this.data.color;
 			this.getElement('#alt').value = this.alt || '';
-			this.getElement('.link').value = this.link || '';
+			this.getElement('.link').value = this.href || '';
 
 			Object.entries(this.attributes).forEach((attribute) => {
 				this.getElement('#' + attribute[0]).value = attribute[1] || '';
@@ -707,7 +694,7 @@ define([
 			this.areaZone = this.element.querySelector('#areaZone');
 			this.editor = editor;
 
-			this.addFauxFormForLinkBrowser(this.editor.browseLink);
+			this.addFauxFormForLinkBrowser();
 		}
 
 		destroy() {
@@ -769,14 +756,15 @@ define([
 		 */
 		addFauxFormForLinkBrowser() {
 			if (top.document !== this.editor.fauxFormDocument) {
-				this.fauxForm = this.editor.fauxFormDocument.createElement('form');
-				this.fauxForm.setAttribute('name', this.editor.browseLink.formName);
-
-				let fauxFormContainer = this.editor.fauxFormDocument.querySelector('#fauxFormContainer');
-				while (fauxFormContainer.firstChild) {
-					fauxFormContainer.removeChild(fauxFormContainer.firstChild);
+				if (!(this.fauxForm = this.editor.fauxFormDocument.querySelector(this.editor.formSelector))) {
+					this.fauxForm = this.editor.fauxFormDocument.createElement('form');
+					this.fauxForm.setAttribute('name', 'areasForm');
+					this.fauxForm.setAttribute('id', 'fauxForm');
+					this.editor.fauxFormDocument.body.appendChild(this.fauxForm);
 				}
-				fauxFormContainer.appendChild(this.fauxForm);
+				while (this.fauxForm.firstChild) {
+					this.fauxForm.removeChild(this.fauxForm.firstChild);
+				}
 			}
 		}
 
@@ -815,6 +803,11 @@ define([
 		 * @type {Document}
 		 */
 		fauxFormDocument = null;
+
+		/**
+		 * @type {string}
+		 */
+		formSelector = '';
 
 		/**
 		 * @type {string}
@@ -933,15 +926,15 @@ define([
 		initializeAreas(areas) {
 			if (areas !== undefined) {
 				areas.forEach((area) => {
-					area.color = AreaEditor.getRandomColor(area.color);
+					area.data.color = AreaEditor.getRandomColor(area.data.color);
 					let configuration = {
 						...area,
 						...this.areaConfig,
 						selectable: !this.preview,
 						hasControls: !this.preview,
-						stroke: area.color,
+						stroke: area.data.color,
 						strokeWidth: 1,
-						fill: AreaEditor.hexToRgbA(area.color, 0.3)
+						fill: AreaEditor.hexToRgbA(area.data.color, 0.3)
 					};
 
 					switch (configuration.shape) {
@@ -972,13 +965,13 @@ define([
 		}
 
 		addRect(configuration) {
-			let [left, top, right, bottom] = configuration.coords.split(','),
+			let coords = configuration.coords,
 				area = new Rect({
 					...configuration,
-					left: parseInt(left),
-					top: parseInt(top),
-					width: right - left,
-					height: bottom - top,
+					left: parseInt(coords.left),
+					top: parseInt(coords.top),
+					width: coords.right - coords.left,
+					height: coords.bottom - coords.top,
 				});
 
 			this.canvas.add(area);
@@ -986,12 +979,12 @@ define([
 		}
 
 		addCircle(configuration) {
-			let [left, top, radius] = configuration.coords.split(','),
+			let coords = configuration.coords,
 				area = new Circle({
 					...configuration,
-					left: left - radius,
-					top: top - radius,
-					radius: parseInt(radius),
+					left: coords.left - coords.radius,
+					top: coords.top - coords.radius,
+					radius: parseInt(coords.radius),
 				});
 
 			// disable control points as these would stretch the circle
@@ -1006,13 +999,14 @@ define([
 		}
 
 		addPoly(configuration) {
-			let area = new Poly([], {
-				...configuration,
-				selectable: true,
-				hasControls: false,
-				objectCaching: false,
-				controlConfig: this.areaConfig,
-			});
+			let points = configuration.coords.points || [],
+				area = new Poly(points, {
+					...configuration,
+					selectable: true,
+					hasControls: false,
+					objectCaching: false,
+					controlConfig: this.areaConfig,
+				});
 
 			this.canvas.add(area);
 			if (this.form) {
@@ -1085,4 +1079,3 @@ define([
 
 	return AreaEditor;
 });
-

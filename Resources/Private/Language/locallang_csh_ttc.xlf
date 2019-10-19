@@ -6,9 +6,6 @@
 			<trans-unit id="tx_imagemap_links.description">
 				<source>Configure imagemap setup for the uploaded image.</source>
 			</trans-unit>
-			<trans-unit id="tx_imagemap_links.details">
-				<source>Configure imagemap setup for the uploaded image.</source>
-			</trans-unit>
 		</body>
 	</file>
 </xliff>

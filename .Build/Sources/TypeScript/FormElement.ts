@@ -9,56 +9,56 @@
  * LICENSE.txt file that was distributed with this source code.
  */
 
-/// <reference types="../types/index"/>
-
 import * as $ from 'jquery';
-import * as AreaEditor from './AreaManipulation';
+// @ts-ignore
+import * as AreaEditor from './AreaEditor';
 
 class FormElement {
-  readonly previewRerenderAjaxUrl: string = '';
+  private formElement: JQuery;
 
-  readonly control: JQuery;
+  private areaEditor: AreaEditor;
 
-  private image: JQuery;
-
-  private areaManipulation: AreaEditor.AreaManipulation;
-
-  constructor() {
-    this.previewRerenderAjaxUrl = window.TYPO3.settings.ajaxUrls.imagemap_preview_rerender;
-    this.control = $('.imagemap-control:eq(0)');
-    this.image = this.control.find('.image');
-
+  constructor(fieldSelector: string) {
+    this.initializeFormElement(fieldSelector);
+    this.initializeAreaEditor();
     this.initializeEvents();
-    this.initializeAreaManipulation();
+    this.initializeAreas(fieldSelector);
+  }
+
+  private initializeFormElement(fieldSelector: string) {
+    this.formElement = $(fieldSelector + '-canvas').eq(0);
+  }
+
+  private initializeAreaEditor() {
+    let image = this.formElement.find('.image'),
+      editorOptions = {
+        canvas: {
+          width: parseInt(image.css('width')),
+          height: parseInt(image.css('height')),
+          top: parseInt(image.css('height')) * -1,
+        },
+      };
+
+    this.areaEditor = new AreaEditor(editorOptions, this.formElement.find('#canvas')[0], '', window.document);
   }
 
   private initializeEvents() {
-    this.control
-      .find('.imagemap-hidden-value')
-      .on('imagemap:changed', this.imagemapChangedHandler.bind(this));
+    this.formElement.find('input[type=hidden]').on('imagemap:changed', this.fieldChangedHandler.bind(this));
   }
 
-  private initializeAreaManipulation() {
-    this.areaManipulation = new AreaEditor.AreaManipulation(
-      this.control[0],
-      {
-        canvas: {
-          width: parseInt(this.image.css('width')),
-          height: parseInt(this.image.css('height')),
-        },
-        canvasSelector: '#canvas',
-      }
-    );
-    this.areaManipulation.initializeAreas(this.control.find('.picture').data('existingAreas'));
+  private initializeAreas(fieldSelector: string) {
+    // @todo remove .areas to use all values
+    let areas = $(fieldSelector).eq(0).val();
+    this.areaEditor.initializeAreas(JSON.parse(areas).areas);
   }
 
-  private imagemapChangedHandler(event: JQueryEventObject) {
+  private fieldChangedHandler(event: JQueryEventObject) {
     let $field = $(event.currentTarget);
     let request = $.ajax({
-      url: this.previewRerenderAjaxUrl,
+      url: window.TYPO3.settings.ajaxUrls.imagemap_preview_rerender,
       method: 'POST',
       data: {
-        arguments: {
+        P: {
           itemFormElName: $field.attr('name'),
           tableName: $field.data('tablename'),
           fieldName: $field.data('fieldname'),
@@ -67,17 +67,13 @@ class FormElement {
         }
       }
     });
-    request.done(this.renderPreviewAreas.bind(this));
-  }
-
-  private renderPreviewAreas(data: any[], textStatus: string) {
-    if (textStatus === 'success') {
-      this.control
-        .find('.modifiedState')
-        .css('display', 'block');
-      this.areaManipulation.removeAllAreas();
-      this.areaManipulation.initializeAreas(data);
-    }
+    request.done((data, textStatus) => {
+      if (textStatus === 'success') {
+        this.formElement.find('.modifiedState').css('display', 'block');
+        this.areaEditor.removeAllAreas();
+        this.areaEditor.initializeAreas(data.areas);
+      }
+    });
   }
 }
 

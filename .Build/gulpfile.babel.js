@@ -6,9 +6,9 @@ import log from 'gulplog';
 import sourcemaps from 'gulp-sourcemaps';
 import typescript from 'gulp-typescript';
 
-import postcss from 'gulp-postcss';
-import autoprefixer from 'autoprefixer';
+import autoprefixer from 'gulp-autoprefixer';
 import sass from 'gulp-sass';
+import rename from 'gulp-rename';
 
 const paths = {
 	src: './Sources',
@@ -16,9 +16,19 @@ const paths = {
 };
 
 const tasks = {
+	scss: {
+		src: `${paths.src}/Sass/*.scss`,
+		dest: `${paths.dest}/Stylesheets/`
+	},
+
+	copy: {
+		src: [`node_modules/fabric/dist/fabric.js`],
+		dest: `${paths.dest}/JavaScript/vendor/`
+	},
+
 	typescript: {
-		'AreaManipulation.ts': {
-			src: `${paths.src}/TypeScript/AreaManipulation.ts`,
+		'AreaEditor.ts': {
+			src: `${paths.src}/TypeScript/AreaEditor.ts`,
 			dest: `${paths.dest}/JavaScript/`,
 			name: 'AreaManipulation.js'
 		},
@@ -32,24 +42,34 @@ const tasks = {
 			dest: `${paths.dest}/JavaScript/`,
 			name: 'FormElement.js'
 		}
-	},
-	copy: {
-		src: [`node_modules/fabric/dist/fabric.js`],
-		dest: `${paths.dest}/JavaScript/vendor/`
-	},
-	scss: {
-		src: `${paths.src}/Sass/*.scss`,
-		dest: `${paths.dest}/Stylesheets/`
 	}
 };
 
-let copyFilesTask = () => {
+let stylesTask = () => {
+	return gulp.src(tasks.scss.src)
+		.pipe(sourcemaps.init())
+		.pipe(
+			sass({
+				outputStyle: 'compressed',
+				includePaths: require('node-normalize-scss').includePaths
+			}).on('error', log.error)
+		)
+		.pipe(autoprefixer())
+		.pipe(sourcemaps.write('./'))
+		.pipe(gulp.dest(tasks.scss.dest));
+};
+
+let copyTask = () => {
 	return gulp.src(tasks.copy.src, { base: './node_modules/fabric/dist' })
+		.pipe(rename(function(path) {
+			path.basename = path.basename.substring(0, 1).toUpperCase() + path.basename.substring(1);
+			return path;
+		}))
 		.pipe(gulp.dest(tasks.copy.dest));
 };
 
 let typescriptTask = (done) => {
-	const position = process.argv.indexOf('--file'),
+	let position = process.argv.indexOf('--file'),
 		file = position > -1 ? process.argv[position + 1] : null;
 
 	let seriesTasks = [];
@@ -76,24 +96,10 @@ let typescriptTask = (done) => {
 	})();
 };
 
-let stylesTask = () => {
-	return gulp.src(tasks.scss.src)
-		.pipe(sourcemaps.init())
-		.pipe(
-			sass({
-				outputStyle: 'compressed',
-				includePaths: require('node-normalize-scss').includePaths
-			}).on('error', log.error)
-		)
-		.pipe(postcss([autoprefixer()]))
-		.pipe(sourcemaps.write('./'))
-		.pipe(gulp.dest(tasks.scss.dest));
-};
+exports.scss = stylesTask;
 
-exports.copyFiles = copyFilesTask;
+exports.copy = copyTask;
 
 exports.typescript = typescriptTask;
 
-exports.scss = stylesTask;
-
-exports.build = gulp.series(copyFilesTask, typescriptTask, stylesTask);
+exports.build = gulp.series(stylesTask, copyTask, typescriptTask);

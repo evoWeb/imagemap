@@ -8,72 +8,56 @@ define([
 		/**
 		 * @type {jQuery}
 		 */
-		control = null;
+		formElement = null;
 
 		/**
 		 * @type {jQuery}
 		 */
-		image = null;
-
-		/**
-		 * @type {jQuery}
-		 */
-		canvas = null;
-
-		/**
-		 * @type {object}
-		 */
-		editorOptions = {};
+		input = null;
 
 		/**
 		 * @type {AreaEditor}
 		 */
 		areaEditor = null;
 
-		constructor() {
-			this.control = jQuery('.imagemap-control:eq(0)');
-			this.image = this.control.find('.image img');
-			this.canvas = this.control.find('.picture');
-
-			this.initialize();
+		constructor(fieldSelector) {
+			this.initializeFormElement(fieldSelector);
+			this.initializeAreaEditor();
+			this.initializeEvents();
+			this.initializeAreas(fieldSelector);
 		}
 
-		initialize() {
-			this.editorOptions = {
-				canvas: {
-					width: parseInt(this.image.css('width')),
-					height: parseInt(this.image.css('height')),
-					top: parseInt(this.image.css('height')) * -1,
-				},
-				previewRerenderAjaxUrl: window.TYPO3.settings.ajaxUrls.imagemap_preview_rerender
-			};
-
-			this.initializeAreaEditor(this.editorOptions);
-			this.initializeEvents(this.editorOptions);
-			this.initializeScaleFactor(this.canvas.data('thumbnail-scale'));
-			this.initializeAreas(this.canvas.data('existing-areas'));
+		initializeFormElement(fieldSelector) {
+			this.formElement = jQuery(fieldSelector + '-canvas').eq(0);
 		}
 
-		initializeAreaEditor(editorOptions) {
-			this.areaEditor = new AreaEditor(editorOptions, this.control.find('#canvas')[0], '', window.document);
-		}
+		initializeAreaEditor() {
+			let image = this.formElement.find('.image'),
+				editorOptions = {
+					canvas: {
+						width: parseInt(image.css('width')),
+						height: parseInt(image.css('height')),
+						top: parseInt(image.css('height')) * -1,
+					},
+				};
 
-		initializeScaleFactor(scaleFactor) {
-			this.areaEditor.setScale(scaleFactor);
+			this.areaEditor = new AreaEditor(editorOptions, this.formElement.find('#canvas')[0], '', window.document);
 		}
 
 		initializeEvents() {
-			this.control.find('input[type=hidden]').on('imagemap:changed', this.imagemapChangedHandler.bind(this));
+			this.formElement.find('input[type=hidden]').on('imagemap:changed', this.fieldChangedHandler.bind(this));
 		}
 
-		initializeAreas(areas) {
-			this.areaEditor.initializeAreas(areas);
+		initializeAreas(fieldSelector) {
+			// @todo remove .areas to use all values
+			let areas = jQuery(fieldSelector).eq(0).val();
+			this.areaEditor.initializeAreas(JSON.parse(areas).areas);
 		}
 
-		imagemapChangedHandler(event) {
+		fieldChangedHandler(event) {
 			let $field = jQuery(event.currentTarget);
 			jQuery.ajax({
-				url: this.editorOptions.previewRerenderAjaxUrl,
+				url: window.TYPO3.settings.ajaxUrls.imagemap_preview_rerender,
 				method: 'POST',
 				data: {
 					P: {
@@ -86,9 +70,9 @@ define([
 				}
 			}).done((data, textStatus) => {
 				if (textStatus === 'success') {
-					this.control.find('.modifiedState').css('display', 'block');
+					this.formElement.find('.modifiedState').css('display', 'block');
 					this.areaEditor.removeAllAreas();
-					this.areaEditor.initializeAreas(data);
+					this.areaEditor.initializeAreas(data.areas);
 				}
 			});
 		}

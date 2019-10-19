@@ -8,39 +8,44 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "jquery", "./AreaManipulation"], function (require, exports, $, AreaEditor) {
+define(["require", "exports", "jquery", "./AreaEditor"], function (require, exports, $, AreaEditor) {
     "use strict";
     var FormElement = /** @class */ (function () {
-        function FormElement() {
-            this.previewRerenderAjaxUrl = '';
-            this.previewRerenderAjaxUrl = window.TYPO3.settings.ajaxUrls.imagemap_preview_rerender;
-            this.control = $('.imagemap-control:eq(0)');
-            this.image = this.control.find('.image');
+        function FormElement(fieldSelector) {
+            this.initializeFormElement(fieldSelector);
+            this.initializeAreaEditor();
             this.initializeEvents();
-            this.initializeAreaManipulation();
+            this.initializeAreas(fieldSelector);
         }
-        FormElement.prototype.initializeEvents = function () {
-            this.control
-                .find('.imagemap-hidden-value')
-                .on('imagemap:changed', this.imagemapChangedHandler.bind(this));
+        FormElement.prototype.initializeFormElement = function (fieldSelector) {
+            this.formElement = $(fieldSelector + '-canvas').eq(0);
         };
-        FormElement.prototype.initializeAreaManipulation = function () {
-            this.areaManipulation = new AreaEditor.AreaManipulation(this.control[0], {
+        FormElement.prototype.initializeAreaEditor = function () {
+            var image = this.formElement.find('.image'), editorOptions = {
                 canvas: {
-                    width: parseInt(this.image.css('width')),
-                    height: parseInt(this.image.css('height')),
+                    width: parseInt(image.css('width')),
+                    height: parseInt(image.css('height')),
+                    top: parseInt(image.css('height')) * -1,
                 },
-                canvasSelector: '#canvas',
-            });
-            this.areaManipulation.initializeAreas(this.control.find('.picture').data('existingAreas'));
+            };
+            this.areaEditor = new AreaEditor(editorOptions, this.formElement.find('#canvas')[0], '', window.document);
         };
-        FormElement.prototype.imagemapChangedHandler = function (event) {
+        FormElement.prototype.initializeEvents = function () {
+            this.formElement.find('input[type=hidden]').on('imagemap:changed', this.fieldChangedHandler.bind(this));
+        };
+        FormElement.prototype.initializeAreas = function (fieldSelector) {
+            // @todo remove .areas to use all values
+            var areas = $(fieldSelector).eq(0).val();
+            this.areaEditor.initializeAreas(JSON.parse(areas).areas);
+        };
+        FormElement.prototype.fieldChangedHandler = function (event) {
+            var _this = this;
             var $field = $(event.currentTarget);
             var request = $.ajax({
-                url: this.previewRerenderAjaxUrl,
+                url: window.TYPO3.settings.ajaxUrls.imagemap_preview_rerender,
                 method: 'POST',
                 data: {
-                    arguments: {
+                    P: {
                         itemFormElName: $field.attr('name'),
                         tableName: $field.data('tablename'),
                         fieldName: $field.data('fieldname'),
@@ -49,16 +54,13 @@ define(["require", "exports", "jquery", "./AreaManipulation"], function (require
                     }
                 }
             });
-            request.done(this.renderPreviewAreas.bind(this));
-        };
-        FormElement.prototype.renderPreviewAreas = function (data, textStatus) {
-            if (textStatus === 'success') {
-                this.control
-                    .find('.modifiedState')
-                    .css('display', 'block');
-                this.areaManipulation.removeAllAreas();
-                this.areaManipulation.initializeAreas(data);
-            }
+            request.done(function (data, textStatus) {
+                if (textStatus === 'success') {
+                    _this.formElement.find('.modifiedState').css('display', 'block');
+                    _this.areaEditor.removeAllAreas();
+                    _this.areaEditor.initializeAreas(data.areas);
+                }
+            });
         };
         return FormElement;
     }());

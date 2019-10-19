@@ -52,9 +52,14 @@ var __spread = (this && this.__spread) || function () {
     for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
     return ar;
 };
-define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contrib/jquery.minicolors"], function (require, exports, $, fabric) {
+define(["require", "exports", "jquery", "./vendor/Fabric", "TYPO3/CMS/Backend/Modal", "TYPO3/CMS/Core/Contrib/jquery.minicolors"], function (require, exports, $, fabric, Modal) {
     "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
+    // needed to access top frame elements
+    var d = top.document || document, w = top.window || window;
+    if (typeof d !== 'undefined' && typeof w !== 'undefined') {
+        fabric.document = d;
+        fabric.window = w;
+    }
     var Aggregation = function (baseClass) {
         var mixins = [];
         for (var _i = 1; _i < arguments.length; _i++) {
@@ -77,6 +82,7 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
         }(baseClass));
         // this function copies all properties and symbols, filtering out some special ones
         var copyProperties = function (target, source) {
+            /** @type {Array} */
             var propertySymbols = Object.getOwnPropertySymbols(source);
             Object.getOwnPropertyNames(source)
                 .concat(propertySymbols)
@@ -97,23 +103,12 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
         __extends(AreaFormElement, _super);
         function AreaFormElement() {
             var _this = _super !== null && _super.apply(this, arguments) || this;
-            _this.id = 0;
-            _this.shape = '';
-            _this.coords = '';
-            _this.link = '';
-            _this.color = '';
-            _this.alt = '';
-            _this.title = '';
             _this.name = '';
             _this.eventDelay = 0;
             _this.attributes = {};
             return _this;
         }
-        AreaFormElement.prototype.addForm = function (form) {
-            this.form = form;
-            this.postAddForm();
-        };
-        AreaFormElement.prototype.postAddForm = function () {
+        AreaFormElement.prototype.postAddToForm = function () {
             this.id = fabric.Object.__uid++;
             this.initializeElement();
             this.updateFields();
@@ -124,7 +119,7 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
         AreaFormElement.prototype.initializeElement = function () {
             this.element = this.getFormElement('#' + this.name + 'Form', this.id);
             this.form.areaZone.append(this.element);
-            this.form.initializeArrows();
+            this.form.updateArrowsState();
         };
         AreaFormElement.prototype.initializeColorPicker = function () {
             $(this.getElement('.t3js-color-picker')).minicolors({
@@ -136,37 +131,38 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
             });
         };
         AreaFormElement.prototype.initializeEvents = function () {
+            var _this = this;
             this.on('moved', this.updateFields.bind(this));
             this.on('modified', this.updateFields.bind(this));
-            this.getElements('.positionOptions .t3js-field').forEach(this.coordinateFieldHandler.bind(this));
-            this.getElements('.basicOptions .t3js-field, .attributes .t3js-field').forEach(this.attributeFieldHandler.bind(this));
-            this.getElements('.t3js-btn').forEach(this.buttonHandler.bind(this));
+            this.getElements('.basicOptions .t3js-field').forEach(function (field) {
+                field.addEventListener('keyup', _this.updateProperties.bind(_this));
+            });
+            this.getElements('.positionOptions .t3js-field').forEach(function (field) {
+                field.addEventListener('input', _this.fieldInputHandler.bind(_this));
+            });
+            this.getElements('.t3js-btn').forEach(this.buttonEventHandler.bind(this));
         };
-        AreaFormElement.prototype.coordinateFieldHandler = function (field) {
-            field.addEventListener('keyup', this.fieldKeyUpHandler.bind(this));
-        };
-        AreaFormElement.prototype.fieldKeyUpHandler = function (event) {
+        AreaFormElement.prototype.fieldInputHandler = function (event) {
             var _this = this;
             clearTimeout(this.eventDelay);
             this.eventDelay = AreaFormElement.wait(function () { _this.updateCanvas(event); }, 500);
         };
-        AreaFormElement.prototype.attributeFieldHandler = function (field) {
-            field.addEventListener('keyup', this.updateProperties.bind(this));
+        AreaFormElement.prototype.buttonEventHandler = function (button) {
+            var action = button.dataset.action + 'Action';
+            button.removeEventListener('click', this[action]);
+            button.addEventListener('click', this[action].bind(this));
         };
-        AreaFormElement.prototype.buttonHandler = function (button) {
-            button.addEventListener('click', this[button.id + 'Action'].bind(this));
-        };
-        AreaFormElement.prototype.initializeArrows = function () {
+        AreaFormElement.prototype.updateArrowsState = function () {
             var areaZone = this.form.areaZone;
-            this.getElement('#up').classList[areaZone.firstChild !== this.element ? 'remove' : 'add']('disabled');
-            this.getElement('#down').classList[areaZone.lastChild !== this.element ? 'remove' : 'add']('disabled');
+            this.getElement('[data-action="up"]').classList[areaZone.firstChild !== this.element ? 'remove' : 'add']('disabled');
+            this.getElement('[data-action="down"]').classList[areaZone.lastChild !== this.element ? 'remove' : 'add']('disabled');
         };
         AreaFormElement.prototype.updateFields = function () {
         };
         AreaFormElement.prototype.updateProperties = function (event) {
             var field = event.currentTarget, property = field.id;
-            if (field.classList.contains('link')) {
-                this.link = field.value;
+            if (field.classList.contains('href')) {
+                this.href = field.value;
             }
             else if (this.hasOwnProperty(property)) {
                 this[property] = field.value;
@@ -186,29 +182,29 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
         AreaFormElement.prototype.downAction = function () {
             this.form.moveArea(this, AreaFormElement.after);
         };
-        AreaFormElement.prototype.undoAction = function () {
-        };
-        AreaFormElement.prototype.redoAction = function () {
-        };
         AreaFormElement.prototype.deleteAction = function () {
             if (this.element) {
                 this.element.remove();
             }
             if (this.form) {
-                this.form.initializeArrows();
+                this.form.updateArrowsState();
             }
             this.removeFauxInput();
             this.editor.deleteArea(this);
         };
         AreaFormElement.prototype.expandAction = function () {
             this.showElement('.moreOptions');
-            this.hideElement('#expand');
-            this.showElement('#collapse');
+            this.showElement('[data-action="collapse"]');
+            this.hideElement('[data-action="expand"]');
         };
         AreaFormElement.prototype.collapseAction = function () {
             this.hideElement('.moreOptions');
-            this.hideElement('#collapse');
-            this.showElement('#expand');
+            this.hideElement('[data-action="collapse"]');
+            this.showElement('[data-action="expand"]');
+        };
+        AreaFormElement.prototype.undoAction = function () {
+        };
+        AreaFormElement.prototype.redoAction = function () {
         };
         AreaFormElement.prototype.colorPickerAction = function (value) {
             this.getElement('.t3js-color-picker').value = value;
@@ -234,13 +230,18 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
         AreaFormElement.prototype.showElement = function (selector) {
             this.getElement(selector).classList.remove('hide');
         };
-        AreaFormElement.prototype.getMapData = function () {
-            var attributes = this.getAdditionalAttributes();
-            return __assign(__assign({}, attributes), { shape: this.name, coords: this.getAreaCoords(), link: this.getLink() });
+        AreaFormElement.prototype.getFieldValue = function (selector) {
+            return this.getElement(selector).value;
         };
+        AreaFormElement.prototype.getData = function () {
+            var attributes = this.getAdditionalAttributes();
+            return __assign(__assign({}, attributes), { shape: this.name, coords: this.getAreaCoords(), href: this.getLink() });
+        };
+        // @todo deprecated
         AreaFormElement.prototype.getAreaCoords = function () {
             return '';
         };
+        // @todo deprecated
         AreaFormElement.prototype.getAdditionalAttributes = function () {
             var result = {};
             this.getElements('.t3js-field').forEach(function (field) {
@@ -250,34 +251,35 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
             });
             return result;
         };
+        // @todo deprecated
         AreaFormElement.prototype.getLink = function () {
-            return this.getElement('.link').value;
+            return this.getElement('.href').value;
         };
         /**
          * Add faux input as target for browselink which listens for changes and writes value to real field
          */
         AreaFormElement.prototype.addFauxInput = function () {
-            if (typeof this.form.fauxForm !== 'undefined') {
+            if (this.form.fauxForm) {
                 var fauxInput = this.editor.fauxFormDocument.createElement('input');
-                fauxInput.setAttribute('id', 'link' + this.id);
-                fauxInput.setAttribute('data-formengine-input-name', 'link' + this.id);
-                fauxInput.setAttribute('value', this.link);
-                fauxInput.addEventListener('change', this.fauxInputChanged.bind(this));
+                fauxInput.setAttribute('id', 'href' + this.id);
+                fauxInput.setAttribute('data-formengine-input-name', 'href' + this.id);
+                fauxInput.setAttribute('value', this.href);
+                fauxInput.onchange = this.changedFauxInput.bind(this);
                 this.form.fauxForm.appendChild(fauxInput);
             }
         };
-        AreaFormElement.prototype.fauxInputChanged = function (event) {
-            var field = event.currentTarget;
-            this.link = field.value;
-            this.updateFields();
-        };
         AreaFormElement.prototype.removeFauxInput = function () {
             if (this.form && this.form.fauxForm !== null) {
-                var field = this.form.fauxForm.querySelector('#link' + this.id);
+                var field = this.form.fauxForm.querySelector('#href' + this.id);
                 if (field) {
                     field.remove();
                 }
             }
+        };
+        AreaFormElement.prototype.changedFauxInput = function () {
+            var field = this.form.fauxForm.querySelector('#href' + this.id);
+            this.href = field.value;
+            this.updateFields();
         };
         AreaFormElement.wait = function (callback, delay) {
             return window.setTimeout(callback, delay);
@@ -290,14 +292,14 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
         __extends(Rect, _super);
         function Rect() {
             var _this = _super !== null && _super.apply(this, arguments) || this;
-            _this.name = 'rect';
+            _this.name = 'rectangle';
             return _this;
         }
         Rect.prototype.updateFields = function () {
             var _this = this;
-            this.getElement('#color').value = this.color;
-            this.getElement('#alt').value = this.alt || '';
-            this.getElement('.link').value = this.link || '';
+            this.getElement('.color').value = this.data.color;
+            this.getElement('.alt').value = this.alt || '';
+            this.getElement('.href').value = this.href || '';
             this.getElement('#left').value = Math.floor(this.left + 0);
             this.getElement('#top').value = Math.floor(this.top + 0);
             this.getElement('#right').value = Math.floor(this.left + this.getScaledWidth());
@@ -337,12 +339,12 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
             this.canvas.renderAll();
         };
         Rect.prototype.getAreaCoords = function () {
-            return [
-                Math.floor(this.left + 0),
-                Math.floor(this.top + 0),
-                Math.floor(this.left + this.getScaledWidth() - 1),
-                Math.floor(this.top + this.getScaledHeight() - 1)
-            ].join(',');
+            return {
+                left: Math.floor(this.left + 0),
+                top: Math.floor(this.top + 0),
+                right: Math.floor(this.left + this.getScaledWidth() - 1),
+                bottom: Math.floor(this.top + this.getScaledHeight() - 1)
+            };
         };
         return Rect;
     }(Aggregation(fabric.Rect, AreaFormElement)));
@@ -355,9 +357,9 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
         }
         Circle.prototype.updateFields = function () {
             var _this = this;
-            this.getElement('#color').value = this.color;
-            this.getElement('#alt').value = this.alt || '';
-            this.getElement('.link').value = this.link || '';
+            this.getElement('.color').value = this.data.color;
+            this.getElement('.alt').value = this.alt || '';
+            this.getElement('.href').value = this.href || '';
             this.getElement('#left').value = Math.floor(this.left + 0);
             this.getElement('#top').value = Math.floor(this.top + 0);
             this.getElement('#radius').value = Math.floor(this.getRadiusX());
@@ -366,26 +368,29 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
             });
         };
         Circle.prototype.updateCanvas = function (event) {
-            var field = (event.currentTarget || event.target), value = parseInt(field.value);
+            var field = (event.currentTarget || event.target), value = 0;
             switch (field.id) {
                 case 'left':
+                    value = parseInt(field.value);
                     this.set({ left: value });
                     break;
                 case 'top':
+                    value = parseInt(field.value);
                     this.set({ top: value });
                     break;
                 case 'radius':
+                    value = parseInt(field.value);
                     this.set({ radius: value });
                     break;
             }
             this.canvas.renderAll();
         };
         Circle.prototype.getAreaCoords = function () {
-            return [
-                Math.floor(this.left + this.getRadiusX()),
-                Math.floor(this.top + this.getRadiusX()),
-                Math.floor(this.getRadiusX())
-            ].join(',');
+            return {
+                left: Math.floor(this.left + this.getRadiusX()),
+                top: Math.floor(this.top + this.getRadiusX()),
+                radius: Math.floor(this.getRadiusX())
+            };
         };
         return Circle;
     }(Aggregation(fabric.Circle, AreaFormElement)));
@@ -393,17 +398,16 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
         __extends(Poly, _super);
         function Poly(points, options) {
             var _this = _super.call(this, points, options) || this;
-            _this.name = 'poly';
-            _this.points = [];
+            _this.name = 'polygon';
             _this.controls = [];
             _this.on('moved', _this.polygonMoved.bind(_this));
             return _this;
         }
         Poly.prototype.updateFields = function () {
             var _this = this;
-            this.getElement('#color').value = this.color;
-            this.getElement('#alt').value = this.alt || '';
-            this.getElement('.link').value = this.link || '';
+            this.getElement('.color').value = this.data.color;
+            this.getElement('.alt').value = this.alt || '';
+            this.getElement('.href').value = this.href || '';
             Object.entries(this.attributes).forEach(function (attribute) {
                 _this.getElement('#' + attribute[0]).value = attribute[1] || '';
             });
@@ -436,10 +440,9 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
             var result = [];
             this.controls.forEach(function (control) {
                 var center = control.getCenterPoint();
-                result.push(center.x);
-                result.push(center.y);
+                result.push({ x: center.x, y: center.y });
             });
-            return result.join(',');
+            return result;
         };
         Poly.prototype.addControls = function () {
             var _this = this;
@@ -566,19 +569,23 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
         return Poly;
     }(Aggregation(fabric.Polygon, AreaFormElement)));
     var AreaForm = /** @class */ (function () {
-        function AreaForm(formElement, editor) {
-            this.element = editor.document.querySelector(formElement);
+        function AreaForm(formSelector, editor) {
+            this.element = editor.document.querySelector(formSelector);
             this.areaZone = this.element.querySelector('#areaZone');
             this.editor = editor;
-            this.addFauxFormForLinkBrowser(this.editor.browseLink);
+            this.addFauxFormForLinkBrowser();
         }
         AreaForm.prototype.destroy = function () {
             this.removeFauxForm();
         };
-        AreaForm.prototype.initializeArrows = function () {
+        AreaForm.prototype.updateArrowsState = function () {
             this.editor.areas.forEach(function (area) {
-                area.initializeArrows();
+                area.updateArrowsState();
             });
+        };
+        AreaForm.prototype.addArea = function (area) {
+            area.form = this;
+            area.postAddToForm();
         };
         AreaForm.prototype.moveArea = function (area, offset) {
             var index = this.editor.areas.indexOf(area), newIndex = index + offset, parent = area.element.parentNode;
@@ -587,45 +594,55 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
                 this.editor.areas.splice(newIndex, 0, removedArea);
                 parent.childNodes[index][offset < 0 ? 'after' : 'before'](parent.childNodes[newIndex]);
             }
-            this.initializeArrows();
+            this.updateArrowsState();
         };
         AreaForm.prototype.openLinkBrowser = function (link, area) {
+            var _this = this;
             link.blur();
-            var data = __assign(__assign({}, this.editor.browseLink), { objectId: area.id, itemName: 'link' + area.id, currentValue: area.getLink() });
+            var data = __assign(__assign({}, this.editor.browseLink), { objectId: area.id, formName: 'areasForm', itemFormElName: 'href' + area.id, currentValue: area.getLink() });
             $.ajax({
                 url: this.editor.browseLinkUrlAjaxUrl,
                 context: area,
                 data: data
             }).done(function (response) {
-                var vHWin = window.open(response.url, '', 'height=600,width=500,status=0,menubar=0,scrollbars=1');
-                vHWin.focus();
+                var url = response.url
+                    + '&P[currentValue]=' + encodeURIComponent(area.getFieldValue('.href'))
+                    + '&P[currentSelectedValues]=' + encodeURIComponent(area.getFieldValue('.href'));
+                if (_this.editor.typo3Branch < 10) {
+                    // @todo remove once TYPO3 9.x support gets removed
+                    var vHWin = window.open(url, '', 'height=600,width=500,status=0,menubar=0,scrollbars=1');
+                    vHWin.focus();
+                }
+                else {
+                    Modal.advanced({
+                        type: Modal.types.iframe,
+                        content: url,
+                        size: Modal.sizes.large,
+                    });
+                }
             });
         };
         /**
-         * Triggers change event after faux field was changed by browselink
+         * Create form element that is reachable for LinkBrowser.finalizeFunction
          */
-        AreaForm.prototype.addFauxFormForLinkBrowser = function (configuration) {
+        AreaForm.prototype.addFauxFormForLinkBrowser = function () {
             if (top.document !== this.editor.fauxFormDocument) {
-                this.fauxForm = this.editor.fauxFormDocument.createElement('form');
-                this.fauxForm.setAttribute('name', configuration.formName);
-                var fauxFormContainer = this.editor.fauxFormDocument.querySelector('#fauxFormContainer');
-                while (fauxFormContainer.firstChild) {
-                    fauxFormContainer.removeChild(fauxFormContainer.firstChild);
+                if (!(this.fauxForm = this.editor.fauxFormDocument.querySelector(this.editor.formSelector))) {
+                    this.fauxForm = this.editor.fauxFormDocument.createElement('form');
+                    this.fauxForm.setAttribute('name', 'areasForm');
+                    this.fauxForm.setAttribute('id', 'fauxForm');
+                    this.editor.fauxFormDocument.body.appendChild(this.fauxForm);
                 }
-                fauxFormContainer.appendChild(this.fauxForm);
+                // empty previously created fauxForm
+                while (this.fauxForm.firstChild) {
+                    this.fauxForm.removeChild(this.fauxForm.firstChild);
+                }
             }
         };
         AreaForm.prototype.removeFauxForm = function () {
             if (this.fauxForm) {
                 this.fauxForm.remove();
             }
-        };
-        AreaForm.prototype.syncAreaLinkValue = function (id) {
-            this.editor.areas.forEach(function (area) {
-                if (area.id === parseInt(id)) {
-                    area.link = area.getElement('.link').value;
-                }
-            });
         };
         return AreaForm;
     }());
@@ -640,6 +657,8 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
                 hasRotatingPoint: false,
                 transparentCorners: false
             };
+            this.formSelector = '';
+            this.typo3Branch = 0;
             this.browseLinkUrlAjaxUrl = '';
             this.preview = true;
             this.areas = [];
@@ -657,109 +676,105 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
                 _this[option[0]] = option[1];
             });
         };
-        AreaEditor.prototype.setScale = function (scaling) {
-            this.canvas.setZoom(this.canvas.getZoom() * (scaling ? scaling : 1));
-        };
         AreaEditor.prototype.initializeCanvas = function (canvas, options) {
-            this.canvas = new fabric.Canvas(canvas, __assign(__assign({}, options.canvas), { selection: false, preserveObjectStacking: true, hoverCursor: this.preview ? 'default' : 'move' }));
-            this.canvas.on('object:moving', this.canvasObjectMoving);
-            this.canvas.on('selection:created', this.canvasSelectionCreated);
-            this.canvas.on('selection:updated', this.canvasSelectionUpdated);
-        };
-        AreaEditor.prototype.canvasObjectMoving = function (event) {
-            var element = event.target;
-            switch (element.type) {
-                case 'control':
-                    var center = element.getCenterPoint();
-                    element.point.x = center.x - element.polygon.left;
-                    element.point.y = center.y - element.polygon.top;
-                    break;
-                case 'polygon':
-                    element.controls.forEach(function (control) {
-                        control.left = element.left + control.point.x;
-                        control.top = element.top + control.point.y;
-                    });
-                    break;
-            }
-        };
-        AreaEditor.prototype.canvasSelectionCreated = function (event) {
-            var activePolygon = null;
-            if (event.target.type === 'polygon') {
-                activePolygon = event.target;
-                // show controls of active polygon
-                activePolygon.controls.forEach(function (control) {
-                    control.opacity = 1;
-                });
-                this.canvas.renderAll();
-            }
-        };
-        AreaEditor.prototype.canvasSelectionUpdated = function (event) {
             var _this = this;
             var activePolygon = null;
-            event.deselected.forEach(function (element) {
-                if (element.type === 'polygon' && event.selected[0].type !== 'control') {
-                    // hide controls of active polygon
-                    element.controls.forEach(function (control) {
-                        control.opacity = 0;
-                    });
-                    activePolygon = null;
-                    _this.canvas.renderAll();
-                }
-                else if (element.type === 'control') {
-                    // hide controls of active polygon
-                    activePolygon.controls.forEach(function (control) {
-                        control.opacity = 0;
-                    });
-                    activePolygon = null;
-                    _this.canvas.renderAll();
+            this.canvas = new fabric.Canvas(canvas, __assign(__assign({}, options.canvas), { selection: false, preserveObjectStacking: true, hoverCursor: this.preview ? 'default' : 'move' }));
+            this.canvas.on('object:moving', function (event) {
+                var element = event.target;
+                switch (element.type) {
+                    case 'control':
+                        var center = element.getCenterPoint();
+                        element.point.x = center.x - element.polygon.left;
+                        element.point.y = center.y - element.polygon.top;
+                        break;
+                    case 'polygon':
+                        element.controls.forEach(function (control) {
+                            control.left = element.left + control.point.x;
+                            control.top = element.top + control.point.y;
+                        });
+                        break;
                 }
             });
-            event.selected.forEach(function (element) {
-                if (element.type === 'polygon') {
-                    activePolygon = element;
-                    // hide controls of active polygon
-                    element.controls.forEach(function (control) {
+            this.canvas.on('selection:created', function (event) {
+                if (event.target.type === 'polygon') {
+                    activePolygon = event.target;
+                    // show controls of active polygon
+                    activePolygon.controls.forEach(function (control) {
                         control.opacity = 1;
                     });
                     _this.canvas.renderAll();
                 }
             });
+            this.canvas.on('selection:updated', function (event) {
+                event.deselected.forEach(function (element) {
+                    if (element.type === 'polygon' && event.selected[0].type !== 'control') {
+                        // hide controls of active polygon
+                        element.controls.forEach(function (control) {
+                            control.opacity = 0;
+                        });
+                        activePolygon = null;
+                        _this.canvas.renderAll();
+                    }
+                    else if (element.type === 'control') {
+                        // hide controls of active polygon
+                        activePolygon.controls.forEach(function (control) {
+                            control.opacity = 0;
+                        });
+                        activePolygon = null;
+                        _this.canvas.renderAll();
+                    }
+                });
+                event.selected.forEach(function (element) {
+                    if (element.type === 'polygon') {
+                        activePolygon = element;
+                        // hide controls of active polygon
+                        element.controls.forEach(function (control) {
+                            control.opacity = 1;
+                        });
+                        _this.canvas.renderAll();
+                    }
+                });
+            });
         };
         AreaEditor.prototype.initializeAreas = function (areas) {
             var _this = this;
-            areas = areas || [];
-            areas.forEach(function (area) {
-                area.color = AreaEditor.getRandomColor(area.color);
-                var areaElement, configuration = __assign(__assign(__assign({}, area), _this.areaConfig), { selectable: !_this.preview, hasControls: !_this.preview, stroke: area.color, strokeWidth: 1, fill: AreaEditor.hexToRgbA(area.color, 0.3) });
-                switch (configuration.shape) {
-                    case 'rect':
-                        areaElement = _this.addRectangle(configuration);
-                        break;
-                    case 'circle':
-                        areaElement = _this.addCircle(configuration);
-                        break;
-                    case 'poly':
-                        areaElement = _this.addPolygon(configuration);
-                        break;
-                }
-                area.editor = _this;
-                _this.areas.push(areaElement);
-                if (_this.form) {
-                    areaElement.addForm(_this.form);
-                }
-            });
+            if (areas !== undefined) {
+                areas.forEach(function (area) {
+                    area.data.color = AreaEditor.getRandomColor(area.data.color);
+                    var areaElement, configuration = __assign(__assign(__assign({}, area), _this.areaConfig), { selectable: !_this.preview, hasControls: !_this.preview, stroke: area.data.color, strokeWidth: 1, fill: AreaEditor.hexToRgbA(area.data.color, 0.3) });
+                    switch (configuration.shape) {
+                        case 'rect':
+                        case 'rectangle':
+                            areaElement = _this.createRectangle(configuration);
+                            break;
+                        case 'circ':
+                        case 'circle':
+                            areaElement = _this.createCircle(configuration);
+                            break;
+                        case 'poly':
+                        case 'polygon':
+                            areaElement = _this.createPolygon(configuration);
+                            break;
+                    }
+                    areaElement.editor = _this;
+                    _this.areas.push(areaElement);
+                    if (_this.form) {
+                        _this.form.addArea(areaElement);
+                    }
+                });
+            }
         };
         AreaEditor.prototype.removeAllAreas = function () {
-            var _this = this;
-            this.areas.forEach(function (area) { _this.deleteArea(area); });
+            this.areas.forEach(function (area) { area.deleteAction(); });
         };
-        AreaEditor.prototype.addRectangle = function (configuration) {
-            var _a = __read(configuration.coords.split(','), 4), left = _a[0], top = _a[1], right = _a[2], bottom = _a[3], area = new Rect(__assign(__assign({}, configuration), { left: parseInt(left), top: parseInt(top), width: parseInt(right) - parseInt(left), height: parseInt(bottom) - parseInt(top) }));
+        AreaEditor.prototype.createRectangle = function (configuration) {
+            var coords = configuration.coords, area = new Rect(__assign(__assign({}, configuration), { left: coords.left, top: coords.top, width: coords.right - coords.left, height: coords.bottom - coords.top }));
             this.canvas.add(area);
             return area;
         };
-        AreaEditor.prototype.addCircle = function (configuration) {
-            var _a = __read(configuration.coords.split(','), 3), left = _a[0], top = _a[1], radius = _a[2], area = new Circle(__assign(__assign({}, configuration), { left: parseInt(left) - parseInt(radius), top: parseInt(top) - parseInt(radius), radius: parseInt(radius) }));
+        AreaEditor.prototype.createCircle = function (configuration) {
+            var coords = configuration.coords, area = new Circle(__assign(__assign({}, configuration), { left: coords.left - coords.radius, top: coords.top - coords.radius, radius: coords.radius }));
             // disable control points as these would stretch the circle
             // to an ellipse which is not possible in html areas
             area.setControlVisible('ml', false);
@@ -769,40 +784,13 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
             this.canvas.add(area);
             return area;
         };
-        AreaEditor.prototype.addPolygon = function (configuration) {
-            var options = __assign(__assign({}, configuration), { selectable: true, hasControls: false, objectCaching: false, controlConfig: this.areaConfig }), points = [], coordsXY = options.coords.split(','), left = 100000, top = 100000, i = 0;
-            if (coordsXY.length % 2) {
-                throw new Error('Bad coords count');
-            }
-            // first get all coordinates and create point of odd even numbers
-            // and get top and left corner of polygon
-            for (; i < coordsXY.length; i = i + 2) {
-                var xy = {
-                    x: parseInt(coordsXY[i]),
-                    y: parseInt(coordsXY[i + 1])
-                };
-                points.push(xy);
-                left = Math.min(left, xy.x);
-                top = Math.min(top, xy.y);
-            }
-            options.left = left;
-            options.top = top;
-            // reduce point x/y values by top/left values
-            points.forEach(function (point) {
-                point.x = point.x - options.left;
-                point.y = point.y - options.top;
-            });
-            var area = new Poly(points, options);
+        AreaEditor.prototype.createPolygon = function (configuration) {
+            var points = configuration.coords.points || [], area = new Poly(points, __assign(__assign({}, configuration), { selectable: true, hasControls: false, objectCaching: false, controlConfig: this.areaConfig }));
             this.canvas.add(area);
             if (this.form) {
                 area.addControls();
             }
             return area;
-        };
-        AreaEditor.prototype.triggerLinkChanged = function (id) {
-            var selector = 'form[name="' + this.browseLink.formName + '"] [data-formengine-input-name="link' + id + '"]', field = this.fauxFormDocument.querySelector(selector), event = this.fauxFormDocument.createEvent('HTMLEvents');
-            event.initEvent('change', false, true);
-            field.dispatchEvent(event);
         };
         AreaEditor.prototype.deleteArea = function (area) {
             var areas = [];
@@ -813,12 +801,11 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
             });
             this.areas = areas;
             this.canvas.remove(area);
-            area = null;
         };
         AreaEditor.prototype.getMapData = function () {
             var areas = [];
             this.areas.forEach(function (area) {
-                areas.push(area.getMapData());
+                areas.push(area.getData());
             });
             return JSON.stringify(areas);
         };
@@ -851,5 +838,5 @@ define(["require", "exports", "jquery", "./vendor/fabric", "TYPO3/CMS/Core/Contr
         };
         return AreaEditor;
     }());
-    exports.default = AreaEditor;
+    return AreaEditor;
 });
