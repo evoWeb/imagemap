@@ -37,7 +37,7 @@ tt_content.imagemap {
   dataProcessing {
     30 = Evoweb\Imagemap\DataProcessing\ImagemapProcessor
     30 {
-      data = field:tx_imagemap_links
+      data = field:tx_imagemap_areas
 
       name = TEXT
       name {

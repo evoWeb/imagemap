@@ -63,13 +63,13 @@ class SoftRefParserTest extends \TYPO3\TestingFramework\Core\Unit\UnitTestCase
         $mapContent = '[{coords:"0,0,100,100",shape:"rect",link:"t3://page?uid=1"}]';
         $result = $this->processor->findRef('', '', '', $mapContent, '', [], '');
 
-        $this->assertEquals(1, count($result['elements']), 'Wrong Reference-Count found');
+        $this->assertCount(1, $result['elements'], 'Wrong Reference-Count found');
 
         $element = array_pop($result['elements']);
         $this->assertEquals('t3://page?uid=1', $element['matchString'], 'Wrong Reference found');
         $this->assertEquals('string', $element['subst']['type'], 'Wrong Reference-Type found');
         $this->assertEquals('t3://page?uid=1', $element['subst']['tokenValue'], 'Wrong token value found');
-        $this->assertContains(
+        $this->assertStringContainsString(
             '{softref:' . $element['subst']['tokenID'] . '}',
             $result['content'],
             'Token not found in parsed content'
@@ -89,7 +89,7 @@ class SoftRefParserTest extends \TYPO3\TestingFramework\Core\Unit\UnitTestCase
         $mapContent = '[{link:"t3://page?uid=1"},{link:"t3://page?uid=2"},{link:"t3://page?uid=3"}]';
         $result = $this->processor->findRef('', '', '', $mapContent, '', [], '');
 
-        $this->assertEquals(3, count($result['elements']), 'Wrong Reference-Count found');
+        $this->assertCount(3, $result['elements'], 'Wrong Reference-Count found');
 
         $supposed = [
             't3://page?uid=1',
@@ -101,7 +101,7 @@ class SoftRefParserTest extends \TYPO3\TestingFramework\Core\Unit\UnitTestCase
             $this->assertEquals('string', $element['subst']['type'], 'Wrong Reference-Type found');
             $this->assertEquals($supposed[$index], $element['matchString'], 'Wrong Reference found');
             $this->assertEquals($supposed[$index], $element['subst']['tokenValue'], 'Wrong token value found');
-            $this->assertContains(
+            $this->assertStringContainsString(
                 '{softref:' . $element['subst']['tokenID'] . '}',
                 $result['content'],
                 'Token (' . $index . ') not found in parsed content'

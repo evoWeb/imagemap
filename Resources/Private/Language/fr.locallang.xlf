@@ -12,7 +12,7 @@
 				<target>Ajouter un élément Imagemap.</target>
 			</trans-unit>
 
-			<trans-unit id="tt_content.tx_imagemap_links">
+			<trans-unit id="tt_content.tx_imagemap_areas">
 				<source>ImageMap Configuration</source>
 				<target>ImageMap Configuration</target>
 			</trans-unit>

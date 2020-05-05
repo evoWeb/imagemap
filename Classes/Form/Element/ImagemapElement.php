@@ -1,8 +1,10 @@
 <?php
-declare(strict_types = 1);
+
+declare(strict_types=1);
+
 namespace Evoweb\Imagemap\Form\Element;
 
-/**
+/*
  * This file is developed by evoWeb.
  *
  * It is free software; you can redistribute it and/or modify it under
@@ -78,16 +80,23 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
      */
     protected $uriBuilder;
 
+    /**
+     * @var object|\Psr\Log\LoggerAwareInterface|ResourceFactory
+     */
+    protected $resourceFactory;
+
     public function __construct(\TYPO3\CMS\Backend\Form\NodeFactory $nodeFactory, array $data)
     {
         parent::__construct($nodeFactory, $data);
         // Would be great, if we could inject the view here, but since the constructor is in the interface, we can't
         $this->templateView = GeneralUtility::makeInstance(StandaloneView::class);
         $this->templateView->setLayoutRootPaths(['EXT:imagemap/Resources/Private/Layouts/']);
+        $this->templateView->setPartialRootPaths(['EXT:imagemap/Resources/Private/Partials/']);
         $this->templateView->setTemplatePathAndFilename(
             'EXT:imagemap/Resources/Private/Templates/FormEngine/ImagemapElement.html'
         );
         $this->uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
+        $this->resourceFactory = GeneralUtility::makeInstance(ResourceFactory::class);
     }
 
     public function render(): array
@@ -141,7 +150,7 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
             'config' => $config,
             'wizardUri' => $this->getWizardUri(),
             'wizardPayload' => \json_encode($this->getWizardPayload($file)),
-            'TYPO3_branch' => TYPO3_branch,
+            'TYPO3_branch' => (new \TYPO3\CMS\Core\Information\Typo3Version())->getBranch(),
         ];
 
         if ($arguments['isAllowedFileExtension']) {
@@ -163,7 +172,7 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
         return $resultArray;
     }
 
-    protected function getFile(array $row, array $config):? File
+    protected function getFile(array $row, array $config): ?File
     {
         $file = null;
         $fileUid = !empty($row[$config['fieldName']]) ? $row[$config['fieldName']] : null;
@@ -172,7 +181,7 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
         }
         if (MathUtility::canBeInterpretedAsInteger($fileUid)) {
             try {
-                $fileReference = ResourceFactory::getInstance()->getFileReferenceObject($fileUid);
+                $fileReference = $this->resourceFactory->getFileReferenceObject($fileUid);
                 $file = $fileReference ? $fileReference->getOriginalFile() : null;
             } catch (\InvalidArgumentException $e) {
             }
@@ -209,7 +218,7 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
         return $config;
     }
 
-    protected function processConfiguration(array $config, string &$elementValue): array
+    protected function processConfiguration(array $config, string $elementValue): array
     {
         $config['mapAreas'] = empty($elementValue) ? [] : json_decode($elementValue, true);
         $config['allowedExtensions'] = implode(
@@ -233,12 +242,11 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
         $arguments = [
             'image' => $image->getUid(),
         ];
-        $uriArguments = [
+
+        return [
             'arguments' => json_encode($arguments),
             'signature' => GeneralUtility::hmac(json_encode($arguments), $this->wizardRouteName)
         ];
-
-        return $uriArguments;
     }
 
     protected function getConfiguration(): array

@@ -1,8 +1,10 @@
 <?php
-declare(strict_types = 1);
+
+declare(strict_types=1);
+
 namespace Evoweb\Imagemap\Controller\Wizard;
 
-/**
+/*
  * This file is developed by evoWeb.
  *
  * It is free software; you can redistribute it and/or modify it under
@@ -29,17 +31,21 @@ class ImagemapManipulationController
      */
     protected $templateView;
 
-    public function __construct(StandaloneView $templateView = null)
+    /**
+     * @var ResourceFactory
+     */
+    protected $resourceFactory;
+
+    public function __construct(StandaloneView $templateView, ResourceFactory $resourceFactory)
     {
-        if (!$templateView) {
-            $templateView = GeneralUtility::makeInstance(StandaloneView::class);
-            $templateView->setLayoutRootPaths(['EXT:imagemap/Resources/Private/Layouts/']);
-            $templateView->setPartialRootPaths(['EXT:imagemap/Resources/Private/Partials/']);
-            $templateView->setTemplatePathAndFilename(
-                'EXT:imagemap/Resources/Private/Templates/FormEngine/ImagemapWizard.html'
-            );
-        }
+        $templateView->setLayoutRootPaths(['EXT:imagemap/Resources/Private/Layouts/']);
+        $templateView->setPartialRootPaths(['EXT:imagemap/Resources/Private/Partials/']);
+        $templateView->setTemplatePathAndFilename(
+            'EXT:imagemap/Resources/Private/Templates/FormEngine/ImagemapWizard.html'
+        );
+
         $this->templateView = $templateView;
+        $this->resourceFactory = $resourceFactory;
     }
 
     /**
@@ -57,7 +63,7 @@ class ImagemapManipulationController
             $image = null;
             if (MathUtility::canBeInterpretedAsInteger($fileUid)) {
                 try {
-                    $image = ResourceFactory::getInstance()->getFileObject($fileUid);
+                    $image = $this->resourceFactory->getFileObject($fileUid);
                 } catch (FileDoesNotExistException $e) {
                 }
             }

@@ -2,11 +2,12 @@
 	"name": "evoweb/imagemap",
 	"type": "typo3-cms-extension",
 	"description": "Image map based on EXT:imagemap_wizard by Tolleiv Nietsch",
-	"homepage": "http://www.evoweb.de/",
+	"homepage": "https://github.com/evoWeb/imagemap/",
 
 	"license": "GPL-2.0-or-later",
 
 	"support": {
+		"docs": "https://docs.typo3.org/p/evoweb/imagemap/master/en-us/",
 		"issues": "https://github.com/evoWeb/imagemap/issues"
 	},
 
@@ -16,7 +17,7 @@
 	],
 
 	"require": {
-		"typo3/cms-core": "^9.5 || ^10.0"
+		"typo3/cms-core": "^9.5 || ^10.4"
 	},
 
 	"autoload": {
@@ -31,11 +32,11 @@
 	},
 
 	"config": {
-		"vendor-dir": ".Build/Web/vendor",
-		"bin-dir": ".Build/bin"
+		"vendor-dir": ".Build/Web/vendor"
 	},
 	"extra": {
 		"typo3/cms": {
+			"extension-key": "imagemap",
 			"cms-package-dir": "{$vendor-dir}/typo3/cms",
 			"web-dir": ".Build/Web"
 		}

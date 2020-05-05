@@ -10,7 +10,7 @@
 				<source>Adds a Imagemap element.</source>
 			</trans-unit>
 
-			<trans-unit id="tt_content.tx_imagemap_links">
+			<trans-unit id="tt_content.tx_imagemap_areas">
 				<source>Imagemap manipulation</source>
 			</trans-unit>
 			<trans-unit id="imagemap.modal.title">

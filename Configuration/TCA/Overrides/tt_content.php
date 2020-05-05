@@ -22,8 +22,8 @@ $GLOBALS['TCA']['tt_content']['types']['imagemap']['columnsOverrides'] = [
 ];
 
 $tempColumns = [
-    'tx_imagemap_links' => [
-        'label' => 'LLL:EXT:imagemap/Resources/Private/Language/locallang.xlf:tt_content.tx_imagemap_links',
+    'tx_imagemap_areas' => [
+        'label' => 'LLL:EXT:imagemap/Resources/Private/Language/locallang.xlf:tt_content.tx_imagemap_areas',
         'config' => [
             'type' => 'input',
             'renderType' => 'imagemap',
@@ -36,7 +36,7 @@ $tempColumns = [
 
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addToAllTCAtypes(
     'tt_content',
-    'tx_imagemap_links',
+    'tx_imagemap_areas',
     'imagemap',
     'after:image'
 );

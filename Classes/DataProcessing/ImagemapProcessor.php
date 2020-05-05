@@ -1,8 +1,10 @@
 <?php
-declare(strict_types = 1);
+
+declare(strict_types=1);
+
 namespace Evoweb\Imagemap\DataProcessing;
 
-/**
+/*
  * This file is developed by evoWeb.
  *
  * It is free software; you can redistribute it and/or modify it under
@@ -46,9 +48,7 @@ class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcess
                 }
 
                 $areas = [];
-                foreach ($mapArray['areas'] as &$area) {
-                    $areaAttributes = $area;
-
+                foreach ($mapArray['areas'] as $areaAttributes) {
                     foreach ($areaAttributes as $key => $value) {
                         if (!in_array($key, $attributes)) {
                             $areaAttributes['data'][$key] = $value;
@@ -77,7 +77,7 @@ class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcess
         return $mapName;
     }
 
-    protected function getTypoScriptFrontendController():? \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController
+    protected function getTypoScriptFrontendController(): ?\TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController
     {
         return $GLOBALS['TSFE'] ?? null;
     }

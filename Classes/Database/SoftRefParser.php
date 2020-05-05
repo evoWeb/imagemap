@@ -1,8 +1,10 @@
 <?php
-declare(strict_types = 1);
+
+declare(strict_types=1);
+
 namespace Evoweb\Imagemap\Database;
 
-/**
+/*
  * This file is developed by evoWeb.
  *
  * It is free software; you can redistribute it and/or modify it under
@@ -31,6 +33,7 @@ class SoftRefParser extends \TYPO3\CMS\Core\Database\SoftReferenceIndex
      */
     public function findRef($table, $field, $uid, $content, $spKey, $spParams, $structurePath = '')
     {
+        // @todo get equal to parent::findRef_typolink_tag
         $this->tokenID_basePrefix = $table . ':' . $uid . ':' . $field . ':' . $structurePath . ':' . $spKey;
 
         $data = \json_decode($content, true);
@@ -57,10 +60,9 @@ class SoftRefParser extends \TYPO3\CMS\Core\Database\SoftReferenceIndex
             reset($data['areas']);
         }
 
-        $retVal = [
+        return [
             'content' => \json_encode($data),
             'elements' => $elements
         ];
-        return $retVal;
     }
 }
