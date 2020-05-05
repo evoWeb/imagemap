@@ -108,7 +108,7 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
         $file = $this->getFile($this->data['databaseRow'], $config);
         if (!$file) {
             // Early return in case we do not find a file
-            $resultArray['html'] = LocalizationUtility::translate('imagemap.element.no_image', 'imagemap');
+            $resultArray['html'] = '<br>' . LocalizationUtility::translate('imagemap.element.no_image', 'imagemap');
             return $resultArray;
         }
 
