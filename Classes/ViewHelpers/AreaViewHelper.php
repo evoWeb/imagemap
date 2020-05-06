@@ -57,7 +57,6 @@ class AreaViewHelper extends AbstractTagBasedViewHelper
         $this->registerArgument('coords', 'array', 'Specifies the coordinates of the area', true);
         $this->registerArgument('href', 'string', 'Specifies the hyperlink target for the area', true);
         $this->registerArgument('shape', 'string', 'Specifies the shape of the area', true);
-        $this->registerArgument('data', 'array', 'Additional data information');
     }
 
     /**
