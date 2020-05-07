@@ -39,15 +39,15 @@ class SoftRefParser extends \TYPO3\CMS\Core\Database\SoftReferenceIndex
         $data = \json_decode($content, true);
 
         $elements = [];
-        if (isset($data['areas']) && is_array($data['areas'])) {
+        if (is_array($data)) {
             $index = 0;
             $zeroToken = $this->makeTokenID('setTypoLinkPartsElement:' . $index) . ':0';
-            foreach ($data['areas'] as $key => $value) {
+            foreach ($data as $key => $value) {
                 $retVal = $this->findRef_typolink($value['value'], $spParams);
                 $element = $retVal['elements'][$zeroToken];
 
                 $indexToken = $this->makeTokenID('setTypoLinkPartsElement:' . $index);
-                $data['areas'][$key]['value'] = str_replace(
+                $data[$key]['value'] = str_replace(
                     $element['subst']['tokenID'],
                     $indexToken,
                     $retVal['content']
@@ -57,7 +57,7 @@ class SoftRefParser extends \TYPO3\CMS\Core\Database\SoftReferenceIndex
                 $index++;
             }
             reset($elements);
-            reset($data['areas']);
+            reset($data);
         }
 
         return [
