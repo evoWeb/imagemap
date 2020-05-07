@@ -33,7 +33,7 @@
 	<f:variable name="column" value="{gallery.rows.1.columns.1}"/>
 	<f:variable name="file" value="{column.media}"/>
 	<f:variable name="dimensions" value="{column.dimensions}"/>
-	<f:if condition="{imageMap}"><f:variable name="arguments" value="{usemap: '#{imageMapName}'}"/></f:if>
+	<f:if condition="{imageMapAreas}"><f:variable name="attributes" value="{usemap: '#{imageMapName}'}"/></f:if>
 	<div class="ce-row">
 		<div class="ce-column">
 			<figure class="image">
@@ -44,14 +44,14 @@
 								 alt="{file.alternative}"
 								 title="{file.title}"
 								 loading="{settings.media.lazyLoading}"
-								 additionalAttributes="{arguments}"/>
+								 additionalAttributes="{attributes}"/>
 				<f:if condition="{file.description}">
 					<figcaption class="image-caption">{file.description -> f:format.nl2br()}</figcaption>
 				</f:if>
 			</figure>
 			<f:if condition="{imageMap}">
 			<map name="{imageMapName}">
-				<f:for each="{imageMap}" as="area">
+				<f:for each="{imageMapAreas}" as="area">
 					<i:area href="{f:uri.typolink(parameter: area.href)}" shape="{area.shape}" coords="{area.coords}" alt="{area.alt}" data="{area.data}"/>
 				</f:for>
 			</map>

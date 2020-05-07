@@ -11,7 +11,7 @@ return [
         'target' => \Evoweb\Imagemap\Controller\AjaxController::class . '::browselinkUrlAction'
     ],
 
-    'wizard_imagemap_area' => [
+    'wizard_imagemap_manipulation' => [
         'path' => '/imagemap/modal',
         'target' => \Evoweb\Imagemap\Controller\Wizard\ImagemapManipulationController::class . '::getWizardContent'
     ],

@@ -59,7 +59,7 @@ class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcess
                     $areas[] = $areaAttributes;
                 }
 
-                $processedData['imageMap'] = $areas;
+                $processedData['imageMapAreas'] = $areas;
                 $processedData['imageMapAttributes'] = $attributes;
             }
             $processedData['imageMapName'] = $mapName;

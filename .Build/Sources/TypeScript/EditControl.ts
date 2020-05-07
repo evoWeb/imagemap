@@ -1,5 +1,5 @@
-/**
- * This file is developed by evoweb.
+/*
+ * This file is developed by evoWeb.
  *
  * It is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License, either version 2
@@ -183,7 +183,9 @@ class EditControl {
 
     // @todo remove .areas to use all values
     let areas = jQuery(this.fieldSelector).eq(0).val();
-    this.areaEditor.initializeAreas(JSON.parse(areas).areas);
+    if (areas.length) {
+      this.areaEditor.initializeAreas(JSON.parse(areas).areas);
+    }
   }
 
   private destroy() {

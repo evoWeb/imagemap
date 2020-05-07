@@ -29,7 +29,7 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
     /**
      * @var string
      */
-    private $wizardRouteName = 'ajax_wizard_imagemap_area';
+    private $wizardRouteName = 'ajax_wizard_imagemap_manipulation';
 
     /**
      * Default element configuration

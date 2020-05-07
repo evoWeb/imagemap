@@ -69,6 +69,23 @@ class AreaViewHelper extends AbstractTagBasedViewHelper
         $coords = $this->arguments['coords'];
         $shape = $this->arguments['shape'];
 
+        [$shape, $coords] = static::prepareShape($shape, $coords);
+
+        if ($href) {
+            $typoLinkCodec = GeneralUtility::makeInstance(TypoLinkCodecService::class);
+            $typoLinkConfiguration = $typoLinkCodec->decode($href);
+            $typoLinkParameter = $typoLinkCodec->encode($typoLinkConfiguration);
+            $href = static::invokeContentObjectRenderer($typoLinkParameter, $absolute);
+        }
+
+        $this->tag->addAttribute('coords', $coords);
+        $this->tag->addAttribute('href', $href);
+        $this->tag->addAttribute('shape', $shape);
+        return $this->tag->render();
+    }
+
+    protected static function prepareShape(string $shape, array $coords): array
+    {
         switch ($shape) {
             case 'rect':
             case 'rectangle':
@@ -92,18 +109,7 @@ class AreaViewHelper extends AbstractTagBasedViewHelper
                 $coords = implode(',', $points);
                 break;
         }
-
-        if ($href) {
-            $typoLinkCodec = GeneralUtility::makeInstance(TypoLinkCodecService::class);
-            $typoLinkConfiguration = $typoLinkCodec->decode($href);
-            $typoLinkParameter = $typoLinkCodec->encode($typoLinkConfiguration);
-            $href = static::invokeContentObjectRenderer($typoLinkParameter, $absolute);
-        }
-
-        $this->tag->addAttribute('coords', $coords);
-        $this->tag->addAttribute('href', $href);
-        $this->tag->addAttribute('shape', $shape);
-        return $this->tag->render();
+        return [$shape, $coords];
     }
 
     protected static function invokeContentObjectRenderer(string $typoLinkParameter, bool $absolute): string

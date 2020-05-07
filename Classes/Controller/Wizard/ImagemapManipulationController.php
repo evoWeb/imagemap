@@ -27,6 +27,11 @@ use TYPO3\CMS\Fluid\View\StandaloneView;
 class ImagemapManipulationController
 {
     /**
+     * @var string
+     */
+    private $wizardRouteName = 'ajax_wizard_imagemap_manipulation';
+
+    /**
      * @var StandaloneView
      */
     protected $templateView;
@@ -57,34 +62,36 @@ class ImagemapManipulationController
      */
     public function getWizardContent(ServerRequestInterface $request): ResponseInterface
     {
-        if ($this->isSignatureValid($request)) {
-            $parsedBody = json_decode($request->getParsedBody()['arguments'], true);
-            $fileUid = $parsedBody['image'];
-            $image = null;
-            if (MathUtility::canBeInterpretedAsInteger($fileUid)) {
-                try {
-                    $image = $this->resourceFactory->getFileObject($fileUid);
-                } catch (FileDoesNotExistException $e) {
-                }
-            }
-            $viewData = [
-                'image' => $image,
-            ];
-            $content = $this->templateView->renderSection('Main', $viewData);
-            return new HtmlResponse($content);
+        if (!$this->isSignatureValid($request)) {
+            return new HtmlResponse('', 403);
         }
-        return new HtmlResponse('', 403);
+
+        $parsedBody = \json_decode($request->getParsedBody()['arguments'], true);
+        $fileUid = $parsedBody['image'];
+        $image = null;
+        if (MathUtility::canBeInterpretedAsInteger($fileUid)) {
+            try {
+                $image = $this->resourceFactory->getFileObject($fileUid);
+            } catch (FileDoesNotExistException $e) {
+            }
+        }
+        $viewData = [
+            'image' => $image,
+        ];
+        $content = $this->templateView->renderSection('Main', $viewData);
+        return new HtmlResponse($content);
     }
 
     /**
      * Check if hmac signature is correct
      *
      * @param ServerRequestInterface $request the request with the POST parameters
+     *
      * @return bool
      */
     protected function isSignatureValid(ServerRequestInterface $request): bool
     {
-        $token = GeneralUtility::hmac($request->getParsedBody()['arguments'], 'ajax_wizard_imagemap_area');
+        $token = GeneralUtility::hmac($request->getParsedBody()['arguments'], $this->wizardRouteName);
         return hash_equals($token, $request->getParsedBody()['signature']);
     }
 }

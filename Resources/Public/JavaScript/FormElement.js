@@ -36,7 +36,9 @@ define(["require", "exports", "jquery", "./AreaEditor"], function (require, expo
         FormElement.prototype.initializeAreas = function (fieldSelector) {
             // @todo remove .areas to use all values
             var areas = $(fieldSelector).eq(0).val();
-            this.areaEditor.initializeAreas(JSON.parse(areas).areas);
+            if (areas.length) {
+              this.areaEditor.initializeAreas(JSON.parse(areas).areas);
+            }
         };
         FormElement.prototype.fieldChangedHandler = function (event) {
             var _this = this;

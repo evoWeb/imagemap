@@ -1,0 +1,12 @@
+# Configuration/Services.yaml
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  Evoweb\Imagemap\:
+    resource: '../Classes/*'
+
+  Evoweb\Imagemap\Controller\Wizard\ImagemapManipulationController:
+    public: true

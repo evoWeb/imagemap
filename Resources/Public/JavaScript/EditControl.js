@@ -129,7 +129,9 @@ define(["require", "exports", "jquery", "./AreaEditor", "TYPO3/CMS/Backend/Icons
             window.imagemap = { areaEditor: this.areaEditor };
             // @todo remove .areas to use all values
             var areas = jQuery(this.fieldSelector).eq(0).val();
-            this.areaEditor.initializeAreas(JSON.parse(areas).areas);
+            if (areas.length) {
+              this.areaEditor.initializeAreas(JSON.parse(areas).areas);
+            }
         };
         EditControl.prototype.destroy = function () {
             if (this.currentModal) {
