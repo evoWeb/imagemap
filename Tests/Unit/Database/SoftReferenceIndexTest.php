@@ -1,6 +1,8 @@
 <?php
 
-namespace Evoweb\Imagemap\Tests\Unit;
+declare(strict_types=1);
+
+namespace Evoweb\Imagemap\Tests\Unit\Database;
 
 /*
  * This file is developed by evoWeb.
@@ -13,10 +15,14 @@ namespace Evoweb\Imagemap\Tests\Unit;
  * LICENSE.txt file that was distributed with this source code.
  */
 
+use Evoweb\Imagemap\Database\SoftReferenceIndex;
 use Psr\EventDispatcher\EventDispatcherInterface;
-use Evoweb\Imagemap\Database\SoftRefParser;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
-class SoftRefParserTest extends \TYPO3\TestingFramework\Core\Unit\UnitTestCase
+/**
+ * Test case
+ */
+class SoftReferenceIndexTest extends UnitTestCase
 {
     protected $resetSingletonInstances = true;
 
@@ -70,7 +76,7 @@ class SoftRefParserTest extends \TYPO3\TestingFramework\Core\Unit\UnitTestCase
         foreach ($softrefConfiguration as $softrefKey => $configuration) {
             /** @var EventDispatcherInterface $eventDispatcher */
             $eventDispatcher = $eventDispatcherProphecy->reveal();
-            $subject = new SoftRefParser($eventDispatcher);
+            $subject = new SoftReferenceIndex($eventDispatcher);
             $result = $subject->findRef(
                 'tt_content',
                 'bodytext',

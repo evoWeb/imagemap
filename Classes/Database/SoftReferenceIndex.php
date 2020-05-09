@@ -15,7 +15,7 @@ namespace Evoweb\Imagemap\Database;
  * LICENSE.txt file that was distributed with this source code.
  */
 
-class SoftRefParser extends \TYPO3\CMS\Core\Database\SoftReferenceIndex
+class SoftReferenceIndex extends \TYPO3\CMS\Core\Database\SoftReferenceIndex
 {
     /**
      * Just overrides the method which normally catches all softref-types

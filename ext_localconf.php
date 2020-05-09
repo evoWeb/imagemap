@@ -28,7 +28,7 @@ call_user_func(function () {
     }
 
     $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['GLOBAL']['softRefParser']['imagemap'] =
-        \Evoweb\Imagemap\Database\SoftRefParser::class;
+        \Evoweb\Imagemap\Database\SoftReferenceIndex::class;
 
     $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1549738969] = [
         'nodeName' => 'imagemap',
