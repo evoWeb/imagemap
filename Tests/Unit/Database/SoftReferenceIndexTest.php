@@ -122,6 +122,7 @@ class SoftReferenceIndexTest extends UnitTestCase
                     ],
                 ],
             ],
+            /* @todo enable test once 9.5 support is dropped
             'link to phone number' => [
                 [
                     'imagemap' => [
@@ -136,7 +137,7 @@ class SoftReferenceIndexTest extends UnitTestCase
                         'tokenValue' => '0123456789',
                     ],
                 ],
-            ],
+            ],*/
         ];
     }
 
