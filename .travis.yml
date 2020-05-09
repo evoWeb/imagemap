@@ -28,13 +28,13 @@ before_install:
 install:
   - export TYPO3_PATH_WEB=$PWD/.Build/Web;
   - |
-    composer require typo3/cms-core="$TYPO3_VERSION" $PREFER_LOWEST;
-    if [ ! -z "$TESTING_FRAMEWORK" ]; then composer require --dev typo3/testing-framework="$TESTING_FRAMEWORK"; fi;
+    composer require typo3/cms-core="${TYPO3_VERSION}" ${PREFER_LOWEST};
+    if [[ ! -z "${TESTING_FRAMEWORK}" ]]; then composer require --dev typo3/testing-framework="${TESTING_FRAMEWORK}"; fi;
   - git checkout composer.json;
 
 script:
   - >
-    echo "Running ${TYPO3_VERSION} unit tests";
+    echo "Running ${TYPO3_VERSION} unit tests with $(which php)";
     php .Build/Web/vendor/bin/phpunit --colors -c .Build/Web/vendor/typo3/testing-framework/Resources/Core/Build/UnitTests.xml Tests/Unit/;
 
 jobs:
@@ -60,8 +60,8 @@ jobs:
       install: skip
       script:
         - |
-          echo "Running php lint";
-          errors=$(find . -name \*.php ! -path "./.Build/*" -exec php -d display_errors=stderr -l {} 2>&1 >/dev/null \;) && echo "$errors" && test -z "$errors"
+          echo "Running php lint with $(which php)";
+          errors=$(find . -name \*.php ! -path "./.Build/*" -exec php -d display_errors=stderr -l "{}" 2>&1 >/dev/null \;) && echo "${errors}" && test -z "${errors}"
     - <<: *lint
       php: 7.3
     - <<: *lint
