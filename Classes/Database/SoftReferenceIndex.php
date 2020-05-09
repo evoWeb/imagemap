@@ -15,6 +15,11 @@ namespace Evoweb\Imagemap\Database;
  * LICENSE.txt file that was distributed with this source code.
  */
 
+use TYPO3\CMS\Core\LinkHandling\LinkService;
+use TYPO3\CMS\Core\Resource\File;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\MathUtility;
+
 class SoftReferenceIndex extends \TYPO3\CMS\Core\Database\SoftReferenceIndex
 {
     /**
@@ -33,36 +38,111 @@ class SoftReferenceIndex extends \TYPO3\CMS\Core\Database\SoftReferenceIndex
      */
     public function findRef($table, $field, $uid, $content, $spKey, $spParams, $structurePath = '')
     {
-        // @todo get equal to parent::findRef_typolink_tag
         $this->tokenID_basePrefix = $table . ':' . $uid . ':' . $field . ':' . $structurePath . ':' . $spKey;
-
-        $data = \json_decode($content, true);
+        $linkService = GeneralUtility::makeInstance(LinkService::class);
+        $areas = \json_decode($content, true);
 
         $elements = [];
-        if (is_array($data)) {
-            $index = 0;
-            $zeroToken = $this->makeTokenID('setTypoLinkPartsElement:' . $index) . ':0';
-            foreach ($data as $key => $value) {
-                $retVal = $this->findRef_typolink($value['value'], $spParams);
-                $element = $retVal['elements'][$zeroToken];
-
-                $indexToken = $this->makeTokenID('setTypoLinkPartsElement:' . $index);
-                $data[$key]['value'] = str_replace(
-                    $element['subst']['tokenID'],
-                    $indexToken,
-                    $retVal['content']
-                );
-                $element['subst']['tokenID'] = $indexToken;
-                $elements[$indexToken . ':' . $index] = $element;
-                $index++;
+        if (is_array($areas)) {
+            foreach ($areas as $key => &$area) {
+                $areaString = \json_encode($area);
+                if (isset($area['href'])) {
+                    try {
+                        $linkDetails = $linkService->resolve($area['href']);
+                        if (
+                            $linkDetails['type'] === LinkService::TYPE_FILE
+                            && preg_match('/file\?uid=(\d+)/', $area['href'], $fileIdMatch)
+                        ) {
+                            $token = $this->makeTokenID($key);
+                            $elements[$key]['matchString'] = $areaString;
+                            $area['href'] = '{softref:' . $token . '}';
+                            $elements[$key]['subst'] = [
+                                'type' => 'db',
+                                'recordRef' => 'sys_file:' . $fileIdMatch[1],
+                                'tokenID' => $token,
+                                'tokenValue' => 'file:' . (
+                                    $linkDetails['file'] instanceof File ?
+                                    $linkDetails['file']->getUid() :
+                                    $fileIdMatch[1]
+                                )
+                            ];
+                        } elseif (
+                            $linkDetails['type'] === LinkService::TYPE_PAGE
+                            && preg_match('/page\?uid=(\d+)#?(\d+)?/', $area['href'], $pageAndAnchorMatches)
+                        ) {
+                            $token = $this->makeTokenID($key);
+                            $content = '{softref:' . $token . '}';
+                            $elements[$key]['matchString'] = $areaString;
+                            $elements[$key]['subst'] = [
+                                'type' => 'db',
+                                'recordRef' => 'pages:' . $linkDetails['pageuid'],
+                                'tokenID' => $token,
+                                'tokenValue' => $linkDetails['pageuid']
+                            ];
+                            if (isset($pageAndAnchorMatches[2]) && $pageAndAnchorMatches[2] !== '') {
+                                // Anchor is assumed to point to a content elements:
+                                if (MathUtility::canBeInterpretedAsInteger($pageAndAnchorMatches[2])) {
+                                    // Initialize a new entry because we have a new relation:
+                                    $newTokenID = $this->makeTokenID('setTypoLinkPartsElement:anchor:' . $key);
+                                    $elements[$newTokenID . ':' . $key] = [];
+                                    $elements[$newTokenID . ':' . $key]['matchString'] = 'Anchor Content Element: '
+                                        . $pageAndAnchorMatches[2];
+                                    $content .= '#{softref:' . $newTokenID . '}';
+                                    $elements[$newTokenID . ':' . $key]['subst'] = [
+                                        'type' => 'db',
+                                        'recordRef' => 'tt_content:' . $pageAndAnchorMatches[2],
+                                        'tokenID' => $newTokenID,
+                                        'tokenValue' => $pageAndAnchorMatches[2]
+                                    ];
+                                } else {
+                                    // Anchor is a hardcoded string
+                                    $content .= '#' . $pageAndAnchorMatches[2];
+                                }
+                            }
+                            $area['href'] = $content;
+                        } elseif ($linkDetails['type'] === LinkService::TYPE_URL) {
+                            $token = $this->makeTokenID($key);
+                            $elements[$key]['matchString'] = $areaString;
+                            $area['href'] = '{softref:' . $token . '}';
+                            $elements[$key]['subst'] = [
+                                'type' => 'external',
+                                'tokenID' => $token,
+                                'tokenValue' => $linkDetails['url']
+                            ];
+                        } elseif ($linkDetails['type'] === LinkService::TYPE_EMAIL) {
+                            $token = $this->makeTokenID($key);
+                            $elements[$key]['matchString'] = $areaString;
+                            $area['href'] = '{softref:' . $token . '}';
+                            $elements[$key]['subst'] = [
+                                'type' => 'string',
+                                'tokenID' => $token,
+                                'tokenValue' => $linkDetails['email']
+                            ];
+                        } elseif ($linkDetails['type'] === LinkService::TYPE_TELEPHONE) {
+                            $token = $this->makeTokenID($key);
+                            $elements[$key]['matchString'] = $areaString;
+                            $area['href'] = '{softref:' . $token . '}';
+                            $elements[$key]['subst'] = [
+                                'type' => 'string',
+                                'tokenID' => $token,
+                                'tokenValue' => $linkDetails['telephone']
+                            ];
+                        }
+                    } catch (\Exception $e) {
+                        // skip invalid links
+                    }
+                }
             }
-            reset($elements);
-            reset($data);
         }
 
-        return [
-            'content' => \json_encode($data),
-            'elements' => $elements
-        ];
+        // Return output:
+        if (!empty($elements)) {
+            return [
+                'content' => \json_encode($areas),
+                'elements' => $elements
+            ];
+        }
+
+        return null;
     }
 }

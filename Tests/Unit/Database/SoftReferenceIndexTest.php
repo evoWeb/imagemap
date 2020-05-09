@@ -31,10 +31,10 @@ class SoftReferenceIndexTest extends UnitTestCase
         return [
             'link to page' => [
                 [
-                    'map_areas' => [
-                        'content' => '[{coords:"0,0,100,100",shape:"rect",link:"t3://page?uid=42"}]',
-                        'elementKey' => 1,
-                        'matchString' => 't3://page?uid=42',
+                    'imagemap' => [
+                        'content' => '[{"coords":"0,0,100,100","shape":"rect","href":"t3:\/\/page?uid=42"}]',
+                        'elementKey' => 0,
+                        'matchString' => '{"coords":"0,0,100,100","shape":"rect","href":"t3:\/\/page?uid=42"}',
                     ],
                 ],
                 [
@@ -47,10 +47,11 @@ class SoftReferenceIndexTest extends UnitTestCase
             ],
             'links to page' => [
                 [
-                    'map_areas' => [
-                        'content' => '[{link:"t3://page?uid=40"},{link:"t3://page?uid=41"},{link:"t3://page?uid=42"}]',
-                        'elementKey' => 3,
-                        'matchString' => 't3://page?uid=42',
+                    'imagemap' => [
+                        'content' => '[{"href":"t3:\/\/page?uid=40"},'
+                            . '{"href":"t3:\/\/page?uid=41"},{"href":"t3:\/\/page?uid=42"}]',
+                        'elementKey' => 2,
+                        'matchString' => '{"href":"t3:\/\/page?uid=42"}',
                     ],
                 ],
                 [
@@ -58,6 +59,81 @@ class SoftReferenceIndexTest extends UnitTestCase
                         'type' => 'db',
                         'recordRef' => 'pages:42',
                         'tokenValue' => 42,
+                    ],
+                ],
+            ],
+            'link to external URL without scheme' => [
+                [
+                    'imagemap' => [
+                        'content' => '[{"coords":"0,0,100,100","shape":"rect","href":"www.example.com"}]',
+                        'elementKey' => 0,
+                        'matchString' => '{"coords":"0,0,100,100","shape":"rect","href":"www.example.com"}',
+                    ],
+                ],
+                [
+                    'subst' => [
+                        'type' => 'external',
+                        'tokenValue' => 'http://www.example.com',
+                    ],
+                ],
+            ],
+            'link to external URL with scheme' => [
+                [
+                    'imagemap' => [
+                        'content' => '[{"coords":"0,0,100,100","shape":"rect","href":"https:\/\/www.example.com"}]',
+                        'elementKey' => 0,
+                        'matchString' => '{"coords":"0,0,100,100","shape":"rect","href":"https:\/\/www.example.com"}',
+                    ],
+                ],
+                [
+                    'subst' => [
+                        'type' => 'external',
+                        'tokenValue' => 'https://www.example.com',
+                    ],
+                ],
+            ],
+            'link to email' => [
+                [
+                    'imagemap' => [
+                        'content' => '[{"coords":"0,0,100,100","shape":"rect","href":"mailto:test@example.com"}]',
+                        'elementKey' => 0,
+                        'matchString' => '{"coords":"0,0,100,100","shape":"rect","href":"mailto:test@example.com"}',
+                    ],
+                ],
+                [
+                    'subst' => [
+                        'type' => 'string',
+                        'tokenValue' => 'test@example.com',
+                    ],
+                ],
+            ],
+            'link to email without schema' => [
+                [
+                    'imagemap' => [
+                        'content' => '[{"coords":"0,0,100,100","shape":"rect","href":"test@example.com"}]',
+                        'elementKey' => 0,
+                        'matchString' => '{"coords":"0,0,100,100","shape":"rect","href":"test@example.com"}',
+                    ],
+                ],
+                [
+                    'subst' => [
+                        'type' => 'string',
+                        'tokenValue' => 'test@example.com',
+                    ],
+                ],
+            ],
+            'link to phone number' => [
+                [
+                    'imagemap' => [
+                        'content' => '[{"coords":"0,0,100,100","shape":"rect","href":"tel:0123456789"}]',
+                        'elementKey' => 0,
+                        'matchString' => '{"coords":"0,0,100,100","shape":"rect","href":"tel:0123456789"}',
+                    ],
+                ],
+                [
+                    'subst' => [
+                        'type' => 'string',
+                        'tokenValue' => '0123456789',
                     ],
                 ],
             ],
@@ -79,7 +155,7 @@ class SoftReferenceIndexTest extends UnitTestCase
             $subject = new SoftReferenceIndex($eventDispatcher);
             $result = $subject->findRef(
                 'tt_content',
-                'bodytext',
+                'tx_imagemap_areas',
                 1,
                 $configuration['content'],
                 $softrefKey,
