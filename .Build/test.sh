@@ -98,6 +98,7 @@ main () {
     if [[ ! ${DEBUG} ]]; then
         rm composer.lock
         rm -rf .Build/Web/
+        rm -rf var/
     fi
 }
 main
