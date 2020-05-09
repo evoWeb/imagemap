@@ -61,7 +61,6 @@ declare interface EditorOptions {
   browseLink?: object,
   browseLinkUrlAjaxUrl?: string,
   formSelector?: string,
-  typo3Branch?: string,
 }
 
 declare interface FabricEvent {
@@ -86,4 +85,7 @@ declare interface Window {
     areaEditor: any
   },
   FormArea?: any,
+  TBE_EDITOR?: {
+    doSaveFieldName?: any
+  }
 }

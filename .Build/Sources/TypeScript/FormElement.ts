@@ -9,12 +9,13 @@
  * LICENSE.txt file that was distributed with this source code.
  */
 
-import * as $ from 'jquery';
 // @ts-ignore
 import * as AreaEditor from './AreaEditor';
 
 class FormElement {
-  private formElement: JQuery;
+  private hiddenInput: HTMLInputElement;
+
+  private formElement: HTMLDivElement;
 
   private areaEditor: AreaEditor;
 
@@ -22,60 +23,66 @@ class FormElement {
     this.initializeFormElement(fieldSelector);
     this.initializeAreaEditor();
     this.initializeEvents();
-    this.initializeAreas(fieldSelector);
+    this.initializeAreas(this.hiddenInput.value);
   }
 
   private initializeFormElement(fieldSelector: string) {
-    this.formElement = $(fieldSelector + '-canvas').eq(0);
+    this.hiddenInput = document.querySelector(fieldSelector);
+    this.formElement = document.querySelector(fieldSelector + '-canvas');
   }
 
   private initializeAreaEditor() {
-    let image = this.formElement.find('.image'),
+    let image: HTMLImageElement = this.formElement.querySelector('.image'),
       editorOptions = {
         canvas: {
-          width: parseInt(image.css('width')),
-          height: parseInt(image.css('height')),
-          top: parseInt(image.css('height')) * -1,
+          width: image.offsetWidth,
+          height: image.offsetHeight,
+          top: image.offsetHeight * -1,
         },
       };
 
-    this.areaEditor = new AreaEditor(editorOptions, this.formElement.find('#canvas')[0], '', window.document);
+    this.areaEditor = new AreaEditor(editorOptions, this.formElement.querySelector('#canvas'), '', window.document);
   }
 
   private initializeEvents() {
-    this.formElement.find('input[type=hidden]').on('imagemap:changed', this.fieldChangedHandler.bind(this));
+    this.hiddenInput.addEventListener('imagemap:changed', this.fieldChangedHandler.bind(this));
   }
 
-  private initializeAreas(fieldSelector: string) {
-    // @todo remove .areas to use all values
-    let areas = $(fieldSelector).eq(0).val();
-    if (areas.length) {
-      this.areaEditor.initializeAreas(JSON.parse(areas).areas);
+  private fieldChangedHandler(event: Event) {
+    let field = (event.currentTarget as HTMLInputElement),
+      data = new FormData(),
+      request = new XMLHttpRequest();
+
+    data.append('P[itemFormElName]', field.getAttribute('name'));
+    data.append('P[tableName]', field.dataset.tablename);
+    data.append('P[fieldName]', field.dataset.fieldname);
+    data.append('P[uid]', field.dataset.uid);
+    data.append('P[value]', field.value);
+
+    request.open('POST', window.TYPO3.settings.ajaxUrls.imagemap_preview_rerender);
+    request.onreadystatechange = this.previewRerenderCallback.bind({
+      request: request,
+      formElement: this
+    });
+    request.send(data);
+  }
+
+  private previewRerenderCallback(this: {request: XMLHttpRequest, formElement: FormElement}) {
+    if (this.request.readyState === 4 && this.request.status === 200) {
+      (this.formElement.formElement.querySelector('.modifiedState') as HTMLDivElement).style.display = 'block';
+      this.formElement.areaEditor.removeAllAreas();
+
+      let data = JSON.parse(this.request.responseText);
+      if (data !== null && data.length) {
+        this.formElement.areaEditor.initializeAreas(data.areas);
+      }
     }
   }
 
-  private fieldChangedHandler(event: JQueryEventObject) {
-    let $field = $(event.currentTarget);
-    let request = $.ajax({
-      url: window.TYPO3.settings.ajaxUrls.imagemap_preview_rerender,
-      method: 'POST',
-      data: {
-        P: {
-          itemFormElName: $field.attr('name'),
-          tableName: $field.data('tablename'),
-          fieldName: $field.data('fieldname'),
-          uid: $field.data('uid'),
-          value: $field.val()
-        }
-      }
-    });
-    request.done((data, textStatus) => {
-      if (textStatus === 'success') {
-        this.formElement.find('.modifiedState').css('display', 'block');
-        this.areaEditor.removeAllAreas();
-        this.areaEditor.initializeAreas(data.areas);
-      }
-    });
+  private initializeAreas(areas: string) {
+    if (areas.length) {
+      this.areaEditor.initializeAreas(JSON.parse(areas));
+    }
   }
 }
 

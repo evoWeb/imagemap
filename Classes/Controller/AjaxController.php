@@ -37,7 +37,7 @@ class AjaxController
         $response->withHeader('Content-Type', 'application/json; charset=utf-8');
 
         try {
-            $parameters = $request->getParsedBody()['arguments'];
+            $parameters = $request->getParsedBody()['P'];
             $record = BackendUtility::getRecord($parameters['tableName'], $parameters['uid']);
             $map = $record[$parameters['fieldName']];
 
