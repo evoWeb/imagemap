@@ -9,31 +9,30 @@
  * LICENSE.txt file that was distributed with this source code.
  */
 
-// @ts-ignore
-import * as AreaEditor from './AreaEditor';
+import { AreaPreview } from './AreaPreview';
 
 class FormElement {
-  private hiddenInput: HTMLInputElement;
+  protected hiddenInput: HTMLInputElement;
 
-  private formElement: HTMLDivElement;
+  protected formElement: HTMLDivElement;
 
-  private areaEditor: AreaEditor;
+  protected areaPreview: AreaPreview;
 
   constructor(fieldSelector: string) {
     this.initializeFormElement(fieldSelector);
     this.initializeAreaEditor();
     this.initializeEvents();
-    this.initializeAreas(this.hiddenInput.value);
+    this.renderAreas(this.hiddenInput.value);
   }
 
-  private initializeFormElement(fieldSelector: string) {
+  protected initializeFormElement(fieldSelector: string) {
     this.hiddenInput = document.querySelector(fieldSelector);
     this.formElement = document.querySelector(fieldSelector + '-canvas');
   }
 
-  private initializeAreaEditor() {
+  protected initializeAreaEditor() {
     let image: HTMLImageElement = this.formElement.querySelector('.image'),
-      editorOptions = {
+      configurations = {
         canvas: {
           width: image.offsetWidth,
           height: image.offsetHeight,
@@ -41,14 +40,14 @@ class FormElement {
         },
       };
 
-    this.areaEditor = new AreaEditor(editorOptions, this.formElement.querySelector('#canvas'), '', window.document);
+    this.areaPreview = new AreaPreview(configurations, this.formElement.querySelector('#canvas'));
   }
 
-  private initializeEvents() {
+  protected initializeEvents() {
     this.hiddenInput.addEventListener('imagemap:changed', this.fieldChangedHandler.bind(this));
   }
 
-  private fieldChangedHandler(event: Event) {
+  protected fieldChangedHandler(event: Event) {
     let field = (event.currentTarget as HTMLInputElement),
       data = new FormData(),
       request = new XMLHttpRequest();
@@ -67,21 +66,21 @@ class FormElement {
     request.send(data);
   }
 
-  private previewRerenderCallback(this: {request: XMLHttpRequest, formElement: FormElement}) {
+  protected previewRerenderCallback(this: {request: XMLHttpRequest, formElement: FormElement}) {
     if (this.request.readyState === 4 && this.request.status === 200) {
       (this.formElement.formElement.querySelector('.modifiedState') as HTMLDivElement).style.display = 'block';
-      this.formElement.areaEditor.removeAllAreas();
+      this.formElement.areaPreview.removeAreas();
 
       let data = JSON.parse(this.request.responseText);
       if (data !== null && data.length) {
-        this.formElement.areaEditor.initializeAreas(data.areas);
+        this.formElement.areaPreview.renderAreas(data.areas);
       }
     }
   }
 
-  private initializeAreas(areas: string) {
+  protected renderAreas(areas: string) {
     if (areas.length) {
-      this.areaEditor.initializeAreas(JSON.parse(areas));
+      this.areaPreview.renderAreas(JSON.parse(areas));
     }
   }
 }

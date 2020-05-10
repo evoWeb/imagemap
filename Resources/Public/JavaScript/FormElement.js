@@ -8,34 +8,34 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "./AreaEditor"], function (require, exports, AreaEditor) {
+define(["require", "exports", "./AreaPreview"], function (require, exports, AreaPreview_1) {
     "use strict";
-    var FormElement = /** @class */ (function () {
-        function FormElement(fieldSelector) {
+    class FormElement {
+        constructor(fieldSelector) {
             this.initializeFormElement(fieldSelector);
             this.initializeAreaEditor();
             this.initializeEvents();
-            this.initializeAreas(this.hiddenInput.value);
+            this.renderAreas(this.hiddenInput.value);
         }
-        FormElement.prototype.initializeFormElement = function (fieldSelector) {
+        initializeFormElement(fieldSelector) {
             this.hiddenInput = document.querySelector(fieldSelector);
             this.formElement = document.querySelector(fieldSelector + '-canvas');
-        };
-        FormElement.prototype.initializeAreaEditor = function () {
-            var image = this.formElement.querySelector('.image'), editorOptions = {
+        }
+        initializeAreaEditor() {
+            let image = this.formElement.querySelector('.image'), configurations = {
                 canvas: {
                     width: image.offsetWidth,
                     height: image.offsetHeight,
                     top: image.offsetHeight * -1,
                 },
             };
-            this.areaEditor = new AreaEditor(editorOptions, this.formElement.querySelector('#canvas'), '', window.document);
-        };
-        FormElement.prototype.initializeEvents = function () {
+            this.areaPreview = new AreaPreview_1.AreaPreview(configurations, this.formElement.querySelector('#canvas'));
+        }
+        initializeEvents() {
             this.hiddenInput.addEventListener('imagemap:changed', this.fieldChangedHandler.bind(this));
-        };
-        FormElement.prototype.fieldChangedHandler = function (event) {
-            var field = event.currentTarget, data = new FormData(), request = new XMLHttpRequest();
+        }
+        fieldChangedHandler(event) {
+            let field = event.currentTarget, data = new FormData(), request = new XMLHttpRequest();
             data.append('P[itemFormElName]', field.getAttribute('name'));
             data.append('P[tableName]', field.dataset.tablename);
             data.append('P[fieldName]', field.dataset.fieldname);
@@ -47,23 +47,22 @@ define(["require", "exports", "./AreaEditor"], function (require, exports, AreaE
                 formElement: this
             });
             request.send(data);
-        };
-        FormElement.prototype.previewRerenderCallback = function () {
+        }
+        previewRerenderCallback() {
             if (this.request.readyState === 4 && this.request.status === 200) {
                 this.formElement.formElement.querySelector('.modifiedState').style.display = 'block';
-                this.formElement.areaEditor.removeAllAreas();
-                var data = JSON.parse(this.request.responseText);
+                this.formElement.areaPreview.removeAreas();
+                let data = JSON.parse(this.request.responseText);
                 if (data !== null && data.length) {
-                    this.formElement.areaEditor.initializeAreas(data.areas);
+                    this.formElement.areaPreview.renderAreas(data.areas);
                 }
             }
-        };
-        FormElement.prototype.initializeAreas = function (areas) {
+        }
+        renderAreas(areas) {
             if (areas.length) {
-                this.areaEditor.initializeAreas(JSON.parse(areas));
+                this.areaPreview.renderAreas(JSON.parse(areas));
             }
-        };
-        return FormElement;
-    }());
+        }
+    }
     return FormElement;
 });

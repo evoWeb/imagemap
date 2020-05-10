@@ -9,6 +9,11 @@
  * LICENSE.txt file that was distributed with this source code.
  */
 
+declare interface Point {
+  x: number,
+  y: number
+}
+
 declare interface AreaConfiguration {
   shape?: string,
   color?: string,
@@ -21,8 +26,8 @@ declare interface AreaConfiguration {
     right?: number,
     bottom?: number,
     radius?: number,
-    points?: {x: number, y: number}[]
   },
+  points?: Point[]
   left?: number,
   top?: number,
   data?: {
@@ -54,7 +59,7 @@ declare interface EditorConfiguration {
   itemName: string,
 }
 
-declare interface EditorOptions {
+declare interface EditorConfigurations {
   canvas?: CanvasSize,
   fauxFormDocument?: Document,
   previewRerenderAjaxUrl?: string,

@@ -1,99 +1,91 @@
 'use strict';
 
-import gulp from 'gulp';
-import log from 'gulplog';
+// Common
+import {src, dest, series} from 'gulp';
+import fs from 'fs';
+import glob from 'glob';
 
-import sourcemaps from 'gulp-sourcemaps';
+// JS
 import typescript from 'gulp-typescript';
 
+// CSS
 import autoprefixer from 'gulp-autoprefixer';
-import sass from 'gulp-sass';
 import rename from 'gulp-rename';
+import sass from 'gulp-sass';
+import sourcemaps from 'gulp-sourcemaps';
 
 const paths = {
-	src: './Sources',
-	dest: '../Resources/Public'
+  src: './Sources',
+  dest: '../Resources/Public'
 };
 
 const tasks = {
-	scss: {
-		src: `${paths.src}/Sass/*.scss`,
-		dest: `${paths.dest}/Stylesheets/`
-	},
+  copy: {
+    src: [`node_modules/fabric/dist/fabric.js`],
+    dest: `${paths.dest}/JavaScript/vendor/`
+  },
 
-	copy: {
-		src: [`node_modules/fabric/dist/fabric.js`],
-		dest: `${paths.dest}/JavaScript/vendor/`
-	},
+  scss: {
+    src: `${paths.src}/Sass/*.scss`,
+    dest: `${paths.dest}/Stylesheets/`
+  },
 
-	typescript: {
-		'AreaEditor.ts': {
-			src: `${paths.src}/TypeScript/AreaEditor.ts`,
-			dest: `${paths.dest}/JavaScript/`,
-			name: 'AreaManipulation.js'
-		},
-		'EditControl.ts': {
-			src: `${paths.src}/TypeScript/EditControl.ts`,
-			dest: `${paths.dest}/JavaScript/`,
-			name: 'EditControl.js'
-		},
-		'FormElement.ts': {
-			src: `${paths.src}/TypeScript/FormElement.ts`,
-			dest: `${paths.dest}/JavaScript/`,
-			name: 'FormElement.js'
-		}
-	}
+  typescript: {
+    src: `${paths.src}/TypeScript/*.ts`,
+    dest: `${paths.dest}/JavaScript/`,
+  }
 };
 
 let stylesTask = () => {
-	return gulp.src(tasks.scss.src)
-		.pipe(sourcemaps.init())
-		.pipe(
-			sass({
-				outputStyle: 'compressed',
-				includePaths: require('node-normalize-scss').includePaths
-			}).on('error', log.error)
-		)
-		.pipe(autoprefixer())
-		.pipe(sourcemaps.write('./'))
-		.pipe(gulp.dest(tasks.scss.dest));
+  return src(tasks.scss.src)
+    .pipe(sourcemaps.init())
+    .pipe(
+      sass({ outputStyle: 'compressed' })
+        .on('error', console.log)
+    )
+    .pipe(autoprefixer())
+    .pipe(sourcemaps.write('./'))
+    .pipe(dest(tasks.scss.dest));
 };
 
 let copyTask = () => {
-	return gulp.src(tasks.copy.src, { base: './node_modules/fabric/dist' })
-		.pipe(rename(function(path) {
-			path.basename = path.basename.substring(0, 1).toUpperCase() + path.basename.substring(1);
-			return path;
-		}))
-		.pipe(gulp.dest(tasks.copy.dest));
+  return src(tasks.copy.src, {base: './node_modules/fabric/dist'})
+    .pipe(rename(function (path) {
+      path.basename = path.basename.substring(0, 1).toUpperCase() + path.basename.substring(1);
+      return path;
+    }))
+    .pipe(dest(tasks.copy.dest));
 };
 
 let typescriptTask = (done) => {
-	let position = process.argv.indexOf('--file'),
-		file = position > -1 ? process.argv[position + 1] : null;
+  let position = process.argv.indexOf('--file'),
+    requestedFile = position > -1 ? process.argv[position + 1] : null;
 
-	let seriesTasks = [];
-	Object.keys(tasks.typescript).map((key) => {
-		if (file == null || file === key) {
-			let localPaths = tasks.typescript[key];
-			let buildJavascript = (done) => {
-				let tsProject = typescript.createProject('tsconfig.json');
+  let seriesTasks = [];
 
-				gulp.src(localPaths.src)
-					.pipe(tsProject())
-					.js.pipe(gulp.dest(localPaths.dest));
-				done();
-			};
-			buildJavascript.displayName = `${localPaths.name}`;
+  glob.sync(tasks.typescript.src + '*').map((filePath) => {
+    if (fs.statSync(filePath).isDirectory()) {
+      return;
+    }
+    if (requestedFile == null || filePath.indexOf(requestedFile) > -1) {
+      let buildJavascript = (singleDone) => {
+        let tsProject = typescript.createProject('./tsconfig.json');
 
-			seriesTasks.push(buildJavascript);
-		}
-	});
+        src(filePath)
+          .pipe(tsProject())
+          .js.pipe(dest(tasks.typescript.dest));
+        singleDone();
+      };
+      buildJavascript.displayName = filePath;
 
-	return gulp.series(...seriesTasks, (seriesDone) => {
-		seriesDone();
-		done();
-	})();
+      seriesTasks.push(buildJavascript);
+    }
+  });
+
+  return series(...seriesTasks, function typescriptTasks (allDone) {
+    allDone();
+    done();
+  })();
 };
 
 exports.scss = stylesTask;
@@ -102,4 +94,4 @@ exports.copy = copyTask;
 
 exports.typescript = typescriptTask;
 
-exports.build = gulp.series(stylesTask, copyTask, typescriptTask);
+exports.build = series(stylesTask, copyTask, typescriptTask);

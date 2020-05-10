@@ -58,13 +58,13 @@ class AjaxController
      */
     public function browselinkUrlAction(ServerRequestInterface $request): ResponseInterface
     {
-        $queryParams = $request->getQueryParams();
+        $parameters = $request->getParsedBody()['P'];
 
-        $options = $GLOBALS['TCA'][$queryParams['tableName']]['columns'][
-            $queryParams['fieldName']
+        $options = $GLOBALS['TCA'][$parameters['tableName']]['columns'][
+            $parameters['fieldName']
             ]['config']['fieldControlOptions'] ?? [];
 
-        $itemName = $queryParams['itemFormElName'];
+        $itemName = $parameters['itemFormElName'];
 
         $linkBrowserArguments = [];
         if (isset($options['blindLinkOptions'])) {
@@ -80,15 +80,15 @@ class AjaxController
         $urlParameters = [
             'P' => [
                 'params' => $linkBrowserArguments,
-                'table' => $queryParams['tableName'],
-                'uid' => (int)$queryParams['uid'],
-                'pid' => (int)$queryParams['pid'],
-                'field' => $queryParams['fieldName'],
-                'formName' => $queryParams['formName'],
+                'table' => $parameters['tableName'],
+                'uid' => (int)$parameters['uid'],
+                'pid' => (int)$parameters['pid'],
+                'field' => $parameters['fieldName'],
+                'formName' => $parameters['formName'],
                 'itemName' => $itemName,
                 'hmac' => GeneralUtility::hmac($itemName, 'wizard_js'),
-                'fieldChangeFunc' => $queryParams['fieldChangeFunc'],
-                'fieldChangeFuncHash' => GeneralUtility::hmac(serialize($queryParams['fieldChangeFunc'])),
+                'fieldChangeFunc' => $parameters['fieldChangeFunc'],
+                'fieldChangeFuncHash' => GeneralUtility::hmac(serialize($parameters['fieldChangeFunc'])),
             ],
         ];
         /** @var \TYPO3\CMS\Backend\Routing\UriBuilder $uriBuilder */

@@ -1,0 +1,56 @@
+/*
+ * This file is developed by evoWeb.
+ *
+ * It is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License, either version 2
+ * of the License, or any later version.
+ *
+ * For the full copyright and license information, please read the
+ * LICENSE.txt file that was distributed with this source code.
+ */
+
+/// <reference types="../../types/index"/>
+
+// @ts-ignore
+import { Canvas, Object } from './vendor/Fabric';
+import { AreaShapeFactory } from './AreaShapeFactory';
+
+export class AreaPreview {
+  readonly configurations: EditorConfigurations;
+
+  protected areaShapes: Array<Object> = [];
+
+  protected canvas: Canvas;
+
+  constructor(configurations: EditorConfigurations, canvas: HTMLElement) {
+    this.configurations = configurations;
+    this.initializeCanvas(canvas, configurations);
+  }
+
+  protected initializeCanvas(canvas: HTMLElement, options: EditorConfigurations) {
+    this.canvas = new Canvas(canvas, {
+      ...options.canvas,
+      selection: false,
+      preserveObjectStacking: true,
+      hoverCursor: 'default',
+    });
+  }
+
+  public renderAreas(areas: Array<AreaConfiguration>) {
+    if (areas !== undefined) {
+      let areaShapeFactory = new AreaShapeFactory(this.configurations);
+
+      areas.forEach((area: AreaConfiguration) => {
+        let areaShape = areaShapeFactory.createShape(area, false);
+        this.canvas.add(areaShape);
+        this.areaShapes.push(areaShape);
+      });
+    }
+  }
+
+  public removeAreas() {
+    this.areaShapes.forEach((area) => {
+      area.remove();
+    });
+  }
+}

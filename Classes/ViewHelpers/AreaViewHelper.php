@@ -88,20 +88,11 @@ class AreaViewHelper extends AbstractTagBasedViewHelper
     {
         switch ($shape) {
             case 'rect':
-            case 'rectangle':
-                $shape = 'rect';
-                $coords = implode(',', $coords);
-                break;
-
-            case 'circ':
             case 'circle':
-                $shape = 'circle';
                 $coords = implode(',', $coords);
                 break;
 
             case 'poly':
-            case 'polygon':
-                $shape = 'poly';
                 $points = [];
                 foreach ($coords['points'] as $point) {
                     $points[] = implode(',', $point);

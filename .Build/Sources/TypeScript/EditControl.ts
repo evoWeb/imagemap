@@ -10,58 +10,59 @@
  */
 
 import * as $ from 'jquery';
+import { AreaEditor } from './AreaEditor';
 // @ts-ignore
-import * as AreaEditor from './AreaEditor';
+import Icons = require('TYPO3/CMS/Backend/Icons');
 // @ts-ignore
-import * as Icons from 'TYPO3/CMS/Backend/Icons';
+import Modal = require('TYPO3/CMS/Backend/Modal');
 // @ts-ignore
-import * as Modal from 'TYPO3/CMS/Backend/Modal';
+import FormEngineValidation = require('TYPO3/CMS/Backend/FormEngineValidation');
 // @ts-ignore
-import * as FormEngineValidation from 'TYPO3/CMS/Backend/FormEngineValidation';
-// @ts-ignore
-import * as ImagesLoaded from 'TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min';
+import ImagesLoaded = require('TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min');
 
 class EditControl {
-  private fieldSelector: string;
+  protected hiddenInput: HTMLInputElement;
 
-  private trigger: JQuery;
+  protected trigger: JQuery;
 
-  private configuration: EditorConfiguration;
+  protected currentModal: Modal;
 
-  private currentModal: Modal;
+  protected areaEditor: AreaEditor;
 
-  private areaEditor: AreaEditor;
+  protected image: JQuery;
 
-  private image: JQuery;
+  protected buttonAddRect: JQuery;
 
-  private buttonAddRect: JQuery;
+  protected buttonAddCircle: JQuery;
 
-  private buttonAddCircle: JQuery;
+  protected buttonAddPoly: JQuery;
 
-  private buttonAddPoly: JQuery;
+  protected buttonDismiss: JQuery;
 
-  private buttonDismiss: JQuery;
-
-  private buttonSave: JQuery;
+  protected buttonSave: JQuery;
 
   constructor(fieldSelector: string) {
-    this.fieldSelector = fieldSelector;
-    this.initializeTrigger();
+    this.initializeFormElement(fieldSelector);
+    this.initializeEvents();
   }
 
-  private initializeTrigger() {
+  protected initializeFormElement(fieldSelector: string) {
+    this.hiddenInput = document.querySelector(fieldSelector);
+  }
+
+  protected initializeEvents() {
     this.trigger = $('.t3js-area-wizard-trigger');
     this.trigger
       .off('click')
       .on('click', this.triggerHandler.bind(this));
   }
 
-  private triggerHandler(event: JQueryEventObject) {
+  protected triggerHandler(event: JQueryEventObject) {
     event.preventDefault();
     this.openModal();
   }
 
-  private openModal() {
+  protected openModal() {
     let modalTitle = this.trigger.data('modalTitle'),
       buttonAddRectangleText = this.trigger.data('buttonAddrectText'),
       buttonAddCircleText = this.trigger.data('buttonAddcircleText'),
@@ -71,8 +72,6 @@ class EditControl {
       wizardUri = this.trigger.data('url'),
       payload = this.trigger.data('payload'),
       initWizardModal = this.initialize.bind(this);
-
-    this.configuration = this.trigger.data('configuration');
 
     Icons.getIcon('spinner-circle', Icons.sizes.default, null, null, Icons.markupIdentifiers.inline).done((icon: string) => {
       /**
@@ -145,7 +144,7 @@ class EditControl {
     });
   }
 
-  private initialize() {
+  protected initialize() {
     this.image = this.currentModal.find('img.image');
     this.buttonAddRect = this.currentModal.find('.button-add-rect').off('click').on('click', this.buttonAddRectHandler.bind(this));
     this.buttonAddCircle = this.currentModal.find('.button-add-circle').off('click').on('click', this.buttonAddCircleHandler.bind(this));
@@ -160,20 +159,17 @@ class EditControl {
     });
   }
 
-  private initializeArea() {
+  protected initializeArea() {
     let width = parseInt(this.image.css('width')),
       height = parseInt(this.image.css('height')),
-      editorOptions: EditorOptions = {
+      editorOptions: EditorConfigurations = {
         canvas: {
           width: width,
           height: height,
           top: height * -1,
         },
         fauxFormDocument: window.document,
-        browseLink: this.configuration.browseLink,
-        browseLinkUrlAjaxUrl: window.TYPO3.settings.ajaxUrls.imagemap_browselink_url,
         formSelector: '[name="areasForm"]',
-        typo3Branch: this.trigger.data('typo3-branch'),
       };
 
     let canvas = this.currentModal.find('#modal-canvas')[0];
@@ -181,14 +177,13 @@ class EditControl {
 
     window.imagemap = { areaEditor: this.areaEditor };
 
-    // @todo remove .areas to use all values
-    let areas = jQuery(this.fieldSelector).eq(0).val();
+    let areas = this.hiddenInput.value;
     if (areas.length) {
-      this.areaEditor.initializeAreas(JSON.parse(areas).areas);
+      this.areaEditor.renderAreas(JSON.parse(areas));
     }
   }
 
-  private destroy() {
+  protected destroy() {
     if (this.currentModal) {
       this.currentModal = null;
       this.areaEditor.form.destroy();
@@ -196,14 +191,14 @@ class EditControl {
     }
   }
 
-  private buttonAddRectHandler(event: JQueryEventObject) {
+  protected buttonAddRectHandler(event: JQueryEventObject) {
     event.stopPropagation();
     event.preventDefault();
 
     let width = parseInt(this.image.css('width')),
       height = parseInt(this.image.css('height'));
 
-    this.areaEditor.initializeAreas([{
+    this.areaEditor.renderAreas([{
       shape: 'rect',
       coords: {
         left: (width / 2 - 50),
@@ -214,14 +209,14 @@ class EditControl {
     }]);
   }
 
-  private buttonAddCircleHandler(event: JQueryEventObject) {
+  protected buttonAddCircleHandler(event: JQueryEventObject) {
     event.stopPropagation();
     event.preventDefault();
 
     let width = parseInt(this.image.css('width')),
       height = parseInt(this.image.css('height'));
 
-    this.areaEditor.initializeAreas([{
+    this.areaEditor.renderAreas([{
       shape: 'circle',
       coords: {
         left: (width / 2),
@@ -231,44 +226,43 @@ class EditControl {
     }]);
   }
 
-  private buttonAddPolyHandler(event: JQueryEventObject) {
+  protected buttonAddPolyHandler(event: JQueryEventObject) {
     event.stopPropagation();
     event.preventDefault();
 
     let width = parseInt(this.image.css('width')),
       height = parseInt(this.image.css('height'));
 
-    this.areaEditor.initializeAreas([{
+    this.areaEditor.renderAreas([{
       shape: 'poly',
-      coords: {
-        points: [
-          {x: (width / 2), y: (height / 2 - 50)},
-          {x: (width / 2 + 50), y: (height / 2 + 50)},
-          {x: (width / 2), y: (height / 2 + 70)},
-          {x: (width / 2 - 50), y: (height / 2 + 50)},
-        ]
-      }
+      points: [
+        {x: (width / 2), y: (height / 2 - 50)},
+        {x: (width / 2 + 50), y: (height / 2 + 50)},
+        {x: (width / 2), y: (height / 2 + 70)},
+        {x: (width / 2 - 50), y: (height / 2 + 50)},
+      ]
     }]);
   }
 
-  private buttonDismissHandler(event: JQueryEventObject) {
+  protected buttonDismissHandler(event: JQueryEventObject) {
     event.stopPropagation();
     event.preventDefault();
 
     this.currentModal.modal('hide');
   }
 
-  private buttonSaveHandler(event: JQueryEventObject) {
+  protected buttonSaveHandler(event: JQueryEventObject) {
     event.stopPropagation();
     event.preventDefault();
 
-    const hiddenField = $(`input[name="${this.configuration.itemName}"]`);
-    hiddenField.val(this.areaEditor.getMapData()).trigger('imagemap:changed');
+    let hiddenField = $(this.hiddenInput);
+    this.hiddenInput.value = this.areaEditor.getMapData();
+    hiddenField.trigger('imagemap:changed');
     FormEngineValidation.markFieldAsChanged(hiddenField);
     this.currentModal.modal('hide');
   }
 
-  private hideColorSwatch(event: JQueryEventObject) {
+  protected hideColorSwatch(event: JQueryEventObject) {
     if (!$(event.target).parents().add(event.target).hasClass('minicolors')) {
       // Hides all dropdown panels
       top.window.$('.minicolors-focus').each(() => {
