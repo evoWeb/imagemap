@@ -32,9 +32,9 @@ class SoftReferenceIndexTest extends UnitTestCase
             'link to page' => [
                 [
                     'imagemap' => [
-                        'content' => '[{"coords":"0,0,100,100","shape":"rect","href":"t3:\/\/page?uid=42"}]',
+                        'content' => '[{"coords":{"left":0,"top":0,"right":100,"bottom":100},"shape":"rect","href":"t3:\/\/page?uid=42"}]',
                         'elementKey' => 0,
-                        'matchString' => '{"coords":"0,0,100,100","shape":"rect","href":"t3:\/\/page?uid=42"}',
+                        'matchString' => '{"coords":{"left":0,"top":0,"right":100,"bottom":100},"shape":"rect","href":"t3:\/\/page?uid=42"}',
                     ],
                 ],
                 [
@@ -48,8 +48,7 @@ class SoftReferenceIndexTest extends UnitTestCase
             'links to page' => [
                 [
                     'imagemap' => [
-                        'content' => '[{"href":"t3:\/\/page?uid=40"},'
-                            . '{"href":"t3:\/\/page?uid=41"},{"href":"t3:\/\/page?uid=42"}]',
+                        'content' => '[{"href":"t3:\/\/page?uid=40"},{"href":"t3:\/\/page?uid=41"},{"href":"t3:\/\/page?uid=42"}]',
                         'elementKey' => 2,
                         'matchString' => '{"href":"t3:\/\/page?uid=42"}',
                     ],
@@ -65,9 +64,9 @@ class SoftReferenceIndexTest extends UnitTestCase
             'link to external URL without scheme' => [
                 [
                     'imagemap' => [
-                        'content' => '[{"coords":"0,0,100,100","shape":"rect","href":"www.example.com"}]',
+                        'content' => '[{"coords":{"left":0,"top":0,"right":100,"bottom":100},"shape":"rect","href":"www.example.com"}]',
                         'elementKey' => 0,
-                        'matchString' => '{"coords":"0,0,100,100","shape":"rect","href":"www.example.com"}',
+                        'matchString' => '{"coords":{"left":0,"top":0,"right":100,"bottom":100},"shape":"rect","href":"www.example.com"}',
                     ],
                 ],
                 [
@@ -80,9 +79,9 @@ class SoftReferenceIndexTest extends UnitTestCase
             'link to external URL with scheme' => [
                 [
                     'imagemap' => [
-                        'content' => '[{"coords":"0,0,100,100","shape":"rect","href":"https:\/\/www.example.com"}]',
+                        'content' => '[{"coords":{"left":0,"top":0,"right":100,"bottom":100},"shape":"rect","href":"https:\/\/www.example.com"}]',
                         'elementKey' => 0,
-                        'matchString' => '{"coords":"0,0,100,100","shape":"rect","href":"https:\/\/www.example.com"}',
+                        'matchString' => '{"coords":{"left":0,"top":0,"right":100,"bottom":100},"shape":"rect","href":"https:\/\/www.example.com"}',
                     ],
                 ],
                 [
@@ -95,9 +94,9 @@ class SoftReferenceIndexTest extends UnitTestCase
             'link to email' => [
                 [
                     'imagemap' => [
-                        'content' => '[{"coords":"0,0,100,100","shape":"rect","href":"mailto:test@example.com"}]',
+                        'content' => '[{"coords":{"left":0,"top":0,"right":100,"bottom":100},"shape":"rect","href":"mailto:test@example.com"}]',
                         'elementKey' => 0,
-                        'matchString' => '{"coords":"0,0,100,100","shape":"rect","href":"mailto:test@example.com"}',
+                        'matchString' => '{"coords":{"left":0,"top":0,"right":100,"bottom":100},"shape":"rect","href":"mailto:test@example.com"}',
                     ],
                 ],
                 [
@@ -110,9 +109,9 @@ class SoftReferenceIndexTest extends UnitTestCase
             'link to email without schema' => [
                 [
                     'imagemap' => [
-                        'content' => '[{"coords":"0,0,100,100","shape":"rect","href":"test@example.com"}]',
+                        'content' => '[{"coords":{"left":0,"top":0,"right":100,"bottom":100},"shape":"rect","href":"test@example.com"}]',
                         'elementKey' => 0,
-                        'matchString' => '{"coords":"0,0,100,100","shape":"rect","href":"test@example.com"}',
+                        'matchString' => '{"coords":{"left":0,"top":0,"right":100,"bottom":100},"shape":"rect","href":"test@example.com"}',
                     ],
                 ],
                 [
@@ -126,9 +125,9 @@ class SoftReferenceIndexTest extends UnitTestCase
             'link to phone number' => [
                 [
                     'imagemap' => [
-                        'content' => '[{"coords":"0,0,100,100","shape":"rect","href":"tel:0123456789"}]',
+                        'content' => '[{"coords":{"left":0,"top":0,"right":100,"bottom":100},"shape":"rect","href":"tel:0123456789"}]',
                         'elementKey' => 0,
-                        'matchString' => '{"coords":"0,0,100,100","shape":"rect","href":"tel:0123456789"}',
+                        'matchString' => '{"coords":{"left":0,"top":0,"right":100,"bottom":100},"shape":"rect","href":"tel:0123456789"}',
                     ],
                 ],
                 [
