@@ -12,7 +12,7 @@ define(["require", "exports", "./vendor/Fabric"], function (require, exports, Fa
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class AreaShapeFactory {
-        constructor(configuration) {
+        constructor(configurations, canvas = null) {
             this.areaConfiguration = {
                 cornerColor: '#eee',
                 cornerStrokeColor: '#bbb',
@@ -22,27 +22,28 @@ define(["require", "exports", "./vendor/Fabric"], function (require, exports, Fa
                 hasRotatingPoint: false,
                 transparentCorners: false
             };
-            this.setCanvasDimension(configuration.canvas.width, configuration.canvas.height);
-        }
-        setCanvasDimension(width, height) {
-            this.width = width;
-            this.height = height;
+            this.width = configurations.canvas.width;
+            this.height = configurations.canvas.height;
+            this.canvas = canvas;
         }
         createShape(area, selectable) {
             area.color = AreaShapeFactory.getRandomColor(area.color);
-            let areaElement, configuration = Object.assign(Object.assign(Object.assign({}, area), this.areaConfiguration), { selectable: selectable, hasControls: selectable, stroke: area.color, strokeWidth: 1, fill: AreaShapeFactory.hexToRgbA(area.color, 0.3) });
+            let areaShape, configuration = Object.assign(Object.assign(Object.assign({}, area), this.areaConfiguration), { selectable: selectable, hasControls: selectable, stroke: area.color, strokeWidth: 1, fill: AreaShapeFactory.hexToRgbA(area.color, 0.3) });
             switch (configuration.shape) {
                 case 'rect':
-                    areaElement = this.createRectangle(configuration);
+                    areaShape = this.createRectangle(configuration);
                     break;
                 case 'circle':
-                    areaElement = this.createCircle(configuration);
+                    areaShape = this.createCircle(configuration);
                     break;
                 case 'poly':
-                    areaElement = this.createPolygon(configuration);
+                    areaShape = this.createPolygon(configuration);
                     break;
             }
-            return areaElement;
+            if (this.canvas !== null) {
+                areaShape.canvas = this.canvas;
+            }
+            return areaShape;
         }
         createRectangle(configuration) {
             let coords = configuration.coords, left = Math.round(coords.left * this.width), top = Math.round(coords.top * this.height), width = Math.round(coords.right * this.width) - left, height = Math.round(coords.bottom * this.height) - top;
@@ -65,22 +66,20 @@ define(["require", "exports", "./vendor/Fabric"], function (require, exports, Fa
                 point.y = Math.round(point.y * this.height);
             });
             area = new Fabric_1.Polygon(points, Object.assign(Object.assign({}, configuration), { objectCaching: false }));
+            area.controls = [];
             if (configuration.selectable) {
                 points.forEach((point, index) => {
-                    this.addControl(area, this.areaConfiguration, point, index, 100000);
+                    AreaShapeFactory.addControl(area, this.areaConfiguration, point, index, 100000);
                 });
             }
             return area;
         }
-        addControl(area, areaConfig, point, index, newControlIndex) {
-            let circle = new Fabric_1.Circle(Object.assign(Object.assign({}, areaConfig), { hasControls: false, radius: 5, fill: areaConfig.cornerColor, stroke: areaConfig.cornerStrokeColor, originX: 'center', originY: 'center', name: index, polygon: this, point: point, type: 'control', opacity: area.controls.length === 0 ? 0 : area.controls[0].opacity, 
+        static addControl(area, areaConfig, point, index, newControlIndex) {
+            let circle = new Fabric_1.Circle(Object.assign(Object.assign({}, areaConfig), { hasControls: false, radius: 5, fill: areaConfig.cornerColor, stroke: areaConfig.cornerStrokeColor, originX: 'center', originY: 'center', name: index, polygon: area, point: point, type: 'control', opacity: area.opacity, 
                 // set control position relative to polygon
                 left: area.left + point.x, top: area.top + point.y }));
-            circle.on('moved', area.pointMoved.bind(this));
             point.control = circle;
             area.controls = AreaShapeFactory.addElementToArrayWithPosition(area.controls, circle, newControlIndex);
-            area.canvas.add(circle);
-            area.canvas.renderAll();
         }
         static addElementToArrayWithPosition(array, item, newPointIndex) {
             if (newPointIndex < 0) {
@@ -102,7 +101,7 @@ define(["require", "exports", "./vendor/Fabric"], function (require, exports, Fa
             return array;
         }
         static getRandomColor(color) {
-            if (color === undefined) {
+            while (color === undefined || !(/^#([A-Fa-f0-9]{3}){1,2}$/.test(color))) {
                 color = '#' + Math.floor(Math.random() * 16777215).toString(16);
             }
             return color;
@@ -125,7 +124,7 @@ define(["require", "exports", "./vendor/Fabric"], function (require, exports, Fa
                 }
                 return result;
             }
-            throw new Error('Bad Hex');
+            throw new Error('Bad Hex: ' + hex);
         }
     }
     exports.AreaShapeFactory = AreaShapeFactory;

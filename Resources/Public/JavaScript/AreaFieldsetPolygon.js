@@ -8,15 +8,15 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "./vendor/Fabric", "./FormElementAbstract"], function (require, exports, fabric, FormElementAbstract_1) {
+define(["require", "exports", "./vendor/Fabric", "./AreaFieldsetAbstract"], function (require, exports, fabric, AreaFieldsetAbstract_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    class FormElementPolygon extends FormElementAbstract_1.FormElementAbstract {
-        constructor(points, options) {
-            super(points, options);
+    class AreaFieldsetPolygon extends AreaFieldsetAbstract_1.AreaFieldsetAbstract {
+        constructor(attributes, configuration, shape) {
+            super(attributes, configuration, shape);
             this.name = 'polygon';
             this.controls = [];
-            this.on('moved', this.polygonMoved.bind(this));
+            this.bindControls();
         }
         updateFields() {
             this.getElement('.color').value = this.data.color;
@@ -44,10 +44,14 @@ define(["require", "exports", "./vendor/Fabric", "./FormElementAbstract"], funct
             });
             return Object.assign(Object.assign({}, this.attributes), { points: points });
         }
-        addControls() {
-            this.points.forEach((point, index) => {
-                this.addControl(this.controlConfig, point, index, 100000);
+        bindControls() {
+            this.areaShape.controls.forEach((control) => {
+                control.on('moved', this.pointMoved.bind(this));
+                this.areaShape.canvas.add(control);
             });
+            this.areaShape.canvas.renderAll();
+        }
+        addControl(areaConfig, point, index, newControlIndex) {
         }
         updateCanvas(event) {
             let field = (event.currentTarget || event.target), [, point] = field.id.split('_'), control = this.controls[parseInt(point)], x = control.getCenterPoint().x, y = control.getCenterPoint().y;
@@ -63,16 +67,6 @@ define(["require", "exports", "./vendor/Fabric", "./FormElementAbstract"], funct
             this.points[control.name] = { x: x, y: y };
             this.canvas.renderAll();
         }
-        addControl(areaConfig, point, index, newControlIndex) {
-            let circle = new fabric.Circle(Object.assign(Object.assign({}, areaConfig), { hasControls: false, radius: 5, fill: areaConfig.cornerColor, stroke: areaConfig.cornerStrokeColor, originX: 'center', originY: 'center', name: index, polygon: this, point: point, type: 'control', opacity: this.controls.length === 0 ? 0 : this.controls[0].opacity, 
-                // set control position relative to polygon
-                left: this.left + point.x, top: this.top + point.y }));
-            circle.on('moved', this.pointMoved.bind(this));
-            point.control = circle;
-            this.controls = fabric.Polygon.addElementToArrayWithPosition(this.controls, circle, newControlIndex);
-            this.canvas.add(circle);
-            this.canvas.renderAll();
-        }
         pointMoved(event) {
             let control = event.target, id = 'p' + control.polygon.id + '_' + control.name, center = control.getCenterPoint();
             this.getElement('#x' + id).value = center.x;
@@ -85,13 +79,13 @@ define(["require", "exports", "./vendor/Fabric", "./FormElementAbstract"], funct
             });
         }
         addPointBeforeAction(event) {
-            let direction = FormElementAbstract_1.FormElementAbstract.before, index = this.points.length, parentElement = this.getElement('.positionOptions'), [point, element, currentPointIndex, currentPoint] = this.getPointElementAndCurrentPoint(event, direction);
+            let direction = AreaFieldsetAbstract_1.AreaFieldsetAbstract.before, index = this.points.length, parentElement = this.getElement('.positionOptions'), [point, element, currentPointIndex, currentPoint] = this.getPointElementAndCurrentPoint(event, direction);
             parentElement.insertBefore(element, currentPoint.element);
             this.points = fabric.Polygon.addElementToArrayWithPosition(this.points, point, currentPointIndex + direction);
             this.addControl(this.configuration, point, index, currentPointIndex + direction);
         }
         addPointAfterAction(event) {
-            let direction = FormElementAbstract_1.FormElementAbstract.after, index = this.points.length, parentElement = this.getElement('.positionOptions'), [point, element, currentPointIndex, currentPoint] = this.getPointElementAndCurrentPoint(event, direction);
+            let direction = AreaFieldsetAbstract_1.AreaFieldsetAbstract.after, index = this.points.length, parentElement = this.getElement('.positionOptions'), [point, element, currentPointIndex, currentPoint] = this.getPointElementAndCurrentPoint(event, direction);
             if (currentPoint.element.nextSibling) {
                 parentElement.insertBefore(element, currentPoint.element.nextSibling);
             }
@@ -178,5 +172,5 @@ define(["require", "exports", "./vendor/Fabric", "./FormElementAbstract"], funct
             return array;
         }
     }
-    exports.FormElementPolygon = FormElementPolygon;
+    exports.AreaFieldsetPolygon = AreaFieldsetPolygon;
 });

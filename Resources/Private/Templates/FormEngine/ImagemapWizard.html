@@ -1,26 +1,29 @@
-<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers">
 
-	<f:section name="Main">
+    <f:section name="Main">
 
-		<div class="modal-panel-main">
-			<div id="t3js-imagemap-container" class="picture">
-				<f:image image="{image}" treatIdAsReference="true" class="image" maxWidth="1000" maxHeight="1000"/>
-				<canvas id="modal-canvas" class="canvas"></canvas>
-			</div>
-		</div>
+        <div class="modal-panel-main">
+            <div id="t3js-imagemap-container" class="picture">
+                <f:image image="{image}" id="t3js-editor-image" class="image" maxWidth="1000" maxHeight="1000"/>
+                <canvas id="canvas" class="canvas"></canvas>
+            </div>
+        </div>
 
-		<div class="modal-panel-sidebar">
-			<div class="panel-group" id="area-form" role="tablist" aria-multiselectable="true">
-				<form name="areasForm" id="areasForm">
-					<div id="areaZone"></div>
-					<f:render partial="RectangleForm"/>
-					<f:render partial="CircleForm"/>
-					<f:render partial="PolygonForm"/>
-					<f:render partial="PolyCoords"/>
-				</form>
-			</div>
-		</div>
+        <div class="modal-panel-sidebar">
+            <div class="panel-group" id="area-form" role="tablist" aria-multiselectable="true">
+                <form name="areasForm" id="areasForm">
+                    <div id="areaZone"></div>
 
-	</f:section>
+                    <f:render partial="RectangleForm"/>
+
+                    <f:render partial="CircleForm"/>
+
+                    <f:render partial="PolygonForm"/>
+                    <f:render partial="PolyCoords"/>
+                </form>
+            </div>
+        </div>
+
+    </f:section>
 
 </html>

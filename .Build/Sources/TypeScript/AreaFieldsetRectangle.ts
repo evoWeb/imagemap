@@ -11,9 +11,9 @@
 
 /// <reference types="../../types/index"/>
 
-import { FormElementAbstract } from './FormElementAbstract';
+import { AreaFieldsetAbstract } from './AreaFieldsetAbstract';
 
-export class FormElementRectangle extends FormElementAbstract {
+export class AreaFieldsetRectangle extends AreaFieldsetAbstract {
   protected name: string = 'rectangle';
 
   public updateFields() {

@@ -2,8 +2,6 @@
 
 // Common
 import {src, dest, series} from 'gulp';
-import fs from 'fs';
-import glob from 'glob';
 
 // JS
 import typescript from 'gulp-typescript';
@@ -57,35 +55,12 @@ let copyTask = () => {
     .pipe(dest(tasks.copy.dest));
 };
 
-let typescriptTask = (done) => {
-  let position = process.argv.indexOf('--file'),
-    requestedFile = position > -1 ? process.argv[position + 1] : null;
+let typescriptTask = () => {
+  let tsProject = typescript.createProject('./tsconfig.json');
 
-  let seriesTasks = [];
-
-  glob.sync(tasks.typescript.src + '*').map((filePath) => {
-    if (fs.statSync(filePath).isDirectory()) {
-      return;
-    }
-    if (requestedFile == null || filePath.indexOf(requestedFile) > -1) {
-      let buildJavascript = (singleDone) => {
-        let tsProject = typescript.createProject('./tsconfig.json');
-
-        src(filePath)
-          .pipe(tsProject())
-          .js.pipe(dest(tasks.typescript.dest));
-        singleDone();
-      };
-      buildJavascript.displayName = filePath;
-
-      seriesTasks.push(buildJavascript);
-    }
-  });
-
-  return series(...seriesTasks, function typescriptTasks (allDone) {
-    allDone();
-    done();
-  })();
+  return src(tasks.typescript.src + '*')
+    .pipe(tsProject())
+    .pipe(dest(tasks.typescript.dest));
 };
 
 exports.scss = stylesTask;

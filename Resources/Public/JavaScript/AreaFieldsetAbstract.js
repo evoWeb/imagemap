@@ -11,8 +11,8 @@
 define(["require", "exports", "jquery", "./vendor/Fabric", "./AreaShapeFactory"], function (require, exports, $, fabric, AreaShapeFactory_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    class FormElementAbstract {
-        constructor(attributes, configuration) {
+    class AreaFieldsetAbstract {
+        constructor(attributes, configuration, shape) {
             this.id = 0;
             this.name = '';
             this.eventDelay = 0;
@@ -20,6 +20,7 @@ define(["require", "exports", "jquery", "./vendor/Fabric", "./AreaShapeFactory"]
             this.configuration = {};
             this.attributes = attributes;
             this.configuration = configuration;
+            this.areaShape = shape;
         }
         postAddToForm() {
             this.id = fabric.Object.__uid++;
@@ -56,7 +57,7 @@ define(["require", "exports", "jquery", "./vendor/Fabric", "./AreaShapeFactory"]
         }
         fieldInputHandler(event) {
             clearTimeout(this.eventDelay);
-            this.eventDelay = FormElementAbstract.wait(() => { this.updateCanvas(event); }, 500);
+            this.eventDelay = AreaFieldsetAbstract.wait(() => { this.updateCanvas(event); }, 500);
         }
         buttonEventHandler(button) {
             let action = button.dataset.action + 'Action';
@@ -85,10 +86,10 @@ define(["require", "exports", "jquery", "./vendor/Fabric", "./AreaShapeFactory"]
             this.form.openLinkBrowser(event.currentTarget, this);
         }
         upAction() {
-            this.form.moveArea(this, FormElementAbstract.before);
+            this.form.moveArea(this, AreaFieldsetAbstract.before);
         }
         downAction() {
-            this.form.moveArea(this, FormElementAbstract.after);
+            this.form.moveArea(this, AreaFieldsetAbstract.after);
         }
         deleteAction() {
             if (this.element) {
@@ -145,25 +146,25 @@ define(["require", "exports", "jquery", "./vendor/Fabric", "./AreaShapeFactory"]
          * Add faux input as target for browselink which listens for changes and writes value to real field
          */
         addFauxInput() {
-            if (this.form.fauxForm) {
-                let fauxInput = this.editor.fauxFormDocument.createElement('input');
+            if (this.form.browselinkTargetForm) {
+                let fauxInput = this.editor.browselinkParent.createElement('input');
                 fauxInput.setAttribute('id', 'href' + this.id);
                 fauxInput.setAttribute('data-formengine-input-name', 'href' + this.id);
                 fauxInput.setAttribute('value', this.attributes.href);
                 fauxInput.onchange = this.changedFauxInput.bind(this);
-                this.form.fauxForm.appendChild(fauxInput);
+                this.form.browselinkTargetForm.appendChild(fauxInput);
             }
         }
         removeFauxInput() {
-            if (this.form && this.form.fauxForm !== null) {
-                let field = this.form.fauxForm.querySelector('#href' + this.id);
+            if (this.form && this.form.browselinkTargetForm !== null) {
+                let field = this.form.browselinkTargetForm.querySelector('#href' + this.id);
                 if (field) {
                     field.remove();
                 }
             }
         }
         changedFauxInput() {
-            let field = this.form.fauxForm.querySelector('#href' + this.id);
+            let field = this.form.browselinkTargetForm.querySelector('#href' + this.id);
             this.attributes.href = field.value;
             this.updateFields();
         }
@@ -171,7 +172,7 @@ define(["require", "exports", "jquery", "./vendor/Fabric", "./AreaShapeFactory"]
             return window.setTimeout(callback, delay);
         }
     }
-    exports.FormElementAbstract = FormElementAbstract;
-    FormElementAbstract.before = -1;
-    FormElementAbstract.after = 1;
+    exports.AreaFieldsetAbstract = AreaFieldsetAbstract;
+    AreaFieldsetAbstract.before = -1;
+    AreaFieldsetAbstract.after = 1;
 });

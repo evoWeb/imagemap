@@ -61,7 +61,7 @@ declare interface EditorConfiguration {
 
 declare interface EditorConfigurations {
   canvas?: CanvasSize,
-  fauxFormDocument?: Document,
+  browselinkTargetDocument?: Document,
   previewRerenderAjaxUrl?: string,
   browseLink?: object,
   browseLinkUrlAjaxUrl?: string,

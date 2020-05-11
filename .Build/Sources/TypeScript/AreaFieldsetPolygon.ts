@@ -14,16 +14,16 @@
 // @ts-ignore
 import * as fabric from './vendor/Fabric';
 
-import { FormElementAbstract } from './FormElementAbstract';
+import { AreaFieldsetAbstract } from './AreaFieldsetAbstract';
 
-export class FormElementPolygon extends FormElementAbstract {
+export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
   protected name: string = 'polygon';
 
   public controls: Array<any> = [];
 
-  constructor(points: Array<any>, options: AreaConfiguration) {
-    super(points, options);
-    this.on('moved', this.polygonMoved.bind(this));
+  constructor(attributes: AreaConfiguration, configuration: EditorConfigurations, shape: fabric.Object) {
+    super(attributes, configuration, shape)
+    this.bindControls();
   }
 
   public updateFields() {
@@ -63,10 +63,15 @@ export class FormElementPolygon extends FormElementAbstract {
     };
   }
 
-  public addControls() {
-    this.points.forEach((point: fabric.Object, index: number) => {
-      this.addControl(this.controlConfig, point, index, 100000);
-    });
+  protected bindControls() {
+    this.areaShape.controls.forEach((control: any) => {
+      control.on('moved', this.pointMoved.bind(this));
+      this.areaShape.canvas.add(control);
+    })
+    this.areaShape.canvas.renderAll();
+  }
+
+  public addControl(areaConfig: AreaConfiguration, point: Object, index: number, newControlIndex: number) {
   }
 
   protected updateCanvas(event: Event) {
@@ -90,35 +95,7 @@ export class FormElementPolygon extends FormElementAbstract {
     this.canvas.renderAll();
   }
 
-  protected addControl(areaConfig: AreaConfiguration, point: fabric.Object, index: number, newControlIndex: number) {
-    let circle = new fabric.Circle({
-      ...areaConfig,
-      hasControls: false,
-      radius: 5,
-      fill: areaConfig.cornerColor,
-      stroke: areaConfig.cornerStrokeColor,
-      originX: 'center',
-      originY: 'center',
-      name: index,
-      polygon: this,
-      point: point,
-      type: 'control',
-      opacity: this.controls.length === 0 ? 0 : this.controls[0].opacity,
-
-      // set control position relative to polygon
-      left: this.left + point.x,
-      top: this.top + point.y,
-    });
-    circle.on('moved', this.pointMoved.bind(this));
-
-    point.control = circle;
-
-    this.controls = fabric.Polygon.addElementToArrayWithPosition(this.controls, circle, newControlIndex);
-    this.canvas.add(circle);
-    this.canvas.renderAll();
-  }
-
-  protected pointMoved(event: FabricEvent) {
+  public pointMoved(event: FabricEvent) {
     let control = (event.target as fabric.Object),
       id = 'p' + control.polygon.id + '_' + control.name,
       center = control.getCenterPoint();
@@ -135,7 +112,7 @@ export class FormElementPolygon extends FormElementAbstract {
   }
 
   protected addPointBeforeAction(event: Event) {
-    let direction = FormElementAbstract.before,
+    let direction = AreaFieldsetAbstract.before,
       index = this.points.length,
       parentElement = this.getElement('.positionOptions'),
       [point, element, currentPointIndex, currentPoint] = this.getPointElementAndCurrentPoint(event, direction);
@@ -147,7 +124,7 @@ export class FormElementPolygon extends FormElementAbstract {
   }
 
   protected addPointAfterAction(event: Event) {
-    let direction = FormElementAbstract.after,
+    let direction = AreaFieldsetAbstract.after,
       index = this.points.length,
       parentElement = this.getElement('.positionOptions'),
       [point, element, currentPointIndex, currentPoint] = this.getPointElementAndCurrentPoint(event, direction);

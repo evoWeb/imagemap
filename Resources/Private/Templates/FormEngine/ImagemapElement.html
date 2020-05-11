@@ -1,71 +1,71 @@
 <html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
-			xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
-			data-namespace-typo3-fluid="true">
-	<f:layout name="Imagemap" />
+      xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers">
+    <f:layout name="Imagemap"/>
 
-	<f:section name="Main">
-		<f:if condition="{isAllowedFileExtension} && {image.properties.width}">
-			<f:then>
-				<f:if condition="{config.readOnly}">
-					<f:else>
-						<div class="form-control-wrap">
-							<input type="hidden" id="{formEngine.field.id}"
-										 name="{formEngine.field.name}"
-										 value="{formEngine.field.value}"
-										 data-tablename="{formEngine.field.tableName}"
-										 data-fieldname="{formEngine.field.fieldName}"
-										 data-uid="{formEngine.field.uid}"
-										 data-formengine-validation-rules="{formEngine.validation}"/>
-							<button class="btn btn-default t3js-area-wizard-trigger" id="{formEngine.field.id}-button"
-											data-url="{wizardUri}"
-											data-payload="{wizardPayload}"
-											data-severity="notice"
-											data-modal-title="{f:render(section: 'ModalTitle', arguments: _all)}"
-											data-image-uid="{image.uid}"
-											data-button-addrect-text="{f:translate(id: 'imagemap.form.addrect', extensionName: 'imagemap')}"
-											data-button-addcircle-text="{f:translate(id: 'imagemap.form.addcircle', extensionName: 'imagemap')}"
-											data-button-addpoly-text="{f:translate(id: 'imagemap.form.addpoly', extensionName: 'imagemap')}"
-											data-button-dismiss-text="{f:translate(id: 'imagemap.form.dismiss', extensionName: 'imagemap')}"
-											data-button-save-text="{f:translate(id: 'imagemap.form.save', extensionName: 'imagemap')}"
-											data-file-field="{config.fieldName}">
-								<core:icon identifier="extensions-imagemap-poly" alternativeMarkupIdentifier="inline" />
-								<f:translate id="imagemap.control.open.editor" extensionName="imagemap"/>
-							</button>
-						</div>
-					</f:else>
-				</f:if>
-				<div class="form-control-wrap">
-					<div class="form-wizards-element pictureWrap" id="{formEngine.field.id}_wrap">
-						<div id="{formEngine.field.id}-canvas" class="picture">
-							<f:image image="{image}" treatIdAsReference="true" class="image" maxWidth="400" maxHeight="400"/>
-							<canvas id="canvas" class="canvas"></canvas>
-							<div class="modifiedState alert alert-warning">
-								<div class="media">
-									<div class="media-left">
-									<span class="fa-stack fa-lg">
-										<span class="fa fa-circle fa-stack-2x"></span>
-										<span class="fa fa-exclamation fa-stack-1x"></span>
-									</span>
-									</div>
-									<div class="media-body">
-										<f:translate id="imagemap.element.is_modified" extensionName="imagemap"/>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</f:then>
-		</f:if>
-	</f:section>
+    <f:section name="Main">
+        <f:if condition="{isAllowedFileExtension} && {image.properties.width}">
+            <f:then>
+                <f:if condition="{config.readOnly}">
+                    <f:else>
+                        <div class="form-control-wrap">
+                            <input type="hidden" id="{formEngine.field.id}"
+                                   name="{formEngine.field.name}"
+                                   value="{formEngine.field.value}"
+                                   data-tablename="{formEngine.field.tableName}"
+                                   data-fieldname="{formEngine.field.fieldName}"
+                                   data-uid="{formEngine.field.uid}"
+                                   data-formengine-validation-rules="{formEngine.validation}"/>
+                            <button class="btn btn-default t3js-area-wizard-trigger" id="{formEngine.field.id}-button"
+                                    data-url="{wizardUri}"
+                                    data-payload="{wizardPayload}"
+                                    data-severity="notice"
+                                    data-modal-title="{f:render(section: 'ModalTitle', arguments: _all)}"
+                                    data-image-uid="{image.uid}"
+                                    data-button-addrect-text="{f:translate(id: 'imagemap.form.addrect', extensionName: 'imagemap')}"
+                                    data-button-addcircle-text="{f:translate(id: 'imagemap.form.addcircle', extensionName: 'imagemap')}"
+                                    data-button-addpoly-text="{f:translate(id: 'imagemap.form.addpoly', extensionName: 'imagemap')}"
+                                    data-button-dismiss-text="{f:translate(id: 'imagemap.form.dismiss', extensionName: 'imagemap')}"
+                                    data-button-save-text="{f:translate(id: 'imagemap.form.save', extensionName: 'imagemap')}"
+                                    data-file-field="{config.fieldName}">
+                                <core:icon identifier="extensions-imagemap-poly" alternativeMarkupIdentifier="inline"/>
+                                <f:translate id="imagemap.control.open.editor" extensionName="imagemap"/>
+                            </button>
+                        </div>
+                    </f:else>
+                </f:if>
+                <div class="form-control-wrap">
+                    <div class="form-wizards-element pictureWrap" id="{formEngine.field.id}_wrap">
+                        <div id="{formEngine.field.id}-canvas" class="picture">
+                            <f:image image="{image}" treatIdAsReference="true" class="image" maxWidth="400" maxHeight="400"/>
+                            <canvas id="canvas" class="canvas"></canvas>
+                            <div class="modifiedState alert alert-warning">
+                                <div class="media">
+                                    <div class="media-left">
+                                        <span class="fa-stack fa-lg">
+                                            <span class="fa fa-circle fa-stack-2x"></span>
+                                            <span class="fa fa-exclamation fa-stack-1x"></span>
+                                        </span>
+                                    </div>
+                                    <div class="media-body">
+                                        <f:translate id="imagemap.element.is_modified" extensionName="imagemap"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </f:then>
+        </f:if>
+    </f:section>
 
-	<f:section name="ModalTitle">
-		<f:translate id="imagemap.modal.title" extensionName="imagemap"/> :
-		<f:if condition="{image.properties.title}">
-			<f:then>{image.properties.title} &mdash; {image.name}</f:then>
-			<f:else>{image.name}</f:else>
-		</f:if>
-		({image.properties.width} × {image.properties.height})
-	</f:section>
+    <f:section name="ModalTitle">
+        <f:translate id="imagemap.modal.title" extensionName="imagemap"/>
+        :
+        <f:if condition="{image.properties.title}">
+            <f:then>{image.properties.title} &mdash; {image.name}</f:then>
+            <f:else>{image.name}</f:else>
+        </f:if>
+        ({image.properties.width} × {image.properties.height})
+    </f:section>
 
 </html>

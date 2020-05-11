@@ -18,46 +18,53 @@ import * as fabric from './vendor/Fabric';
 
 import { AreaForm } from './AreaForm';
 import { AreaShapeFactory } from './AreaShapeFactory';
-import { FormElementAbstract } from './FormElementAbstract';
+import { AreaFieldsetFactory } from './AreaFieldsetFactory';
+import { AreaFieldsetAbstract } from './AreaFieldsetAbstract';
 
 // needed to access top frame elements
 fabric.document = top.document || document;
 fabric.window = top.window || window;
 
-export class AreaEditor {
+export class Editor {
   readonly configurations: EditorConfigurations;
 
-  public document: Document;
-
-  public fauxFormDocument: Document;
-
-  public formSelector: string = '';
-
-  readonly preview: boolean = false;
-
-  protected areaShapes: Array<fabric.Object> = [];
-
-  public areaForms: Array<FormElementAbstract> = [];
+  public areaShapes: Array<fabric.Object> = [];
 
   public canvas: fabric.Canvas;
 
+  readonly width: number;
+
+  readonly height: number;
+
+  protected modalParent: Document;
+
+  public browselinkParent: Document;
+
+  public formSelector: string = '#areasForm';
+
+  public areaFieldsets: Array<AreaFieldsetAbstract> = [];
+
   public form: AreaForm;
 
-  constructor(configurations: EditorConfigurations, canvas: HTMLElement, formSelector: string, document: Document) {
+  constructor(configurations: EditorConfigurations, canvas: HTMLCanvasElement, modalParent: Document, browselinkParent: Document) {
     this.configurations = configurations;
-    this.document = document;
+    this.width = configurations.canvas.width;
+    this.height = configurations.canvas.height;
+    this.modalParent = modalParent;
+    this.browselinkParent = browselinkParent;
+
     this.initializeCanvas(canvas, configurations);
-    this.initializeAreaForm(formSelector)
+    this.initializeAreaForm();
   }
 
-  protected initializeCanvas(canvas: HTMLElement, options: EditorConfigurations) {
+  protected initializeCanvas(canvas: HTMLCanvasElement, configurations: EditorConfigurations) {
     let activePolygon: fabric.Object = null;
 
     this.canvas = new fabric.Canvas(canvas, {
-      ...options.canvas,
+      ...configurations.canvas,
       selection: false,
       preserveObjectStacking: true,
-      hoverCursor: this.preview ? 'default' : 'move',
+      hoverCursor: 'move',
     });
 
     this.canvas.on('object:moving', (event: FabricEvent) => {
@@ -120,22 +127,30 @@ export class AreaEditor {
     });
   }
 
-  protected initializeAreaForm(formSelector: string) {
-    this.form = new AreaForm(formSelector, this);
+  protected initializeAreaForm() {
+    this.form = new AreaForm(this.formSelector, this.modalParent, this);
+  }
+
+  public resize(width: number, height: number) {
+    if (this.width !== width || this.height !== height) {
+      // @todo resize canvas size
+      // @todo resize and reposition shapes on canvas
+      // @todo change values in areaFieldset
+    }
   }
 
   public renderAreas(areas: Array<AreaConfiguration>) {
     if (areas !== undefined) {
-      let areaShapeFactory = new AreaShapeFactory(this.configurations);
+      let areaShapeFactory = new AreaShapeFactory(this.configurations, this.canvas);
+      let areaFieldsetFactory = new AreaFieldsetFactory(this.configurations);
 
       areas.forEach((area) => {
-        let areaShape = areaShapeFactory.createShape(area, true);
+        let areaShape = areaShapeFactory.createShape(area, true),
+          areaFieldset = areaFieldsetFactory.createFieldset(area, areaShape);
+
         this.canvas.add(areaShape);
         this.areaShapes.push(areaShape);
-        /*areaElement.editor = this;
-        if (this.form) {
-          this.form.addArea(areaElement);
-        }*/
+        this.form.addArea(areaFieldset);
       });
     }
   }
@@ -146,24 +161,29 @@ export class AreaEditor {
     });
   }
 
-  public deleteArea(area: FormElementAbstract) {
-    let areas: Array<FormElementAbstract> = [];
-    this.areaForms.forEach((currentArea) => {
+  public deleteArea(area: AreaFieldsetAbstract) {
+    let areas: Array<AreaFieldsetAbstract> = [];
+    this.areaFieldsets.forEach((currentArea) => {
       if (area !== currentArea) {
         areas.push(currentArea);
       }
     });
-    this.areaForms = areas;
+    this.areaFieldsets = areas;
     this.canvas.remove(area);
   }
 
   public getMapData() {
     let areas: object[] = [];
 
-    this.areaForms.forEach((area) => {
+    this.areaFieldsets.forEach((area) => {
       areas.push(area.getData());
     });
 
     return JSON.stringify(areas);
+  }
+
+  public destroy(): void {
+    this.canvas = null;
+    this.form.destroy();
   }
 }

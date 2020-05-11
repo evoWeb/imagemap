@@ -8,10 +8,10 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "./FormElementAbstract"], function (require, exports, FormElementAbstract_1) {
+define(["require", "exports", "./AreaFieldsetAbstract"], function (require, exports, AreaFieldsetAbstract_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    class FormElementRectangle extends FormElementAbstract_1.FormElementAbstract {
+    class AreaFieldsetRectangle extends AreaFieldsetAbstract_1.AreaFieldsetAbstract {
         constructor() {
             super(...arguments);
             this.name = 'rectangle';
@@ -67,5 +67,5 @@ define(["require", "exports", "./FormElementAbstract"], function (require, expor
                 } });
         }
     }
-    exports.FormElementRectangle = FormElementRectangle;
+    exports.AreaFieldsetRectangle = AreaFieldsetRectangle;
 });

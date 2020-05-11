@@ -11,14 +11,14 @@
 define(["require", "exports", "./vendor/Fabric", "./AreaShapeFactory"], function (require, exports, Fabric_1, AreaShapeFactory_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    class AreaPreview {
+    class Preview {
         constructor(configurations, canvas) {
             this.areaShapes = [];
             this.configurations = configurations;
-            this.initializeCanvas(canvas, configurations);
+            this.initializeCanvas(canvas);
         }
-        initializeCanvas(canvas, options) {
-            this.canvas = new Fabric_1.Canvas(canvas, Object.assign(Object.assign({}, options.canvas), { selection: false, preserveObjectStacking: true, hoverCursor: 'default' }));
+        initializeCanvas(canvas) {
+            this.canvas = new Fabric_1.Canvas(canvas, Object.assign(Object.assign({}, this.configurations.canvas), { selection: false, preserveObjectStacking: true, hoverCursor: 'default' }));
         }
         renderAreas(areas) {
             if (areas !== undefined) {
@@ -36,5 +36,5 @@ define(["require", "exports", "./vendor/Fabric", "./AreaShapeFactory"], function
             });
         }
     }
-    exports.AreaPreview = AreaPreview;
+    exports.Preview = Preview;
 });

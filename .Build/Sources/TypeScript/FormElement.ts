@@ -9,18 +9,18 @@
  * LICENSE.txt file that was distributed with this source code.
  */
 
-import { AreaPreview } from './AreaPreview';
+import { Preview } from './Preview';
 
 class FormElement {
   protected hiddenInput: HTMLInputElement;
 
   protected formElement: HTMLDivElement;
 
-  protected areaPreview: AreaPreview;
+  protected preview: Preview;
 
   constructor(fieldSelector: string) {
     this.initializeFormElement(fieldSelector);
-    this.initializeAreaEditor();
+    this.initializePreview();
     this.initializeEvents();
     this.renderAreas(this.hiddenInput.value);
   }
@@ -30,9 +30,9 @@ class FormElement {
     this.formElement = document.querySelector(fieldSelector + '-canvas');
   }
 
-  protected initializeAreaEditor() {
+  protected initializePreview() {
     let image: HTMLImageElement = this.formElement.querySelector('.image'),
-      configurations = {
+      configurations: EditorConfigurations = {
         canvas: {
           width: image.offsetWidth,
           height: image.offsetHeight,
@@ -40,7 +40,10 @@ class FormElement {
         },
       };
 
-    this.areaPreview = new AreaPreview(configurations, this.formElement.querySelector('#canvas'));
+    this.preview = new Preview(
+      configurations,
+      this.formElement.querySelector('#canvas')
+    );
   }
 
   protected initializeEvents() {
@@ -59,28 +62,26 @@ class FormElement {
     data.append('P[value]', field.value);
 
     request.open('POST', window.TYPO3.settings.ajaxUrls.imagemap_preview_rerender);
-    request.onreadystatechange = this.previewRerenderCallback.bind({
-      request: request,
-      formElement: this
-    });
+    request.onreadystatechange = this.previewRerenderCallback.bind(this);
     request.send(data);
   }
 
-  protected previewRerenderCallback(this: {request: XMLHttpRequest, formElement: FormElement}) {
-    if (this.request.readyState === 4 && this.request.status === 200) {
-      (this.formElement.formElement.querySelector('.modifiedState') as HTMLDivElement).style.display = 'block';
-      this.formElement.areaPreview.removeAreas();
+  protected previewRerenderCallback(this: FormElement, e: ProgressEvent) {
+    let request = (e.target as XMLHttpRequest);
+    if (request.readyState === 4 && request.status === 200) {
+      (this.formElement.querySelector('.modifiedState') as HTMLDivElement).style.display = 'block';
+      this.preview.removeAreas();
 
-      let data = JSON.parse(this.request.responseText);
+      let data = JSON.parse(request.responseText);
       if (data !== null && data.length) {
-        this.formElement.areaPreview.renderAreas(data.areas);
+        this.preview.renderAreas(data.areas);
       }
     }
   }
 
   protected renderAreas(areas: string) {
     if (areas.length) {
-      this.areaPreview.renderAreas(JSON.parse(areas));
+      this.preview.renderAreas(JSON.parse(areas));
     }
   }
 }

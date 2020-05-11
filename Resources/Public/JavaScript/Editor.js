@@ -8,26 +8,28 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "./vendor/Fabric", "./AreaForm", "./AreaShapeFactory", "TYPO3/CMS/Core/Contrib/jquery.minicolors"], function (require, exports, fabric, AreaForm_1, AreaShapeFactory_1) {
+define(["require", "exports", "./vendor/Fabric", "./AreaForm", "./AreaShapeFactory", "./AreaFieldsetFactory", "TYPO3/CMS/Core/Contrib/jquery.minicolors"], function (require, exports, fabric, AreaForm_1, AreaShapeFactory_1, AreaFieldsetFactory_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     // needed to access top frame elements
     fabric.document = top.document || document;
     fabric.window = top.window || window;
-    class AreaEditor {
-        constructor(configurations, canvas, formSelector, document) {
-            this.formSelector = '';
-            this.preview = false;
+    class Editor {
+        constructor(configurations, canvas, modalParent, browselinkParent) {
+            this.formSelector = '#areasForm';
             this.areaShapes = [];
-            this.areaForms = [];
+            this.areaFieldsets = [];
             this.configurations = configurations;
-            this.document = document;
+            this.width = configurations.canvas.width;
+            this.height = configurations.canvas.height;
+            this.modalParent = modalParent;
+            this.browselinkParent = browselinkParent;
             this.initializeCanvas(canvas, configurations);
-            this.initializeAreaForm(formSelector);
+            this.initializeAreaForm();
         }
-        initializeCanvas(canvas, options) {
+        initializeCanvas(canvas, configurations) {
             let activePolygon = null;
-            this.canvas = new fabric.Canvas(canvas, Object.assign(Object.assign({}, options.canvas), { selection: false, preserveObjectStacking: true, hoverCursor: this.preview ? 'default' : 'move' }));
+            this.canvas = new fabric.Canvas(canvas, Object.assign(Object.assign({}, configurations.canvas), { selection: false, preserveObjectStacking: true, hoverCursor: 'move' }));
             this.canvas.on('object:moving', (event) => {
                 let element = event.target;
                 switch (element.type) {
@@ -85,20 +87,25 @@ define(["require", "exports", "./vendor/Fabric", "./AreaForm", "./AreaShapeFacto
                 });
             });
         }
-        initializeAreaForm(formSelector) {
-            this.form = new AreaForm_1.AreaForm(formSelector, this);
+        initializeAreaForm() {
+            this.form = new AreaForm_1.AreaForm(this.formSelector, this.modalParent, this);
+        }
+        resize(width, height) {
+            if (this.width !== width || this.height !== height) {
+                // @todo resize canvas size
+                // @todo resize and reposition shapes on canvas
+                // @todo change values in areaFieldset
+            }
         }
         renderAreas(areas) {
             if (areas !== undefined) {
-                let areaShapeFactory = new AreaShapeFactory_1.AreaShapeFactory(this.configurations);
+                let areaShapeFactory = new AreaShapeFactory_1.AreaShapeFactory(this.configurations, this.canvas);
+                let areaFieldsetFactory = new AreaFieldsetFactory_1.AreaFieldsetFactory(this.configurations);
                 areas.forEach((area) => {
-                    let areaShape = areaShapeFactory.createShape(area, true);
+                    let areaShape = areaShapeFactory.createShape(area, true), areaFieldset = areaFieldsetFactory.createFieldset(area, areaShape);
                     this.canvas.add(areaShape);
                     this.areaShapes.push(areaShape);
-                    /*areaElement.editor = this;
-                    if (this.form) {
-                      this.form.addArea(areaElement);
-                    }*/
+                    this.form.addArea(areaFieldset);
                 });
             }
         }
@@ -109,21 +116,25 @@ define(["require", "exports", "./vendor/Fabric", "./AreaForm", "./AreaShapeFacto
         }
         deleteArea(area) {
             let areas = [];
-            this.areaForms.forEach((currentArea) => {
+            this.areaFieldsets.forEach((currentArea) => {
                 if (area !== currentArea) {
                     areas.push(currentArea);
                 }
             });
-            this.areaForms = areas;
+            this.areaFieldsets = areas;
             this.canvas.remove(area);
         }
         getMapData() {
             let areas = [];
-            this.areaForms.forEach((area) => {
+            this.areaFieldsets.forEach((area) => {
                 areas.push(area.getData());
             });
             return JSON.stringify(areas);
         }
+        destroy() {
+            this.canvas = null;
+            this.form.destroy();
+        }
     }
-    exports.AreaEditor = AreaEditor;
+    exports.Editor = Editor;
 });

@@ -15,10 +15,10 @@ import * as $ from 'jquery';
 // @ts-ignore
 import * as fabric from './vendor/Fabric';
 import { AreaShapeFactory } from './AreaShapeFactory';
-import { AreaEditor } from './AreaEditor';
+import { Editor } from './Editor';
 import { AreaForm } from './AreaForm';
 
-export abstract class FormElementAbstract {
+export abstract class AreaFieldsetAbstract {
   static before: number = -1;
 
   static after: number = 1;
@@ -33,7 +33,7 @@ export abstract class FormElementAbstract {
 
   public form: AreaForm;
 
-  public editor: AreaEditor;
+  public editor: Editor;
 
   public areaShape: fabric.Object;
 
@@ -43,9 +43,10 @@ export abstract class FormElementAbstract {
 
   [property: string]: any;
 
-  constructor(attributes: Array<any>, configuration: AreaConfiguration) {
+  constructor(attributes: AreaConfiguration, configuration: EditorConfigurations, shape: fabric.Object) {
     this.attributes = attributes;
     this.configuration = configuration;
+    this.areaShape = shape;
   }
 
   public postAddToForm() {
@@ -89,7 +90,7 @@ export abstract class FormElementAbstract {
 
   protected fieldInputHandler(event: Event) {
     clearTimeout(this.eventDelay);
-    this.eventDelay = FormElementAbstract.wait(() => { this.updateCanvas(event); }, 500);
+    this.eventDelay = AreaFieldsetAbstract.wait(() => { this.updateCanvas(event); }, 500);
   }
 
   protected buttonEventHandler(button: HTMLElement) {
@@ -125,11 +126,11 @@ export abstract class FormElementAbstract {
   }
 
   protected upAction() {
-    this.form.moveArea(this, FormElementAbstract.before);
+    this.form.moveArea(this, AreaFieldsetAbstract.before);
   }
 
   protected downAction() {
-    this.form.moveArea(this, FormElementAbstract.after);
+    this.form.moveArea(this, AreaFieldsetAbstract.after);
   }
 
   protected deleteAction() {
@@ -201,19 +202,19 @@ export abstract class FormElementAbstract {
    * Add faux input as target for browselink which listens for changes and writes value to real field
    */
   protected addFauxInput() {
-    if (this.form.fauxForm) {
-      let fauxInput = this.editor.fauxFormDocument.createElement('input');
+    if (this.form.browselinkTargetForm) {
+      let fauxInput = this.editor.browselinkParent.createElement('input');
       fauxInput.setAttribute('id', 'href' + this.id);
       fauxInput.setAttribute('data-formengine-input-name', 'href' + this.id);
       fauxInput.setAttribute('value', this.attributes.href);
       fauxInput.onchange = this.changedFauxInput.bind(this);
-      this.form.fauxForm.appendChild(fauxInput);
+      this.form.browselinkTargetForm.appendChild(fauxInput);
     }
   }
 
   protected removeFauxInput() {
-    if (this.form && this.form.fauxForm !== null) {
-      let field = this.form.fauxForm.querySelector('#href' + this.id);
+    if (this.form && this.form.browselinkTargetForm !== null) {
+      let field = this.form.browselinkTargetForm.querySelector('#href' + this.id);
       if (field) {
         field.remove();
       }
@@ -221,7 +222,7 @@ export abstract class FormElementAbstract {
   }
 
   protected changedFauxInput() {
-    let field = (this.form.fauxForm.querySelector('#href' + this.id) as HTMLInputElement);
+    let field = (this.form.browselinkTargetForm.querySelector('#href' + this.id) as HTMLInputElement);
     this.attributes.href = field.value;
     this.updateFields();
   }

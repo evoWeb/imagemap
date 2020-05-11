@@ -15,7 +15,7 @@
 import { Canvas, Object } from './vendor/Fabric';
 import { AreaShapeFactory } from './AreaShapeFactory';
 
-export class AreaPreview {
+export class Preview {
   readonly configurations: EditorConfigurations;
 
   protected areaShapes: Array<Object> = [];
@@ -24,12 +24,12 @@ export class AreaPreview {
 
   constructor(configurations: EditorConfigurations, canvas: HTMLElement) {
     this.configurations = configurations;
-    this.initializeCanvas(canvas, configurations);
+    this.initializeCanvas(canvas);
   }
 
-  protected initializeCanvas(canvas: HTMLElement, options: EditorConfigurations) {
+  protected initializeCanvas(canvas: HTMLElement) {
     this.canvas = new Canvas(canvas, {
-      ...options.canvas,
+      ...this.configurations.canvas,
       selection: false,
       preserveObjectStacking: true,
       hoverCursor: 'default',
@@ -42,6 +42,7 @@ export class AreaPreview {
 
       areas.forEach((area: AreaConfiguration) => {
         let areaShape = areaShapeFactory.createShape(area, false);
+
         this.canvas.add(areaShape);
         this.areaShapes.push(areaShape);
       });

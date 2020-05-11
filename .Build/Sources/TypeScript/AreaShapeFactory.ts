@@ -12,7 +12,7 @@
 /// <reference types="../../types/index"/>
 
 // @ts-ignore
-import { Rect, Circle, Polygon, Object } from './vendor/Fabric';
+import { Rect, Circle, Polygon, Canvas, Object } from './vendor/Fabric';
 
 export class AreaShapeFactory {
   readonly areaConfiguration = {
@@ -25,24 +25,21 @@ export class AreaShapeFactory {
     transparentCorners: false
   };
 
-  readonly configuration: EditorConfigurations;
+  readonly width: number;
 
-  protected width: number;
+  readonly height: number;
 
-  protected height: number;
+  readonly canvas: Canvas;
 
-  constructor(configuration: EditorConfigurations) {
-    this.setCanvasDimension(configuration.canvas.width, configuration.canvas.height);
-  }
-
-  public setCanvasDimension(width: number, height: number) {
-    this.width = width;
-    this.height = height;
+  constructor(configurations: EditorConfigurations, canvas: Canvas = null) {
+    this.width = configurations.canvas.width;
+    this.height = configurations.canvas.height;
+    this.canvas = canvas;
   }
 
   public createShape(area: AreaConfiguration, selectable: boolean): Object {
     area.color = AreaShapeFactory.getRandomColor(area.color);
-    let areaElement,
+    let areaShape: Object,
       configuration = {
         ...area,
         ...this.areaConfiguration,
@@ -55,21 +52,26 @@ export class AreaShapeFactory {
 
     switch (configuration.shape) {
       case 'rect':
-        areaElement = this.createRectangle(configuration);
+        areaShape = this.createRectangle(configuration);
         break;
 
       case 'circle':
-        areaElement = this.createCircle(configuration);
+        areaShape = this.createCircle(configuration);
         break;
 
       case 'poly':
-        areaElement = this.createPolygon(configuration);
+        areaShape = this.createPolygon(configuration);
         break;
     }
-    return areaElement;
+
+    if (this.canvas !== null) {
+      areaShape.canvas = this.canvas;
+    }
+
+    return areaShape;
   }
 
-  protected createRectangle(configuration: AreaConfiguration) {
+  private createRectangle(configuration: AreaConfiguration): Rect {
     let coords = configuration.coords,
       left = Math.round(coords.left * this.width),
       top = Math.round(coords.top * this.height),
@@ -85,7 +87,7 @@ export class AreaShapeFactory {
     });
   }
 
-  protected createCircle(configuration: AreaConfiguration) {
+  private createCircle(configuration: AreaConfiguration): Circle {
     let coords = configuration.coords,
       radius = Math.round(coords.radius * this.width),
       left = Math.round(coords.left * this.width) - radius,
@@ -107,7 +109,7 @@ export class AreaShapeFactory {
     return area;
   }
 
-  protected createPolygon(configuration: AreaConfiguration) {
+  private createPolygon(configuration: AreaConfiguration): Polygon {
     let points: Point[] = configuration.points || [],
       area: Polygon;
 
@@ -120,17 +122,24 @@ export class AreaShapeFactory {
       ...configuration,
       objectCaching: false,
     });
+    area.controls = [];
 
     if (configuration.selectable) {
       points.forEach((point: Object, index: number) => {
-        this.addControl(area, this.areaConfiguration, point, index, 100000);
+        AreaShapeFactory.addControl(area, this.areaConfiguration, point, index, 100000);
       });
     }
 
     return area;
   }
 
-  protected addControl(area: Polygon, areaConfig: AreaConfiguration, point: Object, index: number, newControlIndex: number) {
+  static addControl(
+    area: Polygon,
+    areaConfig: AreaConfiguration,
+    point: Object,
+    index: number,
+    newControlIndex: number
+  ): void {
     let circle = new Circle({
       ...areaConfig,
       hasControls: false,
@@ -140,25 +149,22 @@ export class AreaShapeFactory {
       originX: 'center',
       originY: 'center',
       name: index,
-      polygon: this,
+      polygon: area,
       point: point,
       type: 'control',
-      opacity: area.controls.length === 0 ? 0 : area.controls[0].opacity,
+      opacity: area.opacity,
 
       // set control position relative to polygon
       left: area.left + point.x,
       top: area.top + point.y,
     });
-    circle.on('moved', area.pointMoved.bind(this));
 
     point.control = circle;
 
     area.controls = AreaShapeFactory.addElementToArrayWithPosition(area.controls, circle, newControlIndex);
-    area.canvas.add(circle);
-    area.canvas.renderAll();
   }
 
-  static addElementToArrayWithPosition(array: any[], item: any, newPointIndex: number) {
+  static addElementToArrayWithPosition(array: any[], item: any, newPointIndex: number): any[] {
     if (newPointIndex < 0) {
       array.unshift(item);
     } else if (newPointIndex >= array.length) {
@@ -176,14 +182,14 @@ export class AreaShapeFactory {
     return array;
   }
 
-  static getRandomColor(color: string) {
-    if (color === undefined) {
+  static getRandomColor(color: string): string {
+    while (color === undefined || !(/^#([A-Fa-f0-9]{3}){1,2}$/.test(color))) {
       color = '#' + Math.floor(Math.random() * 16777215).toString(16);
     }
     return color;
   }
 
-  static hexToRgbA(hex: string, alpha: number) {
+  static hexToRgbA(hex: string, alpha: number): string {
     let chars, r, g, b, result;
     if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
       chars = hex.substring(1).split('');
@@ -202,6 +208,6 @@ export class AreaShapeFactory {
       }
       return result;
     }
-    throw new Error('Bad Hex');
+    throw new Error('Bad Hex: ' + hex);
   }
 }

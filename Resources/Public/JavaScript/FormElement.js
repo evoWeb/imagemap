@@ -8,12 +8,12 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "./AreaPreview"], function (require, exports, AreaPreview_1) {
+define(["require", "exports", "./Preview"], function (require, exports, Preview_1) {
     "use strict";
     class FormElement {
         constructor(fieldSelector) {
             this.initializeFormElement(fieldSelector);
-            this.initializeAreaEditor();
+            this.initializePreview();
             this.initializeEvents();
             this.renderAreas(this.hiddenInput.value);
         }
@@ -21,7 +21,7 @@ define(["require", "exports", "./AreaPreview"], function (require, exports, Area
             this.hiddenInput = document.querySelector(fieldSelector);
             this.formElement = document.querySelector(fieldSelector + '-canvas');
         }
-        initializeAreaEditor() {
+        initializePreview() {
             let image = this.formElement.querySelector('.image'), configurations = {
                 canvas: {
                     width: image.offsetWidth,
@@ -29,7 +29,7 @@ define(["require", "exports", "./AreaPreview"], function (require, exports, Area
                     top: image.offsetHeight * -1,
                 },
             };
-            this.areaPreview = new AreaPreview_1.AreaPreview(configurations, this.formElement.querySelector('#canvas'));
+            this.preview = new Preview_1.Preview(configurations, this.formElement.querySelector('#canvas'));
         }
         initializeEvents() {
             this.hiddenInput.addEventListener('imagemap:changed', this.fieldChangedHandler.bind(this));
@@ -42,25 +42,23 @@ define(["require", "exports", "./AreaPreview"], function (require, exports, Area
             data.append('P[uid]', field.dataset.uid);
             data.append('P[value]', field.value);
             request.open('POST', window.TYPO3.settings.ajaxUrls.imagemap_preview_rerender);
-            request.onreadystatechange = this.previewRerenderCallback.bind({
-                request: request,
-                formElement: this
-            });
+            request.onreadystatechange = this.previewRerenderCallback.bind(this);
             request.send(data);
         }
-        previewRerenderCallback() {
-            if (this.request.readyState === 4 && this.request.status === 200) {
-                this.formElement.formElement.querySelector('.modifiedState').style.display = 'block';
-                this.formElement.areaPreview.removeAreas();
-                let data = JSON.parse(this.request.responseText);
+        previewRerenderCallback(e) {
+            let request = e.target;
+            if (request.readyState === 4 && request.status === 200) {
+                this.formElement.querySelector('.modifiedState').style.display = 'block';
+                this.preview.removeAreas();
+                let data = JSON.parse(request.responseText);
                 if (data !== null && data.length) {
-                    this.formElement.areaPreview.renderAreas(data.areas);
+                    this.preview.renderAreas(data.areas);
                 }
             }
         }
         renderAreas(areas) {
             if (areas.length) {
-                this.areaPreview.renderAreas(JSON.parse(areas));
+                this.preview.renderAreas(JSON.parse(areas));
             }
         }
     }

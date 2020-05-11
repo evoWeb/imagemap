@@ -48,7 +48,7 @@ class SoftReferenceIndexTest extends UnitTestCase
             'links to page' => [
                 [
                     'imagemap' => [
-                        'content' => '[{"href":"t3:\/\/page?uid=40"},{"href":"t3:\/\/page?uid=41"},{"href":"t3:\/\/page?uid=42"}]',
+                        'content' => '[{"points":[{"x":0.3,"y":0.112359551},{"x":0.05,"y":0.887640449},{"x":0.55,"y":0.887640449}],"shape":"poly","href":"t3://page?uid=40"},{"coords":{"left":0.7,"top":0.5,"radius":0.2575},"shape":"circle","href":"t3://page?uid=41"},{"coords":{"left":0.25,"top":0.112359551,"right":0.75,"bottom":0.887640449},"shape":"rect","href":"t3://page?uid=42"}]',
                         'elementKey' => 2,
                         'matchString' => '{"href":"t3:\/\/page?uid=42"}',
                     ],

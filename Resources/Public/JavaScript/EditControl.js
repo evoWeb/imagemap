@@ -8,17 +8,21 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "jquery", "./AreaEditor", "TYPO3/CMS/Backend/Icons", "TYPO3/CMS/Backend/Modal", "TYPO3/CMS/Backend/FormEngineValidation", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min"], function (require, exports, $, AreaEditor_1, Icons, Modal, FormEngineValidation, ImagesLoaded) {
+define(["require", "exports", "jquery", "./Editor", "TYPO3/CMS/Backend/Icons", "TYPO3/CMS/Backend/Modal", "TYPO3/CMS/Backend/FormEngineValidation", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min"], function (require, exports, $, Editor_1, Icons, Modal, FormEngineValidation, ImagesLoaded) {
     "use strict";
     class EditControl {
         constructor(fieldSelector) {
+            this.editorImageSelector = '#t3js-editor-image';
+            this.formElementSelector = '#t3js-imagemap-container';
+            this.resizeTimeout = 450;
             this.initializeFormElement(fieldSelector);
-            this.initializeEvents();
+            this.initializeTrigger();
+            this.resizeEnd(this.resizeEditor.bind(this));
         }
         initializeFormElement(fieldSelector) {
             this.hiddenInput = document.querySelector(fieldSelector);
         }
-        initializeEvents() {
+        initializeTrigger() {
             this.trigger = $('.t3js-area-wizard-trigger');
             this.trigger
                 .off('click')
@@ -26,10 +30,18 @@ define(["require", "exports", "jquery", "./AreaEditor", "TYPO3/CMS/Backend/Icons
         }
         triggerHandler(event) {
             event.preventDefault();
-            this.openModal();
+            this.show();
         }
-        openModal() {
-            let modalTitle = this.trigger.data('modalTitle'), buttonAddRectangleText = this.trigger.data('buttonAddrectText'), buttonAddCircleText = this.trigger.data('buttonAddcircleText'), buttonAddPolygonText = this.trigger.data('buttonAddpolyText'), buttonDismissText = this.trigger.data('buttonDismissText'), buttonSaveText = this.trigger.data('buttonSaveText'), wizardUri = this.trigger.data('url'), payload = this.trigger.data('payload'), initWizardModal = this.initialize.bind(this);
+        initializeAreaEditorModal() {
+            const image = this.currentModal.find(this.editorImageSelector);
+            ImagesLoaded(image, () => {
+                setTimeout(() => {
+                    this.init();
+                }, 100);
+            });
+        }
+        show() {
+            const modalTitle = this.trigger.data('modalTitle'), buttonAddRectangleText = this.trigger.data('buttonAddrectText'), buttonAddCircleText = this.trigger.data('buttonAddcircleText'), buttonAddPolygonText = this.trigger.data('buttonAddpolyText'), buttonDismissText = this.trigger.data('buttonDismissText'), buttonSaveText = this.trigger.data('buttonSaveText'), wizardUri = this.trigger.data('url'), payload = this.trigger.data('payload'), initEditorModal = this.initializeAreaEditorModal.bind(this);
             Icons.getIcon('spinner-circle', Icons.sizes.default, null, null, Icons.markupIdentifiers.inline).done((icon) => {
                 /**
                  * Open modal with areas to edit
@@ -83,13 +95,18 @@ define(["require", "exports", "jquery", "./AreaEditor", "TYPO3/CMS/Backend/Icons
                     style: Modal.styles.dark,
                     title: modalTitle,
                     callback: (currentModal) => {
-                        $.post({
-                            url: wizardUri,
-                            data: payload
-                        }).done((response) => {
-                            currentModal.find('.t3js-modal-body').html(response).addClass('area-editor');
-                            initWizardModal();
-                        });
+                        let data = new FormData(), request = new XMLHttpRequest();
+                        data.append('arguments', payload.arguments);
+                        data.append('signature', payload.signature);
+                        request.open('POST', wizardUri);
+                        request.onreadystatechange = (e) => {
+                            let request = e.target;
+                            if (request.readyState === 4 && request.status === 200) {
+                                currentModal.find('.t3js-modal-body').html(request.responseText).addClass('area-editor');
+                                initEditorModal();
+                            }
+                        };
+                        request.send(data);
                     },
                 });
                 this.currentModal.on('hide.bs.modal', () => {
@@ -99,81 +116,86 @@ define(["require", "exports", "jquery", "./AreaEditor", "TYPO3/CMS/Backend/Icons
                 this.currentModal.data('bs.modal').options.backdrop = 'static';
             });
         }
-        initialize() {
-            this.image = this.currentModal.find('img.image');
+        init() {
+            this.formElement = this.currentModal.find(this.formElementSelector)[0];
             this.buttonAddRect = this.currentModal.find('.button-add-rect').off('click').on('click', this.buttonAddRectHandler.bind(this));
             this.buttonAddCircle = this.currentModal.find('.button-add-circle').off('click').on('click', this.buttonAddCircleHandler.bind(this));
             this.buttonAddPoly = this.currentModal.find('.button-add-poly').off('click').on('click', this.buttonAddPolyHandler.bind(this));
             this.buttonDismiss = this.currentModal.find('.button-dismiss').off('click').on('click', this.buttonDismissHandler.bind(this));
             this.buttonSave = this.currentModal.find('.button-save').off('click').on('click', this.buttonSaveHandler.bind(this));
             $([document, top.document]).on('mousedown.minicolors touchstart.minicolors', this.hideColorSwatch);
-            ImagesLoaded(this.image, () => {
-                setTimeout(this.initializeArea.bind(this), 100);
-            });
+            this.initializeEditor();
+            this.renderAreas(this.hiddenInput.value);
         }
-        initializeArea() {
-            let width = parseInt(this.image.css('width')), height = parseInt(this.image.css('height')), editorOptions = {
+        initializeEditor() {
+            let image = this.formElement.querySelector(this.editorImageSelector), configurations = {
                 canvas: {
-                    width: width,
-                    height: height,
-                    top: height * -1,
+                    width: image.offsetWidth,
+                    height: image.offsetHeight,
+                    top: image.offsetHeight * -1,
                 },
-                fauxFormDocument: window.document,
                 formSelector: '[name="areasForm"]',
-            };
-            let canvas = this.currentModal.find('#modal-canvas')[0];
-            this.areaEditor = new AreaEditor_1.AreaEditor(editorOptions, canvas, '#areasForm', this.currentModal[0]);
-            window.imagemap = { areaEditor: this.areaEditor };
-            let areas = this.hiddenInput.value;
+            }, modalParent = image.parentNode, 
+            // document in which the browslink is able to set fields
+            browselinkParent = window.document;
+            while (modalParent.parentNode) {
+                modalParent = modalParent.parentNode;
+            }
+            this.editor = new Editor_1.Editor(configurations, this.formElement.querySelector('#canvas'), modalParent, browselinkParent);
+        }
+        resizeEditor() {
+            if (this.editor) {
+                let image = this.formElement.querySelector(this.editorImageSelector);
+                this.editor.resize(image.offsetWidth, image.offsetHeight);
+            }
+        }
+        renderAreas(areas) {
             if (areas.length) {
-                this.areaEditor.renderAreas(JSON.parse(areas));
+                this.editor.renderAreas(JSON.parse(areas));
             }
         }
         destroy() {
             if (this.currentModal) {
+                this.editor.destroy();
+                this.editor = null;
                 this.currentModal = null;
-                this.areaEditor.form.destroy();
-                this.areaEditor = null;
             }
         }
         buttonAddRectHandler(event) {
             event.stopPropagation();
             event.preventDefault();
-            let width = parseInt(this.image.css('width')), height = parseInt(this.image.css('height'));
-            this.areaEditor.renderAreas([{
+            this.editor.renderAreas([{
                     shape: 'rect',
                     coords: {
-                        left: (width / 2 - 50),
-                        top: (height / 2 - 50),
-                        right: (width / 2 + 50),
-                        bottom: (height / 2 + 50)
+                        left: 0.4,
+                        top: 0.4,
+                        right: 0.4,
+                        bottom: 0.4
                     },
                 }]);
         }
         buttonAddCircleHandler(event) {
             event.stopPropagation();
             event.preventDefault();
-            let width = parseInt(this.image.css('width')), height = parseInt(this.image.css('height'));
-            this.areaEditor.renderAreas([{
+            this.editor.renderAreas([{
                     shape: 'circle',
                     coords: {
-                        left: (width / 2),
-                        top: (height / 2),
-                        radius: 50
+                        left: 0.5,
+                        top: 0.5,
+                        radius: 0.2
                     },
                 }]);
         }
         buttonAddPolyHandler(event) {
             event.stopPropagation();
             event.preventDefault();
-            let width = parseInt(this.image.css('width')), height = parseInt(this.image.css('height'));
-            this.areaEditor.renderAreas([{
+            this.editor.renderAreas([{
                     shape: 'poly',
                     points: [
-                        { x: (width / 2), y: (height / 2 - 50) },
-                        { x: (width / 2 + 50), y: (height / 2 + 50) },
-                        { x: (width / 2), y: (height / 2 + 70) },
-                        { x: (width / 2 - 50), y: (height / 2 + 50) },
+                        { x: 0.5, y: 0.4 },
+                        { x: 0.6, y: 0.6 },
+                        { x: 0.5, y: 0.7 },
+                        { x: 0.4, y: 0.6 },
                     ]
                 }]);
         }
@@ -186,7 +208,7 @@ define(["require", "exports", "jquery", "./AreaEditor", "TYPO3/CMS/Backend/Icons
             event.stopPropagation();
             event.preventDefault();
             let hiddenField = $(this.hiddenInput);
-            this.hiddenInput.value = this.areaEditor.getMapData();
+            this.hiddenInput.value = this.editor.getMapData();
             hiddenField.trigger('imagemap:changed');
             FormEngineValidation.markFieldAsChanged(hiddenField);
             this.currentModal.modal('hide');
@@ -203,6 +225,18 @@ define(["require", "exports", "jquery", "./AreaEditor", "TYPO3/CMS/Backend/Icons
                     });
                 });
             }
+        }
+        /**
+         * Calls a function when the editor window has been resized
+         */
+        resizeEnd(callback) {
+            let timer;
+            $(window).on('resize', () => {
+                clearTimeout(timer);
+                timer = setTimeout(() => {
+                    callback();
+                }, this.resizeTimeout);
+            });
         }
     }
     return EditControl;
