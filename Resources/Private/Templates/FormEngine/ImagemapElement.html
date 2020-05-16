@@ -19,7 +19,7 @@
                                     data-url="{wizardUri}"
                                     data-payload="{wizardPayload}"
                                     data-severity="notice"
-                                    data-modal-title="{f:render(section: 'ModalTitle', arguments: _all)}"
+                                    data-modal-title="{f:render(partial: 'ModalTitle', section:'Main', arguments: _all)}"
                                     data-image-uid="{image.uid}"
                                     data-button-addrect-text="{f:translate(id: 'imagemap.form.addrect', extensionName: 'imagemap')}"
                                     data-button-addcircle-text="{f:translate(id: 'imagemap.form.addcircle', extensionName: 'imagemap')}"
@@ -33,9 +33,9 @@
                         </div>
                     </f:else>
                 </f:if>
-                <div class="form-control-wrap">
-                    <div class="form-wizards-element pictureWrap" id="{formEngine.field.id}_wrap">
-                        <div id="{formEngine.field.id}-canvas" class="picture">
+                <div class="form-control-wrap imagemap-element">
+                    <div class="form-wizards-element" id="{formEngine.field.id}_wrap">
+                        <div id="{formEngine.field.id}-canvas">
                             <f:image image="{image}" treatIdAsReference="true" class="image" maxWidth="400" maxHeight="400"/>
                             <canvas id="canvas" class="canvas"></canvas>
                             <div class="modifiedState alert alert-warning">
@@ -57,15 +57,4 @@
             </f:then>
         </f:if>
     </f:section>
-
-    <f:section name="ModalTitle">
-        <f:translate id="imagemap.modal.title" extensionName="imagemap"/>
-        :
-        <f:if condition="{image.properties.title}">
-            <f:then>{image.properties.title} &mdash; {image.name}</f:then>
-            <f:else>{image.name}</f:else>
-        </f:if>
-        ({image.properties.width} × {image.properties.height})
-    </f:section>
-
 </html>

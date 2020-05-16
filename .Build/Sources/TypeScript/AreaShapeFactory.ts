@@ -37,30 +37,29 @@ export class AreaShapeFactory {
     this.canvas = canvas;
   }
 
-  public createShape(area: AreaConfiguration, selectable: boolean): Object {
-    area.color = AreaShapeFactory.getRandomColor(area.color);
+  public createShape(attributes: AreaConfiguration, selectable: boolean): Object {
+    attributes.color = AreaShapeFactory.getRandomColor(attributes.color);
     let areaShape: Object,
-      configuration = {
-        ...area,
+      configuration: ShapeConfiguration = {
         ...this.areaConfiguration,
         selectable: selectable,
         hasControls: selectable,
-        stroke: area.color,
+        stroke: attributes.color,
         strokeWidth: 1,
-        fill: AreaShapeFactory.hexToRgbA(area.color, 0.3)
+        fill: AreaShapeFactory.hexToRgbA(attributes.color, 0.3)
       };
 
-    switch (configuration.shape) {
+    switch (attributes.shape) {
       case 'rect':
-        areaShape = this.createRectangle(configuration);
+        areaShape = this.createRectangle(attributes, configuration);
         break;
 
       case 'circle':
-        areaShape = this.createCircle(configuration);
+        areaShape = this.createCircle(attributes, configuration);
         break;
 
       case 'poly':
-        areaShape = this.createPolygon(configuration);
+        areaShape = this.createPolygon(attributes, configuration);
         break;
     }
 
@@ -71,24 +70,8 @@ export class AreaShapeFactory {
     return areaShape;
   }
 
-  private createRectangle(configuration: AreaConfiguration): Rect {
-    let coords = configuration.coords,
-      left = Math.round(coords.left * this.width),
-      top = Math.round(coords.top * this.height),
-      width = Math.round(coords.right * this.width) - left,
-      height = Math.round(coords.bottom * this.height) - top;
-
-    return new Rect({
-      ...configuration,
-      left: left,
-      top: top,
-      width: width,
-      height: height,
-    });
-  }
-
-  private createCircle(configuration: AreaConfiguration): Circle {
-    let coords = configuration.coords,
+  private createCircle(attributes: AreaConfiguration, configuration: ShapeConfiguration): Circle {
+    let coords = attributes.coords,
       radius = Math.round(coords.radius * this.width),
       left = Math.round(coords.left * this.width) - radius,
       top = Math.round(coords.top * this.height) - radius,
@@ -109,8 +92,8 @@ export class AreaShapeFactory {
     return area;
   }
 
-  private createPolygon(configuration: AreaConfiguration): Polygon {
-    let points: Point[] = configuration.points || [],
+  private createPolygon(attributes: AreaConfiguration, configuration: ShapeConfiguration): Polygon {
+    let points: Point[] = attributes.points || [],
       area: Polygon;
 
     points.map((point) => {
@@ -126,26 +109,42 @@ export class AreaShapeFactory {
 
     if (configuration.selectable) {
       points.forEach((point: Object, index: number) => {
-        AreaShapeFactory.addControl(area, this.areaConfiguration, point, index, 100000);
+        AreaShapeFactory.addControl(area, configuration, point, index, 100000);
       });
     }
 
     return area;
   }
 
+  private createRectangle(attributes: AreaConfiguration, configuration: ShapeConfiguration): Rect {
+    let coords = attributes.coords,
+      left = Math.round(coords.left * this.width),
+      top = Math.round(coords.top * this.height),
+      width = Math.round(coords.right * this.width) - left,
+      height = Math.round(coords.bottom * this.height) - top;
+
+    return new Rect({
+      ...configuration,
+      left: left,
+      top: top,
+      width: width,
+      height: height,
+    });
+  }
+
   static addControl(
     area: Polygon,
-    areaConfig: AreaConfiguration,
+    configuration: ShapeConfiguration,
     point: Object,
     index: number,
     newControlIndex: number
   ): void {
     let circle = new Circle({
-      ...areaConfig,
+      ...configuration,
       hasControls: false,
       radius: 5,
-      fill: areaConfig.cornerColor,
-      stroke: areaConfig.cornerStrokeColor,
+      fill: configuration.cornerColor,
+      stroke: configuration.cornerStrokeColor,
       originX: 'center',
       originY: 'center',
       name: index,
@@ -155,8 +154,8 @@ export class AreaShapeFactory {
       opacity: area.opacity,
 
       // set control position relative to polygon
-      left: area.left + point.x,
-      top: area.top + point.y,
+      left: point.x,
+      top: point.y,
     });
 
     point.control = circle;

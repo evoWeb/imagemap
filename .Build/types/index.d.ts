@@ -11,15 +11,15 @@
 
 declare interface Point {
   x: number,
-  y: number
+  y: number,
+  id?: string|number
 }
 
 declare interface AreaConfiguration {
-  shape?: string,
+  shape: string,
+  href?: string,
+  alt?: string,
   color?: string,
-  cornerColor?: string,
-  cornerStrokeColor?: string,
-  editor?: object,
   coords?: {
     left?: number,
     top?: number,
@@ -28,15 +28,16 @@ declare interface AreaConfiguration {
     radius?: number,
   },
   points?: Point[]
-  left?: number,
-  top?: number,
-  data?: {
-    color: string,
-  },
-  selectable?: boolean
-  hasControls?: boolean
-  objectCaching?: boolean
-  controlConfig?: any
+}
+
+declare interface ShapeConfiguration {
+  selectable: boolean,
+  hasControls: boolean,
+  stroke: string,
+  strokeWidth: number,
+  fill: string,
+  cornerColor: string,
+  cornerStrokeColor: string,
 }
 
 declare interface BrowseLinkConfiguration {

@@ -8,28 +8,33 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "./Preview"], function (require, exports, Preview_1) {
+define(["require", "exports", "jquery", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "./Preview"], function (require, exports, $, ImagesLoaded, Preview_1) {
     "use strict";
     class FormElement {
         constructor(fieldSelector) {
             this.initializeFormElement(fieldSelector);
             this.initializePreview();
             this.initializeEvents();
-            this.renderAreas(this.hiddenInput.value);
         }
         initializeFormElement(fieldSelector) {
             this.hiddenInput = document.querySelector(fieldSelector);
             this.formElement = document.querySelector(fieldSelector + '-canvas');
         }
         initializePreview() {
-            let image = this.formElement.querySelector('.image'), configurations = {
-                canvas: {
-                    width: image.offsetWidth,
-                    height: image.offsetHeight,
-                    top: image.offsetHeight * -1,
-                },
-            };
-            this.preview = new Preview_1.Preview(configurations, this.formElement.querySelector('#canvas'));
+            const image = $(this.formElement).find('.image');
+            ImagesLoaded(image, () => {
+                setTimeout(() => {
+                    let configurations = {
+                        canvas: {
+                            width: image.width(),
+                            height: image.height(),
+                            top: image.height() * -1,
+                        },
+                    };
+                    this.preview = new Preview_1.Preview(configurations, this.formElement.querySelector('#canvas'));
+                    this.renderAreas(this.hiddenInput.value);
+                }, 100);
+            });
         }
         initializeEvents() {
             this.hiddenInput.addEventListener('imagemap:changed', this.fieldChangedHandler.bind(this));

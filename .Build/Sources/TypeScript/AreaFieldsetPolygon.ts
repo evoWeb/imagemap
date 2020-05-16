@@ -12,31 +12,41 @@
 /// <reference types="../../types/index"/>
 
 // @ts-ignore
-import * as fabric from './vendor/Fabric';
+import { Point, Object } from './vendor/Fabric';
 
 import { AreaFieldsetAbstract } from './AreaFieldsetAbstract';
+import { AreaShapeFactory } from './AreaShapeFactory';
 
 export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
   protected name: string = 'polygon';
 
+  protected configuration: ShapeConfiguration;
+
   public controls: Array<any> = [];
 
-  constructor(attributes: AreaConfiguration, configuration: EditorConfigurations, shape: fabric.Object) {
+  constructor(attributes: AreaConfiguration, configuration: EditorConfigurations, shape: Object) {
     super(attributes, configuration, shape)
     this.bindControls();
   }
 
-  public updateFields() {
-    this.getElement('.color').value = this.data.color;
-    this.getElement('.alt').value = this.alt || '';
-    this.getElement('.href').value = this.href || '';
+  protected updateFields() {
+    for (let attributeKey in this.attributes) {
+      if (!this.attributes.hasOwnProperty(attributeKey)) {
+        continue;
+      }
+      let attributeValue = this.attributes[attributeKey] || '',
+        element = this.getElement('.' + attributeKey);
 
-    Object.entries(this.attributes).forEach((attribute) => {
-      this.getElement('#' + attribute[0]).value = attribute[1] || '';
-    });
+      if (element !== null) {
+        if (typeof attributeValue === 'number') {
+          attributeValue = attributeValue.toString();
+        }
+        element.value = attributeValue;
+      }
+    }
 
     let parentElement = this.getElement('.positionOptions');
-    this.points.forEach((point: fabric.Point, index: number) => {
+    this.shape.points.forEach((point: Point, index: number) => {
       point.id = point.id ? point.id : 'p' + this.id + '_' + index;
 
       if (!point.hasOwnProperty('element')) {
@@ -47,31 +57,6 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
       point.element.querySelector('#x' + point.id).value = point.x + this.left;
       point.element.querySelector('#y' + point.id).value = point.y + this.top;
     });
-  }
-
-  public getData(): object {
-    let points: object[] = [];
-
-    this.controls.forEach((control) => {
-      let center = control.getCenterPoint();
-      points.push({x: center.x, y: center.y});
-    });
-
-    return {
-      ...this.attributes,
-      points: points,
-    };
-  }
-
-  protected bindControls() {
-    this.areaShape.controls.forEach((control: any) => {
-      control.on('moved', this.pointMoved.bind(this));
-      this.areaShape.canvas.add(control);
-    })
-    this.areaShape.canvas.renderAll();
-  }
-
-  public addControl(areaConfig: AreaConfiguration, point: Object, index: number, newControlIndex: number) {
   }
 
   protected updateCanvas(event: Event) {
@@ -95,8 +80,30 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
     this.canvas.renderAll();
   }
 
+  public getData(): object {
+    let data = {
+      ...this.attributes
+    };
+
+    data.points.forEach((point: Point) => {
+      if (typeof point.id !== 'undefined') {
+        delete point.id;
+      }
+    });
+
+    return data;
+  }
+
+  protected bindControls() {
+    this.shape.controls.forEach((control: any) => {
+      control.on('moved', this.pointMoved.bind(this));
+      this.shape.canvas.add(control);
+    })
+    this.shape.canvas.renderAll();
+  }
+
   public pointMoved(event: FabricEvent) {
-    let control = (event.target as fabric.Object),
+    let control = (event.target as Object),
       id = 'p' + control.polygon.id + '_' + control.name,
       center = control.getCenterPoint();
 
@@ -105,13 +112,13 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
   }
 
   protected polygonMoved() {
-    this.points.forEach((point: fabric.Object) => {
+    this.points.forEach((point: Object) => {
       this.getElement('#x' + point.id).value = this.left + point.x;
       this.getElement('#y' + point.id).value = this.top + point.y;
     });
   }
 
-  protected addPointBeforeAction(event: Event) {
+  private addPointBeforeAction(event: Event) {
     let direction = AreaFieldsetAbstract.before,
       index = this.points.length,
       parentElement = this.getElement('.positionOptions'),
@@ -119,11 +126,11 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
 
     parentElement.insertBefore(element, currentPoint.element);
 
-    this.points = fabric.Polygon.addElementToArrayWithPosition(this.points, point, currentPointIndex + direction);
-    this.addControl(this.configuration, point, index, currentPointIndex + direction);
+    this.points = AreaShapeFactory.addElementToArrayWithPosition(this.points, point, currentPointIndex + direction);
+    AreaShapeFactory.addControl(this.shape, this.configuration, point, index, currentPointIndex + direction);
   }
 
-  protected addPointAfterAction(event: Event) {
+  protected addPointAction(event: Event) {
     let direction = AreaFieldsetAbstract.after,
       index = this.points.length,
       parentElement = this.getElement('.positionOptions'),
@@ -135,8 +142,8 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
       parentElement.append(element);
     }
 
-    this.points = fabric.Polygon.addElementToArrayWithPosition(this.points, point, currentPointIndex + direction);
-    this.addControl(this.configuration, point, index, currentPointIndex + direction);
+    this.points = AreaShapeFactory.addElementToArrayWithPosition(this.points, point, currentPointIndex + direction);
+    AreaShapeFactory.addControl(this.shape, this.configuration, point, index, currentPointIndex + direction);
   }
 
   protected getPointElementAndCurrentPoint(event: Event, direction: number) {
@@ -185,10 +192,10 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
   protected removePointAction(event: Event) {
     if (this.points.length > 3) {
       let element = (event.currentTarget as HTMLElement).parentNode.parentNode as HTMLElement,
-        points: fabric.Point = [],
-        controls: fabric.Object = [];
+        points: Point = [],
+        controls: Object = [];
 
-      this.points.forEach((point: fabric.Point, index: number) => {
+      this.points.forEach((point: Point, index: number) => {
         if (element.id !== point.id) {
           points.push(point);
           controls.push(this.controls[index]);
@@ -198,7 +205,7 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
         }
       });
 
-      points.forEach((point: fabric.Point, index: number) => {
+      points.forEach((point: Point, index: number) => {
         let oldId = point.id;
         point.id = 'p' + this.id + '_' + index;
         this.getElement('#' + oldId).id = point.id;
@@ -213,23 +220,5 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
       this.controls = controls;
       this.canvas.renderAll();
     }
-  }
-
-  static addElementToArrayWithPosition(array: any[], item: any, newPointIndex: number) {
-    if (newPointIndex < 0) {
-      array.unshift(item);
-    } else if (newPointIndex >= array.length) {
-      array.push(item);
-    } else {
-      let newPoints = [];
-      for (let i = 0; i < array.length; i++) {
-        newPoints.push(array[i]);
-        if (i === newPointIndex - 1) {
-          newPoints.push(item);
-        }
-      }
-      array = newPoints;
-    }
-    return array;
   }
 }

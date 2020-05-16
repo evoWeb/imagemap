@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "jquery", "./Editor", "TYPO3/CMS/Backend/Icons", "TYPO3/CMS/Backend/Modal", "TYPO3/CMS/Backend/FormEngineValidation", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min"], function (require, exports, $, Editor_1, Icons, Modal, FormEngineValidation, ImagesLoaded) {
+define(["require", "exports", "jquery", "TYPO3/CMS/Backend/Icons", "TYPO3/CMS/Backend/Modal", "TYPO3/CMS/Backend/FormEngineValidation", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "./Editor"], function (require, exports, $, Icons, Modal, FormEngineValidation, ImagesLoaded, Editor_1) {
     "use strict";
     class EditControl {
         constructor(fieldSelector) {
@@ -102,7 +102,7 @@ define(["require", "exports", "jquery", "./Editor", "TYPO3/CMS/Backend/Icons", "
                         request.onreadystatechange = (e) => {
                             let request = e.target;
                             if (request.readyState === 4 && request.status === 200) {
-                                currentModal.find('.t3js-modal-body').html(request.responseText).addClass('area-editor');
+                                currentModal.find('.t3js-modal-body').html(request.responseText).addClass('imagemap-editor');
                                 initEditorModal();
                             }
                         };
@@ -118,9 +118,9 @@ define(["require", "exports", "jquery", "./Editor", "TYPO3/CMS/Backend/Icons", "
         }
         init() {
             this.formElement = this.currentModal.find(this.formElementSelector)[0];
-            this.buttonAddRect = this.currentModal.find('.button-add-rect').off('click').on('click', this.buttonAddRectHandler.bind(this));
+            this.buttonAddRect = this.currentModal.find('.button-add-rect').off('click').on('click', this.buttonAddRectangleHandler.bind(this));
             this.buttonAddCircle = this.currentModal.find('.button-add-circle').off('click').on('click', this.buttonAddCircleHandler.bind(this));
-            this.buttonAddPoly = this.currentModal.find('.button-add-poly').off('click').on('click', this.buttonAddPolyHandler.bind(this));
+            this.buttonAddPoly = this.currentModal.find('.button-add-poly').off('click').on('click', this.buttonAddPolygonHandler.bind(this));
             this.buttonDismiss = this.currentModal.find('.button-dismiss').off('click').on('click', this.buttonDismissHandler.bind(this));
             this.buttonSave = this.currentModal.find('.button-save').off('click').on('click', this.buttonSaveHandler.bind(this));
             $([document, top.document]).on('mousedown.minicolors touchstart.minicolors', this.hideColorSwatch);
@@ -161,7 +161,7 @@ define(["require", "exports", "jquery", "./Editor", "TYPO3/CMS/Backend/Icons", "
                 this.currentModal = null;
             }
         }
-        buttonAddRectHandler(event) {
+        buttonAddRectangleHandler(event) {
             event.stopPropagation();
             event.preventDefault();
             this.editor.renderAreas([{
@@ -186,7 +186,7 @@ define(["require", "exports", "jquery", "./Editor", "TYPO3/CMS/Backend/Icons", "
                     },
                 }]);
         }
-        buttonAddPolyHandler(event) {
+        buttonAddPolygonHandler(event) {
             event.stopPropagation();
             event.preventDefault();
             this.editor.renderAreas([{

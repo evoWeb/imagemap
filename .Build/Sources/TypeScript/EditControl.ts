@@ -10,7 +10,6 @@
  */
 
 import * as $ from 'jquery';
-import { Editor } from './Editor';
 // @ts-ignore
 import Icons = require('TYPO3/CMS/Backend/Icons');
 // @ts-ignore
@@ -19,17 +18,18 @@ import Modal = require('TYPO3/CMS/Backend/Modal');
 import FormEngineValidation = require('TYPO3/CMS/Backend/FormEngineValidation');
 // @ts-ignore
 import ImagesLoaded = require('TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min');
+import { Editor } from './Editor';
 
 class EditControl {
   private hiddenInput: HTMLInputElement;
 
   private formElement: HTMLDivElement;
 
+  private editor: Editor;
+
   private trigger: JQuery;
 
   private currentModal: Modal;
-
-  private editor: Editor;
 
   private buttonAddRect: JQuery;
 
@@ -156,7 +156,7 @@ class EditControl {
           request.onreadystatechange = (e: ProgressEvent) => {
             let request = (e.target as XMLHttpRequest);
             if (request.readyState === 4 && request.status === 200) {
-              currentModal.find('.t3js-modal-body').html(request.responseText).addClass('area-editor');
+              currentModal.find('.t3js-modal-body').html(request.responseText).addClass('imagemap-editor');
               initEditorModal();
             }
           };
@@ -175,9 +175,9 @@ class EditControl {
   protected init(): void {
     this.formElement = this.currentModal.find(this.formElementSelector)[0];
 
-    this.buttonAddRect = this.currentModal.find('.button-add-rect').off('click').on('click', this.buttonAddRectHandler.bind(this));
+    this.buttonAddRect = this.currentModal.find('.button-add-rect').off('click').on('click', this.buttonAddRectangleHandler.bind(this));
     this.buttonAddCircle = this.currentModal.find('.button-add-circle').off('click').on('click', this.buttonAddCircleHandler.bind(this));
-    this.buttonAddPoly = this.currentModal.find('.button-add-poly').off('click').on('click', this.buttonAddPolyHandler.bind(this));
+    this.buttonAddPoly = this.currentModal.find('.button-add-poly').off('click').on('click', this.buttonAddPolygonHandler.bind(this));
     this.buttonDismiss = this.currentModal.find('.button-dismiss').off('click').on('click', this.buttonDismissHandler.bind(this));
     this.buttonSave = this.currentModal.find('.button-save').off('click').on('click', this.buttonSaveHandler.bind(this));
 
@@ -234,7 +234,7 @@ class EditControl {
     }
   }
 
-  protected buttonAddRectHandler(event: JQueryEventObject) {
+  protected buttonAddRectangleHandler(event: JQueryEventObject) {
     event.stopPropagation();
     event.preventDefault();
 
@@ -263,7 +263,7 @@ class EditControl {
     }]);
   }
 
-  protected buttonAddPolyHandler(event: JQueryEventObject) {
+  protected buttonAddPolygonHandler(event: JQueryEventObject) {
     event.stopPropagation();
     event.preventDefault();
 

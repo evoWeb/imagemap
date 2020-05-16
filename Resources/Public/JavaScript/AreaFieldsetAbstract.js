@@ -8,32 +8,31 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "jquery", "./vendor/Fabric", "./AreaShapeFactory"], function (require, exports, $, fabric, AreaShapeFactory_1) {
+define(["require", "exports", "jquery", "./vendor/Fabric", "./AreaShapeFactory"], function (require, exports, $, Fabric_1, AreaShapeFactory_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class AreaFieldsetAbstract {
         constructor(attributes, configuration, shape) {
             this.id = 0;
             this.name = '';
-            this.eventDelay = 0;
+            this.updateCanvasDelay = 0;
             this.attributes = {};
             this.configuration = {};
             this.attributes = attributes;
             this.configuration = configuration;
-            this.areaShape = shape;
+            this.shape = shape;
+            this.id = Fabric_1.Object.__uid++;
         }
         postAddToForm() {
-            this.id = fabric.Object.__uid++;
             this.initializeElement();
             this.updateFields();
             this.initializeColorPicker();
             this.initializeEvents();
-            this.addFauxInput();
+            this.addBrowselinkTargetInput();
         }
         initializeElement() {
-            this.element = this.getFormElement('#' + this.name + 'Form', this.id);
-            this.form.areaZone.append(this.element);
-            this.form.updateArrowsState();
+            this.element = this.getFormElement(`#${this.name}Form`, this.id);
+            this.form.element.append(this.element);
         }
         initializeColorPicker() {
             $(this.getElement('.t3js-color-picker')).minicolors({
@@ -45,8 +44,8 @@ define(["require", "exports", "jquery", "./vendor/Fabric", "./AreaShapeFactory"]
             });
         }
         initializeEvents() {
-            this.areaShape.on('moved', this.updateFields.bind(this));
-            this.areaShape.on('modified', this.updateFields.bind(this));
+            this.shape.on('moved', this.updateFields.bind(this));
+            this.shape.on('modified', this.updateFields.bind(this));
             this.getElements('.basicOptions .t3js-field').forEach((field) => {
                 field.addEventListener('keyup', this.updateProperties.bind(this));
             });
@@ -55,9 +54,12 @@ define(["require", "exports", "jquery", "./vendor/Fabric", "./AreaShapeFactory"]
             });
             this.getElements('.t3js-btn').forEach(this.buttonEventHandler.bind(this));
         }
+        updateProperties(event) {
+            let field = event.currentTarget, property = field.id;
+            this.attributes[property] = field.value;
+        }
         fieldInputHandler(event) {
-            clearTimeout(this.eventDelay);
-            this.eventDelay = AreaFieldsetAbstract.wait(() => { this.updateCanvas(event); }, 500);
+            this.updateCanvasDelay = AreaFieldsetAbstract.wait(() => { this.updateCanvas(event); }, 500, this.updateCanvasDelay);
         }
         buttonEventHandler(button) {
             let action = button.dataset.action + 'Action';
@@ -65,22 +67,19 @@ define(["require", "exports", "jquery", "./vendor/Fabric", "./AreaShapeFactory"]
             button.addEventListener('click', this[action].bind(this));
         }
         updateArrowsState() {
-            let areaZone = this.form.areaZone;
-            this.getElement('[data-action="up"]').classList[areaZone.firstChild !== this.element ? 'remove' : 'add']('disabled');
-            this.getElement('[data-action="down"]').classList[areaZone.lastChild !== this.element ? 'remove' : 'add']('disabled');
-        }
-        updateFields() {
-        }
-        updateProperties(event) {
-            let field = event.currentTarget, property = field.id;
-            if (field.classList.contains('href')) {
-                this.attributes.href = field.value;
+            let areasForm = this.form.element, upButton = this.getElement('[data-action="up"]'), downButton = this.getElement('[data-action="down"]');
+            if (areasForm.firstChild !== this.element) {
+                upButton.classList.remove('disabled');
             }
-            else if (this.attributes.hasOwnProperty(property)) {
-                this.attributes[property] = field.value;
+            else {
+                upButton.classList.add('disabled');
             }
-        }
-        updateCanvas(event) {
+            if (areasForm.lastChild !== this.element) {
+                downButton.classList.remove('disabled');
+            }
+            else {
+                downButton.classList.add('disabled');
+            }
         }
         linkAction(event) {
             this.form.openLinkBrowser(event.currentTarget, this);
@@ -95,11 +94,9 @@ define(["require", "exports", "jquery", "./vendor/Fabric", "./AreaShapeFactory"]
             if (this.element) {
                 this.element.remove();
             }
-            if (this.form) {
-                this.form.updateArrowsState();
-            }
-            this.removeFauxInput();
-            this.editor.deleteArea(this);
+            this.removeBrowselinkTargetInput();
+            this.form.updateArrowsState();
+            this.form.editor.deleteArea(this);
         }
         expandAction() {
             this.showElement('.moreOptions');
@@ -116,14 +113,15 @@ define(["require", "exports", "jquery", "./vendor/Fabric", "./AreaShapeFactory"]
         redoAction() {
         }
         colorPickerAction(value) {
-            this.getElement('.t3js-color-picker').value = value;
-            this.areaShape.set('borderColor', value);
-            this.areaShape.set('stroke', value);
-            this.areaShape.set('fill', AreaShapeFactory_1.AreaShapeFactory.hexToRgbA(value, 0.2));
-            this.editor.canvas.renderAll();
+            this.attributes.color = value;
+            this.getElement('.t3js-color-picker').value = this.attributes.color;
+            this.shape.set('borderColor', this.attributes.color);
+            this.shape.set('stroke', this.attributes.color);
+            this.shape.set('fill', AreaShapeFactory_1.AreaShapeFactory.hexToRgbA(this.attributes.color, 0.2));
+            this.form.editor.canvas.renderAll();
         }
         getFormElement(selector, id) {
-            let template = this.form.element.querySelector(selector)
+            let template = this.form.editor.modalParent.querySelector(selector)
                 .innerHTML.replace(new RegExp('_ID', 'g'), String(id ? id : this.id));
             return (new DOMParser()).parseFromString(template, 'text/html').body.firstChild;
         }
@@ -142,20 +140,23 @@ define(["require", "exports", "jquery", "./vendor/Fabric", "./AreaShapeFactory"]
         getFieldValue(selector) {
             return this.getElement(selector).value;
         }
+        getData() {
+            return this.attributes;
+        }
         /**
-         * Add faux input as target for browselink which listens for changes and writes value to real field
+         * Add an input as target for browselink which listens for changes and writes value to real field
          */
-        addFauxInput() {
+        addBrowselinkTargetInput() {
             if (this.form.browselinkTargetForm) {
-                let fauxInput = this.editor.browselinkParent.createElement('input');
-                fauxInput.setAttribute('id', 'href' + this.id);
-                fauxInput.setAttribute('data-formengine-input-name', 'href' + this.id);
-                fauxInput.setAttribute('value', this.attributes.href);
-                fauxInput.onchange = this.changedFauxInput.bind(this);
-                this.form.browselinkTargetForm.appendChild(fauxInput);
+                let browselinkTargetInput = this.form.editor.browselinkParent.createElement('input');
+                browselinkTargetInput.setAttribute('id', 'href' + this.id);
+                browselinkTargetInput.setAttribute('data-formengine-input-name', 'href' + this.id);
+                browselinkTargetInput.setAttribute('value', this.attributes.href);
+                browselinkTargetInput.onchange = this.changedBrowselinkTargetInput.bind(this);
+                this.form.browselinkTargetForm.appendChild(browselinkTargetInput);
             }
         }
-        removeFauxInput() {
+        removeBrowselinkTargetInput() {
             if (this.form && this.form.browselinkTargetForm !== null) {
                 let field = this.form.browselinkTargetForm.querySelector('#href' + this.id);
                 if (field) {
@@ -163,12 +164,13 @@ define(["require", "exports", "jquery", "./vendor/Fabric", "./AreaShapeFactory"]
                 }
             }
         }
-        changedFauxInput() {
+        changedBrowselinkTargetInput() {
             let field = this.form.browselinkTargetForm.querySelector('#href' + this.id);
             this.attributes.href = field.value;
             this.updateFields();
         }
-        static wait(callback, delay) {
+        static wait(callback, delay, timer) {
+            clearTimeout(timer);
             return window.setTimeout(callback, delay);
         }
     }

@@ -9,6 +9,9 @@
  * LICENSE.txt file that was distributed with this source code.
  */
 
+import * as $ from 'jquery';
+// @ts-ignore
+import ImagesLoaded = require('TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min');
 import { Preview } from './Preview';
 
 class FormElement {
@@ -22,7 +25,6 @@ class FormElement {
     this.initializeFormElement(fieldSelector);
     this.initializePreview();
     this.initializeEvents();
-    this.renderAreas(this.hiddenInput.value);
   }
 
   protected initializeFormElement(fieldSelector: string) {
@@ -31,19 +33,27 @@ class FormElement {
   }
 
   protected initializePreview() {
-    let image: HTMLImageElement = this.formElement.querySelector('.image'),
-      configurations: EditorConfigurations = {
-        canvas: {
-          width: image.offsetWidth,
-          height: image.offsetHeight,
-          top: image.offsetHeight * -1,
-        },
-      };
+    const image: JQuery = $(this.formElement).find('.image');
+    ImagesLoaded(image as any, (): void => {
+      setTimeout(
+        (): void => {
+          let configurations: EditorConfigurations = {
+            canvas: {
+              width: image.width(),
+              height: image.height(),
+              top: image.height() * -1,
+            },
+          };
 
-    this.preview = new Preview(
-      configurations,
-      this.formElement.querySelector('#canvas')
-    );
+          this.preview = new Preview(
+            configurations,
+            this.formElement.querySelector('#canvas')
+          );
+          this.renderAreas(this.hiddenInput.value);
+        },
+        100,
+      );
+    });
   }
 
   protected initializeEvents() {

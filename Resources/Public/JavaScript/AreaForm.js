@@ -14,7 +14,6 @@ define(["require", "exports", "TYPO3/CMS/Backend/Modal"], function (require, exp
     class AreaForm {
         constructor(formSelector, modalParent, editor) {
             this.element = modalParent.querySelector(formSelector);
-            this.areaZone = this.element.querySelector('#areaZone');
             this.editor = editor;
             this.addFormAsTargetForBrowselink();
         }
@@ -29,6 +28,7 @@ define(["require", "exports", "TYPO3/CMS/Backend/Modal"], function (require, exp
         addArea(area) {
             area.form = this;
             area.postAddToForm();
+            this.updateArrowsState();
         }
         moveArea(area, offset) {
             let index = this.editor.areaFieldsets.indexOf(area), newIndex = index + offset, parent = area.element.parentNode;
@@ -47,18 +47,15 @@ define(["require", "exports", "TYPO3/CMS/Backend/Modal"], function (require, exp
             data.append('P[itemFormElName]', 'href' + area.id);
             data.append('P[currentValue]', area.getLink());
             request.open('POST', window.TYPO3.settings.ajaxUrls.imagemap_browselink_url);
-            request.onreadystatechange = this.fetchBrowseLinkCallback.bind({
-                areaForm: this,
-                area: area
-            });
+            request.onreadystatechange = this.fetchBrowseLinkCallback.bind(area);
             request.send(data);
         }
         fetchBrowseLinkCallback(e) {
             let request = e.target;
             if (request.readyState === 4 && request.status === 200) {
                 let data = JSON.parse(request.responseText), url = data.url
-                    + '&P[currentValue]=' + encodeURIComponent(this.area.getFieldValue('.href'))
-                    + '&P[currentSelectedValues]=' + encodeURIComponent(this.area.getFieldValue('.href'));
+                    + '&P[currentValue]=' + encodeURIComponent(this.getFieldValue('.href'))
+                    + '&P[currentSelectedValues]=' + encodeURIComponent(this.getFieldValue('.href'));
                 if (window.hasOwnProperty('TBE_EDITOR')
                     && window.TBE_EDITOR.hasOwnProperty('doSaveFieldName')
                     && window.TBE_EDITOR.doSaveFieldName === 'doSave') {

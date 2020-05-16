@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "./vendor/Fabric", "./AreaFieldsetAbstract"], function (require, exports, fabric, AreaFieldsetAbstract_1) {
+define(["require", "exports", "./AreaFieldsetAbstract", "./AreaShapeFactory"], function (require, exports, AreaFieldsetAbstract_1, AreaShapeFactory_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class AreaFieldsetPolygon extends AreaFieldsetAbstract_1.AreaFieldsetAbstract {
@@ -19,14 +19,20 @@ define(["require", "exports", "./vendor/Fabric", "./AreaFieldsetAbstract"], func
             this.bindControls();
         }
         updateFields() {
-            this.getElement('.color').value = this.data.color;
-            this.getElement('.alt').value = this.alt || '';
-            this.getElement('.href').value = this.href || '';
-            Object.entries(this.attributes).forEach((attribute) => {
-                this.getElement('#' + attribute[0]).value = attribute[1] || '';
-            });
+            for (let attributeKey in this.attributes) {
+                if (!this.attributes.hasOwnProperty(attributeKey)) {
+                    continue;
+                }
+                let attributeValue = this.attributes[attributeKey] || '', element = this.getElement('.' + attributeKey);
+                if (element !== null) {
+                    if (typeof attributeValue === 'number') {
+                        attributeValue = attributeValue.toString();
+                    }
+                    element.value = attributeValue;
+                }
+            }
             let parentElement = this.getElement('.positionOptions');
-            this.points.forEach((point, index) => {
+            this.shape.points.forEach((point, index) => {
                 point.id = point.id ? point.id : 'p' + this.id + '_' + index;
                 if (!point.hasOwnProperty('element')) {
                     point.element = this.getFormElement('#polyCoords', point.id);
@@ -35,23 +41,6 @@ define(["require", "exports", "./vendor/Fabric", "./AreaFieldsetAbstract"], func
                 point.element.querySelector('#x' + point.id).value = point.x + this.left;
                 point.element.querySelector('#y' + point.id).value = point.y + this.top;
             });
-        }
-        getData() {
-            let points = [];
-            this.controls.forEach((control) => {
-                let center = control.getCenterPoint();
-                points.push({ x: center.x, y: center.y });
-            });
-            return Object.assign(Object.assign({}, this.attributes), { points: points });
-        }
-        bindControls() {
-            this.areaShape.controls.forEach((control) => {
-                control.on('moved', this.pointMoved.bind(this));
-                this.areaShape.canvas.add(control);
-            });
-            this.areaShape.canvas.renderAll();
-        }
-        addControl(areaConfig, point, index, newControlIndex) {
         }
         updateCanvas(event) {
             let field = (event.currentTarget || event.target), [, point] = field.id.split('_'), control = this.controls[parseInt(point)], x = control.getCenterPoint().x, y = control.getCenterPoint().y;
@@ -67,6 +56,22 @@ define(["require", "exports", "./vendor/Fabric", "./AreaFieldsetAbstract"], func
             this.points[control.name] = { x: x, y: y };
             this.canvas.renderAll();
         }
+        getData() {
+            let data = Object.assign({}, this.attributes);
+            data.points.forEach((point) => {
+                if (typeof point.id !== 'undefined') {
+                    delete point.id;
+                }
+            });
+            return data;
+        }
+        bindControls() {
+            this.shape.controls.forEach((control) => {
+                control.on('moved', this.pointMoved.bind(this));
+                this.shape.canvas.add(control);
+            });
+            this.shape.canvas.renderAll();
+        }
         pointMoved(event) {
             let control = event.target, id = 'p' + control.polygon.id + '_' + control.name, center = control.getCenterPoint();
             this.getElement('#x' + id).value = center.x;
@@ -81,10 +86,10 @@ define(["require", "exports", "./vendor/Fabric", "./AreaFieldsetAbstract"], func
         addPointBeforeAction(event) {
             let direction = AreaFieldsetAbstract_1.AreaFieldsetAbstract.before, index = this.points.length, parentElement = this.getElement('.positionOptions'), [point, element, currentPointIndex, currentPoint] = this.getPointElementAndCurrentPoint(event, direction);
             parentElement.insertBefore(element, currentPoint.element);
-            this.points = fabric.Polygon.addElementToArrayWithPosition(this.points, point, currentPointIndex + direction);
-            this.addControl(this.configuration, point, index, currentPointIndex + direction);
+            this.points = AreaShapeFactory_1.AreaShapeFactory.addElementToArrayWithPosition(this.points, point, currentPointIndex + direction);
+            AreaShapeFactory_1.AreaShapeFactory.addControl(this.shape, this.configuration, point, index, currentPointIndex + direction);
         }
-        addPointAfterAction(event) {
+        addPointAction(event) {
             let direction = AreaFieldsetAbstract_1.AreaFieldsetAbstract.after, index = this.points.length, parentElement = this.getElement('.positionOptions'), [point, element, currentPointIndex, currentPoint] = this.getPointElementAndCurrentPoint(event, direction);
             if (currentPoint.element.nextSibling) {
                 parentElement.insertBefore(element, currentPoint.element.nextSibling);
@@ -92,8 +97,8 @@ define(["require", "exports", "./vendor/Fabric", "./AreaFieldsetAbstract"], func
             else {
                 parentElement.append(element);
             }
-            this.points = fabric.Polygon.addElementToArrayWithPosition(this.points, point, currentPointIndex + direction);
-            this.addControl(this.configuration, point, index, currentPointIndex + direction);
+            this.points = AreaShapeFactory_1.AreaShapeFactory.addElementToArrayWithPosition(this.points, point, currentPointIndex + direction);
+            AreaShapeFactory_1.AreaShapeFactory.addControl(this.shape, this.configuration, point, index, currentPointIndex + direction);
         }
         getPointElementAndCurrentPoint(event, direction) {
             let currentPointId = event.currentTarget.parentNode.parentNode.id, [currentPoint, nextPoint, currentPointIndex] = this.getCurrentAndNextPoint(currentPointId, direction), index = this.points.length, id = 'p' + this.id + '_' + index, element = this.getFormElement('#polyCoords', id), point = {
@@ -151,25 +156,6 @@ define(["require", "exports", "./vendor/Fabric", "./AreaFieldsetAbstract"], func
                 this.controls = controls;
                 this.canvas.renderAll();
             }
-        }
-        static addElementToArrayWithPosition(array, item, newPointIndex) {
-            if (newPointIndex < 0) {
-                array.unshift(item);
-            }
-            else if (newPointIndex >= array.length) {
-                array.push(item);
-            }
-            else {
-                let newPoints = [];
-                for (let i = 0; i < array.length; i++) {
-                    newPoints.push(array[i]);
-                    if (i === newPointIndex - 1) {
-                        newPoints.push(item);
-                    }
-                }
-                array = newPoints;
-            }
-            return array;
         }
     }
     exports.AreaFieldsetPolygon = AreaFieldsetPolygon;

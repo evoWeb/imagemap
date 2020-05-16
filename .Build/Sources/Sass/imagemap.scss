@@ -1,4 +1,9 @@
-@import 'element';
-@import 'control';
-@import 'both';
-@import 'area-editor';
+.imagemap {
+    @import 'element';
+    @import 'wizard';
+    @import 'area-editor';
+}
+
+#fauxForm {
+    display: none;
+}

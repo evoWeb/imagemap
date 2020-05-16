@@ -28,17 +28,17 @@ fabric.window = top.window || window;
 export class Editor {
   readonly configurations: EditorConfigurations;
 
-  public areaShapes: Array<fabric.Object> = [];
-
-  public canvas: fabric.Canvas;
-
   readonly width: number;
 
   readonly height: number;
 
-  protected modalParent: Document;
+  readonly modalParent: Document;
 
-  public browselinkParent: Document;
+  readonly browselinkParent: Document;
+
+  public areaShapes: Array<fabric.Object> = [];
+
+  public canvas: fabric.Canvas;
 
   public formSelector: string = '#areasForm';
 
@@ -150,14 +150,15 @@ export class Editor {
 
         this.canvas.add(areaShape);
         this.areaShapes.push(areaShape);
+        this.areaFieldsets.push(areaFieldset);
         this.form.addArea(areaFieldset);
       });
     }
   }
 
   public removeAreas() {
-    this.areaShapes.forEach((area) => {
-      area.remove();
+    this.areaFieldsets.forEach((area) => {
+      area.deleteAction();
     });
   }
 
@@ -169,7 +170,7 @@ export class Editor {
       }
     });
     this.areaFieldsets = areas;
-    this.canvas.remove(area);
+    this.canvas.remove(area.shape);
   }
 
   public getMapData() {

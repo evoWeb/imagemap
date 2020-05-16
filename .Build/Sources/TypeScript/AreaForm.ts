@@ -18,11 +18,9 @@ import { Editor } from './Editor';
 import { AreaFieldsetAbstract } from './AreaFieldsetAbstract';
 
 export class AreaForm {
-  public areaZone: HTMLElement;
-
   public element: HTMLElement;
 
-  protected editor: Editor;
+  public editor: Editor;
 
   /**
    * Element needed to add inputs that act as target for browselink finalizeFunction target
@@ -31,7 +29,6 @@ export class AreaForm {
 
   constructor(formSelector: string, modalParent: Document, editor: Editor) {
     this.element = modalParent.querySelector(formSelector);
-    this.areaZone = this.element.querySelector('#areaZone');
     this.editor = editor;
 
     this.addFormAsTargetForBrowselink();
@@ -50,6 +47,7 @@ export class AreaForm {
   public addArea(area: AreaFieldsetAbstract) {
     area.form = this;
     area.postAddToForm();
+    this.updateArrowsState();
   }
 
   public moveArea(area: AreaFieldsetAbstract, offset: number) {
@@ -79,20 +77,17 @@ export class AreaForm {
     data.append('P[currentValue]', area.getLink());
 
     request.open('POST', window.TYPO3.settings.ajaxUrls.imagemap_browselink_url);
-    request.onreadystatechange = this.fetchBrowseLinkCallback.bind({
-      areaForm: this,
-      area: area
-    });
+    request.onreadystatechange = this.fetchBrowseLinkCallback.bind(area);
     request.send(data);
   }
 
-  protected fetchBrowseLinkCallback(this: {areaForm: AreaForm, area: AreaFieldsetAbstract}, e: ProgressEvent) {
+  protected fetchBrowseLinkCallback(this: AreaFieldsetAbstract, e: ProgressEvent) {
     let request = (e.target as XMLHttpRequest);
     if (request.readyState === 4 && request.status === 200) {
       let data = JSON.parse(request.responseText),
         url = data.url
-          + '&P[currentValue]=' + encodeURIComponent(this.area.getFieldValue('.href'))
-          + '&P[currentSelectedValues]=' + encodeURIComponent(this.area.getFieldValue('.href'));
+          + '&P[currentValue]=' + encodeURIComponent(this.getFieldValue('.href'))
+          + '&P[currentSelectedValues]=' + encodeURIComponent(this.getFieldValue('.href'));
 
       if (
         window.hasOwnProperty('TBE_EDITOR')

@@ -1,0 +1,16 @@
+&-editor {
+    .image {
+        float: left;
+        position: relative;
+        top: 0;
+        left: 0;
+        z-index: 1;
+    }
+
+    .canvas-container {
+        display: block;
+        left: 0;
+        top: -100%;
+        z-index: 100;
+    }
+}

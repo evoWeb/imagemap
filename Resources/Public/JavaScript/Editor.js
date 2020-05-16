@@ -16,8 +16,8 @@ define(["require", "exports", "./vendor/Fabric", "./AreaForm", "./AreaShapeFacto
     fabric.window = top.window || window;
     class Editor {
         constructor(configurations, canvas, modalParent, browselinkParent) {
-            this.formSelector = '#areasForm';
             this.areaShapes = [];
+            this.formSelector = '#areasForm';
             this.areaFieldsets = [];
             this.configurations = configurations;
             this.width = configurations.canvas.width;
@@ -105,13 +105,14 @@ define(["require", "exports", "./vendor/Fabric", "./AreaForm", "./AreaShapeFacto
                     let areaShape = areaShapeFactory.createShape(area, true), areaFieldset = areaFieldsetFactory.createFieldset(area, areaShape);
                     this.canvas.add(areaShape);
                     this.areaShapes.push(areaShape);
+                    this.areaFieldsets.push(areaFieldset);
                     this.form.addArea(areaFieldset);
                 });
             }
         }
         removeAreas() {
-            this.areaShapes.forEach((area) => {
-                area.remove();
+            this.areaFieldsets.forEach((area) => {
+                area.deleteAction();
             });
         }
         deleteArea(area) {
@@ -122,7 +123,7 @@ define(["require", "exports", "./vendor/Fabric", "./AreaForm", "./AreaShapeFacto
                 }
             });
             this.areaFieldsets = areas;
-            this.canvas.remove(area);
+            this.canvas.remove(area.shape);
         }
         getMapData() {
             let areas = [];
