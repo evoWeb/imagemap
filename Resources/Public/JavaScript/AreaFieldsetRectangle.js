@@ -34,37 +34,37 @@ define(["require", "exports", "./AreaFieldsetAbstract"], function (require, expo
                     continue;
                 }
                 let coordinatesValue = this.attributes.coords[coordinatesKey] || '', element = this.getElement('.' + coordinatesKey);
-                if (['left', 'right'].indexOf(coordinatesKey)) {
-                    coordinatesValue = Math.round(coordinatesValue * this.form.editor.width);
+                if (['left', 'right'].indexOf(coordinatesKey) > -1) {
+                    coordinatesValue = this.outputX(coordinatesValue);
                 }
-                else if (['top', 'bottom'].indexOf(coordinatesKey)) {
-                    coordinatesValue = Math.round(coordinatesValue * this.form.editor.height);
+                else if (['top', 'bottom'].indexOf(coordinatesKey) > -1) {
+                    coordinatesValue = this.outputY(coordinatesValue);
                 }
                 if (element !== null) {
-                    if (typeof coordinatesValue === 'number') {
-                        coordinatesValue = coordinatesValue.toString();
-                    }
                     element.value = coordinatesValue;
                 }
             }
         }
-        updateCanvas(event) {
+        shapeMoved(event) {
+            console.log(event);
+        }
+        moveShape(event) {
             let field = (event.currentTarget || event.target), value = parseInt(field.value);
-            switch (field.id) {
+            switch (field.dataset.field) {
                 case 'left':
-                    this.attributes.coords.left = value / this.form.editor.width;
-                    this.attributes.coords.right = (value + this.shape.getScaledWidth()) / this.form.editor.width;
+                    this.attributes.coords.left = this.inputX(value);
+                    this.attributes.coords.right = this.inputX(value + this.shape.getScaledWidth());
                     this.getElement('#right').value = value + this.shape.getScaledWidth();
                     this.shape.set({ left: value });
                     break;
                 case 'top':
-                    this.attributes.coords.top = value / this.form.editor.height;
-                    this.attributes.coords.bottom = (value + this.shape.getScaledHeight()) / this.form.editor.height;
+                    this.attributes.coords.top = this.inputY(value);
+                    this.attributes.coords.bottom = this.inputY(value + this.shape.getScaledHeight());
                     this.getElement('#bottom').value = value + this.shape.getScaledHeight();
                     this.shape.set({ top: value });
                     break;
                 case 'right':
-                    this.attributes.coords.right = value / this.form.editor.width;
+                    this.attributes.coords.right = this.inputX(value);
                     value -= this.shape.left;
                     if (value < 0) {
                         value = 10;
@@ -73,7 +73,7 @@ define(["require", "exports", "./AreaFieldsetAbstract"], function (require, expo
                     this.shape.set({ width: value });
                     break;
                 case 'bottom':
-                    this.attributes.coords.bottom = value / this.form.editor.height;
+                    this.attributes.coords.bottom = this.inputY(value);
                     value -= this.shape.top;
                     if (value < 0) {
                         value = 10;
@@ -82,7 +82,7 @@ define(["require", "exports", "./AreaFieldsetAbstract"], function (require, expo
                     this.shape.set({ height: value });
                     break;
             }
-            this.canvas.renderAll();
+            this.shape.canvas.renderAll();
         }
     }
     exports.AreaFieldsetRectangle = AreaFieldsetRectangle;

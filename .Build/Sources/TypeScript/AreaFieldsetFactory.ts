@@ -26,7 +26,7 @@ export class AreaFieldsetFactory {
     this.configurations = configurations;
   }
 
-  public createFieldset(area: AreaConfiguration, areaShape: Object): AreaFieldsetAbstract {
+  public createFieldset(area: AreaAttributes, areaShape: Object): AreaFieldsetAbstract {
     area.color = AreaShapeFactory.getRandomColor(area.color);
     let areaElement,
       configuration = {
@@ -50,15 +50,15 @@ export class AreaFieldsetFactory {
     return areaElement;
   }
 
-  protected createCircle(configuration: AreaConfiguration, areaShape: Object) {
+  protected createCircle(configuration: AreaAttributes, areaShape: Object): AreaFieldsetCircle {
     return new AreaFieldsetCircle(configuration, this.configurations, areaShape);
   }
 
-  protected createPolygon(configuration: AreaConfiguration, areaShape: Object) {
+  protected createPolygon(configuration: AreaAttributes, areaShape: Object): AreaFieldsetPolygon {
     return new AreaFieldsetPolygon(configuration, this.configurations, areaShape);
   }
 
-  protected createRectangle(configuration: AreaConfiguration, areaShape: Object) {
+  protected createRectangle(configuration: AreaAttributes, areaShape: Object): AreaFieldsetRectangle {
     return new AreaFieldsetRectangle(configuration, this.configurations, areaShape);
   }
 }

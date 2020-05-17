@@ -58,13 +58,13 @@ class AjaxController
      */
     public function browselinkUrlAction(ServerRequestInterface $request): ResponseInterface
     {
-        $parameters = $request->getParsedBody()['P'];
+        $parameterArray = $request->getParsedBody()['P'];
 
-        $options = $GLOBALS['TCA'][$parameters['tableName']]['columns'][
-            $parameters['fieldName']
+        $options = $GLOBALS['TCA'][$parameterArray['tableName']]['columns'][
+            $parameterArray['fieldName']
             ]['config']['fieldControlOptions'] ?? [];
 
-        $itemName = $parameters['itemFormElName'];
+        $itemName = $parameterArray['itemFormElName'];
 
         $linkBrowserArguments = [];
         if (isset($options['blindLinkOptions'])) {
@@ -80,15 +80,15 @@ class AjaxController
         $urlParameters = [
             'P' => [
                 'params' => $linkBrowserArguments,
-                'table' => $parameters['tableName'],
-                'uid' => (int)$parameters['uid'],
-                'pid' => (int)$parameters['pid'],
-                'field' => $parameters['fieldName'],
-                'formName' => $parameters['formName'],
+                'table' => $parameterArray['tableName'],
+                'uid' => (int)$parameterArray['uid'],
+                'pid' => (int)$parameterArray['pid'],
+                'field' => $parameterArray['fieldName'],
+                'formName' => $parameterArray['formName'],
                 'itemName' => $itemName,
-                'hmac' => GeneralUtility::hmac($itemName, 'wizard_js'),
-                'fieldChangeFunc' => $parameters['fieldChangeFunc'],
-                'fieldChangeFuncHash' => GeneralUtility::hmac(serialize($parameters['fieldChangeFunc'])),
+                'hmac' => GeneralUtility::hmac($parameterArray['formName'] . $itemName, 'wizard_js'),
+                'fieldChangeFunc' => $parameterArray['fieldChangeFunc'],
+                'fieldChangeFuncHash' => GeneralUtility::hmac(serialize($parameterArray['fieldChangeFunc'])),
             ],
         ];
         /** @var \TYPO3\CMS\Backend\Routing\UriBuilder $uriBuilder */

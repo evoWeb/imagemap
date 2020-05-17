@@ -15,7 +15,7 @@ declare interface Point {
   id?: string|number
 }
 
-declare interface AreaConfiguration {
+declare interface AreaAttributes {
   shape: string,
   href?: string,
   alt?: string,
@@ -54,19 +54,16 @@ declare interface CanvasSize {
   top?: number,
 }
 
-declare interface EditorConfiguration {
-  existingAreas: any[],
-  browseLink?: object,
-  itemName: string,
-}
-
 declare interface EditorConfigurations {
   canvas?: CanvasSize,
-  browselinkTargetDocument?: Document,
-  previewRerenderAjaxUrl?: string,
   browseLink?: object,
-  browseLinkUrlAjaxUrl?: string,
   formSelector?: string,
+  cornerColor?: string,
+  cornerStrokeColor?: string,
+  tableName?: string,
+  fieldName?: string,
+  uid?: number,
+  pid?: number,
 }
 
 declare interface FabricEvent {

@@ -128,13 +128,17 @@ define(["require", "exports", "jquery", "TYPO3/CMS/Backend/Icons", "TYPO3/CMS/Ba
             this.renderAreas(this.hiddenInput.value);
         }
         initializeEditor() {
-            let image = this.formElement.querySelector(this.editorImageSelector), configurations = {
+            let image = this.formElement.querySelector(this.editorImageSelector), data = this.hiddenInput.dataset, configurations = {
                 canvas: {
                     width: image.offsetWidth,
                     height: image.offsetHeight,
                     top: image.offsetHeight * -1,
                 },
-                formSelector: '[name="areasForm"]',
+                formSelector: '#areasForm',
+                tableName: data.tablename,
+                fieldName: data.fieldname,
+                uid: parseInt(data.uid),
+                pid: parseInt(data.pid),
             }, modalParent = image.parentNode, 
             // document in which the browslink is able to set fields
             browselinkParent = window.document;

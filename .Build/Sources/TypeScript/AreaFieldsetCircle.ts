@@ -14,9 +14,9 @@
 import { AreaFieldsetAbstract } from './AreaFieldsetAbstract';
 
 export class AreaFieldsetCircle extends AreaFieldsetAbstract {
-  protected name: string = 'circle';
+  readonly name: string = 'circle';
 
-  protected updateFields() {
+  protected updateFields(): void {
     for (let attributeKey in this.attributes) {
       if (!this.attributes.hasOwnProperty(attributeKey)) {
         continue;
@@ -39,41 +39,45 @@ export class AreaFieldsetCircle extends AreaFieldsetAbstract {
       let coordinatesValue = this.attributes.coords[coordinatesKey] || '',
         element = this.getElement('.' + coordinatesKey);
 
-      if (['left', 'radius'].indexOf(coordinatesKey)) {
-        coordinatesValue = Math.round(coordinatesValue * this.form.editor.width);
-      } else if (['top'].indexOf(coordinatesKey)) {
-        coordinatesValue = Math.round(coordinatesValue * this.form.editor.height);
+      if (['left', 'radius'].indexOf(coordinatesKey) > -1) {
+        coordinatesValue = this.outputX(coordinatesValue);
+      } else if (['top'].indexOf(coordinatesKey) > -1) {
+        coordinatesValue = this.outputY(coordinatesValue);
       }
 
       if (element !== null) {
-        if (typeof coordinatesValue === 'number') {
-          coordinatesValue = coordinatesValue.toString();
-        }
         element.value = coordinatesValue;
       }
     }
   }
 
-  protected updateCanvas(event: Event) {
+  protected shapeMoved(event: FabricEvent): void {
+    console.log(event);
+  }
+
+  protected moveShape(event: Event): void {
     let field = ((event.currentTarget || event.target) as HTMLInputElement),
       value = parseInt(field.value);
 
-    switch (field.id) {
+    switch (field.dataset.field) {
       case 'left':
-        this.attributes.coords.left = value / this.form.editor.width;
+        value -= parseInt(this.getElement(`.radius`).value);
+        this.attributes.coords.left = this.inputX(value);
         this.shape.set({left: value});
         break;
 
       case 'top':
-        this.attributes.coords.top = value / this.form.editor.height;
+        value -= parseInt(this.getElement(`.radius`).value);
+        this.attributes.coords.top = this.inputY(value);
         this.shape.set({top: value});
         break;
 
       case 'radius':
-        this.attributes.coords.top = value / this.form.editor.width;
+        this.attributes.coords.top = this.inputX(value);
         this.shape.set({radius: value});
         break;
     }
-    this.canvas.renderAll();
+
+    this.shape.canvas.renderAll();
   }
 }

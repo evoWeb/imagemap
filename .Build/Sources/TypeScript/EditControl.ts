@@ -187,15 +187,20 @@ class EditControl {
     this.renderAreas(this.hiddenInput.value);
   }
 
-  protected initializeEditor() {
+  protected initializeEditor(): void {
     let image: HTMLImageElement = this.formElement.querySelector(this.editorImageSelector),
+      data: any = this.hiddenInput.dataset,
       configurations: EditorConfigurations = {
         canvas: {
           width: image.offsetWidth,
           height: image.offsetHeight,
           top: image.offsetHeight * -1,
         },
-        formSelector: '[name="areasForm"]',
+        formSelector: '#areasForm',
+        tableName: data.tablename,
+        fieldName: data.fieldname,
+        uid: parseInt(data.uid),
+        pid: parseInt(data.pid),
       },
       modalParent = image.parentNode,
       // document in which the browslink is able to set fields
@@ -213,20 +218,20 @@ class EditControl {
     );
   }
 
-  protected resizeEditor() {
+  protected resizeEditor(): void {
     if (this.editor) {
       let image: HTMLImageElement = this.formElement.querySelector(this.editorImageSelector);
       this.editor.resize(image.offsetWidth, image.offsetHeight);
     }
   }
 
-  protected renderAreas(areas: string) {
+  protected renderAreas(areas: string): void {
     if (areas.length) {
       this.editor.renderAreas(JSON.parse(areas));
     }
   }
 
-  protected destroy() {
+  protected destroy(): void {
     if (this.currentModal) {
       this.editor.destroy();
       this.editor = null;
@@ -234,7 +239,7 @@ class EditControl {
     }
   }
 
-  protected buttonAddRectangleHandler(event: JQueryEventObject) {
+  protected buttonAddRectangleHandler(event: JQueryEventObject): void {
     event.stopPropagation();
     event.preventDefault();
 
@@ -249,7 +254,7 @@ class EditControl {
     }]);
   }
 
-  protected buttonAddCircleHandler(event: JQueryEventObject) {
+  protected buttonAddCircleHandler(event: JQueryEventObject): void {
     event.stopPropagation();
     event.preventDefault();
 
@@ -263,7 +268,7 @@ class EditControl {
     }]);
   }
 
-  protected buttonAddPolygonHandler(event: JQueryEventObject) {
+  protected buttonAddPolygonHandler(event: JQueryEventObject): void {
     event.stopPropagation();
     event.preventDefault();
 
@@ -278,14 +283,14 @@ class EditControl {
     }]);
   }
 
-  protected buttonDismissHandler(event: JQueryEventObject) {
+  protected buttonDismissHandler(event: JQueryEventObject): void {
     event.stopPropagation();
     event.preventDefault();
 
     this.currentModal.modal('hide');
   }
 
-  protected buttonSaveHandler(event: JQueryEventObject) {
+  protected buttonSaveHandler(event: JQueryEventObject): void {
     event.stopPropagation();
     event.preventDefault();
 
@@ -296,7 +301,7 @@ class EditControl {
     this.currentModal.modal('hide');
   }
 
-  protected hideColorSwatch(event: JQueryEventObject) {
+  protected hideColorSwatch(event: JQueryEventObject): void {
     if (!$(event.target).parents().add(event.target).hasClass('minicolors')) {
       // Hides all dropdown panels
       top.window.$('.minicolors-focus').each(() => {

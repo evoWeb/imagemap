@@ -27,7 +27,7 @@ export class Preview {
     this.initializeCanvas(canvas);
   }
 
-  protected initializeCanvas(canvas: HTMLElement) {
+  protected initializeCanvas(canvas: HTMLElement): void {
     this.canvas = new Canvas(canvas, {
       ...this.configurations.canvas,
       selection: false,
@@ -36,11 +36,11 @@ export class Preview {
     });
   }
 
-  public renderAreas(areas: Array<AreaConfiguration>) {
+  public renderAreas(areas: Array<AreaAttributes>): void {
     if (areas !== undefined) {
       let areaShapeFactory = new AreaShapeFactory(this.configurations);
 
-      areas.forEach((area: AreaConfiguration) => {
+      areas.forEach((area: AreaAttributes) => {
         let areaShape = areaShapeFactory.createShape(area, false);
 
         this.canvas.add(areaShape);
@@ -49,7 +49,7 @@ export class Preview {
     }
   }
 
-  public removeAreas() {
+  public removeAreas(): void {
     this.areaShapes.forEach((area) => {
       area.remove();
     });

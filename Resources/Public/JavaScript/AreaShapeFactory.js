@@ -46,59 +46,34 @@ define(["require", "exports", "./vendor/Fabric"], function (require, exports, Fa
             return areaShape;
         }
         createCircle(attributes, configuration) {
-            let coords = attributes.coords, radius = Math.round(coords.radius * this.width), left = Math.round(coords.left * this.width) - radius, top = Math.round(coords.top * this.height) - radius, area = new Fabric_1.Circle(Object.assign(Object.assign({}, configuration), { left: left, top: top, radius: radius }));
+            let coords = attributes.coords, radius = Math.round(coords.radius * this.width), left = Math.round(coords.left * this.width) - radius, top = Math.round(coords.top * this.height) - radius, areaShape = new Fabric_1.Circle(Object.assign(Object.assign({}, configuration), { left: left, top: top, radius: radius }));
+            areaShape.id = Fabric_1.Object.__uid++;
             // disable control points as these would stretch the circle
             // to an ellipse which is not possible in html areas
-            area.setControlVisible('ml', false);
-            area.setControlVisible('mt', false);
-            area.setControlVisible('mr', false);
-            area.setControlVisible('mb', false);
-            return area;
+            areaShape.setControlVisible('ml', false);
+            areaShape.setControlVisible('mt', false);
+            areaShape.setControlVisible('mr', false);
+            areaShape.setControlVisible('mb', false);
+            return areaShape;
         }
         createPolygon(attributes, configuration) {
-            let points = attributes.points || [], area;
+            let points = attributes.points || [], polygonPoints = [], polygonId = Fabric_1.Object.__uid++, areaShape;
             points.map((point) => {
-                point.x = Math.round(point.x * this.width);
-                point.y = Math.round(point.y * this.height);
-            });
-            area = new Fabric_1.Polygon(points, Object.assign(Object.assign({}, configuration), { objectCaching: false }));
-            area.controls = [];
-            if (configuration.selectable) {
-                points.forEach((point, index) => {
-                    AreaShapeFactory.addControl(area, configuration, point, index, 100000);
+                point.id = polygonId + '-' + Fabric_1.Object.__uid++;
+                polygonPoints.push({
+                    x: Math.round(point.x * this.width),
+                    y: Math.round(point.y * this.height),
+                    id: point.id,
                 });
-            }
-            return area;
+            });
+            areaShape = new Fabric_1.Polygon(polygonPoints, Object.assign(Object.assign({}, configuration), { objectCaching: false }));
+            areaShape.id = polygonId;
+            return areaShape;
         }
         createRectangle(attributes, configuration) {
-            let coords = attributes.coords, left = Math.round(coords.left * this.width), top = Math.round(coords.top * this.height), width = Math.round(coords.right * this.width) - left, height = Math.round(coords.bottom * this.height) - top;
-            return new Fabric_1.Rect(Object.assign(Object.assign({}, configuration), { left: left, top: top, width: width, height: height }));
-        }
-        static addControl(area, configuration, point, index, newControlIndex) {
-            let circle = new Fabric_1.Circle(Object.assign(Object.assign({}, configuration), { hasControls: false, radius: 5, fill: configuration.cornerColor, stroke: configuration.cornerStrokeColor, originX: 'center', originY: 'center', name: index, polygon: area, point: point, type: 'control', opacity: area.opacity, 
-                // set control position relative to polygon
-                left: point.x, top: point.y }));
-            point.control = circle;
-            area.controls = AreaShapeFactory.addElementToArrayWithPosition(area.controls, circle, newControlIndex);
-        }
-        static addElementToArrayWithPosition(array, item, newPointIndex) {
-            if (newPointIndex < 0) {
-                array.unshift(item);
-            }
-            else if (newPointIndex >= array.length) {
-                array.push(item);
-            }
-            else {
-                let newPoints = [];
-                for (let i = 0; i < array.length; i++) {
-                    newPoints.push(array[i]);
-                    if (i === newPointIndex - 1) {
-                        newPoints.push(item);
-                    }
-                }
-                array = newPoints;
-            }
-            return array;
+            let coords = attributes.coords, left = Math.round(coords.left * this.width), top = Math.round(coords.top * this.height), width = Math.round(coords.right * this.width) - left, height = Math.round(coords.bottom * this.height) - top, areaShape = new Fabric_1.Rect(Object.assign(Object.assign({}, configuration), { left: left, top: top, width: width, height: height }));
+            areaShape.id = Fabric_1.Object.__uid++;
+            return areaShape;
         }
         static getRandomColor(color) {
             while (color === undefined || !(/^#([A-Fa-f0-9]{3}){1,2}$/.test(color))) {

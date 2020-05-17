@@ -14,16 +14,11 @@
 // @ts-ignore
 import 'TYPO3/CMS/Core/Contrib/jquery.minicolors';
 // @ts-ignore
-import * as fabric from './vendor/Fabric';
-
+import { Canvas, Object } from './vendor/Fabric';
 import { AreaForm } from './AreaForm';
 import { AreaShapeFactory } from './AreaShapeFactory';
 import { AreaFieldsetFactory } from './AreaFieldsetFactory';
 import { AreaFieldsetAbstract } from './AreaFieldsetAbstract';
-
-// needed to access top frame elements
-fabric.document = top.document || document;
-fabric.window = top.window || window;
 
 export class Editor {
   readonly configurations: EditorConfigurations;
@@ -36,9 +31,9 @@ export class Editor {
 
   readonly browselinkParent: Document;
 
-  public areaShapes: Array<fabric.Object> = [];
+  public areaShapes: Array<Object> = [];
 
-  public canvas: fabric.Canvas;
+  public canvas: Canvas;
 
   public formSelector: string = '#areasForm';
 
@@ -46,92 +41,102 @@ export class Editor {
 
   public form: AreaForm;
 
-  constructor(configurations: EditorConfigurations, canvas: HTMLCanvasElement, modalParent: Document, browselinkParent: Document) {
+  private activePolygon: Object = null;
+
+  constructor(
+    configurations: EditorConfigurations,
+    canvas: HTMLCanvasElement,
+    modalParent: Document,
+    browselinkParent: Document
+  ) {
     this.configurations = configurations;
     this.width = configurations.canvas.width;
     this.height = configurations.canvas.height;
     this.modalParent = modalParent;
     this.browselinkParent = browselinkParent;
 
-    this.initializeCanvas(canvas, configurations);
+    this.initializeCanvas(canvas, configurations.canvas);
     this.initializeAreaForm();
   }
 
-  protected initializeCanvas(canvas: HTMLCanvasElement, configurations: EditorConfigurations) {
-    let activePolygon: fabric.Object = null;
-
-    this.canvas = new fabric.Canvas(canvas, {
-      ...configurations.canvas,
+  private initializeCanvas(canvas: HTMLCanvasElement, configurations: CanvasSize): void {
+    this.canvas = new Canvas(canvas, {
+      ...configurations,
       selection: false,
       preserveObjectStacking: true,
       hoverCursor: 'move',
     });
 
-    this.canvas.on('object:moving', (event: FabricEvent) => {
-      let element: fabric.Object = event.target;
-      switch (element.type) {
-        case 'control':
-          let center = element.getCenterPoint();
-          element.point.x = center.x - element.polygon.left;
-          element.point.y = center.y - element.polygon.top;
-          break;
+    // @todo check these
+    this.canvas.on('object:moving', this.objectMoving.bind(this));
+    this.canvas.on('selection:created', this.selectionCreated.bind(this));
+    this.canvas.on('selection:updated', this.selectionUpdated.bind(this));
+  }
 
-        case 'polygon':
-          element.controls.forEach((control: fabric.Object) => {
-            control.left = element.left + control.point.x;
-            control.top = element.top + control.point.y;
-          });
-          break;
+  private objectMoving(event: FabricEvent): void {
+    let element: Object = event.target;
+    switch (element.type) {
+      case 'control':
+        let center = element.getCenterPoint();
+        element.point.x = center.x - element.polygon.left;
+        element.point.y = center.y - element.polygon.top;
+        break;
+
+      case 'polygon':
+        element.controls.forEach((control: Object) => {
+          control.left = element.left + control.point.x;
+          control.top = element.top + control.point.y;
+        });
+        break;
+    }
+  }
+
+  private selectionCreated(event: FabricEvent): void {
+    if (event.target.type === 'polygon') {
+      this.activePolygon = event.target;
+      // show controls of active polygon
+      this.activePolygon.controls.forEach((control: Object) => {
+        control.opacity = 1;
+      });
+      this.canvas.renderAll();
+    }
+  }
+
+  private selectionUpdated(event: FabricEvent): void {
+    event.deselected.forEach((element: Object) => {
+      if (element.type === 'polygon' && event.selected[0].type !== 'control') {
+        // hide controls of active polygon
+        element.controls.forEach((control: Object) => {
+          control.opacity = 0;
+        });
+        this.activePolygon = null;
+        this.canvas.renderAll();
+      } else if (element.type === 'control') {
+        // hide controls of active polygon
+        this.activePolygon.controls.forEach((control: Object) => {
+          control.opacity = 0;
+        });
+        this.activePolygon = null;
+        this.canvas.renderAll();
       }
     });
-
-    this.canvas.on('selection:created', (event: FabricEvent) => {
-      if (event.target.type === 'polygon') {
-        activePolygon = event.target;
-        // show controls of active polygon
-        activePolygon.controls.forEach((control: fabric.Object) => {
+    event.selected.forEach((element: Object) => {
+      if (element.type === 'polygon') {
+        this.activePolygon = element;
+        // hide controls of active polygon
+        element.controls.forEach((control: Object) => {
           control.opacity = 1;
         });
         this.canvas.renderAll();
       }
     });
-
-    this.canvas.on('selection:updated', (event: FabricEvent) => {
-      event.deselected.forEach((element: fabric.Object) => {
-        if (element.type === 'polygon' && event.selected[0].type !== 'control') {
-          // hide controls of active polygon
-          element.controls.forEach((control: fabric.Object) => {
-            control.opacity = 0;
-          });
-          activePolygon = null;
-          this.canvas.renderAll();
-        } else if (element.type === 'control') {
-          // hide controls of active polygon
-          activePolygon.controls.forEach((control: fabric.Object) => {
-            control.opacity = 0;
-          });
-          activePolygon = null;
-          this.canvas.renderAll();
-        }
-      });
-      event.selected.forEach((element: fabric.Object) => {
-        if (element.type === 'polygon') {
-          activePolygon = element;
-          // hide controls of active polygon
-          element.controls.forEach((control: fabric.Object) => {
-            control.opacity = 1;
-          });
-          this.canvas.renderAll();
-        }
-      });
-    });
   }
 
-  protected initializeAreaForm() {
+  private initializeAreaForm(): void {
     this.form = new AreaForm(this.formSelector, this.modalParent, this);
   }
 
-  public resize(width: number, height: number) {
+  public resize(width: number, height: number): void {
     if (this.width !== width || this.height !== height) {
       // @todo resize canvas size
       // @todo resize and reposition shapes on canvas
@@ -139,7 +144,7 @@ export class Editor {
     }
   }
 
-  public renderAreas(areas: Array<AreaConfiguration>) {
+  public renderAreas(areas: Array<AreaAttributes>): void {
     if (areas !== undefined) {
       let areaShapeFactory = new AreaShapeFactory(this.configurations, this.canvas);
       let areaFieldsetFactory = new AreaFieldsetFactory(this.configurations);
@@ -156,13 +161,13 @@ export class Editor {
     }
   }
 
-  public removeAreas() {
+  public removeAreas(): void {
     this.areaFieldsets.forEach((area) => {
       area.deleteAction();
     });
   }
 
-  public deleteArea(area: AreaFieldsetAbstract) {
+  public deleteArea(area: AreaFieldsetAbstract): void {
     let areas: Array<AreaFieldsetAbstract> = [];
     this.areaFieldsets.forEach((currentArea) => {
       if (area !== currentArea) {
@@ -173,7 +178,7 @@ export class Editor {
     this.canvas.remove(area.shape);
   }
 
-  public getMapData() {
+  public getMapData(): string {
     let areas: object[] = [];
 
     this.areaFieldsets.forEach((area) => {

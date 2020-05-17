@@ -145,6 +145,7 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
                     'tableName' => $this->data['tableName'],
                     'fieldName' => $this->data['fieldName'],
                     'uid' => $this->data['databaseRow']['uid'],
+                    'pid' => $this->data['databaseRow']['pid'],
                     'mapAreas' => empty($elementValue) ? [] : json_decode($elementValue, true),
                 ],
                 'validation' => '[]'

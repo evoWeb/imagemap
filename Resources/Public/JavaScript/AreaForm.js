@@ -13,9 +13,10 @@ define(["require", "exports", "TYPO3/CMS/Backend/Modal"], function (require, exp
     Object.defineProperty(exports, "__esModule", { value: true });
     class AreaForm {
         constructor(formSelector, modalParent, editor) {
+            this.browselinkTargetFormSelector = '#browselinkTargetForm';
             this.element = modalParent.querySelector(formSelector);
             this.editor = editor;
-            this.addFormAsTargetForBrowselink();
+            this.addBrowselinkTargetForm();
         }
         destroy() {
             this.removeFauxForm();
@@ -44,8 +45,12 @@ define(["require", "exports", "TYPO3/CMS/Backend/Modal"], function (require, exp
             let data = new FormData(), request = new XMLHttpRequest();
             data.append('P[areaId]', area.id.toString());
             data.append('P[formName]', 'areasForm');
-            data.append('P[itemFormElName]', 'href' + area.id);
-            data.append('P[currentValue]', area.getLink());
+            data.append('P[itemFormElName]', `href${area.id}`);
+            data.append('P[currentValue]', area.attributes.href);
+            data.append('P[tableName]', this.editor.configurations.tableName);
+            data.append('P[fieldName]', this.editor.configurations.fieldName);
+            data.append('P[uid]', this.editor.configurations.uid.toString());
+            data.append('P[pid]', this.editor.configurations.pid.toString());
             request.open('POST', window.TYPO3.settings.ajaxUrls.imagemap_browselink_url);
             request.onreadystatechange = this.fetchBrowseLinkCallback.bind(area);
             request.send(data);
@@ -54,8 +59,7 @@ define(["require", "exports", "TYPO3/CMS/Backend/Modal"], function (require, exp
             let request = e.target;
             if (request.readyState === 4 && request.status === 200) {
                 let data = JSON.parse(request.responseText), url = data.url
-                    + '&P[currentValue]=' + encodeURIComponent(this.getFieldValue('.href'))
-                    + '&P[currentSelectedValues]=' + encodeURIComponent(this.getFieldValue('.href'));
+                    + '&P[currentValue]=' + encodeURIComponent(this.getFieldValue('.href'));
                 if (window.hasOwnProperty('TBE_EDITOR')
                     && window.TBE_EDITOR.hasOwnProperty('doSaveFieldName')
                     && window.TBE_EDITOR.doSaveFieldName === 'doSave') {
@@ -75,18 +79,16 @@ define(["require", "exports", "TYPO3/CMS/Backend/Modal"], function (require, exp
         /**
          * Create form element that is reachable for LinkBrowser.finalizeFunction
          */
-        addFormAsTargetForBrowselink() {
-            if (top.document !== this.editor.browselinkParent) {
-                if (!(this.browselinkTargetForm = this.editor.browselinkParent.querySelector(this.editor.formSelector))) {
-                    this.browselinkTargetForm = this.editor.browselinkParent.createElement('form');
-                    this.browselinkTargetForm.setAttribute('name', 'areasForm');
-                    this.browselinkTargetForm.setAttribute('id', 'browselinkTargetForm');
-                    this.editor.browselinkParent.body.appendChild(this.browselinkTargetForm);
-                }
-                // empty previously created browselinkTargetForm
-                while (this.browselinkTargetForm.firstChild) {
-                    this.browselinkTargetForm.removeChild(this.browselinkTargetForm.firstChild);
-                }
+        addBrowselinkTargetForm() {
+            if (!(this.browselinkTargetForm = this.editor.browselinkParent.querySelector(this.browselinkTargetFormSelector))) {
+                this.browselinkTargetForm = this.editor.browselinkParent.createElement('form');
+                this.browselinkTargetForm.setAttribute('name', 'areasForm');
+                this.browselinkTargetForm.setAttribute('id', 'browselinkTargetForm');
+                this.editor.browselinkParent.body.appendChild(this.browselinkTargetForm);
+            }
+            // empty previously created browselinkTargetForm
+            while (this.browselinkTargetForm.firstChild) {
+                this.browselinkTargetForm.removeChild(this.browselinkTargetForm.firstChild);
             }
         }
         removeFauxForm() {

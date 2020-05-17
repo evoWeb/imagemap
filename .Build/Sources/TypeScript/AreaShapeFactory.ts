@@ -37,7 +37,7 @@ export class AreaShapeFactory {
     this.canvas = canvas;
   }
 
-  public createShape(attributes: AreaConfiguration, selectable: boolean): Object {
+  public createShape(attributes: AreaAttributes, selectable: boolean): Object {
     attributes.color = AreaShapeFactory.getRandomColor(attributes.color);
     let areaShape: Object,
       configuration: ShapeConfiguration = {
@@ -70,115 +70,72 @@ export class AreaShapeFactory {
     return areaShape;
   }
 
-  private createCircle(attributes: AreaConfiguration, configuration: ShapeConfiguration): Circle {
+  private createCircle(attributes: AreaAttributes, configuration: ShapeConfiguration): Circle {
     let coords = attributes.coords,
       radius = Math.round(coords.radius * this.width),
       left = Math.round(coords.left * this.width) - radius,
       top = Math.round(coords.top * this.height) - radius,
-      area = new Circle({
+      areaShape = new Circle({
         ...configuration,
         left: left,
         top: top,
         radius: radius,
       });
 
+    areaShape.id = Object.__uid++;
+
     // disable control points as these would stretch the circle
     // to an ellipse which is not possible in html areas
-    area.setControlVisible('ml', false);
-    area.setControlVisible('mt', false);
-    area.setControlVisible('mr', false);
-    area.setControlVisible('mb', false);
+    areaShape.setControlVisible('ml', false);
+    areaShape.setControlVisible('mt', false);
+    areaShape.setControlVisible('mr', false);
+    areaShape.setControlVisible('mb', false);
 
-    return area;
+    return areaShape;
   }
 
-  private createPolygon(attributes: AreaConfiguration, configuration: ShapeConfiguration): Polygon {
+  private createPolygon(attributes: AreaAttributes, configuration: ShapeConfiguration): Polygon {
     let points: Point[] = attributes.points || [],
-      area: Polygon;
+      polygonPoints: Point[] = [],
+      polygonId = Object.__uid++,
+      areaShape: Polygon;
 
     points.map((point) => {
-      point.x = Math.round(point.x * this.width);
-      point.y = Math.round(point.y * this.height);
+      point.id = polygonId + '-' + Object.__uid++;
+      polygonPoints.push({
+        x: Math.round(point.x * this.width),
+        y: Math.round(point.y * this.height),
+        id: point.id,
+      });
     });
 
-    area = new Polygon(points, {
+    areaShape = new Polygon(polygonPoints, {
       ...configuration,
       objectCaching: false,
     });
-    area.controls = [];
 
-    if (configuration.selectable) {
-      points.forEach((point: Object, index: number) => {
-        AreaShapeFactory.addControl(area, configuration, point, index, 100000);
-      });
-    }
+    areaShape.id = polygonId;
 
-    return area;
+    return areaShape;
   }
 
-  private createRectangle(attributes: AreaConfiguration, configuration: ShapeConfiguration): Rect {
+  private createRectangle(attributes: AreaAttributes, configuration: ShapeConfiguration): Rect {
     let coords = attributes.coords,
       left = Math.round(coords.left * this.width),
       top = Math.round(coords.top * this.height),
       width = Math.round(coords.right * this.width) - left,
-      height = Math.round(coords.bottom * this.height) - top;
+      height = Math.round(coords.bottom * this.height) - top,
+      areaShape = new Rect({
+        ...configuration,
+        left: left,
+        top: top,
+        width: width,
+        height: height,
+      });
 
-    return new Rect({
-      ...configuration,
-      left: left,
-      top: top,
-      width: width,
-      height: height,
-    });
-  }
+    areaShape.id = Object.__uid++;
 
-  static addControl(
-    area: Polygon,
-    configuration: ShapeConfiguration,
-    point: Object,
-    index: number,
-    newControlIndex: number
-  ): void {
-    let circle = new Circle({
-      ...configuration,
-      hasControls: false,
-      radius: 5,
-      fill: configuration.cornerColor,
-      stroke: configuration.cornerStrokeColor,
-      originX: 'center',
-      originY: 'center',
-      name: index,
-      polygon: area,
-      point: point,
-      type: 'control',
-      opacity: area.opacity,
-
-      // set control position relative to polygon
-      left: point.x,
-      top: point.y,
-    });
-
-    point.control = circle;
-
-    area.controls = AreaShapeFactory.addElementToArrayWithPosition(area.controls, circle, newControlIndex);
-  }
-
-  static addElementToArrayWithPosition(array: any[], item: any, newPointIndex: number): any[] {
-    if (newPointIndex < 0) {
-      array.unshift(item);
-    } else if (newPointIndex >= array.length) {
-      array.push(item);
-    } else {
-      let newPoints = [];
-      for (let i = 0; i < array.length; i++) {
-        newPoints.push(array[i]);
-        if (i === newPointIndex - 1) {
-          newPoints.push(item);
-        }
-      }
-      array = newPoints;
-    }
-    return array;
+    return areaShape;
   }
 
   static getRandomColor(color: string): string {
@@ -188,7 +145,7 @@ export class AreaShapeFactory {
     return color;
   }
 
-  static hexToRgbA(hex: string, alpha: number): string {
+  static hexToRgbA(hex: string, alpha?: number): string {
     let chars, r, g, b, result;
     if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
       chars = hex.substring(1).split('');

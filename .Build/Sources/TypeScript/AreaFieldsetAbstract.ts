@@ -23,13 +23,13 @@ export abstract class AreaFieldsetAbstract {
 
   static after: number = 1;
 
-  readonly id: number = 0;
+  readonly name: string = '';
 
-  protected name: string = '';
+  readonly id: number = 0;
 
   public element: HTMLElement;
 
-  protected updateCanvasDelay: number = 0;
+  protected moveShapeDelay: number = 0;
 
   public form: AreaForm;
 
@@ -37,21 +37,21 @@ export abstract class AreaFieldsetAbstract {
 
   public shape: Object;
 
-  protected attributes: {[k: string]: any} = {};
+  public attributes: {[k: string]: any} = {};
 
-  protected configuration: {[k: string]: any} = {};
+  protected configuration: EditorConfigurations;
 
   [property: string]: any;
 
-  constructor(attributes: AreaConfiguration, configuration: EditorConfigurations, shape: Object) {
+  constructor(attributes: AreaAttributes, configuration: EditorConfigurations, shape: Object) {
     this.attributes = attributes;
     this.configuration = configuration;
     this.shape = shape;
 
-    this.id = Object.__uid++;
+    this.id = this.shape.id;
   }
 
-  public postAddToForm() {
+  public postAddToForm(): void {
     this.initializeElement();
     this.updateFields();
     this.initializeColorPicker();
@@ -59,12 +59,12 @@ export abstract class AreaFieldsetAbstract {
     this.addBrowselinkTargetInput();
   }
 
-  protected initializeElement() {
+  protected initializeElement(): void {
     this.element = this.getFormElement(`#${this.name}Form`, this.id);
     this.form.element.append(this.element);
   }
 
-  protected initializeColorPicker() {
+  protected initializeColorPicker(): void {
     ($(this.getElement('.t3js-color-picker')) as any).minicolors({
       format: 'hex',
       position: 'left',
@@ -74,43 +74,46 @@ export abstract class AreaFieldsetAbstract {
     });
   }
 
-  protected initializeEvents() {
-    this.shape.on('moved', this.updateFields.bind(this));
-    this.shape.on('modified', this.updateFields.bind(this));
+  protected initializeEvents(): void {
+    // @todo check these
+    this.shape.on('moved', this.shapeMoved.bind(this));
+    this.shape.on('modified', this.shapeMoved.bind(this));
 
     this.getElements('.basicOptions .t3js-field').forEach((field: HTMLInputElement) => {
-      field.addEventListener('keyup', this.updateProperties.bind(this));
+      field.removeEventListener('keyup', this.basicOptionsHandler);
+      field.addEventListener('keyup', this.basicOptionsHandler.bind(this));
     });
     this.getElements('.positionOptions .t3js-field').forEach((field: HTMLInputElement) => {
-      field.addEventListener('input', this.fieldInputHandler.bind(this));
+      field.removeEventListener('input', this.positionOptionsHandler);
+      field.addEventListener('input', this.positionOptionsHandler.bind(this));
     });
-    this.getElements('.t3js-btn').forEach(this.buttonEventHandler.bind(this));
+    this.getElements('.t3js-btn').forEach((field: HTMLInputElement) => {
+      let action: string = field.dataset.action + 'Action';
+      field.removeEventListener('click', this[action]);
+      field.addEventListener('click', this[action].bind(this));
+    });
   }
 
   protected abstract updateFields(): void;
 
-  protected updateProperties(event: Event) {
-    let field = (event.currentTarget as HTMLInputElement),
-      property = field.id;
+  protected abstract shapeMoved(event: FabricEvent): void;
 
-    this.attributes[property] = field.value;
+  protected abstract moveShape(event: Event): void;
+
+  protected basicOptionsHandler(event: Event): void {
+    let field = (event.currentTarget as HTMLInputElement);
+    this.attributes[field.dataset.field] = field.value;
   }
 
-  protected fieldInputHandler(event: Event) {
-    this.updateCanvasDelay = AreaFieldsetAbstract.wait(
-      () => { this.updateCanvas(event); },
+  protected positionOptionsHandler(event: Event): void {
+    this.moveShapeDelay = AreaFieldsetAbstract.wait(
+      () => { this.moveShape(event); },
       500,
-      this.updateCanvasDelay
+      this.moveShapeDelay
     );
   }
 
-  protected buttonEventHandler(button: HTMLElement) {
-    let action: string = button.dataset.action + 'Action';
-    button.removeEventListener('click', this[action]);
-    button.addEventListener('click', this[action].bind(this));
-  }
-
-  public updateArrowsState() {
+  public updateArrowsState(): void {
     let areasForm = this.form.element,
       upButton = this.getElement('[data-action="up"]'),
       downButton = this.getElement('[data-action="down"]');
@@ -128,21 +131,19 @@ export abstract class AreaFieldsetAbstract {
     }
   }
 
-  protected abstract updateCanvas(event: Event): void;
-
-  protected linkAction(event: Event) {
+  protected linkAction(event: Event): void {
     this.form.openLinkBrowser((event.currentTarget as HTMLElement), this);
   }
 
-  protected upAction() {
+  protected upAction(): void {
     this.form.moveArea(this, AreaFieldsetAbstract.before);
   }
 
-  protected downAction() {
+  protected downAction(): void {
     this.form.moveArea(this, AreaFieldsetAbstract.after);
   }
 
-  public deleteAction() {
+  public deleteAction(): void {
     if (this.element) {
       this.element.remove();
     }
@@ -152,22 +153,22 @@ export abstract class AreaFieldsetAbstract {
     this.form.editor.deleteArea(this);
   }
 
-  protected expandAction() {
+  protected expandAction(): void {
     this.showElement('.moreOptions');
     this.showElement('[data-action="collapse"]');
     this.hideElement('[data-action="expand"]');
   }
 
-  protected collapseAction() {
+  protected collapseAction(): void {
     this.hideElement('.moreOptions');
     this.hideElement('[data-action="collapse"]');
     this.showElement('[data-action="expand"]');
   }
 
-  protected undoAction() {
+  protected undoAction(): void {
   }
 
-  protected redoAction() {
+  protected redoAction(): void {
   }
 
   protected colorPickerAction(value: string) {
@@ -176,7 +177,7 @@ export abstract class AreaFieldsetAbstract {
     this.shape.set('borderColor', this.attributes.color);
     this.shape.set('stroke', this.attributes.color);
     this.shape.set('fill', AreaShapeFactory.hexToRgbA(this.attributes.color, 0.2));
-    this.form.editor.canvas.renderAll();
+    this.shape.canvas.renderAll();
   }
 
   protected getFormElement(selector: string, id: number|string): HTMLElement {
@@ -205,6 +206,22 @@ export abstract class AreaFieldsetAbstract {
     return this.getElement(selector).value;
   }
 
+  protected inputX(value: number): number {
+    return value / this.form.editor.width;
+  }
+
+  protected inputY(value: number): number {
+    return value / this.form.editor.height;
+  }
+
+  protected outputX(value: number): string {
+    return Math.round(value * this.form.editor.width).toString();
+  }
+
+  protected outputY(value: number): string {
+    return Math.round(value * this.form.editor.height).toString();
+  }
+
   public getData(): object {
     return this.attributes;
   }
@@ -212,7 +229,7 @@ export abstract class AreaFieldsetAbstract {
   /**
    * Add an input as target for browselink which listens for changes and writes value to real field
    */
-  protected addBrowselinkTargetInput() {
+  protected addBrowselinkTargetInput(): void {
     if (this.form.browselinkTargetForm) {
       let browselinkTargetInput = this.form.editor.browselinkParent.createElement('input');
       browselinkTargetInput.setAttribute('id', 'href' + this.id);
@@ -223,17 +240,17 @@ export abstract class AreaFieldsetAbstract {
     }
   }
 
-  protected removeBrowselinkTargetInput() {
+  protected removeBrowselinkTargetInput(): void {
     if (this.form && this.form.browselinkTargetForm !== null) {
-      let field = this.form.browselinkTargetForm.querySelector('#href' + this.id);
+      let field = this.form.browselinkTargetForm.querySelector(`#href${this.id}`);
       if (field) {
         field.remove();
       }
     }
   }
 
-  protected changedBrowselinkTargetInput() {
-    let field = (this.form.browselinkTargetForm.querySelector('#href' + this.id) as HTMLInputElement);
+  protected changedBrowselinkTargetInput(): void {
+    let field = (this.form.browselinkTargetForm.querySelector(`#href${this.id}`) as HTMLInputElement);
     this.attributes.href = field.value;
     this.updateFields();
   }

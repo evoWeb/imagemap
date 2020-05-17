@@ -2,14 +2,14 @@
       xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
       data-namespace-typo3-fluid="true">
 
-<div class="input-group">
-    <input type="text" class="t3js-field form-control alt"
+<div class="basicOptions input-group">
+    <input type="text" id="alt_ID" data-field="alt" class="t3js-field form-control alt"
            placeholder="{f:translate(id: 'imagemap.form.area.label', extensionName: 'imagemap')}"/>
 </div>
 
 <div class="basicOptions input-group">
-    <input type="text" id="href_ID" autocomplete="off" data-lpignore="true" data-formengine-input-name="href_ID"
-           class="href t3js-field form-control"
+    <input type="text" id="href_ID" data-field="href" class="t3js-field form-control href"
+           autocomplete="off" data-lpignore="true" data-formengine-input-name="href_ID"
            placeholder="{f:translate(id: 'imagemap.form.area.link', extensionName: 'imagemap')}"/>
     <div class="input-group-btn">
         <span data-action="link" class="t3js-btn btn btn-default"
@@ -20,7 +20,7 @@
 
 <div class="input-group buttons">
     <div class="input-group-addon">
-        <input class="form-control t3js-field t3js-color-picker color" type="hidden" value=""/>
+        <input type="hidden" id="color_ID" data-field="color" class="t3js-field form-control t3js-color-picker color"/>
     </div>
 
     <div class="form-control"></div>

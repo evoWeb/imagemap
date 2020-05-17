@@ -14,9 +14,9 @@
 import { AreaFieldsetAbstract } from './AreaFieldsetAbstract';
 
 export class AreaFieldsetRectangle extends AreaFieldsetAbstract {
-  protected name: string = 'rectangle';
+  readonly name: string = 'rectangle';
 
-  protected updateFields() {
+  protected updateFields(): void {
     for (let attributeKey in this.attributes) {
       if (!this.attributes.hasOwnProperty(attributeKey)) {
         continue;
@@ -39,42 +39,43 @@ export class AreaFieldsetRectangle extends AreaFieldsetAbstract {
       let coordinatesValue = this.attributes.coords[coordinatesKey] || '',
         element = this.getElement('.' + coordinatesKey);
 
-      if (['left', 'right'].indexOf(coordinatesKey)) {
-        coordinatesValue = Math.round(coordinatesValue * this.form.editor.width);
-      } else if (['top', 'bottom'].indexOf(coordinatesKey)) {
-        coordinatesValue = Math.round(coordinatesValue * this.form.editor.height);
+      if (['left', 'right'].indexOf(coordinatesKey) > -1) {
+        coordinatesValue = this.outputX(coordinatesValue);
+      } else if (['top', 'bottom'].indexOf(coordinatesKey) > -1) {
+        coordinatesValue = this.outputY(coordinatesValue);
       }
 
       if (element !== null) {
-        if (typeof coordinatesValue === 'number') {
-          coordinatesValue = coordinatesValue.toString();
-        }
         element.value = coordinatesValue;
       }
     }
   }
 
-  protected updateCanvas(event: Event) {
+  protected shapeMoved(event: FabricEvent): void {
+    console.log(event);
+  }
+
+  protected moveShape(event: Event): void {
     let field = ((event.currentTarget || event.target) as HTMLInputElement),
       value = parseInt(field.value);
 
-    switch (field.id) {
+    switch (field.dataset.field) {
       case 'left':
-        this.attributes.coords.left = value / this.form.editor.width;
-        this.attributes.coords.right = (value + this.shape.getScaledWidth()) / this.form.editor.width;
+        this.attributes.coords.left = this.inputX(value);
+        this.attributes.coords.right = this.inputX(value + this.shape.getScaledWidth());
         this.getElement('#right').value = value + this.shape.getScaledWidth();
         this.shape.set({left: value});
         break;
 
       case 'top':
-        this.attributes.coords.top = value / this.form.editor.height;
-        this.attributes.coords.bottom = (value + this.shape.getScaledHeight()) / this.form.editor.height;
+        this.attributes.coords.top = this.inputY(value);
+        this.attributes.coords.bottom = this.inputY(value + this.shape.getScaledHeight());
         this.getElement('#bottom').value = value + this.shape.getScaledHeight();
         this.shape.set({top: value});
         break;
 
       case 'right':
-        this.attributes.coords.right = value / this.form.editor.width;
+        this.attributes.coords.right = this.inputX(value);
         value -= this.shape.left;
         if (value < 0) {
           value = 10;
@@ -84,7 +85,7 @@ export class AreaFieldsetRectangle extends AreaFieldsetAbstract {
         break;
 
       case 'bottom':
-        this.attributes.coords.bottom = value / this.form.editor.height;
+        this.attributes.coords.bottom = this.inputY(value);
         value -= this.shape.top;
         if (value < 0) {
           value = 10;
@@ -93,6 +94,7 @@ export class AreaFieldsetRectangle extends AreaFieldsetAbstract {
         this.shape.set({height: value});
         break;
     }
-    this.canvas.renderAll();
+
+    this.shape.canvas.renderAll();
   }
 }

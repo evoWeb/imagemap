@@ -13,7 +13,6 @@
 
 // @ts-ignore
 import Modal = require('TYPO3/CMS/Backend/Modal');
-
 import { Editor } from './Editor';
 import { AreaFieldsetAbstract } from './AreaFieldsetAbstract';
 
@@ -21,6 +20,8 @@ export class AreaForm {
   public element: HTMLElement;
 
   public editor: Editor;
+
+  public browselinkTargetFormSelector: string = '#browselinkTargetForm';
 
   /**
    * Element needed to add inputs that act as target for browselink finalizeFunction target
@@ -31,26 +32,26 @@ export class AreaForm {
     this.element = modalParent.querySelector(formSelector);
     this.editor = editor;
 
-    this.addFormAsTargetForBrowselink();
+    this.addBrowselinkTargetForm();
   }
 
-  public destroy() {
+  public destroy(): void {
     this.removeFauxForm();
   }
 
-  public updateArrowsState() {
+  public updateArrowsState(): void {
     this.editor.areaFieldsets.forEach((area) => {
       area.updateArrowsState();
     });
   }
 
-  public addArea(area: AreaFieldsetAbstract) {
+  public addArea(area: AreaFieldsetAbstract): void {
     area.form = this;
     area.postAddToForm();
     this.updateArrowsState();
   }
 
-  public moveArea(area: AreaFieldsetAbstract, offset: number) {
+  public moveArea(area: AreaFieldsetAbstract, offset: number): void {
     let index = this.editor.areaFieldsets.indexOf(area),
       newIndex = index + offset,
       parent = area.element.parentNode;
@@ -65,7 +66,7 @@ export class AreaForm {
     this.updateArrowsState();
   }
 
-  public openLinkBrowser(link: HTMLElement, area: AreaFieldsetAbstract) {
+  public openLinkBrowser(link: HTMLElement, area: AreaFieldsetAbstract): void {
     link.blur();
 
     let data = new FormData(),
@@ -73,21 +74,24 @@ export class AreaForm {
 
     data.append('P[areaId]', area.id.toString());
     data.append('P[formName]', 'areasForm');
-    data.append('P[itemFormElName]', 'href' + area.id);
-    data.append('P[currentValue]', area.getLink());
+    data.append('P[itemFormElName]', `href${area.id}`);
+    data.append('P[currentValue]', area.attributes.href);
+    data.append('P[tableName]', this.editor.configurations.tableName);
+    data.append('P[fieldName]', this.editor.configurations.fieldName);
+    data.append('P[uid]', this.editor.configurations.uid.toString());
+    data.append('P[pid]', this.editor.configurations.pid.toString());
 
     request.open('POST', window.TYPO3.settings.ajaxUrls.imagemap_browselink_url);
     request.onreadystatechange = this.fetchBrowseLinkCallback.bind(area);
     request.send(data);
   }
 
-  protected fetchBrowseLinkCallback(this: AreaFieldsetAbstract, e: ProgressEvent) {
+  protected fetchBrowseLinkCallback(this: AreaFieldsetAbstract, e: ProgressEvent): void {
     let request = (e.target as XMLHttpRequest);
     if (request.readyState === 4 && request.status === 200) {
       let data = JSON.parse(request.responseText),
         url = data.url
-          + '&P[currentValue]=' + encodeURIComponent(this.getFieldValue('.href'))
-          + '&P[currentSelectedValues]=' + encodeURIComponent(this.getFieldValue('.href'));
+          + '&P[currentValue]=' + encodeURIComponent(this.getFieldValue('.href'));
 
       if (
         window.hasOwnProperty('TBE_EDITOR')
@@ -95,11 +99,7 @@ export class AreaForm {
         && window.TBE_EDITOR.doSaveFieldName === 'doSave'
       ) {
         // @todo remove once TYPO3 9.x support gets removed
-        let vHWin = window.open(
-          url,
-          '',
-          'height=600,width=500,status=0,menubar=0,scrollbars=1'
-        );
+        let vHWin = window.open(url,'','height=600,width=500,status=0,menubar=0,scrollbars=1');
         vHWin.focus()
       } else {
         Modal.advanced({
@@ -114,23 +114,21 @@ export class AreaForm {
   /**
    * Create form element that is reachable for LinkBrowser.finalizeFunction
    */
-  protected addFormAsTargetForBrowselink() {
-    if (top.document !== this.editor.browselinkParent) {
-      if (!(this.browselinkTargetForm = this.editor.browselinkParent.querySelector(this.editor.formSelector))) {
-        this.browselinkTargetForm = this.editor.browselinkParent.createElement('form');
-        this.browselinkTargetForm.setAttribute('name', 'areasForm');
-        this.browselinkTargetForm.setAttribute('id', 'browselinkTargetForm');
-        this.editor.browselinkParent.body.appendChild(this.browselinkTargetForm);
-      }
+  protected addBrowselinkTargetForm(): void {
+    if (!(this.browselinkTargetForm = this.editor.browselinkParent.querySelector(this.browselinkTargetFormSelector))) {
+      this.browselinkTargetForm = this.editor.browselinkParent.createElement('form');
+      this.browselinkTargetForm.setAttribute('name', 'areasForm');
+      this.browselinkTargetForm.setAttribute('id', 'browselinkTargetForm');
+      this.editor.browselinkParent.body.appendChild(this.browselinkTargetForm);
+    }
 
-      // empty previously created browselinkTargetForm
-      while (this.browselinkTargetForm.firstChild) {
-        this.browselinkTargetForm.removeChild(this.browselinkTargetForm.firstChild);
-      }
+    // empty previously created browselinkTargetForm
+    while (this.browselinkTargetForm.firstChild) {
+      this.browselinkTargetForm.removeChild(this.browselinkTargetForm.firstChild);
     }
   }
 
-  protected removeFauxForm() {
+  protected removeFauxForm(): void {
     if (this.browselinkTargetForm) {
       this.browselinkTargetForm.remove();
     }

@@ -27,12 +27,12 @@ class FormElement {
     this.initializeEvents();
   }
 
-  protected initializeFormElement(fieldSelector: string) {
+  protected initializeFormElement(fieldSelector: string): void {
     this.hiddenInput = document.querySelector(fieldSelector);
     this.formElement = document.querySelector(fieldSelector + '-canvas');
   }
 
-  protected initializePreview() {
+  protected initializePreview(): void {
     const image: JQuery = $(this.formElement).find('.image');
     ImagesLoaded(image as any, (): void => {
       setTimeout(
@@ -56,11 +56,11 @@ class FormElement {
     });
   }
 
-  protected initializeEvents() {
+  protected initializeEvents(): void {
     this.hiddenInput.addEventListener('imagemap:changed', this.fieldChangedHandler.bind(this));
   }
 
-  protected fieldChangedHandler(event: Event) {
+  protected fieldChangedHandler(event: Event): void {
     let field = (event.currentTarget as HTMLInputElement),
       data = new FormData(),
       request = new XMLHttpRequest();
@@ -76,7 +76,7 @@ class FormElement {
     request.send(data);
   }
 
-  protected previewRerenderCallback(this: FormElement, e: ProgressEvent) {
+  protected previewRerenderCallback(this: FormElement, e: ProgressEvent): void {
     let request = (e.target as XMLHttpRequest);
     if (request.readyState === 4 && request.status === 200) {
       (this.formElement.querySelector('.modifiedState') as HTMLDivElement).style.display = 'block';
@@ -89,7 +89,7 @@ class FormElement {
     }
   }
 
-  protected renderAreas(areas: string) {
+  protected renderAreas(areas: string): void {
     if (areas.length) {
       this.preview.renderAreas(JSON.parse(areas));
     }
