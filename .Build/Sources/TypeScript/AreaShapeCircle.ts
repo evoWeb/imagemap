@@ -12,10 +12,12 @@
 /// <reference types="../../types/index"/>
 
 // @ts-ignore
-import { Circle } from './vendor/Fabric';
+import { Canvas, Circle } from './vendor/Fabric';
 
 export class AreaShapeCircle extends Circle {
   public id: number;
+
+  public canvas: Canvas;
 
   [property: string]: any;
 

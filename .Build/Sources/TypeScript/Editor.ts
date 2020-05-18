@@ -15,17 +15,13 @@
 import 'TYPO3/CMS/Core/Contrib/jquery.minicolors';
 // @ts-ignore
 import { Canvas, Object } from './vendor/Fabric';
+import { AreaFieldsetAbstract } from './AreaFieldsetAbstract';
+import { AreaFieldsetFactory } from './AreaFieldsetFactory';
 import { AreaForm } from './AreaForm';
 import { AreaShapeFactory } from './AreaShapeFactory';
-import { AreaFieldsetFactory } from './AreaFieldsetFactory';
-import { AreaFieldsetAbstract } from './AreaFieldsetAbstract';
 
 export class Editor {
-  readonly configurations: EditorConfigurations;
-
-  readonly width: number;
-
-  readonly height: number;
+  readonly configuration: EditorConfiguration;
 
   readonly modalParent: Document;
 
@@ -44,36 +40,38 @@ export class Editor {
   private activePolygon: Object = null;
 
   constructor(
-    configurations: EditorConfigurations,
+    configuration: EditorConfiguration,
     canvas: HTMLCanvasElement,
     modalParent: Document,
     browselinkParent: Document
   ) {
-    this.configurations = configurations;
-    this.width = configurations.canvas.width;
-    this.height = configurations.canvas.height;
+    this.configuration = configuration;
     this.modalParent = modalParent;
     this.browselinkParent = browselinkParent;
 
-    this.initializeCanvas(canvas, configurations.canvas);
+    this.initializeCanvas(canvas);
     this.initializeAreaForm();
   }
 
-  private initializeCanvas(canvas: HTMLCanvasElement, configurations: CanvasSize): void {
+  private initializeCanvas(canvas: HTMLCanvasElement): void {
     this.canvas = new Canvas(canvas, {
-      ...configurations,
+      width: AreaForm.width,
+      height: AreaForm.height,
+      top: AreaForm.height * -1,
       selection: false,
       preserveObjectStacking: true,
       hoverCursor: 'move',
     });
 
-    // @todo check these
+
     this.canvas.on('object:moving', this.objectMoving.bind(this));
     this.canvas.on('selection:created', this.selectionCreated.bind(this));
     this.canvas.on('selection:updated', this.selectionUpdated.bind(this));
   }
 
   private objectMoving(event: FabricEvent): void {
+    // @todo check these
+console.log(event);
     let element: Object = event.target;
     switch (element.type) {
       case 'control':
@@ -92,8 +90,11 @@ export class Editor {
   }
 
   private selectionCreated(event: FabricEvent): void {
-    if (event.target.type === 'polygon') {
-      this.activePolygon = event.target;
+    // @todo check these
+console.log(event);
+    let element: Object = event.target;
+    if (element.type === 'polygon') {
+      this.activePolygon = element;
       // show controls of active polygon
       this.activePolygon.controls.forEach((control: Object) => {
         control.opacity = 1;
@@ -103,6 +104,8 @@ export class Editor {
   }
 
   private selectionUpdated(event: FabricEvent): void {
+    // @todo check these
+console.log(event);
     event.deselected.forEach((element: Object) => {
       if (element.type === 'polygon' && event.selected[0].type !== 'control') {
         // hide controls of active polygon
@@ -137,19 +140,20 @@ export class Editor {
   }
 
   public resize(width: number, height: number): void {
-    if (this.width !== width || this.height !== height) {
+    if (AreaForm.width !== width || AreaForm.height !== height) {
       // @todo resize canvas size
       // @todo resize and reposition shapes on canvas
       // @todo change values in areaFieldset
     }
   }
 
-  public renderAreas(areas: Array<AreaAttributes>): void {
+  public renderAreas(areas: Array<Area>): void {
     if (areas !== undefined) {
-      let areaShapeFactory = new AreaShapeFactory(this.configurations, this.canvas);
-      let areaFieldsetFactory = new AreaFieldsetFactory(this.configurations);
+      let areaShapeFactory = new AreaShapeFactory(this.canvas);
+      let areaFieldsetFactory = new AreaFieldsetFactory(this.configuration);
 
       areas.forEach((area) => {
+        area.color = AreaShapeFactory.getRandomColor(area.color);
         let areaShape = areaShapeFactory.createShape(area, true),
           areaFieldset = areaFieldsetFactory.createFieldset(area, areaShape);
 

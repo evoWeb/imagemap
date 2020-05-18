@@ -13,52 +13,38 @@
 
 // @ts-ignore
 import { Object } from './vendor/fabric';
-import { AreaShapeFactory } from './AreaShapeFactory';
 import { AreaFieldsetAbstract } from './AreaFieldsetAbstract';
 import { AreaFieldsetCircle } from './AreaFieldsetCircle';
 import { AreaFieldsetPolygon } from './AreaFieldsetPolygon';
 import { AreaFieldsetRectangle } from './AreaFieldsetRectangle';
 
 export class AreaFieldsetFactory {
-  readonly configurations: EditorConfigurations;
+  readonly configuration: EditorConfiguration;
 
-  constructor(configurations: EditorConfigurations) {
-    this.configurations = configurations;
+  constructor(configuration: EditorConfiguration) {
+    this.configuration = configuration;
   }
 
-  public createFieldset(area: AreaAttributes, areaShape: Object): AreaFieldsetAbstract {
-    area.color = AreaShapeFactory.getRandomColor(area.color);
-    let areaElement,
-      configuration = {
+  public createFieldset(area: Area, areaShape: Object): AreaFieldsetAbstract {
+    let areaFieldset,
+      decoupledArea = {
         ...area,
       };
 
-    switch (configuration.shape) {
-      case 'rect':
-        areaElement = this.createRectangle(configuration, areaShape);
-        break;
-
+    switch (decoupledArea.shape) {
       case 'circle':
-        areaElement = this.createCircle(configuration, areaShape);
+        areaFieldset = new AreaFieldsetCircle(decoupledArea, this.configuration, areaShape);
         break;
 
       case 'poly':
-        areaElement = this.createPolygon(configuration, areaShape);
+        areaFieldset = new AreaFieldsetPolygon(decoupledArea, this.configuration, areaShape);
+        break;
+
+      case 'rect':
+        areaFieldset = new AreaFieldsetRectangle(decoupledArea, this.configuration, areaShape);
         break;
     }
 
-    return areaElement;
-  }
-
-  protected createCircle(configuration: AreaAttributes, areaShape: Object): AreaFieldsetCircle {
-    return new AreaFieldsetCircle(configuration, this.configurations, areaShape);
-  }
-
-  protected createPolygon(configuration: AreaAttributes, areaShape: Object): AreaFieldsetPolygon {
-    return new AreaFieldsetPolygon(configuration, this.configurations, areaShape);
-  }
-
-  protected createRectangle(configuration: AreaAttributes, areaShape: Object): AreaFieldsetRectangle {
-    return new AreaFieldsetRectangle(configuration, this.configurations, areaShape);
+    return areaFieldset;
   }
 }

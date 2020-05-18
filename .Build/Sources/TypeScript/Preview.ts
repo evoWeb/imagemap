@@ -13,34 +13,35 @@
 
 // @ts-ignore
 import { Canvas, Object } from './vendor/Fabric';
+import { AreaForm } from './AreaForm';
 import { AreaShapeFactory } from './AreaShapeFactory';
 
 export class Preview {
-  readonly configurations: EditorConfigurations;
-
   protected areaShapes: Array<Object> = [];
 
   protected canvas: Canvas;
 
-  constructor(configurations: EditorConfigurations, canvas: HTMLElement) {
-    this.configurations = configurations;
+  constructor(canvas: HTMLElement) {
     this.initializeCanvas(canvas);
   }
 
   protected initializeCanvas(canvas: HTMLElement): void {
     this.canvas = new Canvas(canvas, {
-      ...this.configurations.canvas,
+      width: AreaForm.width,
+      height: AreaForm.height,
+      top: AreaForm.height * -1,
       selection: false,
       preserveObjectStacking: true,
       hoverCursor: 'default',
     });
   }
 
-  public renderAreas(areas: Array<AreaAttributes>): void {
+  public renderAreas(areas: Array<Area>): void {
     if (areas !== undefined) {
-      let areaShapeFactory = new AreaShapeFactory(this.configurations);
+      let areaShapeFactory = new AreaShapeFactory();
 
-      areas.forEach((area: AreaAttributes) => {
+      areas.forEach((area: Area) => {
+        area.color = AreaShapeFactory.getRandomColor(area.color);
         let areaShape = areaShapeFactory.createShape(area, false);
 
         this.canvas.add(areaShape);
@@ -50,8 +51,8 @@ export class Preview {
   }
 
   public removeAreas(): void {
-    this.areaShapes.forEach((area) => {
-      area.remove();
+    this.areaShapes.forEach((areaShape: Object) => {
+      areaShape.remove();
     });
   }
 }

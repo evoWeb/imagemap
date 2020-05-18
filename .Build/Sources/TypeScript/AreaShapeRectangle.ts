@@ -12,10 +12,12 @@
 /// <reference types="../../types/index"/>
 
 // @ts-ignore
-import { Rect } from './vendor/Fabric';
+import { Canvas, Rect } from './vendor/Fabric';
 
 export class AreaShapeRectangle extends Rect {
   public id: number;
+
+  public canvas: Canvas;
 
   [property: string]: any;
 

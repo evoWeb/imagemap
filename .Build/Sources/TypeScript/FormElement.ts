@@ -12,6 +12,7 @@
 import * as $ from 'jquery';
 // @ts-ignore
 import ImagesLoaded = require('TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min');
+import { AreaForm } from './AreaForm';
 import { Preview } from './Preview';
 
 class FormElement {
@@ -37,18 +38,10 @@ class FormElement {
     ImagesLoaded(image as any, (): void => {
       setTimeout(
         (): void => {
-          let configurations: EditorConfigurations = {
-            canvas: {
-              width: image.width(),
-              height: image.height(),
-              top: image.height() * -1,
-            },
-          };
+          AreaForm.width = image.width();
+          AreaForm.height = image.height();
 
-          this.preview = new Preview(
-            configurations,
-            this.formElement.querySelector('#canvas')
-          );
+          this.preview = new Preview(this.formElement.querySelector('#canvas'));
           this.renderAreas(this.hiddenInput.value);
         },
         100,

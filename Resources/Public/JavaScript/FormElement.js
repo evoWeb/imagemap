@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "jquery", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "./Preview"], function (require, exports, $, ImagesLoaded, Preview_1) {
+define(["require", "exports", "jquery", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "./AreaForm", "./Preview"], function (require, exports, $, ImagesLoaded, AreaForm_1, Preview_1) {
     "use strict";
     class FormElement {
         constructor(fieldSelector) {
@@ -24,14 +24,9 @@ define(["require", "exports", "jquery", "TYPO3/CMS/Core/Contrib/imagesloaded.pkg
             const image = $(this.formElement).find('.image');
             ImagesLoaded(image, () => {
                 setTimeout(() => {
-                    let configurations = {
-                        canvas: {
-                            width: image.width(),
-                            height: image.height(),
-                            top: image.height() * -1,
-                        },
-                    };
-                    this.preview = new Preview_1.Preview(configurations, this.formElement.querySelector('#canvas'));
+                    AreaForm_1.AreaForm.width = image.width();
+                    AreaForm_1.AreaForm.height = image.height();
+                    this.preview = new Preview_1.Preview(this.formElement.querySelector('#canvas'));
                     this.renderAreas(this.hiddenInput.value);
                 }, 100);
             });

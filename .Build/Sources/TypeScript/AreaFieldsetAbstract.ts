@@ -14,9 +14,9 @@
 import * as $ from 'jquery';
 // @ts-ignore
 import { Object } from './vendor/Fabric';
+import { AreaForm } from './AreaForm';
 import { AreaShapeFactory } from './AreaShapeFactory';
 import { Editor } from './Editor';
-import { AreaForm } from './AreaForm';
 
 export abstract class AreaFieldsetAbstract {
   static before: number = -1;
@@ -37,14 +37,14 @@ export abstract class AreaFieldsetAbstract {
 
   public shape: Object;
 
-  public attributes: {[k: string]: any} = {};
+  public area: {[k: string]: any} = {};
 
-  protected configuration: EditorConfigurations;
+  protected configuration: EditorConfiguration;
 
   [property: string]: any;
 
-  constructor(attributes: AreaAttributes, configuration: EditorConfigurations, shape: Object) {
-    this.attributes = attributes;
+  constructor(area: Area, configuration: EditorConfiguration, shape: Object) {
+    this.area = area;
     this.configuration = configuration;
     this.shape = shape;
 
@@ -75,7 +75,6 @@ export abstract class AreaFieldsetAbstract {
   }
 
   protected initializeEvents(): void {
-    // @todo check these
     this.shape.on('moved', this.shapeMoved.bind(this));
     this.shape.on('modified', this.shapeMoved.bind(this));
 
@@ -102,7 +101,7 @@ export abstract class AreaFieldsetAbstract {
 
   protected basicOptionsHandler(event: Event): void {
     let field = (event.currentTarget as HTMLInputElement);
-    this.attributes[field.dataset.field] = field.value;
+    this.area[field.dataset.field] = field.value;
   }
 
   protected positionOptionsHandler(event: Event): void {
@@ -172,11 +171,11 @@ export abstract class AreaFieldsetAbstract {
   }
 
   protected colorPickerAction(value: string) {
-    this.attributes.color = value;
-    (this.getElement('.t3js-color-picker') as HTMLInputElement).value = this.attributes.color;
-    this.shape.set('borderColor', this.attributes.color);
-    this.shape.set('stroke', this.attributes.color);
-    this.shape.set('fill', AreaShapeFactory.hexToRgbA(this.attributes.color, 0.2));
+    this.area.color = value;
+    (this.getElement('.t3js-color-picker') as HTMLInputElement).value = this.area.color;
+    this.shape.set('borderColor', this.area.color);
+    this.shape.set('stroke', this.area.color);
+    this.shape.set('fill', AreaShapeFactory.hexToRgbA(this.area.color, 0.2));
     this.shape.canvas.renderAll();
   }
 
@@ -207,23 +206,23 @@ export abstract class AreaFieldsetAbstract {
   }
 
   protected inputX(value: number): number {
-    return value / this.form.editor.width;
+    return value / AreaForm.width;
   }
 
   protected inputY(value: number): number {
-    return value / this.form.editor.height;
+    return value / AreaForm.height;
   }
 
   protected outputX(value: number): string {
-    return Math.round(value * this.form.editor.width).toString();
+    return Math.round(value * AreaForm.width).toString();
   }
 
   protected outputY(value: number): string {
-    return Math.round(value * this.form.editor.height).toString();
+    return Math.round(value * AreaForm.height).toString();
   }
 
   public getData(): object {
-    return this.attributes;
+    return this.area;
   }
 
   /**
@@ -234,7 +233,7 @@ export abstract class AreaFieldsetAbstract {
       let browselinkTargetInput = this.form.editor.browselinkParent.createElement('input');
       browselinkTargetInput.setAttribute('id', 'href' + this.id);
       browselinkTargetInput.setAttribute('data-formengine-input-name', 'href' + this.id);
-      browselinkTargetInput.setAttribute('value', this.attributes.href);
+      browselinkTargetInput.setAttribute('value', this.area.href);
       browselinkTargetInput.onchange = this.changedBrowselinkTargetInput.bind(this);
       this.form.browselinkTargetForm.appendChild(browselinkTargetInput);
     }
@@ -251,7 +250,7 @@ export abstract class AreaFieldsetAbstract {
 
   protected changedBrowselinkTargetInput(): void {
     let field = (this.form.browselinkTargetForm.querySelector(`#href${this.id}`) as HTMLInputElement);
-    this.attributes.href = field.value;
+    this.area.href = field.value;
     this.updateFields();
   }
 

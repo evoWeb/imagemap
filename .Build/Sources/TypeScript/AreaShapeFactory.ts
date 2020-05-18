@@ -13,12 +13,13 @@
 
 // @ts-ignore
 import { Canvas, Object } from './vendor/Fabric';
+import { AreaForm } from './AreaForm';
 import { AreaShapeCircle } from './AreaShapeCircle';
 import { AreaShapePolygon } from './AreaShapePolygon';
 import { AreaShapeRectangle } from './AreaShapeRectangle';
 
 export class AreaShapeFactory {
-  readonly areaConfiguration = {
+  readonly shapeConfiguration: ShapeConfiguration = {
     cornerColor: '#eee',
     cornerStrokeColor: '#bbb',
     cornerSize: 10,
@@ -28,56 +29,45 @@ export class AreaShapeFactory {
     transparentCorners: false
   };
 
-  readonly width: number;
-
-  readonly height: number;
-
   readonly canvas: Canvas;
 
-  constructor(configurations: EditorConfigurations, canvas: Canvas = null) {
-    this.width = configurations.canvas.width;
-    this.height = configurations.canvas.height;
+  constructor(canvas: Canvas = null) {
     this.canvas = canvas;
   }
 
-  public createShape(attributes: AreaAttributes, selectable: boolean): Object {
-    attributes.color = AreaShapeFactory.getRandomColor(attributes.color);
+  public createShape(area: Area, selectable: boolean): Object {
     let areaShape: Object,
       configuration: ShapeConfiguration = {
-        ...this.areaConfiguration,
+        ...this.shapeConfiguration,
         selectable: selectable,
         hasControls: selectable,
-        stroke: attributes.color,
+        stroke: area.color,
         strokeWidth: 1,
-        fill: AreaShapeFactory.hexToRgbA(attributes.color, 0.3)
+        fill: AreaShapeFactory.hexToRgbA(area.color, 0.3)
       };
 
-    switch (attributes.shape) {
+    switch (area.shape) {
       case 'rect':
-        areaShape = this.createRectangle(attributes, configuration);
+        areaShape = this.createRectangle(area, configuration);
         break;
 
       case 'circle':
-        areaShape = this.createCircle(attributes, configuration);
+        areaShape = this.createCircle(area, configuration);
         break;
 
       case 'poly':
-        areaShape = this.createPolygon(attributes, configuration);
+        areaShape = this.createPolygon(area, configuration);
         break;
-    }
-
-    if (this.canvas !== null) {
-      areaShape.canvas = this.canvas;
     }
 
     return areaShape;
   }
 
-  private createCircle(attributes: AreaAttributes, configuration: ShapeConfiguration): AreaShapeCircle {
-    let coords = attributes.coords,
-      radius = Math.round(coords.radius * this.width),
-      left = Math.round(coords.left * this.width) - radius,
-      top = Math.round(coords.top * this.height) - radius,
+  protected createCircle(area: Area, configuration: ShapeConfiguration): AreaShapeCircle {
+    let coords = area.coords,
+      radius = Math.round(coords.radius * AreaForm.width),
+      left = Math.round(coords.left * AreaForm.width) - radius,
+      top = Math.round(coords.top * AreaForm.height) - radius,
       areaShape = new AreaShapeCircle({
         ...configuration,
         left: left,
@@ -94,11 +84,15 @@ export class AreaShapeFactory {
     areaShape.setControlVisible('mr', false);
     areaShape.setControlVisible('mb', false);
 
+    if (this.canvas !== null) {
+      areaShape.canvas = this.canvas;
+    }
+
     return areaShape;
   }
 
-  private createPolygon(attributes: AreaAttributes, configuration: ShapeConfiguration): AreaShapePolygon {
-    let points: Point[] = attributes.points || [],
+  protected createPolygon(area: Area, configuration: ShapeConfiguration): AreaShapePolygon {
+    let points: Point[] = area.points || [],
       polygonPoints: Point[] = [],
       polygonId = Object.__uid++,
       areaShape: AreaShapePolygon;
@@ -106,8 +100,8 @@ export class AreaShapeFactory {
     points.map((point) => {
       point.id = polygonId + '-' + Object.__uid++;
       polygonPoints.push({
-        x: Math.round(point.x * this.width),
-        y: Math.round(point.y * this.height),
+        x: Math.round(point.x * AreaForm.width),
+        y: Math.round(point.y * AreaForm.height),
         id: point.id,
       });
     });
@@ -118,16 +112,20 @@ export class AreaShapeFactory {
     });
 
     areaShape.id = polygonId;
+    if (this.canvas !== null) {
+      areaShape.canvas = this.canvas;
+      areaShape.initializeControls(points);
+    }
 
     return areaShape;
   }
 
-  private createRectangle(attributes: AreaAttributes, configuration: ShapeConfiguration): AreaShapeRectangle {
-    let coords = attributes.coords,
-      left = Math.round(coords.left * this.width),
-      top = Math.round(coords.top * this.height),
-      width = Math.round(coords.right * this.width) - left,
-      height = Math.round(coords.bottom * this.height) - top,
+  protected createRectangle(area: Area, configuration: ShapeConfiguration): AreaShapeRectangle {
+    let coords = area.coords,
+      left = Math.round(coords.left * AreaForm.width),
+      top = Math.round(coords.top * AreaForm.height),
+      width = Math.round(coords.right * AreaForm.width) - left,
+      height = Math.round(coords.bottom * AreaForm.height) - top,
       areaShape = new AreaShapeRectangle({
         ...configuration,
         left: left,
@@ -137,6 +135,10 @@ export class AreaShapeFactory {
       });
 
     areaShape.id = Object.__uid++;
+
+    if (this.canvas !== null) {
+      areaShape.canvas = this.canvas;
+    }
 
     return areaShape;
   }

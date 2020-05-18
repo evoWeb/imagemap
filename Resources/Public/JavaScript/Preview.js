@@ -8,22 +8,29 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "./vendor/Fabric", "./AreaShapeFactory"], function (require, exports, Fabric_1, AreaShapeFactory_1) {
+define(["require", "exports", "./vendor/Fabric", "./AreaForm", "./AreaShapeFactory"], function (require, exports, Fabric_1, AreaForm_1, AreaShapeFactory_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Preview {
-        constructor(configurations, canvas) {
+        constructor(canvas) {
             this.areaShapes = [];
-            this.configurations = configurations;
             this.initializeCanvas(canvas);
         }
         initializeCanvas(canvas) {
-            this.canvas = new Fabric_1.Canvas(canvas, Object.assign(Object.assign({}, this.configurations.canvas), { selection: false, preserveObjectStacking: true, hoverCursor: 'default' }));
+            this.canvas = new Fabric_1.Canvas(canvas, {
+                width: AreaForm_1.AreaForm.width,
+                height: AreaForm_1.AreaForm.height,
+                top: AreaForm_1.AreaForm.height * -1,
+                selection: false,
+                preserveObjectStacking: true,
+                hoverCursor: 'default',
+            });
         }
         renderAreas(areas) {
             if (areas !== undefined) {
-                let areaShapeFactory = new AreaShapeFactory_1.AreaShapeFactory(this.configurations);
+                let areaShapeFactory = new AreaShapeFactory_1.AreaShapeFactory();
                 areas.forEach((area) => {
+                    area.color = AreaShapeFactory_1.AreaShapeFactory.getRandomColor(area.color);
                     let areaShape = areaShapeFactory.createShape(area, false);
                     this.canvas.add(areaShape);
                     this.areaShapes.push(areaShape);
@@ -31,8 +38,8 @@ define(["require", "exports", "./vendor/Fabric", "./AreaShapeFactory"], function
             }
         }
         removeAreas() {
-            this.areaShapes.forEach((area) => {
-                area.remove();
+            this.areaShapes.forEach((areaShape) => {
+                areaShape.remove();
             });
         }
     }

@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "jquery", "TYPO3/CMS/Backend/Icons", "TYPO3/CMS/Backend/Modal", "TYPO3/CMS/Backend/FormEngineValidation", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "./Editor"], function (require, exports, $, Icons, Modal, FormEngineValidation, ImagesLoaded, Editor_1) {
+define(["require", "exports", "jquery", "TYPO3/CMS/Backend/Icons", "TYPO3/CMS/Backend/Modal", "TYPO3/CMS/Backend/FormEngineValidation", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "./AreaForm", "./Editor"], function (require, exports, $, Icons, Modal, FormEngineValidation, ImagesLoaded, AreaForm_1, Editor_1) {
     "use strict";
     class EditControl {
         constructor(fieldSelector) {
@@ -36,6 +36,8 @@ define(["require", "exports", "jquery", "TYPO3/CMS/Backend/Icons", "TYPO3/CMS/Ba
             const image = this.currentModal.find(this.editorImageSelector);
             ImagesLoaded(image, () => {
                 setTimeout(() => {
+                    AreaForm_1.AreaForm.width = image.width();
+                    AreaForm_1.AreaForm.height = image.height();
                     this.init();
                 }, 100);
             });
@@ -129,23 +131,18 @@ define(["require", "exports", "jquery", "TYPO3/CMS/Backend/Icons", "TYPO3/CMS/Ba
         }
         initializeEditor() {
             let image = this.formElement.querySelector(this.editorImageSelector), data = this.hiddenInput.dataset, configurations = {
-                canvas: {
-                    width: image.offsetWidth,
-                    height: image.offsetHeight,
-                    top: image.offsetHeight * -1,
-                },
                 formSelector: '#areasForm',
                 tableName: data.tablename,
                 fieldName: data.fieldname,
                 uid: parseInt(data.uid),
                 pid: parseInt(data.pid),
-            }, modalParent = image.parentNode, 
-            // document in which the browslink is able to set fields
-            browselinkParent = window.document;
+            }, modalParent = image.parentNode;
             while (modalParent.parentNode) {
                 modalParent = modalParent.parentNode;
             }
-            this.editor = new Editor_1.Editor(configurations, this.formElement.querySelector('#canvas'), modalParent, browselinkParent);
+            this.editor = new Editor_1.Editor(configurations, this.formElement.querySelector('#canvas'), modalParent, 
+            // document in which the browslink is able to set fields
+            window.document);
         }
         resizeEditor() {
             if (this.editor) {

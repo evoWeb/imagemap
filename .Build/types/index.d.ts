@@ -15,7 +15,7 @@ declare interface Point {
   id?: string|number
 }
 
-declare interface AreaAttributes {
+declare interface Area {
   shape: string,
   href?: string,
   alt?: string,
@@ -31,31 +31,21 @@ declare interface AreaAttributes {
 }
 
 declare interface ShapeConfiguration {
-  selectable: boolean,
-  hasControls: boolean,
-  stroke: string,
-  strokeWidth: number,
-  fill: string,
   cornerColor: string,
   cornerStrokeColor: string,
+  cornerSize: number,
+  cornerStyle: string,
+  hasBorders: boolean,
+  hasRotatingPoint: boolean,
+  transparentCorners: boolean
+  selectable?: boolean,
+  hasControls?: boolean,
+  stroke?: string,
+  strokeWidth?: number,
+  fill?: string,
 }
 
-declare interface BrowseLinkConfiguration {
-  returnUrl?: string,
-  formName?: string,
-  tableName?: string,
-  fieldName?: string,
-  pid?: number,
-}
-
-declare interface CanvasSize {
-  width: number,
-  height: number,
-  top?: number,
-}
-
-declare interface EditorConfigurations {
-  canvas?: CanvasSize,
+declare interface EditorConfiguration {
   browseLink?: object,
   formSelector?: string,
   cornerColor?: string,

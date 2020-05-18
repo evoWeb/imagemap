@@ -18,6 +18,7 @@ import Modal = require('TYPO3/CMS/Backend/Modal');
 import FormEngineValidation = require('TYPO3/CMS/Backend/FormEngineValidation');
 // @ts-ignore
 import ImagesLoaded = require('TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min');
+import { AreaForm } from './AreaForm';
 import { Editor } from './Editor';
 
 class EditControl {
@@ -50,7 +51,6 @@ class EditControl {
   constructor(fieldSelector: string) {
     this.initializeFormElement(fieldSelector);
     this.initializeTrigger();
-
     this.resizeEnd(this.resizeEditor.bind(this));
   }
 
@@ -75,6 +75,9 @@ class EditControl {
     ImagesLoaded(image as any, (): void => {
       setTimeout(
         (): void => {
+          AreaForm.width = image.width();
+          AreaForm.height = image.height();
+
           this.init();
         },
         100,
@@ -190,21 +193,14 @@ class EditControl {
   protected initializeEditor(): void {
     let image: HTMLImageElement = this.formElement.querySelector(this.editorImageSelector),
       data: any = this.hiddenInput.dataset,
-      configurations: EditorConfigurations = {
-        canvas: {
-          width: image.offsetWidth,
-          height: image.offsetHeight,
-          top: image.offsetHeight * -1,
-        },
+      configurations: EditorConfiguration = {
         formSelector: '#areasForm',
         tableName: data.tablename,
         fieldName: data.fieldname,
         uid: parseInt(data.uid),
         pid: parseInt(data.pid),
       },
-      modalParent = image.parentNode,
-      // document in which the browslink is able to set fields
-      browselinkParent = window.document;
+      modalParent = image.parentNode;
 
     while (modalParent.parentNode) {
       modalParent = modalParent.parentNode;
@@ -214,7 +210,8 @@ class EditControl {
       configurations,
       this.formElement.querySelector('#canvas'),
       (modalParent as Document),
-      browselinkParent
+      // document in which the browslink is able to set fields
+      window.document
     );
   }
 

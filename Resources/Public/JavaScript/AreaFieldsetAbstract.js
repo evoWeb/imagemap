@@ -8,16 +8,16 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "jquery", "./AreaShapeFactory"], function (require, exports, $, AreaShapeFactory_1) {
+define(["require", "exports", "jquery", "./AreaForm", "./AreaShapeFactory"], function (require, exports, $, AreaForm_1, AreaShapeFactory_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class AreaFieldsetAbstract {
-        constructor(attributes, configuration, shape) {
+        constructor(area, configuration, shape) {
             this.name = '';
             this.id = 0;
             this.moveShapeDelay = 0;
-            this.attributes = {};
-            this.attributes = attributes;
+            this.area = {};
+            this.area = area;
             this.configuration = configuration;
             this.shape = shape;
             this.id = this.shape.id;
@@ -43,7 +43,6 @@ define(["require", "exports", "jquery", "./AreaShapeFactory"], function (require
             });
         }
         initializeEvents() {
-            // @todo check these
             this.shape.on('moved', this.shapeMoved.bind(this));
             this.shape.on('modified', this.shapeMoved.bind(this));
             this.getElements('.basicOptions .t3js-field').forEach((field) => {
@@ -62,7 +61,7 @@ define(["require", "exports", "jquery", "./AreaShapeFactory"], function (require
         }
         basicOptionsHandler(event) {
             let field = event.currentTarget;
-            this.attributes[field.dataset.field] = field.value;
+            this.area[field.dataset.field] = field.value;
         }
         positionOptionsHandler(event) {
             this.moveShapeDelay = AreaFieldsetAbstract.wait(() => { this.moveShape(event); }, 500, this.moveShapeDelay);
@@ -114,11 +113,11 @@ define(["require", "exports", "jquery", "./AreaShapeFactory"], function (require
         redoAction() {
         }
         colorPickerAction(value) {
-            this.attributes.color = value;
-            this.getElement('.t3js-color-picker').value = this.attributes.color;
-            this.shape.set('borderColor', this.attributes.color);
-            this.shape.set('stroke', this.attributes.color);
-            this.shape.set('fill', AreaShapeFactory_1.AreaShapeFactory.hexToRgbA(this.attributes.color, 0.2));
+            this.area.color = value;
+            this.getElement('.t3js-color-picker').value = this.area.color;
+            this.shape.set('borderColor', this.area.color);
+            this.shape.set('stroke', this.area.color);
+            this.shape.set('fill', AreaShapeFactory_1.AreaShapeFactory.hexToRgbA(this.area.color, 0.2));
             this.shape.canvas.renderAll();
         }
         getFormElement(selector, id) {
@@ -142,19 +141,19 @@ define(["require", "exports", "jquery", "./AreaShapeFactory"], function (require
             return this.getElement(selector).value;
         }
         inputX(value) {
-            return value / this.form.editor.width;
+            return value / AreaForm_1.AreaForm.width;
         }
         inputY(value) {
-            return value / this.form.editor.height;
+            return value / AreaForm_1.AreaForm.height;
         }
         outputX(value) {
-            return Math.round(value * this.form.editor.width).toString();
+            return Math.round(value * AreaForm_1.AreaForm.width).toString();
         }
         outputY(value) {
-            return Math.round(value * this.form.editor.height).toString();
+            return Math.round(value * AreaForm_1.AreaForm.height).toString();
         }
         getData() {
-            return this.attributes;
+            return this.area;
         }
         /**
          * Add an input as target for browselink which listens for changes and writes value to real field
@@ -164,7 +163,7 @@ define(["require", "exports", "jquery", "./AreaShapeFactory"], function (require
                 let browselinkTargetInput = this.form.editor.browselinkParent.createElement('input');
                 browselinkTargetInput.setAttribute('id', 'href' + this.id);
                 browselinkTargetInput.setAttribute('data-formengine-input-name', 'href' + this.id);
-                browselinkTargetInput.setAttribute('value', this.attributes.href);
+                browselinkTargetInput.setAttribute('value', this.area.href);
                 browselinkTargetInput.onchange = this.changedBrowselinkTargetInput.bind(this);
                 this.form.browselinkTargetForm.appendChild(browselinkTargetInput);
             }
@@ -179,7 +178,7 @@ define(["require", "exports", "jquery", "./AreaShapeFactory"], function (require
         }
         changedBrowselinkTargetInput() {
             let field = this.form.browselinkTargetForm.querySelector(`#href${this.id}`);
-            this.attributes.href = field.value;
+            this.area.href = field.value;
             this.updateFields();
         }
         static wait(callback, delay, timer) {

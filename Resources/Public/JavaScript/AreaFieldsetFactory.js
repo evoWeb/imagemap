@@ -8,37 +8,27 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "./AreaShapeFactory", "./AreaFieldsetCircle", "./AreaFieldsetPolygon", "./AreaFieldsetRectangle"], function (require, exports, AreaShapeFactory_1, AreaFieldsetCircle_1, AreaFieldsetPolygon_1, AreaFieldsetRectangle_1) {
+define(["require", "exports", "./AreaFieldsetCircle", "./AreaFieldsetPolygon", "./AreaFieldsetRectangle"], function (require, exports, AreaFieldsetCircle_1, AreaFieldsetPolygon_1, AreaFieldsetRectangle_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class AreaFieldsetFactory {
-        constructor(configurations) {
-            this.configurations = configurations;
+        constructor(configuration) {
+            this.configuration = configuration;
         }
         createFieldset(area, areaShape) {
-            area.color = AreaShapeFactory_1.AreaShapeFactory.getRandomColor(area.color);
-            let areaElement, configuration = Object.assign({}, area);
-            switch (configuration.shape) {
-                case 'rect':
-                    areaElement = this.createRectangle(configuration, areaShape);
-                    break;
+            let areaFieldset, decoupledArea = Object.assign({}, area);
+            switch (decoupledArea.shape) {
                 case 'circle':
-                    areaElement = this.createCircle(configuration, areaShape);
+                    areaFieldset = new AreaFieldsetCircle_1.AreaFieldsetCircle(decoupledArea, this.configuration, areaShape);
                     break;
                 case 'poly':
-                    areaElement = this.createPolygon(configuration, areaShape);
+                    areaFieldset = new AreaFieldsetPolygon_1.AreaFieldsetPolygon(decoupledArea, this.configuration, areaShape);
+                    break;
+                case 'rect':
+                    areaFieldset = new AreaFieldsetRectangle_1.AreaFieldsetRectangle(decoupledArea, this.configuration, areaShape);
                     break;
             }
-            return areaElement;
-        }
-        createCircle(configuration, areaShape) {
-            return new AreaFieldsetCircle_1.AreaFieldsetCircle(configuration, this.configurations, areaShape);
-        }
-        createPolygon(configuration, areaShape) {
-            return new AreaFieldsetPolygon_1.AreaFieldsetPolygon(configuration, this.configurations, areaShape);
-        }
-        createRectangle(configuration, areaShape) {
-            return new AreaFieldsetRectangle_1.AreaFieldsetRectangle(configuration, this.configurations, areaShape);
+            return areaFieldset;
         }
     }
     exports.AreaFieldsetFactory = AreaFieldsetFactory;

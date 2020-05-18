@@ -13,10 +13,14 @@
 
 // @ts-ignore
 import Modal = require('TYPO3/CMS/Backend/Modal');
-import { Editor } from './Editor';
 import { AreaFieldsetAbstract } from './AreaFieldsetAbstract';
+import { Editor } from './Editor';
 
 export class AreaForm {
+  static width: number;
+
+  static height: number;
+
   public element: HTMLElement;
 
   public editor: Editor;
@@ -75,11 +79,11 @@ export class AreaForm {
     data.append('P[areaId]', area.id.toString());
     data.append('P[formName]', 'areasForm');
     data.append('P[itemFormElName]', `href${area.id}`);
-    data.append('P[currentValue]', area.attributes.href);
-    data.append('P[tableName]', this.editor.configurations.tableName);
-    data.append('P[fieldName]', this.editor.configurations.fieldName);
-    data.append('P[uid]', this.editor.configurations.uid.toString());
-    data.append('P[pid]', this.editor.configurations.pid.toString());
+    data.append('P[currentValue]', area.area.href);
+    data.append('P[tableName]', this.editor.configuration.tableName);
+    data.append('P[fieldName]', this.editor.configuration.fieldName);
+    data.append('P[uid]', this.editor.configuration.uid.toString());
+    data.append('P[pid]', this.editor.configuration.pid.toString());
 
     request.open('POST', window.TYPO3.settings.ajaxUrls.imagemap_browselink_url);
     request.onreadystatechange = this.fetchBrowseLinkCallback.bind(area);

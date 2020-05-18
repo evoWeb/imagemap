@@ -12,36 +12,28 @@
 /// <reference types="../../types/index"/>
 
 // @ts-ignore
-import { Circle, Point, Object } from './vendor/Fabric';
+import { Circle, Object, Point } from './vendor/Fabric';
 import { AreaFieldsetAbstract } from './AreaFieldsetAbstract';
+import { AreaShapePolygon } from './AreaShapePolygon';
 
 export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
   readonly name: string = 'polygon';
 
-  public controls: Array<Circle> = [];
+  public shape: AreaShapePolygon;
 
-  constructor(attributes: AreaAttributes, configuration: EditorConfigurations, shape: Object) {
-    super(attributes, configuration, shape)
-  }
-
-  protected initializeElement(): void {
-    super.initializeElement();
-
-    if (this.shape.selectable) {
-      this.shape.controls = [];
-      this.attributes.points.forEach((point: Object, index: number) => {
-        this.addControl(point, index, 100000);
-      });
-      this.shape.canvas.renderAll();
-    }
+  protected initializeEvents(): void {
+    super.initializeEvents();
+    this.shape.controls.forEach((control: Circle) => {
+      control.on('moved', this.shapeMoved.bind(this));
+    });
   }
 
   protected updateFields(): void {
-    for (let attributeKey in this.attributes) {
-      if (!this.attributes.hasOwnProperty(attributeKey)) {
+    for (let attributeKey in this.area) {
+      if (!this.area.hasOwnProperty(attributeKey)) {
         continue;
       }
-      let attributeValue = this.attributes[attributeKey] || '',
+      let attributeValue = this.area[attributeKey] || '',
         element = this.getElement('.' + attributeKey);
 
       if (element !== null) {
@@ -69,9 +61,10 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
   }
 
   protected shapeMoved(event: FabricEvent): void {
+    // @todo check these
     let control = (event.target as Object),
       center = control.getCenterPoint();
-
+console.log(event);
     this.getElement(`#x${control.id}`).value = center.x;
     this.getElement(`#y${control.id}`).value = center.y;
   }
@@ -121,7 +114,7 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
 
   public getData(): object {
     let data = {
-      ...this.attributes
+      ...this.area
     };
 
     data.points.forEach((point: Point) => {
@@ -145,8 +138,8 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
       parentElement.append(element);
     }
 
-    this.shape.points = AreaFieldsetPolygon.addElementToArrayWithPosition(this.shape.points, point, currentPointIndex + direction);
-    this.addControl(point, index, currentPointIndex + direction);
+    this.shape.points = AreaShapePolygon.addElementToArrayWithPosition(this.shape.points, point, currentPointIndex + direction);
+    this.shape.addControl(point, index, currentPointIndex + direction);
   }
 
   protected removePointAction(event: Event): void {
@@ -223,50 +216,5 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
     }
 
     return [this.points[currentPointIndex], this.points[nextPointIndex], currentPointIndex, nextPointIndex];
-  }
-
-  protected addControl(point: Point, index: number, newControlIndex: number): void {
-    let circle = new Circle({
-      hasControls: false,
-      fill: '#eee',
-      stroke: '#bbb',
-      originX: 'center',
-      originY: 'center',
-      name: index,
-      type: 'control',
-      opacity: this.shape.opacity,
-
-      // set control position relative to polygon
-      left: this.outputX(point.x),
-      top: this.outputY(point.y),
-      radius: 5,
-
-      id: point.id,
-      polygon: this.shape,
-      point: point,
-    });
-
-    circle.on('moved', this.shapeMoved.bind(this));
-
-    this.shape.canvas.add(circle);
-    this.shape.controls = AreaFieldsetPolygon.addElementToArrayWithPosition(this.shape.controls, circle, newControlIndex);
-  }
-
-  static addElementToArrayWithPosition(array: any[], item: any, newPointIndex: number): any[] {
-    if (newPointIndex < 0) {
-      array.unshift(item);
-    } else if (newPointIndex >= array.length) {
-      array.push(item);
-    } else {
-      let newPoints = [];
-      for (let i = 0; i < array.length; i++) {
-        newPoints.push(array[i]);
-        if (i === newPointIndex - 1) {
-          newPoints.push(item);
-        }
-      }
-      array = newPoints;
-    }
-    return array;
   }
 }
