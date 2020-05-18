@@ -190,7 +190,6 @@ define(["require", "exports", "./vendor/Fabric", "./AreaFieldsetAbstract"], func
                 polygon: this.shape,
                 point: point,
             });
-            // @todo check these
             circle.on('moved', this.shapeMoved.bind(this));
             this.shape.canvas.add(circle);
             this.shape.controls = AreaFieldsetPolygon.addElementToArrayWithPosition(this.shape.controls, circle, newControlIndex);

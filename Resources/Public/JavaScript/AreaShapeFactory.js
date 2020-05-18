@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "./vendor/Fabric"], function (require, exports, Fabric_1) {
+define(["require", "exports", "./vendor/Fabric", "./AreaShapeCircle", "./AreaShapePolygon", "./AreaShapeRectangle"], function (require, exports, Fabric_1, AreaShapeCircle_1, AreaShapePolygon_1, AreaShapeRectangle_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class AreaShapeFactory {
@@ -46,7 +46,7 @@ define(["require", "exports", "./vendor/Fabric"], function (require, exports, Fa
             return areaShape;
         }
         createCircle(attributes, configuration) {
-            let coords = attributes.coords, radius = Math.round(coords.radius * this.width), left = Math.round(coords.left * this.width) - radius, top = Math.round(coords.top * this.height) - radius, areaShape = new Fabric_1.Circle(Object.assign(Object.assign({}, configuration), { left: left, top: top, radius: radius }));
+            let coords = attributes.coords, radius = Math.round(coords.radius * this.width), left = Math.round(coords.left * this.width) - radius, top = Math.round(coords.top * this.height) - radius, areaShape = new AreaShapeCircle_1.AreaShapeCircle(Object.assign(Object.assign({}, configuration), { left: left, top: top, radius: radius }));
             areaShape.id = Fabric_1.Object.__uid++;
             // disable control points as these would stretch the circle
             // to an ellipse which is not possible in html areas
@@ -66,12 +66,12 @@ define(["require", "exports", "./vendor/Fabric"], function (require, exports, Fa
                     id: point.id,
                 });
             });
-            areaShape = new Fabric_1.Polygon(polygonPoints, Object.assign(Object.assign({}, configuration), { objectCaching: false }));
+            areaShape = new AreaShapePolygon_1.AreaShapePolygon(polygonPoints, Object.assign(Object.assign({}, configuration), { objectCaching: false }));
             areaShape.id = polygonId;
             return areaShape;
         }
         createRectangle(attributes, configuration) {
-            let coords = attributes.coords, left = Math.round(coords.left * this.width), top = Math.round(coords.top * this.height), width = Math.round(coords.right * this.width) - left, height = Math.round(coords.bottom * this.height) - top, areaShape = new Fabric_1.Rect(Object.assign(Object.assign({}, configuration), { left: left, top: top, width: width, height: height }));
+            let coords = attributes.coords, left = Math.round(coords.left * this.width), top = Math.round(coords.top * this.height), width = Math.round(coords.right * this.width) - left, height = Math.round(coords.bottom * this.height) - top, areaShape = new AreaShapeRectangle_1.AreaShapeRectangle(Object.assign(Object.assign({}, configuration), { left: left, top: top, width: width, height: height }));
             areaShape.id = Fabric_1.Object.__uid++;
             return areaShape;
         }

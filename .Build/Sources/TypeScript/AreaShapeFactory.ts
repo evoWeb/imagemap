@@ -12,7 +12,10 @@
 /// <reference types="../../types/index"/>
 
 // @ts-ignore
-import { Rect, Circle, Polygon, Canvas, Object } from './vendor/Fabric';
+import { Canvas, Object } from './vendor/Fabric';
+import { AreaShapeCircle } from './AreaShapeCircle';
+import { AreaShapePolygon } from './AreaShapePolygon';
+import { AreaShapeRectangle } from './AreaShapeRectangle';
 
 export class AreaShapeFactory {
   readonly areaConfiguration = {
@@ -70,12 +73,12 @@ export class AreaShapeFactory {
     return areaShape;
   }
 
-  private createCircle(attributes: AreaAttributes, configuration: ShapeConfiguration): Circle {
+  private createCircle(attributes: AreaAttributes, configuration: ShapeConfiguration): AreaShapeCircle {
     let coords = attributes.coords,
       radius = Math.round(coords.radius * this.width),
       left = Math.round(coords.left * this.width) - radius,
       top = Math.round(coords.top * this.height) - radius,
-      areaShape = new Circle({
+      areaShape = new AreaShapeCircle({
         ...configuration,
         left: left,
         top: top,
@@ -94,11 +97,11 @@ export class AreaShapeFactory {
     return areaShape;
   }
 
-  private createPolygon(attributes: AreaAttributes, configuration: ShapeConfiguration): Polygon {
+  private createPolygon(attributes: AreaAttributes, configuration: ShapeConfiguration): AreaShapePolygon {
     let points: Point[] = attributes.points || [],
       polygonPoints: Point[] = [],
       polygonId = Object.__uid++,
-      areaShape: Polygon;
+      areaShape: AreaShapePolygon;
 
     points.map((point) => {
       point.id = polygonId + '-' + Object.__uid++;
@@ -109,7 +112,7 @@ export class AreaShapeFactory {
       });
     });
 
-    areaShape = new Polygon(polygonPoints, {
+    areaShape = new AreaShapePolygon(polygonPoints, {
       ...configuration,
       objectCaching: false,
     });
@@ -119,13 +122,13 @@ export class AreaShapeFactory {
     return areaShape;
   }
 
-  private createRectangle(attributes: AreaAttributes, configuration: ShapeConfiguration): Rect {
+  private createRectangle(attributes: AreaAttributes, configuration: ShapeConfiguration): AreaShapeRectangle {
     let coords = attributes.coords,
       left = Math.round(coords.left * this.width),
       top = Math.round(coords.top * this.height),
       width = Math.round(coords.right * this.width) - left,
       height = Math.round(coords.bottom * this.height) - top,
-      areaShape = new Rect({
+      areaShape = new AreaShapeRectangle({
         ...configuration,
         left: left,
         top: top,

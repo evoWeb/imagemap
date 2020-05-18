@@ -18,7 +18,7 @@ import { AreaFieldsetAbstract } from './AreaFieldsetAbstract';
 export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
   readonly name: string = 'polygon';
 
-  public controls: Array<any> = [];
+  public controls: Array<Circle> = [];
 
   constructor(attributes: AreaAttributes, configuration: EditorConfigurations, shape: Object) {
     super(attributes, configuration, shape)
@@ -246,7 +246,6 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
       point: point,
     });
 
-    // @todo check these
     circle.on('moved', this.shapeMoved.bind(this));
 
     this.shape.canvas.add(circle);
