@@ -64,34 +64,28 @@ export class Editor {
     });
 
 
-    this.canvas.on('object:moving', this.objectMoving.bind(this));
+    this.canvas.on('object:modified', Editor.objectModified.bind(this));
     this.canvas.on('selection:created', this.selectionCreated.bind(this));
     this.canvas.on('selection:updated', this.selectionUpdated.bind(this));
   }
 
-  private objectMoving(event: FabricEvent): void {
+  static objectModified(event: FabricEvent): void {
     // @todo check these
-console.log(event);
-    let element: Object = event.target;
-    switch (element.type) {
-      case 'control':
-        let center = element.getCenterPoint();
-        element.point.x = center.x - element.polygon.left;
-        element.point.y = center.y - element.polygon.top;
-        break;
+    console.log(event, 'objectModified');
 
-      case 'polygon':
-        element.controls.forEach((control: Object) => {
-          control.left = element.left + control.point.x;
-          control.top = element.top + control.point.y;
-        });
-        break;
+    let element: Object = event.target;
+    if (element.hasOwnProperty('fieldset')) {
+      // circle, polygon, rectangle
+      element.fieldset.shapeModified(event);
+    } else if (element.hasOwnProperty('polygon')) {
+      // polygon control
+      element.polygon.fieldset.shapeModified(event);
     }
   }
 
   private selectionCreated(event: FabricEvent): void {
     // @todo check these
-console.log(event);
+console.log(event, 'selectionCreated');
     let element: Object = event.target;
     if (element.type === 'polygon') {
       this.activePolygon = element;
@@ -105,7 +99,7 @@ console.log(event);
 
   private selectionUpdated(event: FabricEvent): void {
     // @todo check these
-console.log(event);
+console.log(event, 'selectionUpdated');
     event.deselected.forEach((element: Object) => {
       if (element.type === 'polygon' && event.selected[0].type !== 'control') {
         // hide controls of active polygon

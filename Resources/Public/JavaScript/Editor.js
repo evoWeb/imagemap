@@ -32,31 +32,26 @@ define(["require", "exports", "./vendor/Fabric", "./AreaFieldsetFactory", "./Are
                 preserveObjectStacking: true,
                 hoverCursor: 'move',
             });
-            this.canvas.on('object:moving', this.objectMoving.bind(this));
+            this.canvas.on('object:modified', Editor.objectModified.bind(this));
             this.canvas.on('selection:created', this.selectionCreated.bind(this));
             this.canvas.on('selection:updated', this.selectionUpdated.bind(this));
         }
-        objectMoving(event) {
+        static objectModified(event) {
             // @todo check these
-            console.log(event);
+            console.log(event, 'objectModified');
             let element = event.target;
-            switch (element.type) {
-                case 'control':
-                    let center = element.getCenterPoint();
-                    element.point.x = center.x - element.polygon.left;
-                    element.point.y = center.y - element.polygon.top;
-                    break;
-                case 'polygon':
-                    element.controls.forEach((control) => {
-                        control.left = element.left + control.point.x;
-                        control.top = element.top + control.point.y;
-                    });
-                    break;
+            if (element.hasOwnProperty('fieldset')) {
+                // circle, polygon, rectangle
+                element.fieldset.shapeModified(event);
+            }
+            else if (element.hasOwnProperty('polygon')) {
+                // polygon control
+                element.polygon.fieldset.shapeModified(event);
             }
         }
         selectionCreated(event) {
             // @todo check these
-            console.log(event);
+            console.log(event, 'selectionCreated');
             let element = event.target;
             if (element.type === 'polygon') {
                 this.activePolygon = element;
@@ -69,7 +64,7 @@ define(["require", "exports", "./vendor/Fabric", "./AreaFieldsetFactory", "./Are
         }
         selectionUpdated(event) {
             // @todo check these
-            console.log(event);
+            console.log(event, 'selectionUpdated');
             event.deselected.forEach((element) => {
                 if (element.type === 'polygon' && event.selected[0].type !== 'control') {
                     // hide controls of active polygon

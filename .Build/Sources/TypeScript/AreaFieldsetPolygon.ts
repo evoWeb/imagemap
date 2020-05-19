@@ -21,13 +21,6 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
 
   public shape: AreaShapePolygon;
 
-  protected initializeEvents(): void {
-    super.initializeEvents();
-    this.shape.controls.forEach((control: Circle) => {
-      control.on('moved', this.shapeMoved.bind(this));
-    });
-  }
-
   protected updateFields(): void {
     for (let attributeKey in this.area) {
       if (!this.area.hasOwnProperty(attributeKey)) {
@@ -40,7 +33,7 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
         if (typeof attributeValue === 'number') {
           attributeValue = attributeValue.toString();
         }
-        element.value = attributeValue;
+        element.setAttribute('value', attributeValue);
       }
     }
 
@@ -54,19 +47,24 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
         yField = this.getElement(`#y${control.id}`);
 
       xField.dataset.control = control.id;
-      xField.value = this.outputX(control.point.x);
       yField.dataset.control = control.id;
-      yField.value = this.outputY(control.point.y);
+      xField.setAttribute('value', this.outputX(control.point.x));
+      yField.setAttribute('value', this.outputY(control.point.y));
     });
   }
 
-  protected shapeMoved(event: FabricEvent): void {
+  protected shapeModified(event: FabricEvent): void {
     // @todo check these
-    let control = (event.target as Object),
-      center = control.getCenterPoint();
-console.log(event);
-    this.getElement(`#x${control.id}`).value = center.x;
-    this.getElement(`#y${control.id}`).value = center.y;
+    let element = (event.target as Object),
+      center = element.getCenterPoint();
+
+    this.getElement(`#x${element.id}`).setAttribute('value', center.x);
+    this.getElement(`#y${element.id}`).setAttribute('value', center.y);
+
+    element.controls.forEach((control: Object) => {
+      control.left = element.left + control.point.x;
+      control.top = element.top + control.point.y;
+    });
   }
 
   protected moveShape(event: Event): void {
@@ -190,8 +188,8 @@ console.log(event);
 
     element.querySelectorAll('.t3js-btn').forEach(this.buttonHandler.bind(this));
 
-    (element.querySelector('#x' + point.id) as HTMLInputElement).value = point.x.toString();
-    (element.querySelector('#y' + point.id) as HTMLInputElement).value = point.y.toString();
+    (element.querySelector('#x' + point.id) as HTMLInputElement).setAttribute('value', point.x.toString());
+    (element.querySelector('#y' + point.id) as HTMLInputElement).setAttribute('value', point.y.toString());
 
     return [point, element, currentPointIndex, currentPoint];
   }

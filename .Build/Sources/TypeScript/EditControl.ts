@@ -292,7 +292,7 @@ class EditControl {
     event.preventDefault();
 
     let hiddenField = $(this.hiddenInput);
-    this.hiddenInput.value = this.editor.getMapData();
+    this.hiddenInput.setAttribute('value', this.editor.getMapData());
     hiddenField.trigger('imagemap:changed');
     FormEngineValidation.markFieldAsChanged(hiddenField);
     this.currentModal.modal('hide');

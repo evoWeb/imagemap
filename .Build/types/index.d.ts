@@ -57,10 +57,8 @@ declare interface EditorConfiguration {
 }
 
 declare interface FabricEvent {
-  target?: {
-    type: string
-  },
-  transform?: object,
+  e: MouseEvent,
+  target?: any,
   deselected?: any[],
   selected?: any[],
 }

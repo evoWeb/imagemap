@@ -13,10 +13,15 @@
 
 // @ts-ignore
 import { Canvas, Circle, Polygon } from './vendor/Fabric';
+import { AreaFieldsetPolygon } from './AreaFieldsetPolygon';
 import { AreaForm } from './AreaForm';
 
 export class AreaShapePolygon extends Polygon {
   public id: number;
+
+  public canvas: Canvas;
+
+  public fieldset: AreaFieldsetPolygon;
 
   public points: any[];
 
@@ -26,7 +31,7 @@ export class AreaShapePolygon extends Polygon {
 
   public opacity: boolean;
 
-  public canvas: Canvas;
+  [property: string]: any;
 
   constructor(points: any, options: any) {
     super(points, options);

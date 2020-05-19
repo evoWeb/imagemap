@@ -13,11 +13,14 @@
 
 // @ts-ignore
 import { Canvas, Rect } from './vendor/Fabric';
+import { AreaFieldsetRectangle } from './AreaFieldsetRectangle';
 
 export class AreaShapeRectangle extends Rect {
   public id: number;
 
   public canvas: Canvas;
+
+  public fieldset: AreaFieldsetRectangle;
 
   [property: string]: any;
 

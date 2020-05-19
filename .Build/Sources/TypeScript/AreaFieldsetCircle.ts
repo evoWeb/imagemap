@@ -31,7 +31,7 @@ export class AreaFieldsetCircle extends AreaFieldsetAbstract {
         if (typeof attributeValue === 'number') {
           attributeValue = attributeValue.toString();
         }
-        element.value = attributeValue;
+        element.setAttribute('value', attributeValue);
       }
     }
 
@@ -49,14 +49,24 @@ export class AreaFieldsetCircle extends AreaFieldsetAbstract {
       }
 
       if (element !== null) {
-        element.value = coordinatesValue;
+        element.setAttribute('value', coordinatesValue);
       }
     }
   }
 
-  protected shapeMoved(event: FabricEvent): void {
-    // @todo check these
-console.log(event);
+  protected shapeModified(event: FabricEvent): void {
+    let shape = (event.target as AreaShapeCircle),
+      radius = shape.getRadiusX(),
+      left = shape.left + radius,
+      top = shape.top + radius;
+
+    this.area.coords.left = this.inputX(left);
+    this.area.coords.top = this.inputY(top);
+    this.area.coords.radius = this.inputX(radius);
+
+    this.getElement('.left').setAttribute('value', left);
+    this.getElement('.top').setAttribute('value', top);
+    this.getElement('.radius').setAttribute('value', radius);
   }
 
   protected moveShape(event: Event): void {

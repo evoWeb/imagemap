@@ -47,6 +47,7 @@ export abstract class AreaFieldsetAbstract {
     this.area = area;
     this.configuration = configuration;
     this.shape = shape;
+    this.shape.fieldset = this;
 
     this.id = this.shape.id;
   }
@@ -75,9 +76,6 @@ export abstract class AreaFieldsetAbstract {
   }
 
   protected initializeEvents(): void {
-    this.shape.on('moved', this.shapeMoved.bind(this));
-    this.shape.on('modified', this.shapeMoved.bind(this));
-
     this.getElements('.basicOptions .t3js-field').forEach((field: HTMLInputElement) => {
       field.removeEventListener('keyup', this.basicOptionsHandler);
       field.addEventListener('keyup', this.basicOptionsHandler.bind(this));
@@ -95,7 +93,7 @@ export abstract class AreaFieldsetAbstract {
 
   protected abstract updateFields(): void;
 
-  protected abstract shapeMoved(event: FabricEvent): void;
+  protected abstract shapeModified(event: FabricEvent): void;
 
   protected abstract moveShape(event: Event): void;
 
@@ -172,7 +170,7 @@ export abstract class AreaFieldsetAbstract {
 
   protected colorPickerAction(value: string) {
     this.area.color = value;
-    (this.getElement('.t3js-color-picker') as HTMLInputElement).value = this.area.color;
+    (this.getElement('.t3js-color-picker') as HTMLInputElement).setAttribute('value', this.area.color);
     this.shape.set('borderColor', this.area.color);
     this.shape.set('stroke', this.area.color);
     this.shape.set('fill', AreaShapeFactory.hexToRgbA(this.area.color, 0.2));
@@ -205,18 +203,22 @@ export abstract class AreaFieldsetAbstract {
     return this.getElement(selector).value;
   }
 
+  // @todo refactor to move to AreaForm
   protected inputX(value: number): number {
     return value / AreaForm.width;
   }
 
+  // @todo refactor to move to AreaForm
   protected inputY(value: number): number {
     return value / AreaForm.height;
   }
 
+  // @todo refactor to move to AreaForm
   protected outputX(value: number): string {
     return Math.round(value * AreaForm.width).toString();
   }
 
+  // @todo refactor to move to AreaForm
   protected outputY(value: number): string {
     return Math.round(value * AreaForm.height).toString();
   }

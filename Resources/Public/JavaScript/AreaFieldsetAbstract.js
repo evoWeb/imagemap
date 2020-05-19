@@ -20,6 +20,7 @@ define(["require", "exports", "jquery", "./AreaForm", "./AreaShapeFactory"], fun
             this.area = area;
             this.configuration = configuration;
             this.shape = shape;
+            this.shape.fieldset = this;
             this.id = this.shape.id;
         }
         postAddToForm() {
@@ -43,8 +44,6 @@ define(["require", "exports", "jquery", "./AreaForm", "./AreaShapeFactory"], fun
             });
         }
         initializeEvents() {
-            this.shape.on('moved', this.shapeMoved.bind(this));
-            this.shape.on('modified', this.shapeMoved.bind(this));
             this.getElements('.basicOptions .t3js-field').forEach((field) => {
                 field.removeEventListener('keyup', this.basicOptionsHandler);
                 field.addEventListener('keyup', this.basicOptionsHandler.bind(this));
@@ -114,7 +113,7 @@ define(["require", "exports", "jquery", "./AreaForm", "./AreaShapeFactory"], fun
         }
         colorPickerAction(value) {
             this.area.color = value;
-            this.getElement('.t3js-color-picker').value = this.area.color;
+            this.getElement('.t3js-color-picker').setAttribute('value', this.area.color);
             this.shape.set('borderColor', this.area.color);
             this.shape.set('stroke', this.area.color);
             this.shape.set('fill', AreaShapeFactory_1.AreaShapeFactory.hexToRgbA(this.area.color, 0.2));
@@ -140,15 +139,19 @@ define(["require", "exports", "jquery", "./AreaForm", "./AreaShapeFactory"], fun
         getFieldValue(selector) {
             return this.getElement(selector).value;
         }
+        // @todo refactor to move to AreaForm
         inputX(value) {
             return value / AreaForm_1.AreaForm.width;
         }
+        // @todo refactor to move to AreaForm
         inputY(value) {
             return value / AreaForm_1.AreaForm.height;
         }
+        // @todo refactor to move to AreaForm
         outputX(value) {
             return Math.round(value * AreaForm_1.AreaForm.width).toString();
         }
+        // @todo refactor to move to AreaForm
         outputY(value) {
             return Math.round(value * AreaForm_1.AreaForm.height).toString();
         }

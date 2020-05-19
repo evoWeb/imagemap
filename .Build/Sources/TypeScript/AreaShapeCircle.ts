@@ -13,11 +13,14 @@
 
 // @ts-ignore
 import { Canvas, Circle } from './vendor/Fabric';
+import { AreaFieldsetCircle } from './AreaFieldsetCircle';
 
 export class AreaShapeCircle extends Circle {
   public id: number;
 
   public canvas: Canvas;
+
+  public fieldset: AreaFieldsetCircle;
 
   [property: string]: any;
 

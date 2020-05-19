@@ -26,7 +26,7 @@ define(["require", "exports", "./AreaFieldsetAbstract"], function (require, expo
                     if (typeof attributeValue === 'number') {
                         attributeValue = attributeValue.toString();
                     }
-                    element.value = attributeValue;
+                    element.setAttribute('value', attributeValue);
                 }
             }
             for (let coordinatesKey in this.area.coords) {
@@ -41,13 +41,18 @@ define(["require", "exports", "./AreaFieldsetAbstract"], function (require, expo
                     coordinatesValue = this.outputY(coordinatesValue);
                 }
                 if (element !== null) {
-                    element.value = coordinatesValue;
+                    element.setAttribute('value', coordinatesValue);
                 }
             }
         }
-        shapeMoved(event) {
-            // @todo check these
-            console.log(event);
+        shapeModified(event) {
+            let shape = event.target, radius = shape.getRadiusX(), left = shape.left + radius, top = shape.top + radius;
+            this.area.coords.left = this.inputX(left);
+            this.area.coords.top = this.inputY(top);
+            this.area.coords.radius = this.inputX(radius);
+            this.getElement('.left').setAttribute('value', left);
+            this.getElement('.top').setAttribute('value', top);
+            this.getElement('.radius').setAttribute('value', radius);
         }
         moveShape(event) {
             let field = (event.currentTarget || event.target), value = parseInt(field.value);

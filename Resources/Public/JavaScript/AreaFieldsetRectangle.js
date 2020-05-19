@@ -26,7 +26,7 @@ define(["require", "exports", "./AreaFieldsetAbstract"], function (require, expo
                     if (typeof attributeValue === 'number') {
                         attributeValue = attributeValue.toString();
                     }
-                    element.value = attributeValue;
+                    element.setAttribute('value', attributeValue);
                 }
             }
             for (let coordinatesKey in this.area.coords) {
@@ -41,12 +41,20 @@ define(["require", "exports", "./AreaFieldsetAbstract"], function (require, expo
                     coordinatesValue = this.outputY(coordinatesValue);
                 }
                 if (element !== null) {
-                    element.value = coordinatesValue;
+                    element.setAttribute('value', coordinatesValue);
                 }
             }
         }
-        shapeMoved(event) {
-            console.log(event);
+        shapeModified(event) {
+            let shape = event.target, left = Math.round(shape.left), top = Math.round(shape.top), right = Math.round(shape.getScaledWidth() + left), bottom = Math.round(shape.getScaledHeight() + top);
+            this.area.coords.left = this.inputX(left);
+            this.area.coords.right = this.inputX(right);
+            this.area.coords.top = this.inputY(top);
+            this.area.coords.bottom = this.inputX(bottom);
+            this.getElement('.left').setAttribute('value', left.toString());
+            this.getElement('.right').setAttribute('value', right.toString());
+            this.getElement('.top').setAttribute('value', top.toString());
+            this.getElement('.bottom').setAttribute('value', bottom.toString());
         }
         moveShape(event) {
             let field = (event.currentTarget || event.target), value = parseInt(field.value);
@@ -54,13 +62,13 @@ define(["require", "exports", "./AreaFieldsetAbstract"], function (require, expo
                 case 'left':
                     this.area.coords.left = this.inputX(value);
                     this.area.coords.right = this.inputX(value + this.shape.getScaledWidth());
-                    this.getElement('#right').value = value + this.shape.getScaledWidth();
+                    this.getElement('#right').setAttribute('value', value + this.shape.getScaledWidth());
                     this.shape.set({ left: value });
                     break;
                 case 'top':
                     this.area.coords.top = this.inputY(value);
                     this.area.coords.bottom = this.inputY(value + this.shape.getScaledHeight());
-                    this.getElement('#bottom').value = value + this.shape.getScaledHeight();
+                    this.getElement('#bottom').setAttribute('value', value + this.shape.getScaledHeight());
                     this.shape.set({ top: value });
                     break;
                 case 'right':
@@ -68,7 +76,7 @@ define(["require", "exports", "./AreaFieldsetAbstract"], function (require, expo
                     value -= this.shape.left;
                     if (value < 0) {
                         value = 10;
-                        field.value = this.left + value;
+                        field.setAttribute('value', this.left + value);
                     }
                     this.shape.set({ width: value });
                     break;
@@ -77,7 +85,7 @@ define(["require", "exports", "./AreaFieldsetAbstract"], function (require, expo
                     value -= this.shape.top;
                     if (value < 0) {
                         value = 10;
-                        field.value = this.top + value;
+                        field.setAttribute('value', this.top + value);
                     }
                     this.shape.set({ height: value });
                     break;

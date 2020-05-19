@@ -31,7 +31,7 @@ export class AreaFieldsetRectangle extends AreaFieldsetAbstract {
         if (typeof attributeValue === 'number') {
           attributeValue = attributeValue.toString();
         }
-        element.value = attributeValue;
+        element.setAttribute('value', attributeValue);
       }
     }
 
@@ -49,13 +49,27 @@ export class AreaFieldsetRectangle extends AreaFieldsetAbstract {
       }
 
       if (element !== null) {
-        element.value = coordinatesValue;
+        element.setAttribute('value', coordinatesValue);
       }
     }
   }
 
-  protected shapeMoved(event: FabricEvent): void {
-    console.log(event);
+  protected shapeModified(event: FabricEvent): void {
+    let shape = (event.target as AreaShapeRectangle),
+      left = Math.round(shape.left),
+      top = Math.round(shape.top),
+      right = Math.round(shape.getScaledWidth() + left),
+      bottom = Math.round(shape.getScaledHeight() + top);
+
+    this.area.coords.left = this.inputX(left);
+    this.area.coords.right = this.inputX(right);
+    this.area.coords.top = this.inputY(top);
+    this.area.coords.bottom = this.inputX(bottom);
+
+    this.getElement('.left').setAttribute('value', left.toString());
+    this.getElement('.right').setAttribute('value', right.toString());
+    this.getElement('.top').setAttribute('value', top.toString());
+    this.getElement('.bottom').setAttribute('value', bottom.toString());
   }
 
   protected moveShape(event: Event): void {
@@ -66,14 +80,14 @@ export class AreaFieldsetRectangle extends AreaFieldsetAbstract {
       case 'left':
         this.area.coords.left = this.inputX(value);
         this.area.coords.right = this.inputX(value + this.shape.getScaledWidth());
-        this.getElement('#right').value = value + this.shape.getScaledWidth();
+        this.getElement('#right').setAttribute('value', value + this.shape.getScaledWidth());
         this.shape.set({left: value});
         break;
 
       case 'top':
         this.area.coords.top = this.inputY(value);
         this.area.coords.bottom = this.inputY(value + this.shape.getScaledHeight());
-        this.getElement('#bottom').value = value + this.shape.getScaledHeight();
+        this.getElement('#bottom').setAttribute('value', value + this.shape.getScaledHeight());
         this.shape.set({top: value});
         break;
 
@@ -82,7 +96,7 @@ export class AreaFieldsetRectangle extends AreaFieldsetAbstract {
         value -= this.shape.left;
         if (value < 0) {
           value = 10;
-          field.value = this.left + value;
+          field.setAttribute('value', this.left + value);
         }
         this.shape.set({width: value});
         break;
@@ -92,7 +106,7 @@ export class AreaFieldsetRectangle extends AreaFieldsetAbstract {
         value -= this.shape.top;
         if (value < 0) {
           value = 10;
-          field.value = this.top + value;
+          field.setAttribute('value', this.top + value);
         }
         this.shape.set({height: value});
         break;
