@@ -39,8 +39,10 @@ define(["require", "exports", "./vendor/Fabric", "./AreaForm", "./AreaShapeFacto
         }
         removeAreas() {
             this.areaShapes.forEach((areaShape) => {
-                areaShape.remove();
+                this.canvas.remove(areaShape);
+                areaShape = null;
             });
+            this.areaShapes = [];
         }
     }
     exports.Preview = Preview;

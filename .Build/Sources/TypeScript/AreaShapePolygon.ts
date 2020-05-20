@@ -12,81 +12,27 @@
 /// <reference types="../../types/index"/>
 
 // @ts-ignore
-import { Canvas, Circle, Polygon } from './vendor/Fabric';
+import * as fabric from './vendor/Fabric';
 import { AreaFieldsetPolygon } from './AreaFieldsetPolygon';
-import { AreaForm } from './AreaForm';
 
-export class AreaShapePolygon extends Polygon {
+export class AreaShapePolygon extends fabric.Polygon {
   public id: number;
 
-  public canvas: Canvas;
+  public canvas: fabric.Canvas;
 
   public fieldset: AreaFieldsetPolygon;
 
   public points: any[];
 
-  public controls: Array<Circle> = [];
-
   public selectable: boolean;
 
   public opacity: boolean;
+
+  public controls: any;
 
   [property: string]: any;
 
   constructor(points: any, options: any) {
     super(points, options);
-  }
-
-  public initializeControls(points: Point[]) {
-    if (this.selectable) {
-      this.controls = [];
-      points.forEach((point: Point, index: number) => {
-        this.addControl(point, index, 100000);
-      });
-      this.canvas.renderAll();
-    }
-  }
-
-  public addControl(point: Point, index: number, newControlIndex: number): void {
-    let circle = new Circle({
-      hasControls: false,
-      fill: '#eee',
-      stroke: '#bbb',
-      originX: 'center',
-      originY: 'center',
-      name: index,
-      type: 'control',
-      opacity: this.opacity,
-
-      // set control position relative to polygon
-      left: Math.round(point.x * AreaForm.width),
-      top: Math.round(point.y * AreaForm.height),
-      radius: 5,
-
-      id: point.id,
-      polygon: this,
-      point: point,
-    });
-
-    this.canvas.add(circle);
-    this.controls = AreaShapePolygon.addElementToArrayWithPosition(this.controls, circle, newControlIndex);
-  }
-
-  static addElementToArrayWithPosition(array: any[], item: any, newPointIndex: number): any[] {
-    if (newPointIndex < 0) {
-      array.unshift(item);
-    } else if (newPointIndex >= array.length) {
-      array.push(item);
-    } else {
-      let newPoints = [];
-      for (let i = 0; i < array.length; i++) {
-        newPoints.push(array[i]);
-        if (i === newPointIndex - 1) {
-          newPoints.push(item);
-        }
-      }
-      array = newPoints;
-    }
-    return array;
   }
 }

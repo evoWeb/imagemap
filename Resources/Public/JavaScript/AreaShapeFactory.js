@@ -54,22 +54,19 @@ define(["require", "exports", "./vendor/Fabric", "./AreaForm", "./AreaShapeCircl
             return areaShape;
         }
         createPolygon(area, configuration) {
-            let points = area.points || [], polygonPoints = [], polygonId = Fabric_1.Object.__uid++, areaShape;
+            let points = area.points || [], polygonPoints = [], polygonId = Fabric_1.Object.__uid++;
             points.map((point) => {
                 point.id = polygonId + '-' + Fabric_1.Object.__uid++;
-                polygonPoints.push({
+                let polygonPoint = {
                     x: Math.round(point.x * AreaForm_1.AreaForm.width),
                     y: Math.round(point.y * AreaForm_1.AreaForm.height),
                     id: point.id,
-                });
+                    areaPoint: point,
+                };
+                point.polygonPoint = polygonPoint;
+                polygonPoints.push(polygonPoint);
             });
-            areaShape = new AreaShapePolygon_1.AreaShapePolygon(polygonPoints, Object.assign(Object.assign({}, configuration), { objectCaching: false }));
-            areaShape.id = polygonId;
-            if (this.canvas !== null) {
-                areaShape.canvas = this.canvas;
-                areaShape.initializeControls(points);
-            }
-            return areaShape;
+            return new AreaShapePolygon_1.AreaShapePolygon(polygonPoints, Object.assign(Object.assign({}, configuration), { objectCaching: false, id: polygonId, canvas: this.canvas }));
         }
         createRectangle(area, configuration) {
             let coords = area.coords, left = Math.round(coords.left * AreaForm_1.AreaForm.width), top = Math.round(coords.top * AreaForm_1.AreaForm.height), width = Math.round(coords.right * AreaForm_1.AreaForm.width) - left, height = Math.round(coords.bottom * AreaForm_1.AreaForm.height) - top, areaShape = new AreaShapeRectangle_1.AreaShapeRectangle(Object.assign(Object.assign({}, configuration), { left: left, top: top, width: width, height: height }));

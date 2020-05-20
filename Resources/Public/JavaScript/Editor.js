@@ -13,10 +13,7 @@ define(["require", "exports", "./vendor/Fabric", "./AreaFieldsetFactory", "./Are
     Object.defineProperty(exports, "__esModule", { value: true });
     class Editor {
         constructor(configuration, canvas, modalParent, browselinkParent) {
-            this.areaShapes = [];
             this.formSelector = '#areasForm';
-            this.areaFieldsets = [];
-            this.activePolygon = null;
             this.configuration = configuration;
             this.modalParent = modalParent;
             this.browselinkParent = browselinkParent;
@@ -33,8 +30,10 @@ define(["require", "exports", "./vendor/Fabric", "./AreaFieldsetFactory", "./Are
                 hoverCursor: 'move',
             });
             this.canvas.on('object:modified', Editor.objectModified.bind(this));
-            this.canvas.on('selection:created', this.selectionCreated.bind(this));
-            this.canvas.on('selection:updated', this.selectionUpdated.bind(this));
+        }
+        initializeAreaForm() {
+            let element = this.modalParent.querySelector(this.formSelector);
+            this.form = new AreaForm_1.AreaForm(element, this.canvas, this.configuration, this.modalParent, this.browselinkParent);
         }
         static objectModified(event) {
             // @todo check these
@@ -44,64 +43,17 @@ define(["require", "exports", "./vendor/Fabric", "./AreaFieldsetFactory", "./Are
                 // circle, polygon, rectangle
                 element.fieldset.shapeModified(event);
             }
-            else if (element.hasOwnProperty('polygon')) {
-                // polygon control
-                element.polygon.fieldset.shapeModified(event);
-            }
-        }
-        selectionCreated(event) {
-            // @todo check these
-            console.log(event, 'selectionCreated');
-            let element = event.target;
-            if (element.type === 'polygon') {
-                this.activePolygon = element;
-                // show controls of active polygon
-                this.activePolygon.controls.forEach((control) => {
-                    control.opacity = 1;
-                });
-                this.canvas.renderAll();
-            }
-        }
-        selectionUpdated(event) {
-            // @todo check these
-            console.log(event, 'selectionUpdated');
-            event.deselected.forEach((element) => {
-                if (element.type === 'polygon' && event.selected[0].type !== 'control') {
-                    // hide controls of active polygon
-                    element.controls.forEach((control) => {
-                        control.opacity = 0;
-                    });
-                    this.activePolygon = null;
-                    this.canvas.renderAll();
-                }
-                else if (element.type === 'control') {
-                    // hide controls of active polygon
-                    this.activePolygon.controls.forEach((control) => {
-                        control.opacity = 0;
-                    });
-                    this.activePolygon = null;
-                    this.canvas.renderAll();
-                }
-            });
-            event.selected.forEach((element) => {
-                if (element.type === 'polygon') {
-                    this.activePolygon = element;
-                    // hide controls of active polygon
-                    element.controls.forEach((control) => {
-                        control.opacity = 1;
-                    });
-                    this.canvas.renderAll();
-                }
-            });
-        }
-        initializeAreaForm() {
-            this.form = new AreaForm_1.AreaForm(this.formSelector, this.modalParent, this);
         }
         resize(width, height) {
             if (AreaForm_1.AreaForm.width !== width || AreaForm_1.AreaForm.height !== height) {
-                // @todo resize canvas size
-                // @todo resize and reposition shapes on canvas
-                // @todo change values in areaFieldset
+                let data = JSON.parse(this.getMapData());
+                this.removeAreas();
+                AreaForm_1.AreaForm.width = width;
+                AreaForm_1.AreaForm.height = height;
+                this.canvas.setWidth(width);
+                this.canvas.setHeight(height);
+                this.canvas.calcOffset();
+                this.renderAreas(data);
             }
         }
         renderAreas(areas) {
@@ -112,33 +64,17 @@ define(["require", "exports", "./vendor/Fabric", "./AreaFieldsetFactory", "./Are
                     area.color = AreaShapeFactory_1.AreaShapeFactory.getRandomColor(area.color);
                     let areaShape = areaShapeFactory.createShape(area, true), areaFieldset = areaFieldsetFactory.createFieldset(area, areaShape);
                     this.canvas.add(areaShape);
-                    this.areaShapes.push(areaShape);
-                    this.areaFieldsets.push(areaFieldset);
                     this.form.addArea(areaFieldset);
                 });
             }
         }
         removeAreas() {
-            this.areaFieldsets.forEach((area) => {
-                area.deleteAction();
+            this.form.areaFieldsets.forEach((area) => {
+                this.form.deleteArea(area);
             });
-        }
-        deleteArea(area) {
-            let areas = [];
-            this.areaFieldsets.forEach((currentArea) => {
-                if (area !== currentArea) {
-                    areas.push(currentArea);
-                }
-            });
-            this.areaFieldsets = areas;
-            this.canvas.remove(area.shape);
         }
         getMapData() {
-            let areas = [];
-            this.areaFieldsets.forEach((area) => {
-                areas.push(area.getData());
-            });
-            return JSON.stringify(areas);
+            return this.form.getMapData();
         }
         destroy() {
             this.canvas = null;

@@ -17,15 +17,15 @@ import { AreaForm } from './AreaForm';
 import { AreaShapeFactory } from './AreaShapeFactory';
 
 export class Preview {
-  protected areaShapes: Array<Object> = [];
+  private areaShapes: Array<Object> = [];
 
-  protected canvas: Canvas;
+  private canvas: Canvas;
 
   constructor(canvas: HTMLElement) {
     this.initializeCanvas(canvas);
   }
 
-  protected initializeCanvas(canvas: HTMLElement): void {
+  private initializeCanvas(canvas: HTMLElement): void {
     this.canvas = new Canvas(canvas, {
       width: AreaForm.width,
       height: AreaForm.height,
@@ -39,7 +39,6 @@ export class Preview {
   public renderAreas(areas: Array<Area>): void {
     if (areas !== undefined) {
       let areaShapeFactory = new AreaShapeFactory();
-
       areas.forEach((area: Area) => {
         area.color = AreaShapeFactory.getRandomColor(area.color);
         let areaShape = areaShapeFactory.createShape(area, false);
@@ -52,7 +51,9 @@ export class Preview {
 
   public removeAreas(): void {
     this.areaShapes.forEach((areaShape: Object) => {
-      areaShape.remove();
+      this.canvas.remove(areaShape);
+      areaShape = null;
     });
+    this.areaShapes = [];
   }
 }

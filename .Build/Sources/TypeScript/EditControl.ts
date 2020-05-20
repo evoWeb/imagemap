@@ -11,13 +11,11 @@
 
 import * as $ from 'jquery';
 // @ts-ignore
+import ImagesLoaded = require('TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min');
+// @ts-ignore
 import Icons = require('TYPO3/CMS/Backend/Icons');
 // @ts-ignore
 import Modal = require('TYPO3/CMS/Backend/Modal');
-// @ts-ignore
-import FormEngineValidation = require('TYPO3/CMS/Backend/FormEngineValidation');
-// @ts-ignore
-import ImagesLoaded = require('TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min');
 import { AreaForm } from './AreaForm';
 import { Editor } from './Editor';
 
@@ -28,19 +26,19 @@ class EditControl {
 
   private editor: Editor;
 
-  private trigger: JQuery;
+  private trigger: HTMLButtonElement;
 
   private currentModal: Modal;
 
-  private buttonAddRect: JQuery;
+  private buttonAddRectangle: HTMLButtonElement;
 
-  private buttonAddCircle: JQuery;
+  private buttonAddCircle: HTMLButtonElement;
 
-  private buttonAddPoly: JQuery;
+  private buttonAddPolygon: HTMLButtonElement;
 
-  private buttonDismiss: JQuery;
+  private buttonDismiss: HTMLButtonElement;
 
-  private buttonSave: JQuery;
+  private buttonSave: HTMLButtonElement;
 
   private editorImageSelector: string = '#t3js-editor-image';
 
@@ -54,29 +52,28 @@ class EditControl {
     this.resizeEnd(this.resizeEditor.bind(this));
   }
 
-  protected initializeFormElement(fieldSelector: string): void {
+  private initializeFormElement(fieldSelector: string): void {
     this.hiddenInput = document.querySelector(fieldSelector);
   }
 
-  protected initializeTrigger(): void {
-    this.trigger = $('.t3js-area-wizard-trigger');
-    this.trigger
-      .off('click')
-      .on('click', this.triggerHandler.bind(this));
+  private initializeTrigger(): void {
+    this.trigger = document.querySelector('.t3js-area-wizard-trigger');
+    this.trigger.removeEventListener('click', this.triggerHandler);
+    this.trigger.addEventListener('click', this.triggerHandler.bind(this));
   }
 
-  protected triggerHandler(event: JQueryEventObject): void {
+  private triggerHandler(event: JQueryEventObject): void {
     event.preventDefault();
     this.show();
   }
 
-  protected initializeAreaEditorModal(): void {
-    const image: JQuery = this.currentModal.find(this.editorImageSelector);
-    ImagesLoaded(image as any, (): void => {
+  private initializeAreaEditorModal(): void {
+    const image: HTMLImageElement = this.currentModal[0].querySelector(this.editorImageSelector);
+    ImagesLoaded(image, (): void => {
       setTimeout(
         (): void => {
-          AreaForm.width = image.width();
-          AreaForm.height = image.height();
+          AreaForm.width = image.width;
+          AreaForm.height = image.height;
 
           this.init();
         },
@@ -85,18 +82,20 @@ class EditControl {
     });
   }
 
-  protected show(): void {
-    const modalTitle: string = this.trigger.data('modalTitle'),
-      buttonAddRectangleText: string = this.trigger.data('buttonAddrectText'),
-      buttonAddCircleText: string = this.trigger.data('buttonAddcircleText'),
-      buttonAddPolygonText: string = this.trigger.data('buttonAddpolyText'),
-      buttonDismissText: string = this.trigger.data('buttonDismissText'),
-      buttonSaveText: string = this.trigger.data('buttonSaveText'),
-      wizardUri: string = this.trigger.data('url'),
-      payload: {arguments: string, signature: string} = this.trigger.data('payload'),
+  private show(): void {
+    const modalTitle: string = this.trigger.dataset.modalTitle,
+      buttonAddRectangleText: string = this.trigger.dataset.buttonAddrectText,
+      buttonAddCircleText: string = this.trigger.dataset.buttonAddcircleText,
+      buttonAddPolygonText: string = this.trigger.dataset.buttonAddpolyText,
+      buttonDismissText: string = this.trigger.dataset.buttonDismissText,
+      buttonSaveText: string = this.trigger.dataset.buttonSaveText,
+      wizardUri: string = this.trigger.dataset.url,
+      payload: {arguments: string, signature: string} = JSON.parse(this.trigger.dataset.payload),
       initEditorModal: () => void = this.initializeAreaEditorModal.bind(this);
 
     Icons.getIcon('spinner-circle', Icons.sizes.default, null, null, Icons.markupIdentifiers.inline).done((icon: string) => {
+      let content = '<div class="modal-loading">' + icon + '</div>';
+
       /**
        * Open modal with areas to edit
        */
@@ -108,7 +107,7 @@ class EditControl {
             dataAttributes: {
               method: 'rectangle',
             },
-            icon: 'extensions-imagemap-rect',
+            icon: 'extensions-imagemap-rectangle',
             text: buttonAddRectangleText,
           },
           {
@@ -124,11 +123,11 @@ class EditControl {
             dataAttributes: {
               method: 'polygon',
             },
-            icon: 'extensions-imagemap-poly',
+            icon: 'extensions-imagemap-polygon',
             text: buttonAddPolygonText,
           },
           {
-            btnClass: 'btn-default button-dismiss',
+            btnClass: 'btn-default',
             dataAttributes: {
               method: 'dismiss',
             },
@@ -136,7 +135,7 @@ class EditControl {
             text: buttonDismissText,
           },
           {
-            btnClass: 'btn-primary button-save',
+            btnClass: 'btn-primary',
             dataAttributes: {
               method: 'save',
             },
@@ -144,7 +143,7 @@ class EditControl {
             text: buttonSaveText,
           },
         ],
-        content: $('<div class="modal-loading">').append(icon),
+        content: content,
         size: Modal.sizes.full,
         style: Modal.styles.dark,
         title: modalTitle,
@@ -175,22 +174,38 @@ class EditControl {
     });
   }
 
-  protected init(): void {
-    this.formElement = this.currentModal.find(this.formElementSelector)[0];
+  private init(): void {
+    let modal = this.currentModal[0];
 
-    this.buttonAddRect = this.currentModal.find('.button-add-rect').off('click').on('click', this.buttonAddRectangleHandler.bind(this));
-    this.buttonAddCircle = this.currentModal.find('.button-add-circle').off('click').on('click', this.buttonAddCircleHandler.bind(this));
-    this.buttonAddPoly = this.currentModal.find('.button-add-poly').off('click').on('click', this.buttonAddPolygonHandler.bind(this));
-    this.buttonDismiss = this.currentModal.find('.button-dismiss').off('click').on('click', this.buttonDismissHandler.bind(this));
-    this.buttonSave = this.currentModal.find('.button-save').off('click').on('click', this.buttonSaveHandler.bind(this));
+    this.formElement = modal.querySelector(this.formElementSelector);
 
-    $([document, top.document]).on('mousedown.minicolors touchstart.minicolors', this.hideColorSwatch);
+    this.buttonAddCircle = modal.querySelector('[data-method=circle]');
+    this.buttonAddCircle.removeEventListener('click', this.buttonAddCircleHandler);
+    this.buttonAddCircle.addEventListener('click', this.buttonAddCircleHandler.bind(this));
+
+    this.buttonAddPolygon = modal.querySelector('[data-method=polygon]');
+    this.buttonAddPolygon.removeEventListener('click', this.buttonAddPolygonHandler);
+    this.buttonAddPolygon.addEventListener('click', this.buttonAddPolygonHandler.bind(this));
+
+    this.buttonAddRectangle = modal.querySelector('[data-method=rectangle]');
+    this.buttonAddRectangle.removeEventListener('click', this.buttonAddRectangleHandler);
+    this.buttonAddRectangle.addEventListener('click', this.buttonAddRectangleHandler.bind(this));
+
+    this.buttonDismiss = modal.querySelector('[data-method=dismiss]');
+    this.buttonDismiss.removeEventListener('click', this.buttonDismissHandler);
+    this.buttonDismiss.addEventListener('click', this.buttonDismissHandler.bind(this));
+
+    this.buttonSave = modal.querySelector('[data-method=save]');
+    this.buttonSave.removeEventListener('click', this.buttonSaveHandler);
+    this.buttonSave.addEventListener('click', this.buttonSaveHandler.bind(this));
+
+    $(top.document).on('mousedown.minicolors touchstart.minicolors', this.hideColorSwatch);
 
     this.initializeEditor();
     this.renderAreas(this.hiddenInput.value);
   }
 
-  protected initializeEditor(): void {
+  private initializeEditor(): void {
     let image: HTMLImageElement = this.formElement.querySelector(this.editorImageSelector),
       data: any = this.hiddenInput.dataset,
       configurations: EditorConfiguration = {
@@ -215,20 +230,20 @@ class EditControl {
     );
   }
 
-  protected resizeEditor(): void {
+  private resizeEditor(): void {
     if (this.editor) {
       let image: HTMLImageElement = this.formElement.querySelector(this.editorImageSelector);
       this.editor.resize(image.offsetWidth, image.offsetHeight);
     }
   }
 
-  protected renderAreas(areas: string): void {
+  private renderAreas(areas: string): void {
     if (areas.length) {
       this.editor.renderAreas(JSON.parse(areas));
     }
   }
 
-  protected destroy(): void {
+  private destroy(): void {
     if (this.currentModal) {
       this.editor.destroy();
       this.editor = null;
@@ -236,7 +251,7 @@ class EditControl {
     }
   }
 
-  protected buttonAddRectangleHandler(event: JQueryEventObject): void {
+  private buttonAddRectangleHandler(event: JQueryEventObject): void {
     event.stopPropagation();
     event.preventDefault();
 
@@ -251,7 +266,7 @@ class EditControl {
     }]);
   }
 
-  protected buttonAddCircleHandler(event: JQueryEventObject): void {
+  private buttonAddCircleHandler(event: JQueryEventObject): void {
     event.stopPropagation();
     event.preventDefault();
 
@@ -265,7 +280,7 @@ class EditControl {
     }]);
   }
 
-  protected buttonAddPolygonHandler(event: JQueryEventObject): void {
+  private buttonAddPolygonHandler(event: JQueryEventObject): void {
     event.stopPropagation();
     event.preventDefault();
 
@@ -280,25 +295,27 @@ class EditControl {
     }]);
   }
 
-  protected buttonDismissHandler(event: JQueryEventObject): void {
+  private buttonDismissHandler(event: JQueryEventObject): void {
     event.stopPropagation();
     event.preventDefault();
 
     this.currentModal.modal('hide');
   }
 
-  protected buttonSaveHandler(event: JQueryEventObject): void {
+  private buttonSaveHandler(event: JQueryEventObject): void {
     event.stopPropagation();
     event.preventDefault();
 
-    let hiddenField = $(this.hiddenInput);
     this.hiddenInput.setAttribute('value', this.editor.getMapData());
-    hiddenField.trigger('imagemap:changed');
-    FormEngineValidation.markFieldAsChanged(hiddenField);
+    this.hiddenInput.dispatchEvent(new CustomEvent('imagemap:changed'));
+
+    // without FormEngineValidation.markFieldAsChanged call
+    EditControl.closest(this.hiddenInput, '.t3js-formengine-palette-field').classList.add('has-change');
+
     this.currentModal.modal('hide');
   }
 
-  protected hideColorSwatch(event: JQueryEventObject): void {
+  private hideColorSwatch(event: JQueryEventObject): void {
     if (!$(event.target).parents().add(event.target).hasClass('minicolors')) {
       // Hides all dropdown panels
       top.window.$('.minicolors-focus').each(() => {
@@ -320,7 +337,7 @@ class EditControl {
    */
   private resizeEnd(callback: () => void): void {
     let timer: number;
-    $(window).on('resize', (): void => {
+    window.addEventListener('resize', (): void => {
       clearTimeout(timer);
       timer = setTimeout(
         (): void => {
@@ -329,6 +346,20 @@ class EditControl {
         this.resizeTimeout,
       );
     });
+  }
+
+  static closest(element: HTMLElement, selector: string): HTMLElement {
+    let parent;
+    // traverse parents
+    while (element) {
+      parent = element.parentElement;
+      if (parent && parent.matches(selector)) {
+        element = parent;
+        break;
+      }
+      element = parent;
+    }
+    return element;
   }
 }
 

@@ -16,8 +16,8 @@ call_user_func(function () {
     $icons = [
         'content' => 'content-imagemap.svg',
         'circle' => 'draw-circle.svg',
-        'poly' => 'draw-polygon.svg',
-        'rect' => 'draw-square.svg',
+        'polygon' => 'draw-polygon.svg',
+        'rectangle' => 'draw-square.svg',
     ];
     foreach ($icons as $identifier => $iconPath) {
         $iconRegistry->registerIcon(

@@ -12,7 +12,7 @@
 /// <reference types="../../types/index"/>
 
 // @ts-ignore
-import { Circle, Object, Point } from './vendor/Fabric';
+import { Object, Point, util } from './vendor/Fabric';
 import { AreaFieldsetAbstract } from './AreaFieldsetAbstract';
 import { AreaShapePolygon } from './AreaShapePolygon';
 
@@ -38,73 +38,56 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
     }
 
     let parentElement = this.getElement('.positionOptions');
-    this.shape.controls.forEach((control: Circle) => {
-      if (!control.hasOwnProperty('element')) {
-        control.element = this.getFormElement('#polygonCoords', control.id);
-        parentElement.append(control.element);
+    this.shape.points.forEach((point: Point) => {
+      if (!point.hasOwnProperty('element')) {
+        point.element = this.getFieldsetElement('#polygonCoords', point.id);
+        parentElement.append(point.element);
       }
-      let xField = this.getElement(`#x${control.id}`),
-        yField = this.getElement(`#y${control.id}`);
 
-      xField.dataset.control = control.id;
-      yField.dataset.control = control.id;
-      xField.setAttribute('value', this.outputX(control.point.x));
-      yField.setAttribute('value', this.outputY(control.point.y));
+      let xField = this.getElement(`#x${point.id}`),
+        yField = this.getElement(`#y${point.id}`);
+      xField.dataset.point = point.id;
+      yField.dataset.point = point.id;
+      xField.setAttribute('value', this.outputX(point.areaPoint.x));
+      yField.setAttribute('value', this.outputY(point.areaPoint.y));
     });
   }
 
   protected shapeModified(event: FabricEvent): void {
-    // @todo check these
-    let element = (event.target as Object),
-      center = element.getCenterPoint();
+    let element = (event.target as Object);
+    let matrix = element.calcTransformMatrix()
+    element.points.forEach((point: Point) => {
+      let temporaryPoint = new Point(point.x - element.pathOffset.x, point.y - element.pathOffset.y),
+        transformed = util.transformPoint(temporaryPoint, matrix);
 
-    this.getElement(`#x${element.id}`).setAttribute('value', center.x);
-    this.getElement(`#y${element.id}`).setAttribute('value', center.y);
-
-    element.controls.forEach((control: Object) => {
-      control.left = element.left + control.point.x;
-      control.top = element.top + control.point.y;
+      point.areaPoint.x = this.inputX(transformed.x);
+      point.areaPoint.y = this.inputX(transformed.y);
+      this.getElement(`#x${point.id}`).setAttribute('value', transformed.x.toString());
+      this.getElement(`#y${point.id}`).setAttribute('value', transformed.y.toString());
     });
   }
 
   protected moveShape(event: Event): void {
-    let field = (event.currentTarget || event.target) as HTMLInputElement;
+    let field = (event.target) as HTMLInputElement;
     if (field.dataset.field === 'x' || field.dataset.field === 'y') {
-      let control: Circle = null,
+      let point: Point = null,
         left: number,
         top: number;
 
-      this.shape.controls.forEach((circle: Circle) => {
-        if (circle.id === field.dataset.control) {
-          control = circle;
+      this.shape.points.forEach((point1: Point) => {
+        if (point1.id === field.dataset.point) {
+          point = point1;
         }
       });
 
-      if (control !== null) {
-        if (field.dataset.field === 'x') {
-          left = parseInt(field.value);
-        } else {
-          left = parseInt(control.left);
-        }
-        if (field.dataset.field === 'y') {
-          top = parseInt(field.value);
-        } else {
-          top = parseInt(control.top);
-        }
+      if (point !== null) {
+        left = parseInt(field.dataset.field === 'x' ? field.value : point.x);
+        top = parseInt(field.dataset.field === 'y' ? field.value : point.y);
 
-        control.set('left', left);
-        control.set('top', top);
-        control.point.x = this.inputX(left);
-        control.point.y = this.inputY(top);
-        control.setCoords();
-
-        this.shape.points.forEach((point: Point) => {
-          if (point.id === control.id) {
-            point.x = left;
-            point.y = top;
-          }
-        })
-
+        point.areaPoint.x = this.inputX(left);
+        point.areaPoint.y = this.inputY(top);
+        point.x = left;
+        point.y = top;
         this.shape.canvas.renderAll();
       }
     }
@@ -116,9 +99,8 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
     };
 
     data.points.forEach((point: Point) => {
-      if (typeof point.id !== 'undefined') {
-        delete point.id;
-      }
+      delete(point.polygonPoint);
+      delete(point.id);
     });
 
     return data;
@@ -126,9 +108,14 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
 
   protected addPointAfterAction(event: Event): void {
     let direction = AreaFieldsetAbstract.after,
-      index = this.points.length,
       parentElement = this.getElement('.positionOptions'),
-      [point, element, currentPointIndex, currentPoint] = this.getPointElementAndCurrentPoint(event, direction);
+      [polygonPoint, element, currentPointIndex, currentPoint] = this.getPointElementAndCurrentPoint(event, direction),
+      areaPoint = {
+        x: this.inputX(polygonPoint.x),
+        y: this.inputY(polygonPoint.y),
+        id: polygonPoint.id,
+        polygonPoint: polygonPoint,
+      };
 
     if (currentPoint.element.nextSibling) {
       parentElement.insertBefore(element, currentPoint.element.nextSibling);
@@ -136,39 +123,34 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
       parentElement.append(element);
     }
 
-    this.shape.points = AreaShapePolygon.addElementToArrayWithPosition(this.shape.points, point, currentPointIndex + direction);
-    this.shape.addControl(point, index, currentPointIndex + direction);
+    this.area.points = AreaFieldsetPolygon.addElementToArrayWithPosition(this.area.points, areaPoint, currentPointIndex + direction);
+    this.shape.points = AreaFieldsetPolygon.addElementToArrayWithPosition(this.shape.points, polygonPoint, currentPointIndex + direction);
   }
 
   protected removePointAction(event: Event): void {
     if (this.points.length > 3) {
       let element = (event.currentTarget as HTMLElement).parentNode.parentNode as HTMLElement,
-        points: Point = [],
-        controls: Object = [];
+        points: Point = [];
 
-      this.points.forEach((point: Point, index: number) => {
+      this.points.forEach((point: Point) => {
         if (element.id !== point.id) {
           points.push(point);
-          controls.push(this.controls[index]);
         } else {
           point.element.remove();
-          this.canvas.remove(this.controls[index]);
         }
       });
 
       points.forEach((point: Point, index: number) => {
         let oldId = point.id;
-        point.id = 'p' + this.id + '_' + index;
-        this.getElement('#' + oldId).id = point.id;
-        this.getElement('#x' + oldId).id = 'x' + point.id;
-        this.getElement('#y' + oldId).id = 'y' + point.id;
-        this.getElement('[for="x' + oldId + '"]').setAttribute('for', 'x' + point.id);
-        this.getElement('[for="y' + oldId + '"]').setAttribute('for', 'y' + point.id);
-        controls[index].name = index;
+        point.id = `p${this.id}_${index}`;
+        this.getElement(`#${oldId}`).id = point.id;
+        this.getElement(`#x${oldId}`).id = 'x' + point.id;
+        this.getElement(`#y${oldId}`).id = 'y' + point.id;
+        this.getElement(`[for="x${oldId}"]`).setAttribute('for', 'x' + point.id);
+        this.getElement(`[for="y${oldId}"]`).setAttribute('for', 'y' + point.id);
       });
 
       this.points = points;
-      this.controls = controls;
       this.canvas.renderAll();
     }
   }
@@ -178,7 +160,7 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
       [currentPoint, nextPoint, currentPointIndex] = this.getCurrentAndNextPoint(currentPointId, direction),
       index = this.points.length,
       id = 'p' + this.id + '_' + index,
-      element = this.getFormElement('#polyCoords', id),
+      element = this.getFieldsetElement('#polyCoords', id),
       point = {
         x: Math.floor((currentPoint.x + nextPoint.x) / 2),
         y: Math.floor((currentPoint.y + nextPoint.y) / 2),
@@ -214,5 +196,23 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
     }
 
     return [this.points[currentPointIndex], this.points[nextPointIndex], currentPointIndex, nextPointIndex];
+  }
+
+  static addElementToArrayWithPosition(array: any[], item: any, index: number): any[] {
+    if (index < 0) {
+      array.unshift(item);
+    } else if (index >= array.length) {
+      array.push(item);
+    } else {
+      let newPoints = [];
+      for (let i = 0; i < array.length; i++) {
+        newPoints.push(array[i]);
+        if (i === index - 1) {
+          newPoints.push(item);
+        }
+      }
+      array = newPoints;
+    }
+    return array;
   }
 }

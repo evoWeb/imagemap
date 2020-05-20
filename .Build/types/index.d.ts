@@ -12,7 +12,10 @@
 declare interface Point {
   x: number,
   y: number,
-  id?: string|number
+  id?: string|number,
+  control?: any
+  areaPoint?: any
+  polygonPoint?: any
 }
 
 declare interface Area {
@@ -42,7 +45,7 @@ declare interface ShapeConfiguration {
   hasControls?: boolean,
   stroke?: string,
   strokeWidth?: number,
-  fill?: string,
+  fill?: string
 }
 
 declare interface EditorConfiguration {
@@ -53,14 +56,14 @@ declare interface EditorConfiguration {
   tableName?: string,
   fieldName?: string,
   uid?: number,
-  pid?: number,
+  pid?: number
 }
 
 declare interface FabricEvent {
   e: MouseEvent,
   target?: any,
   deselected?: any[],
-  selected?: any[],
+  selected?: any[]
 }
 
 declare interface Window {

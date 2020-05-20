@@ -17,38 +17,11 @@ namespace Evoweb\Imagemap\Controller;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Http\JsonResponse;
-use TYPO3\CMS\Core\Http\Response;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class AjaxController
 {
-    /**
-     * Processes the data send via ajax
-     *
-     * @param ServerRequestInterface $request
-     *
-     * @return ResponseInterface
-     */
-    public function rerenderPreviewAction(ServerRequestInterface $request): ResponseInterface
-    {
-        $response = new Response();
-        $response->withHeader('Content-Type', 'application/json; charset=utf-8');
-
-        try {
-            $parameters = $request->getParsedBody()['P'];
-            $record = BackendUtility::getRecord($parameters['tableName'], $parameters['uid']);
-            $map = $record[$parameters['fieldName']];
-
-            $content = \json_encode($map);
-            $response->getBody()->write($content);
-        } catch (\Exception $e) {
-        }
-
-        return $response;
-    }
-
     /**
      * Processes the data send via ajax
      *

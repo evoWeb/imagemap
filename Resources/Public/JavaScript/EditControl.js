@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "jquery", "TYPO3/CMS/Backend/Icons", "TYPO3/CMS/Backend/Modal", "TYPO3/CMS/Backend/FormEngineValidation", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "./AreaForm", "./Editor"], function (require, exports, $, Icons, Modal, FormEngineValidation, ImagesLoaded, AreaForm_1, Editor_1) {
+define(["require", "exports", "jquery", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "TYPO3/CMS/Backend/Icons", "TYPO3/CMS/Backend/Modal", "./AreaForm", "./Editor"], function (require, exports, $, ImagesLoaded, Icons, Modal, AreaForm_1, Editor_1) {
     "use strict";
     class EditControl {
         constructor(fieldSelector) {
@@ -23,28 +23,28 @@ define(["require", "exports", "jquery", "TYPO3/CMS/Backend/Icons", "TYPO3/CMS/Ba
             this.hiddenInput = document.querySelector(fieldSelector);
         }
         initializeTrigger() {
-            this.trigger = $('.t3js-area-wizard-trigger');
-            this.trigger
-                .off('click')
-                .on('click', this.triggerHandler.bind(this));
+            this.trigger = document.querySelector('.t3js-area-wizard-trigger');
+            this.trigger.removeEventListener('click', this.triggerHandler);
+            this.trigger.addEventListener('click', this.triggerHandler.bind(this));
         }
         triggerHandler(event) {
             event.preventDefault();
             this.show();
         }
         initializeAreaEditorModal() {
-            const image = this.currentModal.find(this.editorImageSelector);
+            const image = this.currentModal[0].querySelector(this.editorImageSelector);
             ImagesLoaded(image, () => {
                 setTimeout(() => {
-                    AreaForm_1.AreaForm.width = image.width();
-                    AreaForm_1.AreaForm.height = image.height();
+                    AreaForm_1.AreaForm.width = image.width;
+                    AreaForm_1.AreaForm.height = image.height;
                     this.init();
                 }, 100);
             });
         }
         show() {
-            const modalTitle = this.trigger.data('modalTitle'), buttonAddRectangleText = this.trigger.data('buttonAddrectText'), buttonAddCircleText = this.trigger.data('buttonAddcircleText'), buttonAddPolygonText = this.trigger.data('buttonAddpolyText'), buttonDismissText = this.trigger.data('buttonDismissText'), buttonSaveText = this.trigger.data('buttonSaveText'), wizardUri = this.trigger.data('url'), payload = this.trigger.data('payload'), initEditorModal = this.initializeAreaEditorModal.bind(this);
+            const modalTitle = this.trigger.dataset.modalTitle, buttonAddRectangleText = this.trigger.dataset.buttonAddrectText, buttonAddCircleText = this.trigger.dataset.buttonAddcircleText, buttonAddPolygonText = this.trigger.dataset.buttonAddpolyText, buttonDismissText = this.trigger.dataset.buttonDismissText, buttonSaveText = this.trigger.dataset.buttonSaveText, wizardUri = this.trigger.dataset.url, payload = JSON.parse(this.trigger.dataset.payload), initEditorModal = this.initializeAreaEditorModal.bind(this);
             Icons.getIcon('spinner-circle', Icons.sizes.default, null, null, Icons.markupIdentifiers.inline).done((icon) => {
+                let content = '<div class="modal-loading">' + icon + '</div>';
                 /**
                  * Open modal with areas to edit
                  */
@@ -56,7 +56,7 @@ define(["require", "exports", "jquery", "TYPO3/CMS/Backend/Icons", "TYPO3/CMS/Ba
                             dataAttributes: {
                                 method: 'rectangle',
                             },
-                            icon: 'extensions-imagemap-rect',
+                            icon: 'extensions-imagemap-rectangle',
                             text: buttonAddRectangleText,
                         },
                         {
@@ -72,11 +72,11 @@ define(["require", "exports", "jquery", "TYPO3/CMS/Backend/Icons", "TYPO3/CMS/Ba
                             dataAttributes: {
                                 method: 'polygon',
                             },
-                            icon: 'extensions-imagemap-poly',
+                            icon: 'extensions-imagemap-polygon',
                             text: buttonAddPolygonText,
                         },
                         {
-                            btnClass: 'btn-default button-dismiss',
+                            btnClass: 'btn-default',
                             dataAttributes: {
                                 method: 'dismiss',
                             },
@@ -84,7 +84,7 @@ define(["require", "exports", "jquery", "TYPO3/CMS/Backend/Icons", "TYPO3/CMS/Ba
                             text: buttonDismissText,
                         },
                         {
-                            btnClass: 'btn-primary button-save',
+                            btnClass: 'btn-primary',
                             dataAttributes: {
                                 method: 'save',
                             },
@@ -92,7 +92,7 @@ define(["require", "exports", "jquery", "TYPO3/CMS/Backend/Icons", "TYPO3/CMS/Ba
                             text: buttonSaveText,
                         },
                     ],
-                    content: $('<div class="modal-loading">').append(icon),
+                    content: content,
                     size: Modal.sizes.full,
                     style: Modal.styles.dark,
                     title: modalTitle,
@@ -119,13 +119,24 @@ define(["require", "exports", "jquery", "TYPO3/CMS/Backend/Icons", "TYPO3/CMS/Ba
             });
         }
         init() {
-            this.formElement = this.currentModal.find(this.formElementSelector)[0];
-            this.buttonAddRect = this.currentModal.find('.button-add-rect').off('click').on('click', this.buttonAddRectangleHandler.bind(this));
-            this.buttonAddCircle = this.currentModal.find('.button-add-circle').off('click').on('click', this.buttonAddCircleHandler.bind(this));
-            this.buttonAddPoly = this.currentModal.find('.button-add-poly').off('click').on('click', this.buttonAddPolygonHandler.bind(this));
-            this.buttonDismiss = this.currentModal.find('.button-dismiss').off('click').on('click', this.buttonDismissHandler.bind(this));
-            this.buttonSave = this.currentModal.find('.button-save').off('click').on('click', this.buttonSaveHandler.bind(this));
-            $([document, top.document]).on('mousedown.minicolors touchstart.minicolors', this.hideColorSwatch);
+            let modal = this.currentModal[0];
+            this.formElement = modal.querySelector(this.formElementSelector);
+            this.buttonAddCircle = modal.querySelector('[data-method=circle]');
+            this.buttonAddCircle.removeEventListener('click', this.buttonAddCircleHandler);
+            this.buttonAddCircle.addEventListener('click', this.buttonAddCircleHandler.bind(this));
+            this.buttonAddPolygon = modal.querySelector('[data-method=polygon]');
+            this.buttonAddPolygon.removeEventListener('click', this.buttonAddPolygonHandler);
+            this.buttonAddPolygon.addEventListener('click', this.buttonAddPolygonHandler.bind(this));
+            this.buttonAddRectangle = modal.querySelector('[data-method=rectangle]');
+            this.buttonAddRectangle.removeEventListener('click', this.buttonAddRectangleHandler);
+            this.buttonAddRectangle.addEventListener('click', this.buttonAddRectangleHandler.bind(this));
+            this.buttonDismiss = modal.querySelector('[data-method=dismiss]');
+            this.buttonDismiss.removeEventListener('click', this.buttonDismissHandler);
+            this.buttonDismiss.addEventListener('click', this.buttonDismissHandler.bind(this));
+            this.buttonSave = modal.querySelector('[data-method=save]');
+            this.buttonSave.removeEventListener('click', this.buttonSaveHandler);
+            this.buttonSave.addEventListener('click', this.buttonSaveHandler.bind(this));
+            $(top.document).on('mousedown.minicolors touchstart.minicolors', this.hideColorSwatch);
             this.initializeEditor();
             this.renderAreas(this.hiddenInput.value);
         }
@@ -208,10 +219,10 @@ define(["require", "exports", "jquery", "TYPO3/CMS/Backend/Icons", "TYPO3/CMS/Ba
         buttonSaveHandler(event) {
             event.stopPropagation();
             event.preventDefault();
-            let hiddenField = $(this.hiddenInput);
             this.hiddenInput.setAttribute('value', this.editor.getMapData());
-            hiddenField.trigger('imagemap:changed');
-            FormEngineValidation.markFieldAsChanged(hiddenField);
+            this.hiddenInput.dispatchEvent(new CustomEvent('imagemap:changed'));
+            // without FormEngineValidation.markFieldAsChanged call
+            EditControl.closest(this.hiddenInput, '.t3js-formengine-palette-field').classList.add('has-change');
             this.currentModal.modal('hide');
         }
         hideColorSwatch(event) {
@@ -232,12 +243,25 @@ define(["require", "exports", "jquery", "TYPO3/CMS/Backend/Icons", "TYPO3/CMS/Ba
          */
         resizeEnd(callback) {
             let timer;
-            $(window).on('resize', () => {
+            window.addEventListener('resize', () => {
                 clearTimeout(timer);
                 timer = setTimeout(() => {
                     callback();
                 }, this.resizeTimeout);
             });
+        }
+        static closest(element, selector) {
+            let parent;
+            // traverse parents
+            while (element) {
+                parent = element.parentElement;
+                if (parent && parent.matches(selector)) {
+                    element = parent;
+                    break;
+                }
+                element = parent;
+            }
+            return element;
         }
     }
     return EditControl;

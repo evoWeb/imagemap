@@ -13,8 +13,9 @@
 
 // @ts-ignore
 import Modal = require('TYPO3/CMS/Backend/Modal');
+// @ts-ignore
+import { Canvas } from './vendor/Fabric';
 import { AreaFieldsetAbstract } from './AreaFieldsetAbstract';
-import { Editor } from './Editor';
 
 export class AreaForm {
   static width: number;
@@ -23,18 +24,35 @@ export class AreaForm {
 
   public element: HTMLElement;
 
-  public editor: Editor;
+  private canvas: Canvas;
 
-  public browselinkTargetFormSelector: string = '#browselinkTargetForm';
+  private configuration: EditorConfiguration;
+
+  public modalParent: Document;
+
+  public browselinkParent: Document;
+
+  public areaFieldsets: Array<AreaFieldsetAbstract> = [];
+
+  private browselinkTargetFormSelector: string = '#browselinkTargetForm';
 
   /**
    * Element needed to add inputs that act as target for browselink finalizeFunction target
    */
   public browselinkTargetForm: HTMLFormElement;
 
-  constructor(formSelector: string, modalParent: Document, editor: Editor) {
-    this.element = modalParent.querySelector(formSelector);
-    this.editor = editor;
+  constructor(
+    element: HTMLElement,
+    canvas: Canvas,
+    configuration: EditorConfiguration,
+    modalParent: Document,
+    browselinkParent: Document
+  ) {
+    this.canvas = canvas;
+    this.configuration = configuration;
+    this.element = element;
+    this.modalParent = modalParent;
+    this.browselinkParent = browselinkParent;
 
     this.addBrowselinkTargetForm();
   }
@@ -44,30 +62,41 @@ export class AreaForm {
   }
 
   public updateArrowsState(): void {
-    this.editor.areaFieldsets.forEach((area) => {
+    this.areaFieldsets.forEach((area) => {
       area.updateArrowsState();
     });
   }
 
   public addArea(area: AreaFieldsetAbstract): void {
-    area.form = this;
-    area.postAddToForm();
+    this.areaFieldsets.push(area);
+    area.addForm(this);
     this.updateArrowsState();
   }
 
   public moveArea(area: AreaFieldsetAbstract, offset: number): void {
-    let index = this.editor.areaFieldsets.indexOf(area),
+    let index = this.areaFieldsets.indexOf(area),
       newIndex = index + offset,
       parent = area.element.parentNode;
 
-    if (newIndex > -1 && newIndex < this.editor.areaFieldsets.length) {
-      let removedArea = this.editor.areaFieldsets.splice(index, 1)[0];
-      this.editor.areaFieldsets.splice(newIndex, 0, removedArea);
+    if (newIndex > -1 && newIndex < this.areaFieldsets.length) {
+      let removedArea = this.areaFieldsets.splice(index, 1)[0];
+      this.areaFieldsets.splice(newIndex, 0, removedArea);
 
       parent.childNodes[index][offset < 0 ? 'after' : 'before'](parent.childNodes[newIndex]);
     }
 
     this.updateArrowsState();
+  }
+
+  public deleteArea(area: AreaFieldsetAbstract): void {
+    let areas: Array<AreaFieldsetAbstract> = [];
+    this.areaFieldsets.forEach((currentArea) => {
+      if (area !== currentArea) {
+        areas.push(currentArea);
+      }
+    });
+    this.areaFieldsets = areas;
+    this.canvas.remove(area.shape);
   }
 
   public openLinkBrowser(link: HTMLElement, area: AreaFieldsetAbstract): void {
@@ -80,22 +109,21 @@ export class AreaForm {
     data.append('P[formName]', 'areasForm');
     data.append('P[itemFormElName]', `href${area.id}`);
     data.append('P[currentValue]', area.area.href);
-    data.append('P[tableName]', this.editor.configuration.tableName);
-    data.append('P[fieldName]', this.editor.configuration.fieldName);
-    data.append('P[uid]', this.editor.configuration.uid.toString());
-    data.append('P[pid]', this.editor.configuration.pid.toString());
+    data.append('P[tableName]', this.configuration.tableName);
+    data.append('P[fieldName]', this.configuration.fieldName);
+    data.append('P[uid]', this.configuration.uid.toString());
+    data.append('P[pid]', this.configuration.pid.toString());
 
     request.open('POST', window.TYPO3.settings.ajaxUrls.imagemap_browselink_url);
     request.onreadystatechange = this.fetchBrowseLinkCallback.bind(area);
     request.send(data);
   }
 
-  protected fetchBrowseLinkCallback(this: AreaFieldsetAbstract, e: ProgressEvent): void {
+  private fetchBrowseLinkCallback(this: AreaFieldsetAbstract, e: ProgressEvent): void {
     let request = (e.target as XMLHttpRequest);
     if (request.readyState === 4 && request.status === 200) {
       let data = JSON.parse(request.responseText),
-        url = data.url
-          + '&P[currentValue]=' + encodeURIComponent(this.getFieldValue('.href'));
+        url = data.url + '&P[currentValue]=' + encodeURIComponent(this.getFieldValue('.href'));
 
       if (
         window.hasOwnProperty('TBE_EDITOR')
@@ -118,12 +146,12 @@ export class AreaForm {
   /**
    * Create form element that is reachable for LinkBrowser.finalizeFunction
    */
-  protected addBrowselinkTargetForm(): void {
-    if (!(this.browselinkTargetForm = this.editor.browselinkParent.querySelector(this.browselinkTargetFormSelector))) {
-      this.browselinkTargetForm = this.editor.browselinkParent.createElement('form');
+  private addBrowselinkTargetForm(): void {
+    if (!(this.browselinkTargetForm = this.browselinkParent.querySelector(this.browselinkTargetFormSelector))) {
+      this.browselinkTargetForm = this.browselinkParent.createElement('form');
       this.browselinkTargetForm.setAttribute('name', 'areasForm');
       this.browselinkTargetForm.setAttribute('id', 'browselinkTargetForm');
-      this.editor.browselinkParent.body.appendChild(this.browselinkTargetForm);
+      this.browselinkParent.body.appendChild(this.browselinkTargetForm);
     }
 
     // empty previously created browselinkTargetForm
@@ -132,9 +160,19 @@ export class AreaForm {
     }
   }
 
-  protected removeFauxForm(): void {
+  private removeFauxForm(): void {
     if (this.browselinkTargetForm) {
       this.browselinkTargetForm.remove();
     }
+  }
+
+  public getMapData(): string {
+    let areas: object[] = [];
+
+    this.areaFieldsets.forEach((area) => {
+      areas.push(area.getData());
+    });
+
+    return JSON.stringify(areas);
   }
 }

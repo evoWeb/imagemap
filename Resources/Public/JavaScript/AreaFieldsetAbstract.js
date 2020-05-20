@@ -23,7 +23,8 @@ define(["require", "exports", "jquery", "./AreaForm", "./AreaShapeFactory"], fun
             this.shape.fieldset = this;
             this.id = this.shape.id;
         }
-        postAddToForm() {
+        addForm(form) {
+            this.form = form;
             this.initializeElement();
             this.updateFields();
             this.initializeColorPicker();
@@ -31,7 +32,7 @@ define(["require", "exports", "jquery", "./AreaForm", "./AreaShapeFactory"], fun
             this.addBrowselinkTargetInput();
         }
         initializeElement() {
-            this.element = this.getFormElement(`#${this.name}Form`, this.id);
+            this.element = this.getFieldsetElement(`#${this.name}Form`, this.id);
             this.form.element.append(this.element);
         }
         initializeColorPicker() {
@@ -93,9 +94,13 @@ define(["require", "exports", "jquery", "./AreaForm", "./AreaShapeFactory"], fun
             if (this.element) {
                 this.element.remove();
             }
+            if (this.shape) {
+                this.shape.canvas.remove(this.shape);
+                this.shape = null;
+            }
             this.removeBrowselinkTargetInput();
             this.form.updateArrowsState();
-            this.form.editor.deleteArea(this);
+            this.form.deleteArea(this);
         }
         expandAction() {
             this.showElement('.moreOptions');
@@ -119,8 +124,8 @@ define(["require", "exports", "jquery", "./AreaForm", "./AreaShapeFactory"], fun
             this.shape.set('fill', AreaShapeFactory_1.AreaShapeFactory.hexToRgbA(this.area.color, 0.2));
             this.shape.canvas.renderAll();
         }
-        getFormElement(selector, id) {
-            let template = this.form.editor.modalParent.querySelector(selector)
+        getFieldsetElement(selector, id) {
+            let template = this.form.modalParent.querySelector(selector)
                 .innerHTML.replace(new RegExp('_ID', 'g'), String(id ? id : this.id));
             return (new DOMParser()).parseFromString(template, 'text/html').body.firstChild;
         }
@@ -139,19 +144,15 @@ define(["require", "exports", "jquery", "./AreaForm", "./AreaShapeFactory"], fun
         getFieldValue(selector) {
             return this.getElement(selector).value;
         }
-        // @todo refactor to move to AreaForm
         inputX(value) {
             return value / AreaForm_1.AreaForm.width;
         }
-        // @todo refactor to move to AreaForm
         inputY(value) {
             return value / AreaForm_1.AreaForm.height;
         }
-        // @todo refactor to move to AreaForm
         outputX(value) {
             return Math.round(value * AreaForm_1.AreaForm.width).toString();
         }
-        // @todo refactor to move to AreaForm
         outputY(value) {
             return Math.round(value * AreaForm_1.AreaForm.height).toString();
         }
@@ -163,7 +164,7 @@ define(["require", "exports", "jquery", "./AreaForm", "./AreaShapeFactory"], fun
          */
         addBrowselinkTargetInput() {
             if (this.form.browselinkTargetForm) {
-                let browselinkTargetInput = this.form.editor.browselinkParent.createElement('input');
+                let browselinkTargetInput = this.form.browselinkParent.createElement('input');
                 browselinkTargetInput.setAttribute('id', 'href' + this.id);
                 browselinkTargetInput.setAttribute('data-formengine-input-name', 'href' + this.id);
                 browselinkTargetInput.setAttribute('value', this.area.href);

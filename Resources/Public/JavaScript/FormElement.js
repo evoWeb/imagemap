@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "jquery", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "./AreaForm", "./Preview"], function (require, exports, $, ImagesLoaded, AreaForm_1, Preview_1) {
+define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "./AreaForm", "./Preview"], function (require, exports, ImagesLoaded, AreaForm_1, Preview_1) {
     "use strict";
     class FormElement {
         constructor(fieldSelector) {
@@ -21,11 +21,11 @@ define(["require", "exports", "jquery", "TYPO3/CMS/Core/Contrib/imagesloaded.pkg
             this.formElement = document.querySelector(fieldSelector + '-canvas');
         }
         initializePreview() {
-            const image = $(this.formElement).find('.image');
+            const image = this.formElement.querySelector('.image');
             ImagesLoaded(image, () => {
                 setTimeout(() => {
-                    AreaForm_1.AreaForm.width = image.width();
-                    AreaForm_1.AreaForm.height = image.height();
+                    AreaForm_1.AreaForm.width = image.width;
+                    AreaForm_1.AreaForm.height = image.height;
                     this.preview = new Preview_1.Preview(this.formElement.querySelector('#canvas'));
                     this.renderAreas(this.hiddenInput.value);
                 }, 100);
@@ -34,27 +34,12 @@ define(["require", "exports", "jquery", "TYPO3/CMS/Core/Contrib/imagesloaded.pkg
         initializeEvents() {
             this.hiddenInput.addEventListener('imagemap:changed', this.fieldChangedHandler.bind(this));
         }
-        fieldChangedHandler(event) {
-            let field = event.currentTarget, data = new FormData(), request = new XMLHttpRequest();
-            data.append('P[itemFormElName]', field.getAttribute('name'));
-            data.append('P[tableName]', field.dataset.tablename);
-            data.append('P[fieldName]', field.dataset.fieldname);
-            data.append('P[uid]', field.dataset.uid);
-            data.append('P[value]', field.value);
-            request.open('POST', window.TYPO3.settings.ajaxUrls.imagemap_preview_rerender);
-            request.onreadystatechange = this.previewRerenderCallback.bind(this);
-            request.send(data);
-        }
-        previewRerenderCallback(e) {
-            let request = e.target;
-            if (request.readyState === 4 && request.status === 200) {
-                this.formElement.querySelector('.modifiedState').style.display = 'block';
-                this.preview.removeAreas();
-                let data = JSON.parse(request.responseText);
-                if (data !== null && data.length) {
-                    this.preview.renderAreas(data.areas);
-                }
-            }
+        fieldChangedHandler() {
+            this.preview.removeAreas();
+            const image = this.formElement.querySelector('.image');
+            AreaForm_1.AreaForm.width = image.width;
+            AreaForm_1.AreaForm.height = image.height;
+            this.renderAreas(this.hiddenInput.value);
         }
         renderAreas(areas) {
             if (areas.length) {

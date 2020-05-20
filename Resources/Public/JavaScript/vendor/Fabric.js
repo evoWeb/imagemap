@@ -898,10 +898,10 @@ fabric.CommonMethods = {
     },
 
     /**
-     * Returns array of area for given svg that fabric parses
+     * Returns array of attributes for given svg that fabric parses
      * @memberOf fabric.util
      * @param {String} type Type of svg element (eg. 'circle')
-     * @return {Array} string names of supported area
+     * @return {Array} string names of supported attributes
      */
     getSvgAttributes: function(type) {
       var attributes = [
@@ -2438,7 +2438,7 @@ fabric.CommonMethods = {
   }
 
   /**
-   * Creates specified element with specified area
+   * Creates specified element with specified attributes
    * @memberOf fabric.util
    * @param {String} tagName Type of an element to create
    * @param {Object} [attributes] Attributes to set on an element
@@ -3494,7 +3494,7 @@ fabric.warn = console.warn;
 
   /**
    * @private
-   * @param {Object} attributes Array of area to parse
+   * @param {Object} attributes Array of attributes to parse
    */
   function _setStrokeFillOpacity(attributes) {
     for (var attr in colorAttributes) {
@@ -4155,13 +4155,13 @@ fabric.warn = console.warn;
     },
 
     /**
-     * Returns an object of area' name/value, given element and an array of attribute names;
+     * Returns an object of attributes' name/value, given element and an array of attribute names;
      * Parses parent "g" nodes recursively upwards.
      * @static
      * @memberOf fabric
      * @param {DOMElement} element Element to parse
-     * @param {Array} attributes Array of area to parse
-     * @return {Object} object containing parsed area' names/values
+     * @param {Array} attributes Array of attributes to parse
+     * @return {Object} object containing parsed attributes' names/values
      */
     parseAttributes: function(element, attributes, svgUid) {
 
@@ -4176,7 +4176,7 @@ fabric.warn = console.warn;
       if (typeof svgUid === 'undefined') {
         svgUid = element.getAttribute('svgUid');
       }
-      // if there's a parent container (`g` or `a` or `symbol` node), parse its area recursively upwards
+      // if there's a parent container (`g` or `a` or `symbol` node), parse its attributes recursively upwards
       if (element.parentNode && fabric.svgValidParentsRegEx.test(element.parentNode.nodeName)) {
         parentAttributes = fabric.parseAttributes(element.parentNode, attributes, svgUid);
       }
@@ -4188,7 +4188,7 @@ fabric.warn = console.warn;
         }
         return memo;
       }, { });
-      // add values parsed from style, which take precedence over area
+      // add values parsed from style, which take precedence over attributes
       // (see: http://www.w3.org/TR/SVG/styling.html#UsingPresentationAttributes)
       var cssAttrs = extend(
         getGlobalStylesForElement(element, svgUid),
@@ -17858,7 +17858,7 @@ fabric.util.object.extend(fabric.Object.prototype, /** @lends fabric.Object.prot
     },
 
     /**
-     * Initializes rx/ry area
+     * Initializes rx/ry attributes
      * @private
      */
     _initRxRy: function() {
@@ -21340,7 +21340,7 @@ fabric.Image.filters.BaseFilter = fabric.util.createClass(/** @lends fabric.Imag
   type: 'BaseFilter',
 
   /**
-   * Array of area to send with buffers. do not modify
+   * Array of attributes to send with buffers. do not modify
    * @private
    */
 
@@ -26293,7 +26293,7 @@ fabric.Image.filters.BaseFilter.fromObject = function(object, callback) {
         offX = 0;
     /*
       Adjust positioning:
-        x/y area in SVG correspond to the bottom-left corner of text bounding box
+        x/y attributes in SVG correspond to the bottom-left corner of text bounding box
         fabric output by default at top, left.
     */
     if (parsedAnchor === 'center') {
