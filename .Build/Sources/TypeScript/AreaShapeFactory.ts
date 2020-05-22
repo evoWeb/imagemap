@@ -19,7 +19,7 @@ import { AreaShapePolygon } from './AreaShapePolygon';
 import { AreaShapeRectangle } from './AreaShapeRectangle';
 
 export class AreaShapeFactory {
-  readonly shapeConfiguration: ShapeConfiguration = {
+  static shapeConfiguration: ShapeConfiguration = {
     cornerColor: '#eee',
     cornerStrokeColor: '#bbb',
     cornerSize: 10,
@@ -38,7 +38,7 @@ export class AreaShapeFactory {
   public createShape(area: Area, selectable: boolean): Object {
     let areaShape: Object,
       configuration: ShapeConfiguration = {
-        ...this.shapeConfiguration,
+        ...AreaShapeFactory.shapeConfiguration,
         selectable: selectable,
         hasControls: selectable,
         stroke: area.color,
@@ -65,30 +65,27 @@ export class AreaShapeFactory {
 
   private createCircle(area: Area, configuration: ShapeConfiguration): AreaShapeCircle {
     let coords = area.coords,
-      radius = Math.round(coords.radius * AreaForm.width),
-      left = Math.round(coords.left * AreaForm.width) - radius,
-      top = Math.round(coords.top * AreaForm.height) - radius,
-      areaShape = new AreaShapeCircle({
-        ...configuration,
-        left: left,
-        top: top,
-        radius: radius,
-      });
+      radius = AreaForm.outputiX(coords.radius),
+      left = AreaForm.outputiX(coords.left) - radius,
+      top = AreaForm.outputiY(coords.top) - radius;
 
-    areaShape.id = Object.__uid++;
-
-    // disable control points as these would stretch the circle
-    // to an ellipse which is not possible in html areas
-    areaShape.setControlVisible('ml', false);
-    areaShape.setControlVisible('mt', false);
-    areaShape.setControlVisible('mr', false);
-    areaShape.setControlVisible('mb', false);
-
-    if (this.canvas !== null) {
-      areaShape.canvas = this.canvas;
-    }
-
-    return areaShape;
+    return new AreaShapeCircle({
+      ...configuration,
+      left: left,
+      top: top,
+      radius: radius,
+      id: Object.__uid++,
+      canvas: this.canvas,
+      // disable control points as these would stretch the circle
+      // to an ellipse which is not possible in html areas
+      _controlsVisibility: {
+        ml: false,
+        mt: false,
+        mr: false,
+        mb: false,
+        mtr: false,
+      }
+    });
   }
 
   private createPolygon(area: Area, configuration: ShapeConfiguration): AreaShapePolygon {
@@ -98,14 +95,11 @@ export class AreaShapeFactory {
 
     points.map((point) => {
       point.id = polygonId + '-' + Object.__uid++;
-      let polygonPoint = {
-        x: Math.round(point.x * AreaForm.width),
-        y: Math.round(point.y * AreaForm.height),
+      polygonPoints.push({
+        x: AreaForm.outputiX(point.x),
+        y: AreaForm.outputiY(point.y),
         id: point.id,
-        areaPoint: point,
-      };
-      point.polygonPoint = polygonPoint;
-      polygonPoints.push(polygonPoint);
+      });
     });
 
     return new AreaShapePolygon(polygonPoints, {
@@ -118,25 +112,23 @@ export class AreaShapeFactory {
 
   private createRectangle(area: Area, configuration: ShapeConfiguration): AreaShapeRectangle {
     let coords = area.coords,
-      left = Math.round(coords.left * AreaForm.width),
-      top = Math.round(coords.top * AreaForm.height),
-      width = Math.round(coords.right * AreaForm.width) - left,
-      height = Math.round(coords.bottom * AreaForm.height) - top,
-      areaShape = new AreaShapeRectangle({
-        ...configuration,
-        left: left,
-        top: top,
-        width: width,
-        height: height,
-      });
+      left = AreaForm.outputiX(coords.left),
+      top = AreaForm.outputiY(coords.top),
+      width = AreaForm.outputiX(coords.right) - left,
+      height = AreaForm.outputiY(coords.bottom) - top;
 
-    areaShape.id = Object.__uid++;
-
-    if (this.canvas !== null) {
-      areaShape.canvas = this.canvas;
-    }
-
-    return areaShape;
+    return new AreaShapeRectangle({
+      ...configuration,
+      left: left,
+      top: top,
+      width: width,
+      height: height,
+      id: Object.__uid++,
+      canvas: this.canvas,
+      _controlsVisibility: {
+        mtr: false,
+      }
+    });
   }
 
   static getRandomColor(color: string): string {

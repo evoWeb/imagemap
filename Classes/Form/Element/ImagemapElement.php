@@ -158,10 +158,12 @@ class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElemen
         if ($arguments['isAllowedFileExtension']) {
             $fieldId = StringUtility::getUniqueId('imagemap-area-manipulation-');
             $resultArray['requireJsModules'][] = [
-                'TYPO3/CMS/Imagemap/EditControl' => 'function (ec) { new ec("#' . $fieldId . '"); }',
+                'TYPO3/CMS/Imagemap/EditControl' =>
+                    'function (ec) { window.iec = new ec("#' . $fieldId . '"); }',
             ];
             $resultArray['requireJsModules'][] = [
-                'TYPO3/CMS/Imagemap/FormElement' => 'function (fe) { new fe("#' . $fieldId . '"); }',
+                'TYPO3/CMS/Imagemap/FormElement' =>
+                    'function (fe) { window.ife = new fe("#' . $fieldId . '"); }',
             ];
             $arguments['formEngine']['field']['id'] = $fieldId;
             if (GeneralUtility::inList($config['eval'], 'required')) {

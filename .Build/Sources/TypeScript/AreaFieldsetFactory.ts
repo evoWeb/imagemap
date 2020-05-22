@@ -26,22 +26,19 @@ export class AreaFieldsetFactory {
   }
 
   public createFieldset(area: Area, areaShape: Object): AreaFieldsetAbstract {
-    let areaFieldset,
-      decoupledArea = {
-        ...area,
-      };
+    let areaFieldset;
 
-    switch (decoupledArea.shape) {
+    switch (area.shape) {
       case 'circle':
-        areaFieldset = new AreaFieldsetCircle(decoupledArea, this.configuration, areaShape);
+        areaFieldset = new AreaFieldsetCircle(area, this.configuration, areaShape);
         break;
 
       case 'poly':
-        areaFieldset = new AreaFieldsetPolygon(decoupledArea, this.configuration, areaShape);
+        areaFieldset = new AreaFieldsetPolygon(area, this.configuration, areaShape);
         break;
 
       case 'rect':
-        areaFieldset = new AreaFieldsetRectangle(decoupledArea, this.configuration, areaShape);
+        areaFieldset = new AreaFieldsetRectangle(area, this.configuration, areaShape);
         break;
     }
 

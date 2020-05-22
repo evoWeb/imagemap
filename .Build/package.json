@@ -19,19 +19,19 @@
 		"@babel/preset-env": "^7.4.5",
 		"@babel/register": "^7.0.0",
 		"@types/fabric": "^3.6.2",
-		"@types/jquery": "2.0.47",
+		"@types/jquery": "^3.3.38",
 		"gulp": "^4.0.2",
 		"gulp-autoprefixer": "^7.0.1",
 		"gulp-rename": "^2.0.0",
 		"gulp-sass": "^4.1.0",
 		"gulp-sourcemaps": "^2.6.5",
 		"gulp-typescript": "^5.0.1",
-		"node-sass": "^4.13.0",
-		"typescript": "~3.8.2"
+		"node-sass": "^4.13.1",
+		"typescript": "~3.8.3"
 	},
 	"dependencies": {
-		"jquery": "^3.4",
-		"fabric": "^3.6.3-browser"
+		"fabric": "git@github.com:fabricjs/fabric.js.git#4.0.0-beta.12-browser",
+		"jquery": "^3.5"
 	},
 	"babel": {
 		"presets": [

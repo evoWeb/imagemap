@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "jquery", "./AreaForm", "./AreaShapeFactory"], function (require, exports, $, AreaForm_1, AreaShapeFactory_1) {
+define(["require", "exports", "jquery", "./AreaShapeFactory"], function (require, exports, $, AreaShapeFactory_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class AreaFieldsetAbstract {
@@ -100,15 +100,6 @@ define(["require", "exports", "jquery", "./AreaForm", "./AreaShapeFactory"], fun
             this.form.moveArea(this, AreaFieldsetAbstract.after);
         }
         deleteAction() {
-            if (this.element) {
-                this.element.remove();
-            }
-            if (this.shape) {
-                this.shape.canvas.remove(this.shape);
-                this.shape = null;
-            }
-            this.removeBrowselinkTargetInput();
-            this.form.updateArrowsState();
             this.form.deleteArea(this);
         }
         expandAction() {
@@ -131,7 +122,7 @@ define(["require", "exports", "jquery", "./AreaForm", "./AreaShapeFactory"], fun
             this.shape.set('borderColor', this.area.color);
             this.shape.set('stroke', this.area.color);
             this.shape.set('fill', AreaShapeFactory_1.AreaShapeFactory.hexToRgbA(this.area.color, 0.2));
-            this.shape.canvas.renderAll();
+            this.form.canvas.renderAll();
         }
         getFieldsetElement(selector, id) {
             let template = this.form.modalParent.querySelector(selector)
@@ -153,18 +144,6 @@ define(["require", "exports", "jquery", "./AreaForm", "./AreaShapeFactory"], fun
         getFieldValue(selector) {
             return this.getElement(selector).value;
         }
-        inputX(value) {
-            return value / AreaForm_1.AreaForm.width;
-        }
-        inputY(value) {
-            return value / AreaForm_1.AreaForm.height;
-        }
-        outputX(value) {
-            return Math.round(value * AreaForm_1.AreaForm.width).toString();
-        }
-        outputY(value) {
-            return Math.round(value * AreaForm_1.AreaForm.height).toString();
-        }
         getData() {
             return this.area;
         }
@@ -173,16 +152,16 @@ define(["require", "exports", "jquery", "./AreaForm", "./AreaShapeFactory"], fun
          */
         addBrowselinkTargetInput() {
             if (this.form.browselinkTargetForm) {
-                let browselinkTargetInput = this.form.browselinkParent.createElement('input');
-                browselinkTargetInput.setAttribute('id', 'href' + this.id);
-                browselinkTargetInput.setAttribute('data-formengine-input-name', 'href' + this.id);
-                browselinkTargetInput.setAttribute('value', this.area.href);
-                browselinkTargetInput.onchange = this.changedBrowselinkTargetInput.bind(this);
-                this.form.browselinkTargetForm.appendChild(browselinkTargetInput);
+                let input = this.form.browselinkParent.createElement('input');
+                input.id = `href${this.id}`;
+                input.value = this.area.href;
+                input.setAttribute('data-formengine-input-name', input.id);
+                input.onchange = this.changedBrowselinkTargetInput.bind(this);
+                this.form.browselinkTargetForm.appendChild(input);
             }
         }
         removeBrowselinkTargetInput() {
-            if (this.form && this.form.browselinkTargetForm !== null) {
+            if (this.form && this.form.browselinkTargetForm) {
                 let field = this.form.browselinkTargetForm.querySelector(`#href${this.id}`);
                 if (field) {
                     field.remove();

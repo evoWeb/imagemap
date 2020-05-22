@@ -16,16 +16,16 @@ define(["require", "exports", "./AreaFieldsetCircle", "./AreaFieldsetPolygon", "
             this.configuration = configuration;
         }
         createFieldset(area, areaShape) {
-            let areaFieldset, decoupledArea = Object.assign({}, area);
-            switch (decoupledArea.shape) {
+            let areaFieldset;
+            switch (area.shape) {
                 case 'circle':
-                    areaFieldset = new AreaFieldsetCircle_1.AreaFieldsetCircle(decoupledArea, this.configuration, areaShape);
+                    areaFieldset = new AreaFieldsetCircle_1.AreaFieldsetCircle(area, this.configuration, areaShape);
                     break;
                 case 'poly':
-                    areaFieldset = new AreaFieldsetPolygon_1.AreaFieldsetPolygon(decoupledArea, this.configuration, areaShape);
+                    areaFieldset = new AreaFieldsetPolygon_1.AreaFieldsetPolygon(area, this.configuration, areaShape);
                     break;
                 case 'rect':
-                    areaFieldset = new AreaFieldsetRectangle_1.AreaFieldsetRectangle(decoupledArea, this.configuration, areaShape);
+                    areaFieldset = new AreaFieldsetRectangle_1.AreaFieldsetRectangle(area, this.configuration, areaShape);
                     break;
             }
             return areaFieldset;

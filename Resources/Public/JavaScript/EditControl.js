@@ -219,14 +219,15 @@ define(["require", "exports", "jquery", "TYPO3/CMS/Core/Contrib/imagesloaded.pkg
         buttonSaveHandler(event) {
             event.stopPropagation();
             event.preventDefault();
-            this.hiddenInput.setAttribute('value', this.editor.getMapData());
+            this.hiddenInput.value = this.editor.getMapData();
             this.hiddenInput.dispatchEvent(new CustomEvent('imagemap:changed'));
             // without FormEngineValidation.markFieldAsChanged call
             EditControl.closest(this.hiddenInput, '.t3js-formengine-palette-field').classList.add('has-change');
             this.currentModal.modal('hide');
         }
         hideColorSwatch(event) {
-            if (!$(event.target).parents().add(event.target).hasClass('minicolors')) {
+            let swatch = (event.target);
+            if (!$(swatch).parents().add(swatch).hasClass('minicolors')) {
                 // Hides all dropdown panels
                 top.window.$('.minicolors-focus').each(() => {
                     let minicolors = $(this), input = minicolors.find('.minicolors-input'), panel = minicolors.find('.minicolors-panel'), settings = input.data('minicolors-settings');

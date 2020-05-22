@@ -18,6 +18,7 @@ import { Canvas, Object } from './vendor/Fabric';
 import { AreaFieldsetFactory } from './AreaFieldsetFactory';
 import { AreaForm } from './AreaForm';
 import { AreaShapeFactory } from './AreaShapeFactory';
+import { AreaShapePolygon } from './AreaShapePolygon';
 
 export class Editor {
   readonly configuration: EditorConfiguration;
@@ -65,8 +66,6 @@ export class Editor {
   }
 
   static objectModified(event: FabricEvent): void {
-    // @todo check these
-console.log(event, 'objectModified');
     let element: Object = event.target;
     if (element.hasOwnProperty('fieldset')) {
       // circle, polygon, rectangle
@@ -103,6 +102,10 @@ console.log(event, 'objectModified');
 
         this.canvas.add(areaShape);
         this.form.addArea(areaFieldset);
+
+        if (areaShape instanceof AreaShapePolygon) {
+          areaShape.initializeControls();
+        }
       });
     }
   }

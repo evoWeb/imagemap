@@ -12,6 +12,7 @@
 /// <reference types="../../types/index"/>
 
 import { AreaFieldsetAbstract } from './AreaFieldsetAbstract';
+import { AreaForm } from './AreaForm';
 import { AreaShapeCircle } from './AreaShapeCircle';
 
 export class AreaFieldsetCircle extends AreaFieldsetAbstract {
@@ -25,13 +26,13 @@ export class AreaFieldsetCircle extends AreaFieldsetAbstract {
         continue;
       }
       let attributeValue = this.area[attributeKey] || '',
-        element = this.getElement('.' + attributeKey);
+        element = this.getElement(`.${attributeKey}`);
 
       if (element !== null) {
         if (typeof attributeValue === 'number') {
           attributeValue = attributeValue.toString();
         }
-        element.setAttribute('value', attributeValue);
+        element.value = attributeValue;
       }
     }
 
@@ -40,16 +41,16 @@ export class AreaFieldsetCircle extends AreaFieldsetAbstract {
         continue;
       }
       let coordinatesValue = this.area.coords[coordinatesKey] || '',
-        element = this.getElement('.' + coordinatesKey);
+        element = this.getElement(`.${coordinatesKey}`);
 
       if (['left', 'radius'].indexOf(coordinatesKey) > -1) {
-        coordinatesValue = this.outputX(coordinatesValue);
+        coordinatesValue = AreaForm.outputX(coordinatesValue);
       } else if (['top'].indexOf(coordinatesKey) > -1) {
-        coordinatesValue = this.outputY(coordinatesValue);
+        coordinatesValue = AreaForm.outputY(coordinatesValue);
       }
 
       if (element !== null) {
-        element.setAttribute('value', coordinatesValue);
+        element.value = coordinatesValue;
       }
     }
   }
@@ -60,9 +61,9 @@ export class AreaFieldsetCircle extends AreaFieldsetAbstract {
       left = shape.left + radius,
       top = shape.top + radius;
 
-    this.area.coords.left = this.inputX(left);
-    this.area.coords.top = this.inputY(top);
-    this.area.coords.radius = this.inputX(radius);
+    this.area.coords.left = AreaForm.inputX(left);
+    this.area.coords.top = AreaForm.inputY(top);
+    this.area.coords.radius = AreaForm.inputX(radius);
 
     this.getElement('.left').setAttribute('value', left);
     this.getElement('.top').setAttribute('value', top);
@@ -76,22 +77,22 @@ export class AreaFieldsetCircle extends AreaFieldsetAbstract {
     switch (field.dataset.field) {
       case 'left':
         value -= parseInt(this.getElement(`.radius`).value);
-        this.area.coords.left = this.inputX(value);
+        this.area.coords.left = AreaForm.inputX(value);
         this.shape.set({left: value});
         break;
 
       case 'top':
         value -= parseInt(this.getElement(`.radius`).value);
-        this.area.coords.top = this.inputY(value);
+        this.area.coords.top = AreaForm.inputY(value);
         this.shape.set({top: value});
         break;
 
       case 'radius':
-        this.area.coords.top = this.inputX(value);
+        this.area.coords.top = AreaForm.inputX(value);
         this.shape.set({radius: value});
         break;
     }
 
-    this.shape.canvas.renderAll();
+    this.form.canvas.renderAll();
   }
 }

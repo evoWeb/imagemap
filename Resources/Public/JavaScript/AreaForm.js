@@ -45,14 +45,25 @@ define(["require", "exports", "TYPO3/CMS/Backend/Modal"], function (require, exp
             this.updateArrowsState();
         }
         deleteArea(area) {
-            let areas = [];
-            this.areaFieldsets.forEach((currentArea) => {
-                if (area !== currentArea) {
-                    areas.push(currentArea);
+            let areaFieldsets = [];
+            this.areaFieldsets.forEach((currentArea, index) => {
+                if (area === currentArea) {
+                    if (currentArea.element) {
+                        currentArea.element.remove();
+                    }
+                    if (currentArea.shape) {
+                        this.canvas.remove(currentArea.shape);
+                        currentArea.shape = null;
+                    }
+                    currentArea.removeBrowselinkTargetInput();
+                    delete (this.areaFieldsets[index]);
+                }
+                else {
+                    areaFieldsets.push(currentArea);
                 }
             });
-            this.areaFieldsets = areas;
-            this.canvas.remove(area.shape);
+            this.areaFieldsets = areaFieldsets;
+            this.updateArrowsState();
         }
         openLinkBrowser(link, area) {
             link.blur();
@@ -95,8 +106,8 @@ define(["require", "exports", "TYPO3/CMS/Backend/Modal"], function (require, exp
         addBrowselinkTargetForm() {
             if (!(this.browselinkTargetForm = this.browselinkParent.querySelector(this.browselinkTargetFormSelector))) {
                 this.browselinkTargetForm = this.browselinkParent.createElement('form');
-                this.browselinkTargetForm.setAttribute('name', 'areasForm');
-                this.browselinkTargetForm.setAttribute('id', 'browselinkTargetForm');
+                this.browselinkTargetForm.name = 'areasForm';
+                this.browselinkTargetForm.id = 'browselinkTargetForm';
                 this.browselinkParent.body.appendChild(this.browselinkTargetForm);
             }
             // empty previously created browselinkTargetForm
@@ -111,10 +122,28 @@ define(["require", "exports", "TYPO3/CMS/Backend/Modal"], function (require, exp
         }
         getMapData() {
             let areas = [];
-            this.areaFieldsets.forEach((area) => {
-                areas.push(area.getData());
+            this.areaFieldsets.forEach((areaFieldset) => {
+                areas.push(areaFieldset.getData());
             });
             return JSON.stringify(areas);
+        }
+        static inputX(value) {
+            return value / AreaForm.width;
+        }
+        static inputY(value) {
+            return value / AreaForm.height;
+        }
+        static outputiX(value) {
+            return Math.round(value * AreaForm.width);
+        }
+        static outputiY(value) {
+            return Math.round(value * AreaForm.height);
+        }
+        static outputX(value) {
+            return AreaForm.outputiX(value).toString();
+        }
+        static outputY(value) {
+            return AreaForm.outputiY(value).toString();
         }
     }
     exports.AreaForm = AreaForm;

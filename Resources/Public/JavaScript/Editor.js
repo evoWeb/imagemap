@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "./vendor/Fabric", "./AreaFieldsetFactory", "./AreaForm", "./AreaShapeFactory", "TYPO3/CMS/Core/Contrib/jquery.minicolors"], function (require, exports, Fabric_1, AreaFieldsetFactory_1, AreaForm_1, AreaShapeFactory_1) {
+define(["require", "exports", "./vendor/Fabric", "./AreaFieldsetFactory", "./AreaForm", "./AreaShapeFactory", "./AreaShapePolygon", "TYPO3/CMS/Core/Contrib/jquery.minicolors"], function (require, exports, Fabric_1, AreaFieldsetFactory_1, AreaForm_1, AreaShapeFactory_1, AreaShapePolygon_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Editor {
@@ -36,8 +36,6 @@ define(["require", "exports", "./vendor/Fabric", "./AreaFieldsetFactory", "./Are
             this.form = new AreaForm_1.AreaForm(element, this.canvas, this.configuration, this.modalParent, this.browselinkParent);
         }
         static objectModified(event) {
-            // @todo check these
-            console.log(event, 'objectModified');
             let element = event.target;
             if (element.hasOwnProperty('fieldset')) {
                 // circle, polygon, rectangle
@@ -65,6 +63,9 @@ define(["require", "exports", "./vendor/Fabric", "./AreaFieldsetFactory", "./Are
                     let areaShape = areaShapeFactory.createShape(area, true), areaFieldset = areaFieldsetFactory.createFieldset(area, areaShape);
                     this.canvas.add(areaShape);
                     this.form.addArea(areaFieldset);
+                    if (areaShape instanceof AreaShapePolygon_1.AreaShapePolygon) {
+                        areaShape.initializeControls();
+                    }
                 });
             }
         }

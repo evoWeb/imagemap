@@ -13,19 +13,10 @@ define(["require", "exports", "./vendor/Fabric", "./AreaForm", "./AreaShapeCircl
     Object.defineProperty(exports, "__esModule", { value: true });
     class AreaShapeFactory {
         constructor(canvas = null) {
-            this.shapeConfiguration = {
-                cornerColor: '#eee',
-                cornerStrokeColor: '#bbb',
-                cornerSize: 10,
-                cornerStyle: 'circle',
-                hasBorders: false,
-                hasRotatingPoint: false,
-                transparentCorners: false
-            };
             this.canvas = canvas;
         }
         createShape(area, selectable) {
-            let areaShape, configuration = Object.assign(Object.assign({}, this.shapeConfiguration), { selectable: selectable, hasControls: selectable, stroke: area.color, strokeWidth: 1, fill: AreaShapeFactory.hexToRgbA(area.color, 0.3) });
+            let areaShape, configuration = Object.assign(Object.assign({}, AreaShapeFactory.shapeConfiguration), { selectable: selectable, hasControls: selectable, stroke: area.color, strokeWidth: 1, fill: AreaShapeFactory.hexToRgbA(area.color, 0.3) });
             switch (area.shape) {
                 case 'rect':
                     areaShape = this.createRectangle(area, configuration);
@@ -40,41 +31,35 @@ define(["require", "exports", "./vendor/Fabric", "./AreaForm", "./AreaShapeCircl
             return areaShape;
         }
         createCircle(area, configuration) {
-            let coords = area.coords, radius = Math.round(coords.radius * AreaForm_1.AreaForm.width), left = Math.round(coords.left * AreaForm_1.AreaForm.width) - radius, top = Math.round(coords.top * AreaForm_1.AreaForm.height) - radius, areaShape = new AreaShapeCircle_1.AreaShapeCircle(Object.assign(Object.assign({}, configuration), { left: left, top: top, radius: radius }));
-            areaShape.id = Fabric_1.Object.__uid++;
-            // disable control points as these would stretch the circle
-            // to an ellipse which is not possible in html areas
-            areaShape.setControlVisible('ml', false);
-            areaShape.setControlVisible('mt', false);
-            areaShape.setControlVisible('mr', false);
-            areaShape.setControlVisible('mb', false);
-            if (this.canvas !== null) {
-                areaShape.canvas = this.canvas;
-            }
-            return areaShape;
+            let coords = area.coords, radius = AreaForm_1.AreaForm.outputiX(coords.radius), left = AreaForm_1.AreaForm.outputiX(coords.left) - radius, top = AreaForm_1.AreaForm.outputiY(coords.top) - radius;
+            return new AreaShapeCircle_1.AreaShapeCircle(Object.assign(Object.assign({}, configuration), { left: left, top: top, radius: radius, id: Fabric_1.Object.__uid++, canvas: this.canvas, 
+                // disable control points as these would stretch the circle
+                // to an ellipse which is not possible in html areas
+                _controlsVisibility: {
+                    ml: false,
+                    mt: false,
+                    mr: false,
+                    mb: false,
+                    mtr: false,
+                } }));
         }
         createPolygon(area, configuration) {
             let points = area.points || [], polygonPoints = [], polygonId = Fabric_1.Object.__uid++;
             points.map((point) => {
                 point.id = polygonId + '-' + Fabric_1.Object.__uid++;
-                let polygonPoint = {
-                    x: Math.round(point.x * AreaForm_1.AreaForm.width),
-                    y: Math.round(point.y * AreaForm_1.AreaForm.height),
+                polygonPoints.push({
+                    x: AreaForm_1.AreaForm.outputiX(point.x),
+                    y: AreaForm_1.AreaForm.outputiY(point.y),
                     id: point.id,
-                    areaPoint: point,
-                };
-                point.polygonPoint = polygonPoint;
-                polygonPoints.push(polygonPoint);
+                });
             });
             return new AreaShapePolygon_1.AreaShapePolygon(polygonPoints, Object.assign(Object.assign({}, configuration), { objectCaching: false, id: polygonId, canvas: this.canvas }));
         }
         createRectangle(area, configuration) {
-            let coords = area.coords, left = Math.round(coords.left * AreaForm_1.AreaForm.width), top = Math.round(coords.top * AreaForm_1.AreaForm.height), width = Math.round(coords.right * AreaForm_1.AreaForm.width) - left, height = Math.round(coords.bottom * AreaForm_1.AreaForm.height) - top, areaShape = new AreaShapeRectangle_1.AreaShapeRectangle(Object.assign(Object.assign({}, configuration), { left: left, top: top, width: width, height: height }));
-            areaShape.id = Fabric_1.Object.__uid++;
-            if (this.canvas !== null) {
-                areaShape.canvas = this.canvas;
-            }
-            return areaShape;
+            let coords = area.coords, left = AreaForm_1.AreaForm.outputiX(coords.left), top = AreaForm_1.AreaForm.outputiY(coords.top), width = AreaForm_1.AreaForm.outputiX(coords.right) - left, height = AreaForm_1.AreaForm.outputiY(coords.bottom) - top;
+            return new AreaShapeRectangle_1.AreaShapeRectangle(Object.assign(Object.assign({}, configuration), { left: left, top: top, width: width, height: height, id: Fabric_1.Object.__uid++, canvas: this.canvas, _controlsVisibility: {
+                    mtr: false,
+                } }));
         }
         static getRandomColor(color) {
             while (color === undefined || !(/^#([A-Fa-f0-9]{3}){1,2}$/.test(color))) {
@@ -104,4 +89,13 @@ define(["require", "exports", "./vendor/Fabric", "./AreaForm", "./AreaShapeCircl
         }
     }
     exports.AreaShapeFactory = AreaShapeFactory;
+    AreaShapeFactory.shapeConfiguration = {
+        cornerColor: '#eee',
+        cornerStrokeColor: '#bbb',
+        cornerSize: 10,
+        cornerStyle: 'circle',
+        hasBorders: false,
+        hasRotatingPoint: false,
+        transparentCorners: false
+    };
 });

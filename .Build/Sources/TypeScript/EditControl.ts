@@ -62,7 +62,7 @@ class EditControl {
     this.trigger.addEventListener('click', this.triggerHandler.bind(this));
   }
 
-  private triggerHandler(event: JQueryEventObject): void {
+  private triggerHandler(event: MouseEvent): void {
     event.preventDefault();
     this.show();
   }
@@ -251,7 +251,7 @@ class EditControl {
     }
   }
 
-  private buttonAddRectangleHandler(event: JQueryEventObject): void {
+  private buttonAddRectangleHandler(event: MouseEvent): void {
     event.stopPropagation();
     event.preventDefault();
 
@@ -266,7 +266,7 @@ class EditControl {
     }]);
   }
 
-  private buttonAddCircleHandler(event: JQueryEventObject): void {
+  private buttonAddCircleHandler(event: MouseEvent): void {
     event.stopPropagation();
     event.preventDefault();
 
@@ -280,7 +280,7 @@ class EditControl {
     }]);
   }
 
-  private buttonAddPolygonHandler(event: JQueryEventObject): void {
+  private buttonAddPolygonHandler(event: MouseEvent): void {
     event.stopPropagation();
     event.preventDefault();
 
@@ -295,18 +295,18 @@ class EditControl {
     }]);
   }
 
-  private buttonDismissHandler(event: JQueryEventObject): void {
+  private buttonDismissHandler(event: MouseEvent): void {
     event.stopPropagation();
     event.preventDefault();
 
     this.currentModal.modal('hide');
   }
 
-  private buttonSaveHandler(event: JQueryEventObject): void {
+  private buttonSaveHandler(event: MouseEvent): void {
     event.stopPropagation();
     event.preventDefault();
 
-    this.hiddenInput.setAttribute('value', this.editor.getMapData());
+    this.hiddenInput.value = this.editor.getMapData();
     this.hiddenInput.dispatchEvent(new CustomEvent('imagemap:changed'));
 
     // without FormEngineValidation.markFieldAsChanged call
@@ -316,7 +316,8 @@ class EditControl {
   }
 
   private hideColorSwatch(event: JQueryEventObject): void {
-    if (!$(event.target).parents().add(event.target).hasClass('minicolors')) {
+    let swatch = (event.target) as HTMLElement;
+    if (!$(swatch).parents().add(swatch).hasClass('minicolors')) {
       // Hides all dropdown panels
       top.window.$('.minicolors-focus').each(() => {
         let minicolors = $(this),

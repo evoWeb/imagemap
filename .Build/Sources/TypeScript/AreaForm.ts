@@ -24,7 +24,7 @@ export class AreaForm {
 
   public element: HTMLElement;
 
-  private canvas: Canvas;
+  public canvas: Canvas;
 
   private configuration: EditorConfiguration;
 
@@ -62,7 +62,7 @@ export class AreaForm {
   }
 
   public updateArrowsState(): void {
-    this.areaFieldsets.forEach((area) => {
+    this.areaFieldsets.forEach((area: AreaFieldsetAbstract) => {
       area.updateArrowsState();
     });
   }
@@ -89,14 +89,24 @@ export class AreaForm {
   }
 
   public deleteArea(area: AreaFieldsetAbstract): void {
-    let areas: Array<AreaFieldsetAbstract> = [];
-    this.areaFieldsets.forEach((currentArea) => {
-      if (area !== currentArea) {
-        areas.push(currentArea);
+    let areaFieldsets: Array<AreaFieldsetAbstract> = [];
+    this.areaFieldsets.forEach((currentArea: AreaFieldsetAbstract, index: number) => {
+      if (area === currentArea) {
+        if (currentArea.element) {
+          currentArea.element.remove();
+        }
+        if (currentArea.shape) {
+          this.canvas.remove(currentArea.shape);
+          currentArea.shape = null;
+        }
+        currentArea.removeBrowselinkTargetInput();
+        delete(this.areaFieldsets[index]);
+      } else {
+        areaFieldsets.push(currentArea);
       }
     });
-    this.areaFieldsets = areas;
-    this.canvas.remove(area.shape);
+    this.areaFieldsets = areaFieldsets;
+    this.updateArrowsState();
   }
 
   public openLinkBrowser(link: HTMLElement, area: AreaFieldsetAbstract): void {
@@ -149,8 +159,8 @@ export class AreaForm {
   private addBrowselinkTargetForm(): void {
     if (!(this.browselinkTargetForm = this.browselinkParent.querySelector(this.browselinkTargetFormSelector))) {
       this.browselinkTargetForm = this.browselinkParent.createElement('form');
-      this.browselinkTargetForm.setAttribute('name', 'areasForm');
-      this.browselinkTargetForm.setAttribute('id', 'browselinkTargetForm');
+      this.browselinkTargetForm.name = 'areasForm';
+      this.browselinkTargetForm.id = 'browselinkTargetForm';
       this.browselinkParent.body.appendChild(this.browselinkTargetForm);
     }
 
@@ -167,12 +177,36 @@ export class AreaForm {
   }
 
   public getMapData(): string {
-    let areas: object[] = [];
+    let areas: Area[] = [];
 
-    this.areaFieldsets.forEach((area) => {
-      areas.push(area.getData());
+    this.areaFieldsets.forEach((areaFieldset: AreaFieldsetAbstract) => {
+      areas.push(areaFieldset.getData());
     });
 
     return JSON.stringify(areas);
+  }
+
+  static inputX(value: number): number {
+    return value / AreaForm.width;
+  }
+
+  static inputY(value: number): number {
+    return value / AreaForm.height;
+  }
+
+  static outputiX(value: number): number {
+    return Math.round(value * AreaForm.width);
+  }
+
+  static outputiY(value: number): number {
+    return Math.round(value * AreaForm.height);
+  }
+
+  static outputX(value: number): string {
+    return AreaForm.outputiX(value).toString();
+  }
+
+  static outputY(value: number): string {
+    return AreaForm.outputiY(value).toString();
   }
 }

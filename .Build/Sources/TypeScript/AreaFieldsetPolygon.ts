@@ -14,6 +14,8 @@
 // @ts-ignore
 import { Object, Point, util } from './vendor/Fabric';
 import { AreaFieldsetAbstract } from './AreaFieldsetAbstract';
+import { AreaForm } from './AreaForm';
+import { AreaShapeFactory } from './AreaShapeFactory';
 import { AreaShapePolygon } from './AreaShapePolygon';
 
 export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
@@ -27,200 +29,206 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
         continue;
       }
       let attributeValue = this.area[attributeKey] || '',
-        element = this.getElement('.' + attributeKey);
+        element = this.getElement(`.${attributeKey}`);
 
       if (element !== null) {
         if (typeof attributeValue === 'number') {
           attributeValue = attributeValue.toString();
         }
-        element.setAttribute('value', attributeValue);
+        element.value = attributeValue;
       }
     }
 
     let parentElement = this.getElement('.positionOptions');
-    this.shape.points.forEach((point: Point) => {
+    this.area.points.forEach((point: Point) => {
       if (!point.hasOwnProperty('element')) {
         point.element = this.getFieldsetElement('#polygonCoords', point.id);
         parentElement.append(point.element);
       }
 
-      let xField = this.getElement(`#x${point.id}`),
-        yField = this.getElement(`#y${point.id}`);
+      let xField = point.element.querySelector('[data-field="x"]'),
+        yField = point.element.querySelector('[data-field="y"]');
       xField.dataset.point = point.id;
       yField.dataset.point = point.id;
-      xField.setAttribute('value', this.outputX(point.areaPoint.x));
-      yField.setAttribute('value', this.outputY(point.areaPoint.y));
+      xField.value = AreaForm.outputX(point.x);
+      yField.value = AreaForm.outputY(point.y);
     });
   }
 
   protected shapeModified(event: FabricEvent): void {
-    let element = (event.target as Object);
-    let matrix = element.calcTransformMatrix()
-    element.points.forEach((point: Point) => {
-      let temporaryPoint = new Point(point.x - element.pathOffset.x, point.y - element.pathOffset.y),
-        transformed = util.transformPoint(temporaryPoint, matrix);
+    let areaShape = (event.target as Object),
+      matrix = areaShape.calcTransformMatrix();
 
-      point.areaPoint.x = this.inputX(transformed.x);
-      point.areaPoint.y = this.inputX(transformed.y);
-      console.log(this.getElement(`#x${point.id}`));
-      console.log(this.getElement(`#y${point.id}`));
-      let xField: HTMLInputElement = this.getElement(`#x${point.id}`),
-        yField: HTMLInputElement = this.getElement(`#y${point.id}`);
-      xField.value = transformed.x.toString();
-      yField.value = transformed.y.toString();
+    areaShape.points.forEach((point: Point) => {
+      let temporaryPoint = new Point(point.x - areaShape.pathOffset.x, point.y - areaShape.pathOffset.y),
+        transformed = util.transformPoint(temporaryPoint, matrix),
+        areaPoint = this.area.points.find((findPoint: Point) => { return findPoint.id === point.id }),
+        xField: HTMLInputElement = areaPoint.element.querySelector('[data-field="x"]'),
+        yField: HTMLInputElement = areaPoint.element.querySelector('[data-field="y"]')
+
+      areaPoint.x = AreaForm.inputX(transformed.x);
+      areaPoint.y = AreaForm.inputY(transformed.y);
+
+      xField.value = AreaForm.outputX(areaPoint.x);
+      yField.value = AreaForm.outputY(areaPoint.y);
     });
   }
 
   protected moveShape(event: InputEvent): void {
     let field = (event.target) as HTMLInputElement,
-      point: Point = null,
+      point: Point = this.shape.points.find((findPoint: Point) => { return findPoint.id === field.dataset.point }),
+      areaPoint = this.area.points.find((findPoint: Point) => { return findPoint.id === point.id }),
       left: number,
       top: number;
 
-    this.shape.points.forEach((pointToCheck: Point) => {
-      if (pointToCheck.id === field.dataset.point) {
-        point = pointToCheck;
-      }
-    });
-
     if (point !== null) {
-      left = parseInt(field.dataset.field === 'x' ? field.value : point.x);
-      top = parseInt(field.dataset.field === 'y' ? field.value : point.y);
+      left = field.dataset.field === 'x' ? parseInt(field.value) : point.x;
+      top = field.dataset.field === 'y' ? parseInt(field.value) : point.y;
 
-      point.areaPoint.x = this.inputX(left);
-      point.areaPoint.y = this.inputY(top);
+      areaPoint.x = AreaForm.inputX(left);
+      areaPoint.y = AreaForm.inputY(top);
       point.x = left;
       point.y = top;
-      this.shape.canvas.renderAll();
+      this.form.canvas.renderAll();
     }
   }
 
-  public getData(): object {
+  public getData(): Area {
     let data = {
       ...this.area
     };
 
     data.points.forEach((point: Point) => {
-      delete(point.polygonPoint);
+      delete(point.element);
       delete(point.id);
     });
 
-    return data;
+    return data as Area;
   }
 
   protected addPointAfterAction(event: Event): void {
-    let direction = AreaFieldsetAbstract.after,
+    let currentElement = (event.currentTarget as HTMLElement),
       parentElement = this.getElement('.positionOptions'),
-      [polygonPoint, element, currentPoint, nextPointIndex] = this.getPointElementAndCurrentPoint(event, direction),
-      areaPoint = {
-        x: this.inputX(polygonPoint.x),
-        y: this.inputY(polygonPoint.y),
-        id: polygonPoint.id,
-        polygonPoint: polygonPoint,
+      [currentPoint, nextPoint, newIndex] = this.getCurrentAndNextIndex(
+        currentElement.dataset.point,
+        AreaFieldsetAbstract.after
+      ),
+      areaPoint: Point = {
+        x: (currentPoint.x + nextPoint.x) / 2,
+        y: (currentPoint.y + nextPoint.y) / 2,
+        id: this.id + '-' + Object.__uid++,
+        element: null,
       };
-
-    polygonPoint.areaPoint = areaPoint;
+    areaPoint.element = this.getPointFields(areaPoint);
 
     if (currentPoint.element.nextSibling) {
-      parentElement.insertBefore(element, currentPoint.element.nextSibling);
+      parentElement.insertBefore(areaPoint.element, currentPoint.element.nextSibling);
     } else {
-      parentElement.append(element);
+      parentElement.append(areaPoint.element);
     }
 
-    this.area.points = AreaFieldsetPolygon.addElementToArrayWithPosition(this.area.points, areaPoint, nextPointIndex);
-    this.shape.points = AreaFieldsetPolygon.addElementToArrayWithPosition(this.shape.points, polygonPoint, nextPointIndex);
+    this.area.points = AreaFieldsetPolygon.addElementWithPosition(this.area.points, areaPoint, newIndex);
+
+    this.renderNewShape(this.area as Area, true);
   }
 
   protected removePointAction(event: Event): void {
-    if (this.points.length > 3) {
-      let element = (event.currentTarget as HTMLElement).parentNode.parentNode as HTMLElement,
-        points: Point = [];
-
-      this.points.forEach((point: Point) => {
-        if (element.id !== point.id) {
-          points.push(point);
-        } else {
-          point.element.remove();
+    if (this.area.points.length > 3) {
+      let element = (event.currentTarget) as HTMLElement;
+      this.area.points.forEach((findPoint: Point, index: number) => {
+        if (findPoint.id === element.dataset.point) {
+          this.area.points[index].element.remove();
+          delete(this.area.points[index]);
         }
       });
+      this.area.points = this.area.points.filter((findPoint: Point) => { return findPoint !== null; });
 
-      points.forEach((point: Point, index: number) => {
-        let oldId = point.id;
-        point.id = `p${this.id}_${index}`;
-        this.getElement(`#${oldId}`).id = point.id;
-        this.getElement(`#x${oldId}`).id = 'x' + point.id;
-        this.getElement(`#y${oldId}`).id = 'y' + point.id;
-        this.getElement(`[for="x${oldId}"]`).setAttribute('for', 'x' + point.id);
-        this.getElement(`[for="y${oldId}"]`).setAttribute('for', 'y' + point.id);
-      });
-
-      this.points = points;
-      this.canvas.renderAll();
+      this.renderNewShape(this.area as Area, true);
     }
   }
 
-  protected getPointElementAndCurrentPoint(event: Event, direction: number): any[] {
-    let currentPointId = ((event.currentTarget as HTMLElement).parentNode.parentNode as HTMLElement).id,
-      [currentPoint, nextPoint, nextPointIndex] = this.getCurrentAndNextPoint(currentPointId, direction),
-      id = this.id + '_' + Object.__uid++,
-      element = this.getFieldsetElement('#polygonCoords', id),
-      point = {
-        x: Math.floor((currentPoint.x + nextPoint.x) / 2),
-        y: Math.floor((currentPoint.y + nextPoint.y) / 2),
-        id: id,
-        element: element
+  private renderNewShape(area: Area, selectable: boolean): void {
+    let points: Point[] = area.points || [],
+      polygonPoints: Point[] = [],
+      configuration: ShapeConfiguration = {
+        ...AreaShapeFactory.shapeConfiguration,
+        selectable: selectable,
+        hasControls: selectable,
+        stroke: area.color,
+        strokeWidth: 1,
+        fill: AreaShapeFactory.hexToRgbA(area.color, 0.3)
       };
+
+    points.map((point) => {
+      polygonPoints.push({
+        x: AreaForm.outputiX(point.x),
+        y: AreaForm.outputiY(point.y),
+        id: point.id,
+      });
+    });
+
+    this.form.canvas.remove(this.shape);
+    this.shape = new AreaShapePolygon(polygonPoints, {
+      ...configuration,
+      objectCaching: false,
+      id: this.id,
+      canvas: this.canvas,
+    });
+    this.form.canvas.add(this.shape);
+
+    this.shape.initializeControls();
+  }
+
+  private getCurrentAndNextIndex(currentId: string, direction: number): any[] {
+    let currentIndex = 0;
+
+    this.area.points.forEach((findPoint: Point, index: number) => {
+      if (findPoint.id === currentId) {
+        currentIndex = index;
+      }
+    })
+
+    let nextPointIndex = currentIndex + direction;
+    if (nextPointIndex < 0) {
+      nextPointIndex = this.area.points.length - 1;
+    }
+    if (nextPointIndex >= this.area.points.length) {
+      nextPointIndex = 0;
+    }
+
+    return [this.area.points[currentIndex], this.area.points[nextPointIndex], nextPointIndex];
+  }
+
+  private getPointFields(point: Point) {
+    let element = this.getFieldsetElement('#polygonCoords', point.id),
+      xField: HTMLInputElement = element.querySelector('[data-field="x"]'),
+      yField: HTMLInputElement = element.querySelector('[data-field="y"]');
+
+    xField.dataset.point = point.id;
+    yField.dataset.point = point.id;
+    xField.value = AreaForm.outputX(point.x);
+    yField.value = AreaForm.outputY(point.y);
 
     this.initializeCoordinateFieldEvents(element.querySelectorAll('.t3js-field'));
     this.initializeButtonEvents(element.querySelectorAll('.t3js-btn'));
 
-    let xField: HTMLInputElement = element.querySelector(`#x${point.id}`),
-      yField: HTMLInputElement = element.querySelector(`#y${point.id}`);
-    xField.dataset.point = point.id;
-    yField.dataset.point = point.id;
-    xField.value = point.x.toString();
-    yField.value = point.y.toString();
-
-    return [point, element, currentPoint, nextPointIndex];
+    return element;
   }
 
-  protected getCurrentAndNextPoint(currentPointId: string, direction: number): any[] {
-    let points = this.shape.points,
-      currentPoint = null,
-      currentPointIndex = 0;
-
-    points.forEach((point: Point, index: number) => {
-      if (point.id === currentPointId) {
-        currentPoint = point;
-        currentPointIndex = index;
-      }
-    })
-
-    let nextPointIndex = currentPointIndex + direction;
-    if (nextPointIndex < 0) {
-      nextPointIndex = points.length - 1;
-    }
-    if (nextPointIndex >= points.length) {
-      nextPointIndex = 0;
-    }
-
-    return [currentPoint, points[nextPointIndex], nextPointIndex];
-  }
-
-  static addElementToArrayWithPosition(array: any[], item: any, index: number): any[] {
-    if (index < 0) {
-      array.unshift(item);
-    } else if (index >= array.length) {
-      array.push(item);
+  static addElementWithPosition(array: any[], newPoint: any, newIndex: number): any[] {
+    if (newIndex < 0) {
+      array.unshift(newPoint);
+    } else if (array.length <= newIndex) {
+      array.push(newPoint);
     } else {
-      let newPoints = [];
-      for (let i = 0; i < array.length; i++) {
-        newPoints.push(array[i]);
-        if (i === index - 1) {
-          newPoints.push(item);
+      let points: any[] = [];
+      array.forEach((point: Point, index: number) => {
+        if (index === newIndex) {
+          points.push(newPoint);
         }
-      }
-      array = newPoints;
+        points.push(point);
+      });
+      array = points;
     }
     return array;
   }

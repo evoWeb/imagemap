@@ -13,9 +13,7 @@ declare interface Point {
   x: number,
   y: number,
   id?: string|number,
-  control?: any
-  areaPoint?: any
-  polygonPoint?: any
+  element?: any
 }
 
 declare interface Area {
@@ -67,6 +65,7 @@ declare interface FabricEvent {
 }
 
 declare interface Window {
+  $?: Function,
   TYPO3?: {
     settings: {
       ajaxUrls: {
