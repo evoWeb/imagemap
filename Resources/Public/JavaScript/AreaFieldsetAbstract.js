@@ -45,18 +45,27 @@ define(["require", "exports", "jquery", "./AreaForm", "./AreaShapeFactory"], fun
             });
         }
         initializeEvents() {
-            this.getElements('.basicOptions .t3js-field').forEach((field) => {
+            this.initializeInformationFieldEvents(this.getElements('.basicOptions .t3js-field'));
+            this.initializeCoordinateFieldEvents(this.getElements('.positionOptions .t3js-field'));
+            this.initializeButtonEvents(this.getElements('.t3js-btn'));
+        }
+        initializeInformationFieldEvents(fields) {
+            fields.forEach((field) => {
                 field.removeEventListener('keyup', this.basicOptionsHandler);
                 field.addEventListener('keyup', this.basicOptionsHandler.bind(this));
             });
-            this.getElements('.positionOptions .t3js-field').forEach((field) => {
+        }
+        initializeCoordinateFieldEvents(fields) {
+            fields.forEach((field) => {
                 field.removeEventListener('input', this.positionOptionsHandler);
                 field.addEventListener('input', this.positionOptionsHandler.bind(this));
             });
-            this.getElements('.t3js-btn').forEach((field) => {
-                let action = field.dataset.action + 'Action';
-                field.removeEventListener('click', this[action]);
-                field.addEventListener('click', this[action].bind(this));
+        }
+        initializeButtonEvents(buttons) {
+            buttons.forEach((button) => {
+                let action = button.dataset.action + 'Action';
+                button.removeEventListener('click', this[action]);
+                button.addEventListener('click', this[action].bind(this));
             });
         }
         basicOptionsHandler(event) {

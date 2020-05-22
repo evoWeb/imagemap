@@ -74,18 +74,30 @@ export abstract class AreaFieldsetAbstract {
   }
 
   private initializeEvents(): void {
-    this.getElements('.basicOptions .t3js-field').forEach((field: HTMLInputElement) => {
+    this.initializeInformationFieldEvents(this.getElements('.basicOptions .t3js-field'));
+    this.initializeCoordinateFieldEvents(this.getElements('.positionOptions .t3js-field'));
+    this.initializeButtonEvents(this.getElements('.t3js-btn'));
+  }
+
+  private initializeInformationFieldEvents(fields: NodeListOf<Element>): void {
+    fields.forEach((field: HTMLInputElement) => {
       field.removeEventListener('keyup', this.basicOptionsHandler);
       field.addEventListener('keyup', this.basicOptionsHandler.bind(this));
     });
-    this.getElements('.positionOptions .t3js-field').forEach((field: HTMLInputElement) => {
+  }
+
+  protected initializeCoordinateFieldEvents(fields: NodeListOf<Element>): void {
+    fields.forEach((field: HTMLInputElement) => {
       field.removeEventListener('input', this.positionOptionsHandler);
       field.addEventListener('input', this.positionOptionsHandler.bind(this));
     });
-    this.getElements('.t3js-btn').forEach((field: HTMLInputElement) => {
-      let action: string = field.dataset.action + 'Action';
-      field.removeEventListener('click', this[action]);
-      field.addEventListener('click', this[action].bind(this));
+  }
+
+  protected initializeButtonEvents(buttons: NodeListOf<Element>): void {
+    buttons.forEach((button: HTMLButtonElement) => {
+      let action: string = button.dataset.action + 'Action';
+      button.removeEventListener('click', this[action]);
+      button.addEventListener('click', this[action].bind(this));
     });
   }
 
@@ -95,12 +107,12 @@ export abstract class AreaFieldsetAbstract {
 
   protected abstract moveShape(event: Event): void;
 
-  private basicOptionsHandler(event: Event): void {
+  private basicOptionsHandler(event: InputEvent): void {
     let field = (event.currentTarget as HTMLInputElement);
     this.area[field.dataset.field] = field.value;
   }
 
-  private positionOptionsHandler(event: Event): void {
+  private positionOptionsHandler(event: InputEvent): void {
     this.moveShapeDelay = AreaFieldsetAbstract.wait(
       () => { this.moveShape(event); },
       500,
@@ -189,7 +201,7 @@ export abstract class AreaFieldsetAbstract {
     return this.element.querySelector(selector);
   }
 
-  private getElements(selector: string) {
+  private getElements(selector: string): NodeListOf<Element> {
     return this.element.querySelectorAll(selector);
   }
 
