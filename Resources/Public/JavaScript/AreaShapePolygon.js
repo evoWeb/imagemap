@@ -20,13 +20,12 @@ define(["require", "exports", "./vendor/Fabric"], function (require, exports, Fa
             this.hasBorders = false;
             this.cornerStyle = 'circle';
             this.controls = this.points.reduce(function (acc, point, index) {
-                let control = new Fabric_1.Control({
+                acc['p' + index] = new Fabric_1.Control({
+                    positionHandler: self.polygonPositionHandler,
                     actionHandler: self.anchorWrapper(index > 0 ? index - 1 : lastControl, self.actionHandler),
                     actionName: 'modifyPolygon',
                     pointIndex: index
                 });
-                control.positionHandler = self.polygonPositionHandler.bind(control);
-                acc['p' + index] = control;
                 return acc;
             }, {});
             this.canvas.requestRenderAll();

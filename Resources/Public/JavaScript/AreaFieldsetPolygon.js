@@ -46,7 +46,6 @@ define(["require", "exports", "./vendor/Fabric", "./AreaFieldsetAbstract", "./Ar
             let areaShape = event.target, matrix = areaShape.calcTransformMatrix();
             areaShape.points.forEach((point) => {
                 let temporaryPoint = new Fabric_1.Point(point.x - areaShape.pathOffset.x, point.y - areaShape.pathOffset.y), transformed = Fabric_1.util.transformPoint(temporaryPoint, matrix), areaPoint = this.area.points.find((findPoint) => { return findPoint.id === point.id; });
-                console.log(areaPoint);
                 if (areaPoint) {
                     let xField = areaPoint.element.querySelector('[data-field="x"]'), yField = areaPoint.element.querySelector('[data-field="y"]');
                     areaPoint.x = AreaForm_1.AreaForm.inputX(transformed.x);

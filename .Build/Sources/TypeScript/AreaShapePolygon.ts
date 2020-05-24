@@ -30,13 +30,12 @@ export class AreaShapePolygon extends Polygon {
     this.hasBorders = false;
     this.cornerStyle = 'circle';
     this.controls = this.points.reduce(function(acc: Point, point: Point, index: number) {
-      let control = new Control({
+      acc['p' + index] = new Control({
+        positionHandler: self.polygonPositionHandler,
         actionHandler: self.anchorWrapper(index > 0 ? index - 1 : lastControl, self.actionHandler),
         actionName: 'modifyPolygon',
         pointIndex: index
       });
-      control.positionHandler = self.polygonPositionHandler.bind(control);
-      acc['p' + index] = control;
       return acc;
     }, { });
 
