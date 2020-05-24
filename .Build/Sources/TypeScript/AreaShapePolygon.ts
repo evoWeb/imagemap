@@ -13,22 +13,9 @@
 
 // @ts-ignore
 import { Canvas, Control, Point, Polygon, util } from './vendor/Fabric';
-import { AreaFieldsetPolygon } from './AreaFieldsetPolygon';
 
 export class AreaShapePolygon extends Polygon {
-  public id: number;
-
   public canvas: Canvas;
-
-  public fieldset: AreaFieldsetPolygon;
-
-  public points: any[];
-
-  public selectable: boolean;
-
-  public opacity: boolean;
-
-  public controls: any = [];
 
   [property: string]: any;
 
@@ -37,37 +24,23 @@ export class AreaShapePolygon extends Polygon {
   }
 
   initializeControls(): void {
-    let lastControl = this.points.length - 1;
+    let self = this,
+      lastControl = this.points.length - 1;
 
-    this.edit = true;
     this.hasBorders = false;
     this.cornerStyle = 'circle';
-
-    this.controls = this.points.reduce((acc: {[property: string]: any}, point: Point, index: number) => {
-      acc['p' + index] = new Control({
-        positionHandler: this.polygonPositionHandler,
-        actionHandler: this.anchorWrapper(index > 0 ? index - 1 : lastControl, this.actionHandler),
+    this.controls = this.points.reduce(function(acc: Point, point: Point, index: number) {
+      let control = new Control({
+        actionHandler: self.anchorWrapper(index > 0 ? index - 1 : lastControl, self.actionHandler),
         actionName: 'modifyPolygon',
         pointIndex: index
       });
+      control.positionHandler = self.polygonPositionHandler.bind(control);
+      acc['p' + index] = control;
       return acc;
     }, { });
 
     this.canvas.requestRenderAll();
-  }
-
-  addPoint(newPoint: Point, newIndex: number): void {
-    this.points = AreaShapePolygon.addElementWithPosition(this.points, newPoint, newIndex);
-    this.initializeControls();
-  }
-
-  removePoint(pointToRemove: Point): void {
-    this.points.forEach((point: Point, index: number) => {
-      if (pointToRemove === point) {
-        delete(this.points[index]);
-      }
-    });
-    this.initializeControls();
   }
 
   // from example
@@ -96,10 +69,8 @@ export class AreaShapePolygon extends Polygon {
       mouseLocalPosition = polygon.toLocalPoint(new Point(x, y), 'center', 'center'),
       size = polygon._getTransformedDimensions(0, 0);
 
-    polygon.points[currentControl.pointIndex] = {
-      x: mouseLocalPosition.x * polygon.width / size.x + polygon.pathOffset.x,
-      y: mouseLocalPosition.y * polygon.height / size.y + polygon.pathOffset.y
-    };
+    polygon.points[currentControl.pointIndex].x = mouseLocalPosition.x * polygon.width / size.x + polygon.pathOffset.x;
+    polygon.points[currentControl.pointIndex].y = mouseLocalPosition.y * polygon.height / size.y + polygon.pathOffset.y;
     return true;
   }
 
@@ -120,26 +91,8 @@ export class AreaShapePolygon extends Polygon {
       let newX = (fabricObject.points[anchorIndex].x - fabricObject.pathOffset.x) / fabricObject.width,
         newY = (fabricObject.points[anchorIndex].y - fabricObject.pathOffset.y) / fabricObject.height;
 
-      fabricObject.setPositionByOrigin(absolutePoint, (newX + 0.5).toString(), (newY + 0.5).toString());
+      fabricObject.setPositionByOrigin(absolutePoint, (newX + 0.5), (newY + 0.5));
       return actionPerformed;
     }
-  }
-
-  static addElementWithPosition(array: any[], newPoint: any, newIndex: number): any[] {
-    if (newIndex < 0) {
-      array.unshift(newPoint);
-    } else if (array.length <= newIndex) {
-      array.push(newPoint);
-    } else {
-      let points: any[] = [];
-      array.forEach((point: Point, index: number) => {
-        if (index === newIndex) {
-          points.push(newPoint);
-        }
-        points.push(point);
-      });
-      array = points;
-    }
-    return array;
   }
 }

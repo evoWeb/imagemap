@@ -14,35 +14,22 @@ define(["require", "exports", "./vendor/Fabric"], function (require, exports, Fa
     class AreaShapePolygon extends Fabric_1.Polygon {
         constructor(points, options) {
             super(points, options);
-            this.controls = [];
         }
         initializeControls() {
-            let lastControl = this.points.length - 1;
-            this.edit = true;
+            let self = this, lastControl = this.points.length - 1;
             this.hasBorders = false;
             this.cornerStyle = 'circle';
-            this.controls = this.points.reduce((acc, point, index) => {
-                acc['p' + index] = new Fabric_1.Control({
-                    positionHandler: this.polygonPositionHandler,
-                    actionHandler: this.anchorWrapper(index > 0 ? index - 1 : lastControl, this.actionHandler),
+            this.controls = this.points.reduce(function (acc, point, index) {
+                let control = new Fabric_1.Control({
+                    actionHandler: self.anchorWrapper(index > 0 ? index - 1 : lastControl, self.actionHandler),
                     actionName: 'modifyPolygon',
                     pointIndex: index
                 });
+                control.positionHandler = self.polygonPositionHandler.bind(control);
+                acc['p' + index] = control;
                 return acc;
             }, {});
             this.canvas.requestRenderAll();
-        }
-        addPoint(newPoint, newIndex) {
-            this.points = AreaShapePolygon.addElementWithPosition(this.points, newPoint, newIndex);
-            this.initializeControls();
-        }
-        removePoint(pointToRemove) {
-            this.points.forEach((point, index) => {
-                if (pointToRemove === point) {
-                    delete (this.points[index]);
-                }
-            });
-            this.initializeControls();
         }
         // from example
         // define a function that can locate the controls.
@@ -60,10 +47,8 @@ define(["require", "exports", "./vendor/Fabric"], function (require, exports, Fa
         // transform.target is a reference to the current object being transformed,
         actionHandler(eventData, transform, x, y) {
             let polygon = transform.target, currentControl = polygon.controls[polygon.__corner], mouseLocalPosition = polygon.toLocalPoint(new Fabric_1.Point(x, y), 'center', 'center'), size = polygon._getTransformedDimensions(0, 0);
-            polygon.points[currentControl.pointIndex] = {
-                x: mouseLocalPosition.x * polygon.width / size.x + polygon.pathOffset.x,
-                y: mouseLocalPosition.y * polygon.height / size.y + polygon.pathOffset.y
-            };
+            polygon.points[currentControl.pointIndex].x = mouseLocalPosition.x * polygon.width / size.x + polygon.pathOffset.x;
+            polygon.points[currentControl.pointIndex].y = mouseLocalPosition.y * polygon.height / size.y + polygon.pathOffset.y;
             return true;
         }
         // from example
@@ -77,28 +62,9 @@ define(["require", "exports", "./vendor/Fabric"], function (require, exports, Fa
                 }, fabricObject.calcTransformMatrix()), actionPerformed = fn(eventData, transform, x, y);
                 fabricObject._setPositionDimensions({});
                 let newX = (fabricObject.points[anchorIndex].x - fabricObject.pathOffset.x) / fabricObject.width, newY = (fabricObject.points[anchorIndex].y - fabricObject.pathOffset.y) / fabricObject.height;
-                fabricObject.setPositionByOrigin(absolutePoint, (newX + 0.5).toString(), (newY + 0.5).toString());
+                fabricObject.setPositionByOrigin(absolutePoint, (newX + 0.5), (newY + 0.5));
                 return actionPerformed;
             };
-        }
-        static addElementWithPosition(array, newPoint, newIndex) {
-            if (newIndex < 0) {
-                array.unshift(newPoint);
-            }
-            else if (array.length <= newIndex) {
-                array.push(newPoint);
-            }
-            else {
-                let points = [];
-                array.forEach((point, index) => {
-                    if (index === newIndex) {
-                        points.push(newPoint);
-                    }
-                    points.push(point);
-                });
-                array = points;
-            }
-            return array;
         }
     }
     exports.AreaShapePolygon = AreaShapePolygon;

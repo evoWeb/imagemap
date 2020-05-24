@@ -45,11 +45,15 @@ define(["require", "exports", "./vendor/Fabric", "./AreaFieldsetAbstract", "./Ar
         shapeModified(event) {
             let areaShape = event.target, matrix = areaShape.calcTransformMatrix();
             areaShape.points.forEach((point) => {
-                let temporaryPoint = new Fabric_1.Point(point.x - areaShape.pathOffset.x, point.y - areaShape.pathOffset.y), transformed = Fabric_1.util.transformPoint(temporaryPoint, matrix), areaPoint = this.area.points.find((findPoint) => { return findPoint.id === point.id; }), xField = areaPoint.element.querySelector('[data-field="x"]'), yField = areaPoint.element.querySelector('[data-field="y"]');
-                areaPoint.x = AreaForm_1.AreaForm.inputX(transformed.x);
-                areaPoint.y = AreaForm_1.AreaForm.inputY(transformed.y);
-                xField.value = AreaForm_1.AreaForm.outputX(areaPoint.x);
-                yField.value = AreaForm_1.AreaForm.outputY(areaPoint.y);
+                let temporaryPoint = new Fabric_1.Point(point.x - areaShape.pathOffset.x, point.y - areaShape.pathOffset.y), transformed = Fabric_1.util.transformPoint(temporaryPoint, matrix), areaPoint = this.area.points.find((findPoint) => { return findPoint.id === point.id; });
+                console.log(areaPoint);
+                if (areaPoint) {
+                    let xField = areaPoint.element.querySelector('[data-field="x"]'), yField = areaPoint.element.querySelector('[data-field="y"]');
+                    areaPoint.x = AreaForm_1.AreaForm.inputX(transformed.x);
+                    areaPoint.y = AreaForm_1.AreaForm.inputY(transformed.y);
+                    xField.value = AreaForm_1.AreaForm.outputX(areaPoint.x);
+                    yField.value = AreaForm_1.AreaForm.outputY(areaPoint.y);
+                }
             });
         }
         moveShape(event) {

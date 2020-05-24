@@ -62,15 +62,18 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
     areaShape.points.forEach((point: Point) => {
       let temporaryPoint = new Point(point.x - areaShape.pathOffset.x, point.y - areaShape.pathOffset.y),
         transformed = util.transformPoint(temporaryPoint, matrix),
-        areaPoint = this.area.points.find((findPoint: Point) => { return findPoint.id === point.id }),
-        xField: HTMLInputElement = areaPoint.element.querySelector('[data-field="x"]'),
-        yField: HTMLInputElement = areaPoint.element.querySelector('[data-field="y"]')
+        areaPoint = this.area.points.find((findPoint: Point) => { return findPoint.id === point.id });
+      console.log(areaPoint);
+      if (areaPoint) {
+        let xField: HTMLInputElement = areaPoint.element.querySelector('[data-field="x"]'),
+          yField: HTMLInputElement = areaPoint.element.querySelector('[data-field="y"]')
 
-      areaPoint.x = AreaForm.inputX(transformed.x);
-      areaPoint.y = AreaForm.inputY(transformed.y);
+        areaPoint.x = AreaForm.inputX(transformed.x);
+        areaPoint.y = AreaForm.inputY(transformed.y);
 
-      xField.value = AreaForm.outputX(areaPoint.x);
-      yField.value = AreaForm.outputY(areaPoint.y);
+        xField.value = AreaForm.outputX(areaPoint.x);
+        yField.value = AreaForm.outputY(areaPoint.y);
+      }
     });
   }
 
