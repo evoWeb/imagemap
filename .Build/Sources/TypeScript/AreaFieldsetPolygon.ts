@@ -177,6 +177,7 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
       ...configuration,
       objectCaching: false,
     });
+    this.shape.fieldset = this;
     this.form.canvas.add(this.shape);
 
     this.shape.initializeControls();

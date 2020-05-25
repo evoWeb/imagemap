@@ -116,6 +116,7 @@ define(["require", "exports", "./vendor/Fabric", "./AreaFieldsetAbstract", "./Ar
             });
             this.form.canvas.remove(this.shape);
             this.shape = new AreaShapePolygon_1.AreaShapePolygon(polygonPoints, Object.assign(Object.assign({}, configuration), { objectCaching: false }));
+            this.shape.fieldset = this;
             this.form.canvas.add(this.shape);
             this.shape.initializeControls();
         }

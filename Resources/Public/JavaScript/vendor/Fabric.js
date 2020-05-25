@@ -14838,7 +14838,7 @@ fabric.util.object.extend(fabric.StaticCanvas.prototype, /** @lends fabric.Stati
      * Returns coordinates of a pointer relative to an object
      * @param {Event} e Event to operate upon
      * @param {Object} [pointer] Pointer to operate upon (instead of event)
-     * @return {Object} Coordinates of a pointer (x, y)
+     * @return {Object} Coordinate of a pointer (x, y)
      */
     getLocalPointer: function(e, pointer) {
       pointer = pointer || this.canvas.getPointer(e);
@@ -15411,7 +15411,7 @@ fabric.util.object.extend(fabric.StaticCanvas.prototype, /** @lends fabric.Stati
     /**
      * Method that returns an object with the object edges in it, given the coordinates of the corners
      * @private
-     * @param {Object} oCoords Coordinates of the object corners
+     * @param {Object} oCoords Coordinate of the object corners
      */
     _getImageLines: function(oCoords) {
 
@@ -15457,7 +15457,7 @@ fabric.util.object.extend(fabric.StaticCanvas.prototype, /** @lends fabric.Stati
      * and the horizontal line determined by a point on canvas
      * @private
      * @param {fabric.Point} point Point to check
-     * @param {Object} lines Coordinates of the object being evaluated
+     * @param {Object} lines Coordinate of the object being evaluated
      */
     // remove yi, not used but left code here just in case.
     _findCrossPoints: function(point, lines) {

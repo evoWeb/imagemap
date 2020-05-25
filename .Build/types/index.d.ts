@@ -16,18 +16,20 @@ declare interface Point {
   element?: any
 }
 
+declare interface Coordinate {
+  left: number,
+  top: number,
+  right?: number,
+  bottom?: number,
+  radius?: number,
+}
+
 declare interface Area {
   shape: string,
   href?: string,
   alt?: string,
   color?: string,
-  coords?: {
-    left?: number,
-    top?: number,
-    right?: number,
-    bottom?: number,
-    radius?: number,
-  },
+  coords?: Coordinate,
   points?: Point[]
 }
 
