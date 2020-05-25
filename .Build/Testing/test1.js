@@ -83,7 +83,24 @@ var points = [{
   x: 0, y: 20
 }]
 
-var polygon = new AreaShapePolygon(points, {
+var productionOptions = {
+  fill: "rgba(115, 248, 131, 0.3)",
+  cornerColor: "#eee",
+  cornerSize: 10,
+  cornerStrokeColor: "#bbb",
+  cornerStyle: "circle",
+  hasBorders: false,
+  hasControls: true,
+  hasRotatingPoint: false,
+  id: 6,
+  objectCaching: false,
+  selectable: true,
+  stroke: "#73f883",
+  strokeWidth: 0,
+  transparentCorners: false
+};
+
+var testOptions = {
   left: 100,
   top: 50,
   fill: '#D81B60',
@@ -93,7 +110,9 @@ var polygon = new AreaShapePolygon(points, {
   objectCaching: false,
   transparentCorners: false,
   cornerColor: 'blue'
-});
+};
+
+var polygon = new AreaShapePolygon(points, productionOptions);
 
 var canvas = this.__canvas = new fabric.Canvas('c');
 canvas.add(polygon);

@@ -43,7 +43,9 @@ declare interface ShapeConfiguration {
   hasControls?: boolean,
   stroke?: string,
   strokeWidth?: number,
-  fill?: string
+  fill?: string,
+  id?: number,
+  canvas?: string
 }
 
 declare interface EditorConfiguration {

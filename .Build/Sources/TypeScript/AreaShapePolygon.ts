@@ -27,8 +27,6 @@ export class AreaShapePolygon extends Polygon {
     let self = this,
       lastControl = this.points.length - 1;
 
-    this.hasBorders = false;
-    this.cornerStyle = 'circle';
     this.controls = this.points.reduce(function(acc: Point, point: Point, index: number) {
       acc['p' + index] = new Control({
         positionHandler: self.polygonPositionHandler,
@@ -42,9 +40,15 @@ export class AreaShapePolygon extends Polygon {
     this.canvas.requestRenderAll();
   }
 
-  // from example
-  // define a function that can locate the controls.
-  // this function will be used both for drawing and for interaction.
+  /**
+   * from example http://fabricjs.com/custom-controls-polygon
+   *  define a function that can locate the controls.
+   *  this function will be used both for drawing and for interaction.
+   *
+   * @param dim
+   * @param finalMatrix
+   * @param fabricObject
+   */
   polygonPositionHandler(dim: any, finalMatrix: any, fabricObject: AreaShapePolygon): Point {
     let x = (fabricObject.points[this.pointIndex].x - fabricObject.pathOffset.x),
       y = (fabricObject.points[this.pointIndex].y - fabricObject.pathOffset.y);
@@ -55,13 +59,20 @@ export class AreaShapePolygon extends Polygon {
     );
   }
 
-  // from example
-  // define a function that will define what the control does
-  // this function will be called on every mouse move after a control has been
-  // clicked and is being dragged.
-  // The function receive as argument the mouse event, the current transform object
-  // and the current position in canvas coordinate
-  // transform.target is a reference to the current object being transformed,
+  /**
+   * from example http://fabricjs.com/custom-controls-polygon
+   *  define a function that will define what the control does
+   *  this function will be called on every mouse move after a control has been
+   *  clicked and is being dragged.
+   *  The function receive as argument the mouse event, the current transform object
+   *  and the current position in canvas coordinate
+   *  transform.target is a reference to the current object being transformed,
+   *
+   * @param eventData
+   * @param transform
+   * @param x
+   * @param y
+   */
   actionHandler(eventData: any, transform: any, x: number, y: number): boolean {
     let polygon = transform.target,
       currentControl = polygon.controls[polygon.__corner],
@@ -73,9 +84,14 @@ export class AreaShapePolygon extends Polygon {
     return true;
   }
 
-  // from example
-  // define a function that can keep the polygon in the same position when we change its
-  // width/height/top/left.
+  /**
+   * from example http://fabricjs.com/custom-controls-polygon
+   *  define a function that can keep the polygon in the same position when we change its
+   *  width/height/top/left.
+   *
+   * @param anchorIndex
+   * @param fn
+   */
   anchorWrapper(anchorIndex: number, fn: Function): Function {
     return function(eventData: any, transform: any, x: number, y: number) {
       let fabricObject = transform.target,

@@ -26,7 +26,10 @@ export class AreaShapeFactory {
     cornerStyle: 'circle',
     hasBorders: false,
     hasRotatingPoint: false,
-    transparentCorners: false
+    transparentCorners: false,
+
+    // needs to be 0 to keep polygon from sliding
+    strokeWidth: 0
   };
 
   readonly canvas: Canvas;
@@ -42,28 +45,29 @@ export class AreaShapeFactory {
         selectable: selectable,
         hasControls: selectable,
         stroke: area.color,
-        strokeWidth: 1,
-        fill: AreaShapeFactory.hexToRgbA(area.color, 0.3)
+        fill: AreaShapeFactory.hexToRgbA(area.color, 0.4),
+        id: Object.__uid++,
+        canvas: this.canvas
       };
 
     switch (area.shape) {
-      case 'rect':
-        areaShape = this.createRectangle(area, configuration);
-        break;
-
       case 'circle':
-        areaShape = this.createCircle(area, configuration);
+        areaShape = AreaShapeFactory.createCircle(area, configuration);
         break;
 
       case 'poly':
-        areaShape = this.createPolygon(area, configuration);
+        areaShape = AreaShapeFactory.createPolygon(area, configuration);
+        break;
+
+      case 'rect':
+        areaShape = AreaShapeFactory.createRectangle(area, configuration);
         break;
     }
 
     return areaShape;
   }
 
-  private createCircle(area: Area, configuration: ShapeConfiguration): AreaShapeCircle {
+  static createCircle(area: Area, configuration: ShapeConfiguration): AreaShapeCircle {
     let coords = area.coords,
       radius = AreaForm.outputiX(coords.radius),
       left = AreaForm.outputiX(coords.left) - radius,
@@ -74,8 +78,6 @@ export class AreaShapeFactory {
       left: left,
       top: top,
       radius: radius,
-      id: Object.__uid++,
-      canvas: this.canvas,
       // disable control points as these would stretch the circle
       // to an ellipse which is not possible in html areas
       _controlsVisibility: {
@@ -88,13 +90,12 @@ export class AreaShapeFactory {
     });
   }
 
-  private createPolygon(area: Area, configuration: ShapeConfiguration): AreaShapePolygon {
+  static createPolygon(area: Area, configuration: ShapeConfiguration): AreaShapePolygon {
     let points: Point[] = area.points || [],
-      polygonPoints: Point[] = [],
-      polygonId = Object.__uid++;
+      polygonPoints: Point[] = [];
 
     points.map((point) => {
-      point.id = polygonId + '-' + Object.__uid++;
+      point.id = configuration.id + '-' + Object.__uid++;
       polygonPoints.push({
         x: AreaForm.outputiX(point.x),
         y: AreaForm.outputiY(point.y),
@@ -105,12 +106,10 @@ export class AreaShapeFactory {
     return new AreaShapePolygon(polygonPoints, {
       ...configuration,
       objectCaching: false,
-      id: polygonId,
-      canvas: this.canvas,
     });
   }
 
-  private createRectangle(area: Area, configuration: ShapeConfiguration): AreaShapeRectangle {
+  static createRectangle(area: Area, configuration: ShapeConfiguration): AreaShapeRectangle {
     let coords = area.coords,
       left = AreaForm.outputiX(coords.left),
       top = AreaForm.outputiY(coords.top),
@@ -123,8 +122,6 @@ export class AreaShapeFactory {
       top: top,
       width: width,
       height: height,
-      id: Object.__uid++,
-      canvas: this.canvas,
       _controlsVisibility: {
         mtr: false,
       }
