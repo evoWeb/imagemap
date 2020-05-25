@@ -19,7 +19,7 @@ const paths = {
 
 const tasks = {
   copy: {
-    src: [`node_modules/fabric/dist/fabric.js`],
+    src: [`node_modules/fabric/dist/fabric.min.js`],
     dest: `${paths.dest}/JavaScript/vendor/`
   },
 

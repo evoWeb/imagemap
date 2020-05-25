@@ -12,7 +12,7 @@
 /// <reference types="../../types/index"/>
 
 // @ts-ignore
-import { Canvas, Rect } from './vendor/Fabric';
+import { Canvas, Rect } from './vendor/Fabric.min';
 import { AreaFieldsetRectangle } from './AreaFieldsetRectangle';
 
 export class AreaShapeRectangle extends Rect {

@@ -8,17 +8,17 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "./vendor/Fabric"], function (require, exports, Fabric_1) {
+define(["require", "exports", "./vendor/Fabric.min"], function (require, exports, Fabric_min_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    class AreaShapePolygon extends Fabric_1.Polygon {
+    class AreaShapePolygon extends Fabric_min_1.Polygon {
         constructor(points, options) {
             super(points, options);
         }
         initializeControls() {
             let self = this, lastControl = this.points.length - 1;
             this.controls = this.points.reduce(function (acc, point, index) {
-                acc['p' + index] = new Fabric_1.Control({
+                acc['p' + index] = new Fabric_min_1.Control({
                     positionHandler: self.polygonPositionHandler,
                     actionHandler: self.anchorWrapper(index > 0 ? index - 1 : lastControl, self.actionHandler),
                     actionName: 'modifyPolygon',
@@ -39,7 +39,7 @@ define(["require", "exports", "./vendor/Fabric"], function (require, exports, Fa
          */
         polygonPositionHandler(dim, finalMatrix, fabricObject) {
             let x = (fabricObject.points[this.pointIndex].x - fabricObject.pathOffset.x), y = (fabricObject.points[this.pointIndex].y - fabricObject.pathOffset.y);
-            return Fabric_1.util.transformPoint({ x: x, y: y }, fabricObject.calcTransformMatrix());
+            return Fabric_min_1.util.transformPoint({ x: x, y: y }, fabricObject.calcTransformMatrix());
         }
         /**
          * from example http://fabricjs.com/custom-controls-polygon
@@ -56,7 +56,7 @@ define(["require", "exports", "./vendor/Fabric"], function (require, exports, Fa
          * @param y
          */
         actionHandler(eventData, transform, x, y) {
-            let polygon = transform.target, currentControl = polygon.controls[polygon.__corner], mouseLocalPosition = polygon.toLocalPoint(new Fabric_1.Point(x, y), 'center', 'center'), size = polygon._getTransformedDimensions(0, 0);
+            let polygon = transform.target, currentControl = polygon.controls[polygon.__corner], mouseLocalPosition = polygon.toLocalPoint(new Fabric_min_1.Point(x, y), 'center', 'center'), size = polygon._getTransformedDimensions(0, 0);
             polygon.points[currentControl.pointIndex].x = mouseLocalPosition.x * polygon.width / size.x + polygon.pathOffset.x;
             polygon.points[currentControl.pointIndex].y = mouseLocalPosition.y * polygon.height / size.y + polygon.pathOffset.y;
             return true;
@@ -71,7 +71,7 @@ define(["require", "exports", "./vendor/Fabric"], function (require, exports, Fa
          */
         anchorWrapper(anchorIndex, fn) {
             return function (eventData, transform, x, y) {
-                let fabricObject = transform.target, absolutePoint = Fabric_1.util.transformPoint({
+                let fabricObject = transform.target, absolutePoint = Fabric_min_1.util.transformPoint({
                     x: (fabricObject.points[anchorIndex].x - fabricObject.pathOffset.x),
                     y: (fabricObject.points[anchorIndex].y - fabricObject.pathOffset.y),
                 }, fabricObject.calcTransformMatrix()), actionPerformed = fn(eventData, transform, x, y);

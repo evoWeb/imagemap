@@ -12,7 +12,7 @@
 /// <reference types="../../types/index"/>
 
 // @ts-ignore
-import { Canvas, Object } from './vendor/Fabric';
+import { Canvas, Object } from './vendor/Fabric.min';
 import { AreaForm } from './AreaForm';
 import { AreaShapeCircle } from './AreaShapeCircle';
 import { AreaShapePolygon } from './AreaShapePolygon';

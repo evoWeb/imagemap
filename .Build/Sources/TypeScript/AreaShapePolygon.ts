@@ -12,7 +12,7 @@
 /// <reference types="../../types/index"/>
 
 // @ts-ignore
-import { Canvas, Control, Point, Polygon, util } from './vendor/Fabric';
+import { Canvas, Control, Point, Polygon, util } from './vendor/Fabric.min';
 
 export class AreaShapePolygon extends Polygon {
   public canvas: Canvas;

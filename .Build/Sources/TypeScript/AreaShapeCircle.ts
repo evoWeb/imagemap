@@ -12,7 +12,7 @@
 /// <reference types="../../types/index"/>
 
 // @ts-ignore
-import { Canvas, Circle } from './vendor/Fabric';
+import { Canvas, Circle } from './vendor/Fabric.min';
 import { AreaFieldsetCircle } from './AreaFieldsetCircle';
 
 export class AreaShapeCircle extends Circle {

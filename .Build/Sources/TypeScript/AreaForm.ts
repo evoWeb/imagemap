@@ -14,7 +14,7 @@
 // @ts-ignore
 import Modal = require('TYPO3/CMS/Backend/Modal');
 // @ts-ignore
-import { Canvas } from './vendor/Fabric';
+import { Canvas } from './vendor/Fabric.min';
 import { AreaFieldsetAbstract } from './AreaFieldsetAbstract';
 
 export class AreaForm {

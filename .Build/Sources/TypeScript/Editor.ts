@@ -14,7 +14,7 @@
 // @ts-ignore
 import 'TYPO3/CMS/Core/Contrib/jquery.minicolors';
 // @ts-ignore
-import { Canvas, Object } from './vendor/Fabric';
+import { Canvas, Object } from './vendor/Fabric.min';
 import { AreaFieldsetFactory } from './AreaFieldsetFactory';
 import { AreaForm } from './AreaForm';
 import { AreaShapeFactory } from './AreaShapeFactory';

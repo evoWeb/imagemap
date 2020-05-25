@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "./vendor/Fabric", "./AreaFieldsetAbstract", "./AreaForm", "./AreaShapeFactory", "./AreaShapePolygon"], function (require, exports, Fabric_1, AreaFieldsetAbstract_1, AreaForm_1, AreaShapeFactory_1, AreaShapePolygon_1) {
+define(["require", "exports", "./vendor/Fabric.min", "./AreaFieldsetAbstract", "./AreaForm", "./AreaShapeFactory", "./AreaShapePolygon"], function (require, exports, Fabric_min_1, AreaFieldsetAbstract_1, AreaForm_1, AreaShapeFactory_1, AreaShapePolygon_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class AreaFieldsetPolygon extends AreaFieldsetAbstract_1.AreaFieldsetAbstract {
@@ -45,7 +45,7 @@ define(["require", "exports", "./vendor/Fabric", "./AreaFieldsetAbstract", "./Ar
         shapeModified(event) {
             let areaShape = event.target, matrix = areaShape.calcTransformMatrix();
             areaShape.points.forEach((point) => {
-                let temporaryPoint = new Fabric_1.Point(point.x - areaShape.pathOffset.x, point.y - areaShape.pathOffset.y), transformed = Fabric_1.util.transformPoint(temporaryPoint, matrix), areaPoint = this.area.points.find((findPoint) => { return findPoint.id === point.id; });
+                let temporaryPoint = new Fabric_min_1.Point(point.x - areaShape.pathOffset.x, point.y - areaShape.pathOffset.y), transformed = Fabric_min_1.util.transformPoint(temporaryPoint, matrix), areaPoint = this.area.points.find((findPoint) => { return findPoint.id === point.id; });
                 if (areaPoint) {
                     let xField = areaPoint.element.querySelector('[data-field="x"]'), yField = areaPoint.element.querySelector('[data-field="y"]');
                     areaPoint.x = AreaForm_1.AreaForm.inputX(transformed.x);
@@ -79,7 +79,7 @@ define(["require", "exports", "./vendor/Fabric", "./AreaFieldsetAbstract", "./Ar
             let currentElement = event.currentTarget, parentElement = this.getElement('.positionOptions'), [currentPoint, nextPoint, newIndex] = this.getCurrentAndNextIndex(currentElement.dataset.point, AreaFieldsetAbstract_1.AreaFieldsetAbstract.after), areaPoint = {
                 x: (currentPoint.x + nextPoint.x) / 2,
                 y: (currentPoint.y + nextPoint.y) / 2,
-                id: this.id + '-' + Fabric_1.Object.__uid++,
+                id: this.id + '-' + Fabric_min_1.Object.__uid++,
                 element: null,
             };
             areaPoint.element = this.getPointFields(areaPoint);

@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "./vendor/Fabric", "./AreaFieldsetFactory", "./AreaForm", "./AreaShapeFactory", "./AreaShapePolygon", "TYPO3/CMS/Core/Contrib/jquery.minicolors"], function (require, exports, Fabric_1, AreaFieldsetFactory_1, AreaForm_1, AreaShapeFactory_1, AreaShapePolygon_1) {
+define(["require", "exports", "./vendor/Fabric.min", "./AreaFieldsetFactory", "./AreaForm", "./AreaShapeFactory", "./AreaShapePolygon", "TYPO3/CMS/Core/Contrib/jquery.minicolors"], function (require, exports, Fabric_min_1, AreaFieldsetFactory_1, AreaForm_1, AreaShapeFactory_1, AreaShapePolygon_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Editor {
@@ -21,7 +21,7 @@ define(["require", "exports", "./vendor/Fabric", "./AreaFieldsetFactory", "./Are
             this.initializeAreaForm();
         }
         initializeCanvas(canvas) {
-            this.canvas = new Fabric_1.Canvas(canvas, {
+            this.canvas = new Fabric_min_1.Canvas(canvas, {
                 width: AreaForm_1.AreaForm.width,
                 height: AreaForm_1.AreaForm.height,
                 top: AreaForm_1.AreaForm.height * -1,

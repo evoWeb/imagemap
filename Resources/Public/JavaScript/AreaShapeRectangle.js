@@ -8,10 +8,10 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "./vendor/Fabric"], function (require, exports, Fabric_1) {
+define(["require", "exports", "./vendor/Fabric.min"], function (require, exports, Fabric_min_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    class AreaShapeRectangle extends Fabric_1.Rect {
+    class AreaShapeRectangle extends Fabric_min_1.Rect {
         constructor(options) {
             super(options);
         }

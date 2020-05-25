@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "./vendor/Fabric", "./AreaForm", "./AreaShapeCircle", "./AreaShapePolygon", "./AreaShapeRectangle"], function (require, exports, Fabric_1, AreaForm_1, AreaShapeCircle_1, AreaShapePolygon_1, AreaShapeRectangle_1) {
+define(["require", "exports", "./vendor/Fabric.min", "./AreaForm", "./AreaShapeCircle", "./AreaShapePolygon", "./AreaShapeRectangle"], function (require, exports, Fabric_min_1, AreaForm_1, AreaShapeCircle_1, AreaShapePolygon_1, AreaShapeRectangle_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class AreaShapeFactory {
@@ -16,7 +16,7 @@ define(["require", "exports", "./vendor/Fabric", "./AreaForm", "./AreaShapeCircl
             this.canvas = canvas;
         }
         createShape(area, selectable) {
-            let areaShape, configuration = Object.assign(Object.assign({}, AreaShapeFactory.shapeConfiguration), { selectable: selectable, hasControls: selectable, stroke: area.color, fill: AreaShapeFactory.hexToRgbA(area.color, 0.4), id: Fabric_1.Object.__uid++, canvas: this.canvas });
+            let areaShape, configuration = Object.assign(Object.assign({}, AreaShapeFactory.shapeConfiguration), { selectable: selectable, hasControls: selectable, stroke: area.color, fill: AreaShapeFactory.hexToRgbA(area.color, 0.4), id: Fabric_min_1.Object.__uid++, canvas: this.canvas });
             switch (area.shape) {
                 case 'circle':
                     areaShape = AreaShapeFactory.createCircle(area, configuration);
@@ -46,7 +46,7 @@ define(["require", "exports", "./vendor/Fabric", "./AreaForm", "./AreaShapeCircl
         static createPolygon(area, configuration) {
             let points = area.points || [], polygonPoints = [];
             points.map((point) => {
-                point.id = configuration.id + '-' + Fabric_1.Object.__uid++;
+                point.id = configuration.id + '-' + Fabric_min_1.Object.__uid++;
                 polygonPoints.push({
                     x: AreaForm_1.AreaForm.outputiX(point.x),
                     y: AreaForm_1.AreaForm.outputiY(point.y),

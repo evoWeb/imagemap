@@ -13,7 +13,7 @@
 
 import * as $ from 'jquery';
 // @ts-ignore
-import { Object } from './vendor/Fabric';
+import { Object } from './vendor/Fabric.min';
 import { AreaForm } from './AreaForm';
 import { AreaShapeFactory } from './AreaShapeFactory';
 

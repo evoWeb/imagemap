@@ -12,7 +12,7 @@
 /// <reference types="../../types/index"/>
 
 // @ts-ignore
-import { Object, Point, util } from './vendor/Fabric';
+import { Object, Point, util } from './vendor/Fabric.min';
 import { AreaFieldsetAbstract } from './AreaFieldsetAbstract';
 import { AreaForm } from './AreaForm';
 import { AreaShapeFactory } from './AreaShapeFactory';
