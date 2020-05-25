@@ -96,7 +96,7 @@ var productionOptions = {
   objectCaching: false,
   selectable: true,
   stroke: "#73f883",
-  strokeWidth: 0,
+  strokeWidth: 1,
   transparentCorners: false
 };
 

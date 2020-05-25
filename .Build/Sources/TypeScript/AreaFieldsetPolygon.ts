@@ -158,8 +158,10 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
         selectable: selectable,
         hasControls: selectable,
         stroke: area.color,
-        strokeWidth: 1,
-        fill: AreaShapeFactory.hexToRgbA(area.color, 0.3)
+        strokeWidth: 0,
+        fill: AreaShapeFactory.hexToRgbA(area.color, 0.4),
+        id: this.id,
+        canvas: this.canvas,
       };
 
     points.map((point) => {
@@ -174,8 +176,6 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
     this.shape = new AreaShapePolygon(polygonPoints, {
       ...configuration,
       objectCaching: false,
-      id: this.id,
-      canvas: this.canvas,
     });
     this.form.canvas.add(this.shape);
 

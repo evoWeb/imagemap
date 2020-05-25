@@ -258,10 +258,10 @@ class EditControl {
     this.editor.renderAreas([{
       shape: 'rect',
       coords: {
-        left: 0.4,
-        top: 0.4,
-        right: 0.4,
-        bottom: 0.4
+        left: 0.3,
+        top: 0.3,
+        right: 0.7,
+        bottom: 0.7
       },
     }]);
   }

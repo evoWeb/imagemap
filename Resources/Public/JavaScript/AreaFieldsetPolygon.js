@@ -106,7 +106,7 @@ define(["require", "exports", "./vendor/Fabric", "./AreaFieldsetAbstract", "./Ar
             }
         }
         renderNewShape(area, selectable) {
-            let points = area.points || [], polygonPoints = [], configuration = Object.assign(Object.assign({}, AreaShapeFactory_1.AreaShapeFactory.shapeConfiguration), { selectable: selectable, hasControls: selectable, stroke: area.color, strokeWidth: 1, fill: AreaShapeFactory_1.AreaShapeFactory.hexToRgbA(area.color, 0.3) });
+            let points = area.points || [], polygonPoints = [], configuration = Object.assign(Object.assign({}, AreaShapeFactory_1.AreaShapeFactory.shapeConfiguration), { selectable: selectable, hasControls: selectable, stroke: area.color, strokeWidth: 0, fill: AreaShapeFactory_1.AreaShapeFactory.hexToRgbA(area.color, 0.4), id: this.id, canvas: this.canvas });
             points.map((point) => {
                 polygonPoints.push({
                     x: AreaForm_1.AreaForm.outputiX(point.x),
@@ -115,7 +115,7 @@ define(["require", "exports", "./vendor/Fabric", "./AreaFieldsetAbstract", "./Ar
                 });
             });
             this.form.canvas.remove(this.shape);
-            this.shape = new AreaShapePolygon_1.AreaShapePolygon(polygonPoints, Object.assign(Object.assign({}, configuration), { objectCaching: false, id: this.id, canvas: this.canvas }));
+            this.shape = new AreaShapePolygon_1.AreaShapePolygon(polygonPoints, Object.assign(Object.assign({}, configuration), { objectCaching: false }));
             this.form.canvas.add(this.shape);
             this.shape.initializeControls();
         }
