@@ -70,6 +70,8 @@ export class Editor {
       'mouse:up:before', // only fired after the modal was closed and reopened
       'mouse:down:before',
       'mouse:move:before',
+      'mouse:dblclick',
+      'mouse:wheel',
       'mouse:over',
       'mouse:out',
       'after:render',

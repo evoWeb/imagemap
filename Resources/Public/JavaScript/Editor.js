@@ -42,6 +42,8 @@ define(["require", "exports", "./vendor/Fabric.min", "./AreaFieldsetFactory", ".
                 'mouse:up:before',
                 'mouse:down:before',
                 'mouse:move:before',
+                'mouse:dblclick',
+                'mouse:wheel',
                 'mouse:over',
                 'mouse:out',
                 'after:render',

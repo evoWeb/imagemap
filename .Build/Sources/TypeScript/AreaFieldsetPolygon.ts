@@ -181,6 +181,7 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
     this.form.canvas.add(this.shape);
 
     this.shape.initializeControls();
+    this.initializeShapeEvents(this.shape);
   }
 
   private getCurrentAndNextIndex(currentId: string, direction: number): any[] {

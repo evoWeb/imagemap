@@ -119,6 +119,7 @@ define(["require", "exports", "./vendor/Fabric.min", "./AreaFieldsetAbstract", "
             this.shape.fieldset = this;
             this.form.canvas.add(this.shape);
             this.shape.initializeControls();
+            this.initializeShapeEvents(this.shape);
         }
         getCurrentAndNextIndex(currentId, direction) {
             let currentIndex = 0;

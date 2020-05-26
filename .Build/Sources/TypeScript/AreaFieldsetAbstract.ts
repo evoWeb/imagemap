@@ -77,6 +77,7 @@ export abstract class AreaFieldsetAbstract {
     this.initializeInformationFieldEvents(this.getElements('.basicOptions .t3js-field'));
     this.initializeCoordinateFieldEvents(this.getElements('.positionOptions .t3js-field'));
     this.initializeButtonEvents(this.getElements('.t3js-btn'));
+    this.initializeShapeEvents(this.shape);
   }
 
   private initializeInformationFieldEvents(fields: NodeListOf<Element>): void {
@@ -98,6 +99,25 @@ export abstract class AreaFieldsetAbstract {
       let action: string = button.dataset.action + 'Action';
       button.removeEventListener('click', this[action]);
       button.addEventListener('click', this[action].bind(this));
+    });
+  }
+
+  protected initializeShapeEvents(shape: Object): void {
+    [
+      'moving', // after closing the modal
+      'moved', // after closing and reopening modal
+
+      'mouseup', // after closing and reopening modal
+      'mousedown',
+      'mousemove',
+      'mouseup:before', // after closing and reopening modal
+      'mousedown:before',
+      'mousedblclick',
+      'mousewheel',
+      'mouseover',
+      'mouseout',
+    ].forEach((eventName: string) => {
+      shape.on(eventName, (e: FabricEvent) => { console.log(e, eventName); });
     });
   }
 

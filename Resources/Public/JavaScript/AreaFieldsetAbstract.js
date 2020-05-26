@@ -48,6 +48,7 @@ define(["require", "exports", "jquery", "./AreaShapeFactory"], function (require
             this.initializeInformationFieldEvents(this.getElements('.basicOptions .t3js-field'));
             this.initializeCoordinateFieldEvents(this.getElements('.positionOptions .t3js-field'));
             this.initializeButtonEvents(this.getElements('.t3js-btn'));
+            this.initializeShapeEvents(this.shape);
         }
         initializeInformationFieldEvents(fields) {
             fields.forEach((field) => {
@@ -66,6 +67,23 @@ define(["require", "exports", "jquery", "./AreaShapeFactory"], function (require
                 let action = button.dataset.action + 'Action';
                 button.removeEventListener('click', this[action]);
                 button.addEventListener('click', this[action].bind(this));
+            });
+        }
+        initializeShapeEvents(shape) {
+            [
+                'moving',
+                'moved',
+                'mouseup',
+                'mousedown',
+                'mousemove',
+                'mouseup:before',
+                'mousedown:before',
+                'mousedblclick',
+                'mousewheel',
+                'mouseover',
+                'mouseout',
+            ].forEach((eventName) => {
+                shape.on(eventName, (e) => { console.log(e, eventName); });
             });
         }
         basicOptionsHandler(event) {
