@@ -30,6 +30,25 @@ define(["require", "exports", "./vendor/Fabric.min", "./AreaFieldsetFactory", ".
                 hoverCursor: 'move',
             });
             this.canvas.on('object:modified', Editor.objectModified.bind(this));
+            [
+                'object:modified',
+                'object:moving',
+                'object:moved',
+                'before:transform',
+                'selection:created',
+                'mouse:up',
+                'mouse:down',
+                'mouse:move',
+                'mouse:up:before',
+                'mouse:down:before',
+                'mouse:move:before',
+                'mouse:over',
+                'mouse:out',
+                'after:render',
+                'object:added',
+            ].forEach((eventName) => {
+                this.canvas.on(eventName, (e) => { console.log(e, eventName); });
+            });
         }
         initializeAreaForm() {
             let element = this.modalParent.querySelector(this.formSelector);

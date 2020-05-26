@@ -58,7 +58,7 @@ let copyTask = () => {
 let typescriptTask = () => {
   let tsProject = typescript.createProject('./tsconfig.json');
 
-  return src(tasks.typescript.src + '*')
+  return src(tasks.typescript.src)
     .pipe(tsProject())
     .pipe(dest(tasks.typescript.dest));
 };

@@ -58,6 +58,25 @@ export class Editor {
     });
 
     this.canvas.on('object:modified', Editor.objectModified.bind(this));
+    [
+      'object:modified', // only fired after the modal was closed and reopened
+      'object:moving', // only fired after the modal is closed
+      'object:moved', // only fired after the modal was closed and reopened
+      'before:transform',
+      'selection:created',
+      'mouse:up', // only fired after the modal was closed and reopened
+      'mouse:down',
+      'mouse:move',
+      'mouse:up:before', // only fired after the modal was closed and reopened
+      'mouse:down:before',
+      'mouse:move:before',
+      'mouse:over',
+      'mouse:out',
+      'after:render',
+      'object:added',
+    ].forEach((eventName: string) => {
+      this.canvas.on(eventName, (e: FabricEvent) => { console.log(e, eventName); });
+    });
   }
 
   private initializeAreaForm(): void {
