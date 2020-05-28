@@ -105,7 +105,6 @@ jobs:
       - name: publish in ter
         run: |
           tag="$(echo $GITHUB_REF | cut -d / -f 3)"
-          echo "Upload tag ${tag}"
           if [[ "${tag}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && [ -n "${TYPO3_ORG_USERNAME}" ] && [ -n "${TYPO3_ORG_PASSWORD}" ]; then
             echo -e "Preparing upload of release ${tag} to TER\n";
 
