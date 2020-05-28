@@ -47,7 +47,7 @@ jobs:
           php -v
 
       - name: Disable xdebug
-        run: grep -q xdebug; then phpenv config-rm xdebug.ini; fi
+        run: if php -i | grep -v xdebug | grep -q xdebug; then phpenv config-rm xdebug.ini; fi
 
       - name: Running php lint with ${php}
         run: |
@@ -55,6 +55,8 @@ jobs:
 
   unit:
     name: Run unit tests
+
+    needs: lint
 
     runs-on: ubuntu-18.04
 
@@ -78,7 +80,7 @@ jobs:
         run: sudo update-alternatives --set php /usr/bin/php7.4
 
       - name: Disable xdebug
-        run: grep -q xdebug; then phpenv config-rm xdebug.ini; fi
+        run: if php -i | grep -v xdebug | grep -q xdebug; then phpenv config-rm xdebug.ini; fi
 
       - name: Install
         run: |
