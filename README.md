@@ -1,5 +1,5 @@
 # TYPO3 Extension ``imagemap``
-[![Build Status](https://travis-ci.org/evoWeb/imagemap.svg?branch=master)](https://travis-ci.org/evoWeb/imagemap)
+![build](https://github.com/evoWeb/imagemap/workflows/build/badge.svg?branch=develop)
 [![Latest Stable Version](https://poser.pugx.org/evoweb/imagemap/v/stable)](https://packagist.org/packages/evoweb/imagemap)
 [![Monthly Downloads](https://poser.pugx.org/evoweb/imagemap/d/monthly)](https://packagist.org/packages/evoweb/imagemap)
 [![Total Downloads](https://poser.pugx.org/evoweb/imagemap/downloads)](https://packagist.org/packages/evoweb/imagemap)
