@@ -104,9 +104,9 @@ jobs:
 
       - name: publish in ter
         run: |
-          tag="$(echo $GITHUB_REF | cut -d / -f 3)"
-          if [[ "${tag}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && [ -n "${TYPO3_ORG_USERNAME}" ] && [ -n "${TYPO3_ORG_PASSWORD}" ]; then
-            echo -e "Preparing upload of release ${tag} to TER\n";
+          TAG="$(echo $GITHUB_REF | cut -d / -f 3)"
+          if [[ "${TAG}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && [ -n "${USERNAME}" ] && [ -n "${PASSWORD}" ]; then
+            echo -e "Preparing upload of release ${TAG} to TER\n";
 
             # Install requirements
             composer global require helhum/ter-client
@@ -118,14 +118,15 @@ jobs:
             rm -rf .Build
             rm -rf .github
 
-            # Set version number from tag
-            sed -i "s/version' => '.*'/version' => '${TRAVIS_TAG}'/" ext_emconf.php
+            # Set version number from TAG
+            sed -i "s/version' => '.*'/version' => '${TAG}'/" ext_emconf.php
 
             # Upload
-            TAG_MESSAGE=`git tag -n10 -l ${TRAVIS_TAG} | sed 's/^[0-9.]*[ ]*//g'`
-            echo "Uploading release ${TRAVIS_TAG} to TER"
-            $HOME/.composer/vendor/bin/ter-client upload imagemap . -u "${TYPO3_ORG_USERNAME}" -p "${TYPO3_ORG_PASSWORD}" -m "${TAG_MESSAGE}"
+            TAG_MESSAGE=`git TAG -n10 -l ${TAG} | sed 's/^[0-9.]*[ ]*//g'`
+            echo "Uploading release ${TAG} to TER"
+            $HOME/.composer/vendor/bin/ter-client upload ${EXTENSION} . -u "${USERNAME}" -p "${PASSWORD}" -m "${TAG_MESSAGE}"
           fi;
         env:
-          TYPO3_ORG_USERNAME: ${{ secrets.typo3Username }}
-          TYPO3_ORG_PASSWORD: ${{ secrets.typo3Password }}
+          EXTENSION: imagemap
+          USERNAME: ${{ secrets.typo3Username }}
+          PASSWORD: ${{ secrets.typo3Password }}
