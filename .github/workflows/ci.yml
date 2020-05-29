@@ -128,7 +128,7 @@ jobs:
 
       - name: publish in ter
         run: |
-          TAG="$(echo ${{ github.ref }} | cut -d / -f 3)"
+          TAG="$(echo ${GITHUB_REF} | cut -d / -f 3)"
           if [[ "${TAG}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && [ -n "${USERNAME}" ] && [ -n "${PASSWORD}" ]; then
             echo -e "Preparing upload of release ${TAG} to TER\n";
 
