@@ -62,6 +62,7 @@ jobs:
 
     continue-on-error: ${{ matrix.TYPO3_VERSION == "dev-master as 10.4.2" }}
     strategy:
+      fail-fast: false
       matrix:
         env:
           - { php: 7.3, TYPO3_VERSION: ^9.5.0, TESTING_FRAMEWORK: ~4.10.0 }
