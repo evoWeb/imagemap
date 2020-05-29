@@ -60,7 +60,7 @@ jobs:
 
     runs-on: ubuntu-18.04
 
-    continue-on-error: ${{ matrix.TYPO3_VERSION == "dev-master as 10.4.2" }}
+    continue-on-error: ${{ matrix.TYPO3_VERSION == 'dev-master as 10.4.2' }}
     strategy:
       fail-fast: false
       matrix:
