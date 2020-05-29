@@ -43,7 +43,7 @@ jobs:
 
       - name: Set up PHP ${php}
         run: |
-          sudo update-alternatives --set php /usr/bin/php${php}
+          sudo update-alternatives --set php /usr/bin/php${php};
           php -v
 
       - name: Disable xdebug
@@ -78,9 +78,9 @@ jobs:
     steps:
       - uses: actions/checkout@v1
 
-      - name: Setup PHP 7.4
+      - name: Setup PHP ${php}
         run: |
-          sudo update-alternatives --set php /usr/bin/php7.4;
+          sudo update-alternatives --set php /usr/bin/php${php};
           php -v;
 
       - name: Disable xdebug
