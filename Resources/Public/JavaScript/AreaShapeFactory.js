@@ -97,7 +97,5 @@ define(["require", "exports", "./vendor/Fabric.min", "./AreaForm", "./AreaShapeC
         hasBorders: false,
         hasRotatingPoint: false,
         transparentCorners: false,
-        // needs to be 0 to keep polygon from sliding
-        strokeWidth: 0
     };
 });

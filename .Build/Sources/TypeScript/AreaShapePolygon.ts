@@ -103,8 +103,9 @@ export class AreaShapePolygon extends Polygon {
 
       fabricObject._setPositionDimensions({});
 
-      let newX = (fabricObject.points[anchorIndex].x - fabricObject.pathOffset.x) / fabricObject.width,
-        newY = (fabricObject.points[anchorIndex].y - fabricObject.pathOffset.y) / fabricObject.height;
+      let polygonBaseSize = fabricObject._getNonTransformedDimensions(),
+        newX = (fabricObject.points[anchorIndex].x - fabricObject.pathOffset.x) / polygonBaseSize.x,
+        newY = (fabricObject.points[anchorIndex].y - fabricObject.pathOffset.y) / polygonBaseSize.y;
 
       fabricObject.setPositionByOrigin(absolutePoint, (newX + 0.5), (newY + 0.5));
       return actionPerformed;
