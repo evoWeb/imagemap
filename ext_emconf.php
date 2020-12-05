@@ -7,7 +7,6 @@ $EM_CONF['imagemap'] = [
     'author' => 'Sebastian Fischer',
     'author_email' => 'typo3@evoweb.de',
     'author_company' => 'evoWeb',
-    'modify_tables' => 'tt_content',
     'state' => 'stable',
     'version' => '1.0.0',
     'constraints' => [
