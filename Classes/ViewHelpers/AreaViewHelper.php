@@ -54,9 +54,10 @@ class AreaViewHelper extends AbstractTagBasedViewHelper
         $this->registerTagAttribute('target', 'string', 'Specifies where to open the target URL');
         $this->registerTagAttribute('type', 'string', 'Specifies the media type of the target URL');
         $this->registerTagAttribute('media', 'string', 'Specifies what media/device the target URL is optimized for');
+        $this->registerArgument('shape', 'string', 'Specifies the shape of the area', true);
         $this->registerArgument('coords', 'array', 'Specifies the coordinates of the area', true);
         $this->registerArgument('href', 'string', 'Specifies the hyperlink target for the area', true);
-        $this->registerArgument('shape', 'string', 'Specifies the shape of the area', true);
+        $this->registerArgument('dimensions', 'array', 'Width and height of image', false, ['width' => 1, 'height' => 1]);
     }
 
     /**
@@ -64,43 +65,62 @@ class AreaViewHelper extends AbstractTagBasedViewHelper
      */
     public function render()
     {
-        $href = $this->arguments['href'];
+        $parameter = $this->arguments['href'];
         $absolute = (bool) $this->arguments['absolute'];
         $coords = $this->arguments['coords'];
         $shape = $this->arguments['shape'];
+        $dimensions = $this->arguments['dimensions'];
 
-        [$shape, $coords] = static::prepareShape($shape, $coords);
+        $coords = static::prepareShape($shape, $coords, $dimensions);
 
-        if ($href) {
+        if ($parameter) {
             $typoLinkCodec = GeneralUtility::makeInstance(TypoLinkCodecService::class);
-            $typoLinkConfiguration = $typoLinkCodec->decode($href);
+            $typoLinkConfiguration = $typoLinkCodec->decode($parameter);
             $typoLinkParameter = $typoLinkCodec->encode($typoLinkConfiguration);
             $href = static::invokeContentObjectRenderer($typoLinkParameter, $absolute);
+
+            if ($href) {
+                $this->tag->addAttribute('href', $href);
+            }
         }
 
         $this->tag->addAttribute('coords', $coords);
-        $this->tag->addAttribute('href', $href);
         $this->tag->addAttribute('shape', $shape);
         return $this->tag->render();
     }
 
-    protected static function prepareShape(string $shape, array $coords): array
+    protected static function prepareShape(string $shape, array $coords, array $dimensions): string
     {
+        $width = $dimensions['width'];
+        $height = $dimensions['height'];
+
         switch ($shape) {
             case 'rect':
+                $coords['left'] = $coords['left'] * $width;
+                $coords['top'] = $coords['top'] * $height;
+                $coords['right'] = $coords['right'] * $width;
+                $coords['bottom'] = $coords['bottom'] * $height;
+                $coords = implode(',', $coords);
+                break;
+
             case 'circle':
+                $coords['left'] = $coords['left'] * $width;
+                $coords['top'] = $coords['top'] * $height;
+                $coords['radius'] = $coords['radius'] * $width;
                 $coords = implode(',', $coords);
                 break;
 
             case 'poly':
                 $points = [];
-                foreach ($coords['points'] as $point) {
+                foreach ($coords as $point) {
+                    $point['x'] = $point['x'] * $width;
+                    $point['y'] = $point['y'] * $height;
                     $points[] = implode(',', $point);
                 }
                 $coords = implode(',', $points);
                 break;
         }
-        return [$shape, $coords];
+        return $coords;
     }
 
     protected static function invokeContentObjectRenderer(string $typoLinkParameter, bool $absolute): string
@@ -110,7 +130,8 @@ class AreaViewHelper extends AbstractTagBasedViewHelper
             'forceAbsoluteUrl' => $absolute,
         ];
 
+        /** @var ContentObjectRenderer $contentObject */
         $contentObject = GeneralUtility::makeInstance(ContentObjectRenderer::class);
-        return $contentObject->typoLink_URL(['typolink.' => $instructions]);
+        return $contentObject->typoLink_URL($instructions);
     }
 }

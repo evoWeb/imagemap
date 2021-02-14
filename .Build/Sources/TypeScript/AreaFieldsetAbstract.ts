@@ -260,6 +260,14 @@ export abstract class AreaFieldsetAbstract {
     this.updateFields();
   }
 
+  protected inputX(value: number): number {
+    return value / AreaForm.width;
+  }
+
+  protected inputY(value: number): number {
+    return value / AreaForm.height;
+  }
+
   static wait(callback: Function, delay: number, timer: number): number {
     clearTimeout(timer);
     return window.setTimeout(callback, delay);

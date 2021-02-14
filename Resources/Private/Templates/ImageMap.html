@@ -11,16 +11,17 @@
             <div class="ce-gallery{f:if(condition: data.imageborder, then: ' ce-border')}"
                  data-ce-columns="{gallery.count.columns}"
                  data-ce-images="{gallery.count.files}">
+                <f:variable name="arguments" value="{gallery: gallery, imageMapAreas: imageMapAreas, imageMapAttributes: imageMapAttributes, imageMapName: imageMapName, settings: settings}"/>
                 <f:if condition="{gallery.position.horizontal} == 'center'">
                     <f:then>
                         <div class="ce-outer">
                             <div class="ce-inner">
-                                {f:render(section: 'row', arguments: {gallery: gallery, imageMap: imageMap, settings: settings})}
+                                {f:render(section: 'row', arguments: arguments)}
                             </div>
                         </div>
                     </f:then>
                     <f:else>
-                        {f:render(section: 'row', arguments: {gallery: gallery, imageMap: imageMap, settings: settings})}
+                        {f:render(section: 'row', arguments: arguments)}
                     </f:else>
                 </f:if>
             </div>
@@ -34,10 +35,12 @@
     <f:variable name="file" value="{column.media}"/>
     <f:variable name="dimensions" value="{column.dimensions}"/>
     <f:if condition="{imageMapAreas}"><f:variable name="attributes" value="{usemap: '#{imageMapName}'}"/></f:if>
+
     <div class="ce-row">
         <div class="ce-column">
+
             <figure class="image">
-                <f:media class="image-embed-item"
+                <i:media class="image-embed-item"
                          file="{file}"
                          width="{dimensions.width}"
                          height="{dimensions.height}"
@@ -46,16 +49,25 @@
                          loading="{settings.media.lazyLoading}"
                          additionalAttributes="{attributes}"/>
                 <f:if condition="{file.description}">
-                    <figcaption class="image-caption">{file.description -> f:format.nl2br()}</figcaption>
+                    <figcaption class="image-caption">
+                        {file.description -> f:format.nl2br()}
+                    </figcaption>
                 </f:if>
             </figure>
-            <f:if condition="{imageMap}">
+
+            <f:if condition="{imageMapAreas}">
                 <map name="{imageMapName}">
                     <f:for each="{imageMapAreas}" as="area">
-                        <i:area href="{f:uri.typolink(parameter: area.href)}" shape="{area.shape}" coords="{area.coords}" alt="{area.alt}" data="{area.data}"/>
+                        <i:area shape="{area.shape}"
+                                coords="{area.coords}"
+                                href="{area.href}"
+                                alt="{area.alt}"
+                                data="{area.data}"
+                                dimensions="{width: imagemapWidth, height: imagemapHeight}"/>
                     </f:for>
                 </map>
             </f:if>
+
         </div>
     </div>
 </f:section>

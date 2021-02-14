@@ -41,15 +41,20 @@ class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcess
 
             $mapData = $cObj->getData($processorConfiguration['data'], $cObj->data);
             $mapArray = $mapData ? \json_decode($mapData, true) : [];
-            if (isset($mapArray['areas']) && count($mapArray['areas'])) {
+            if (count($mapArray)) {
                 if ($this->getTypoScriptFrontendController()->xhtmlDoctype !== '') {
                     // remove target attribute to have xhtml-strict output
                     $attributes = array_diff($attributes, ['target']);
                 }
 
                 $areas = [];
-                foreach ($mapArray['areas'] as $areaAttributes) {
+                foreach ($mapArray as $areaAttributes) {
                     foreach ($areaAttributes as $key => $value) {
+                        if ($key === 'points') {
+                            $areaAttributes['coords'] = $value;
+                            unset($areaAttributes[$key]);
+                            continue;
+                        }
                         if (!in_array($key, $attributes)) {
                             $areaAttributes['data'][$key] = $value;
                             unset($areaAttributes[$key]);

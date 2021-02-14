@@ -62,10 +62,10 @@ export class AreaFieldsetRectangle extends AreaFieldsetAbstract {
       right = Math.round(shape.getScaledWidth() + left),
       bottom = Math.round(shape.getScaledHeight() + top);
 
-    this.area.coords.left = AreaForm.inputX(left);
-    this.area.coords.right = AreaForm.inputX(right);
-    this.area.coords.top = AreaForm.inputY(top);
-    this.area.coords.bottom = AreaForm.inputX(bottom);
+    this.area.coords.left = this.inputX(left);
+    this.area.coords.right = this.inputX(right);
+    this.area.coords.top = this.inputY(top);
+    this.area.coords.bottom = this.inputX(bottom);
 
     this.getElement('.left').setAttribute('value', left.toString());
     this.getElement('.right').setAttribute('value', right.toString());
@@ -79,21 +79,21 @@ export class AreaFieldsetRectangle extends AreaFieldsetAbstract {
 
     switch (field.dataset.field) {
       case 'left':
-        this.area.coords.left = AreaForm.inputX(value);
-        this.area.coords.right = AreaForm.inputX(value + this.shape.getScaledWidth());
+        this.area.coords.left = this.inputX(value);
+        this.area.coords.right = this.inputX(value + this.shape.getScaledWidth());
         this.getElement('#right').setAttribute('value', value + this.shape.getScaledWidth());
         this.shape.set({left: value});
         break;
 
       case 'top':
-        this.area.coords.top = AreaForm.inputY(value);
-        this.area.coords.bottom = AreaForm.inputY(value + this.shape.getScaledHeight());
+        this.area.coords.top = this.inputY(value);
+        this.area.coords.bottom = this.inputY(value + this.shape.getScaledHeight());
         this.getElement('#bottom').setAttribute('value', value + this.shape.getScaledHeight());
         this.shape.set({top: value});
         break;
 
       case 'right':
-        this.area.coords.right = AreaForm.inputX(value);
+        this.area.coords.right = this.inputX(value);
         value -= this.shape.left;
         if (value < 0) {
           value = 10;
@@ -103,7 +103,7 @@ export class AreaFieldsetRectangle extends AreaFieldsetAbstract {
         break;
 
       case 'bottom':
-        this.area.coords.bottom = AreaForm.inputY(value);
+        this.area.coords.bottom = this.inputY(value);
         value -= this.shape.top;
         if (value < 0) {
           value = 10;

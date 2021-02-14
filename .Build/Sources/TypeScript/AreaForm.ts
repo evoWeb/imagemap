@@ -186,14 +186,6 @@ export class AreaForm {
     return JSON.stringify(areas);
   }
 
-  static inputX(value: number): number {
-    return value / AreaForm.width;
-  }
-
-  static inputY(value: number): number {
-    return value / AreaForm.height;
-  }
-
   static outputiX(value: number): number {
     return Math.round(value * AreaForm.width);
   }

@@ -19,6 +19,7 @@ $GLOBALS['TCA']['tt_content']['types']['imagemap'] = [
             --palette--;;headers,
         --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.images,
             image,
+            tx_imagemap_areas,
             --palette--;;mediaAdjustments,
         --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.appearance,
             --palette--;;frames,
@@ -55,13 +56,6 @@ $temporaryColumns = [
     ],
 ];
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns('tt_content', $temporaryColumns);
-
-\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addToAllTCAtypes(
-    'tt_content',
-    'tx_imagemap_areas',
-    'imagemap',
-    'after:image'
-);
 
 // CSH context sensitive help
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addLLrefForTCAdescr(

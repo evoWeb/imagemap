@@ -68,8 +68,8 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
         let xField: HTMLInputElement = areaPoint.element.querySelector('[data-field="x"]'),
           yField: HTMLInputElement = areaPoint.element.querySelector('[data-field="y"]')
 
-        areaPoint.x = AreaForm.inputX(transformed.x);
-        areaPoint.y = AreaForm.inputY(transformed.y);
+        areaPoint.x = this.inputX(transformed.x);
+        areaPoint.y = this.inputY(transformed.y);
 
         xField.value = AreaForm.outputX(areaPoint.x);
         yField.value = AreaForm.outputY(areaPoint.y);
@@ -88,8 +88,8 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
       left = field.dataset.field === 'x' ? parseInt(field.value) : point.x;
       top = field.dataset.field === 'y' ? parseInt(field.value) : point.y;
 
-      areaPoint.x = AreaForm.inputX(left);
-      areaPoint.y = AreaForm.inputY(top);
+      areaPoint.x = this.inputX(left);
+      areaPoint.y = this.inputY(top);
       point.x = left;
       point.y = top;
       this.form.canvas.renderAll();
