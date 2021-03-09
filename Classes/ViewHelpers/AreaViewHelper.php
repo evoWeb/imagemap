@@ -66,7 +66,7 @@ class AreaViewHelper extends AbstractTagBasedViewHelper
     public function render()
     {
         $parameter = $this->arguments['href'];
-        $absolute = (bool) $this->arguments['absolute'];
+        $absolute = (bool)$this->arguments['absolute'];
         $coords = $this->arguments['coords'];
         $shape = $this->arguments['shape'];
         $dimensions = $this->arguments['dimensions'];
