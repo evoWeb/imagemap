@@ -15,6 +15,7 @@ namespace Evoweb\Imagemap\Form\Element;
  * LICENSE.txt file that was distributed with this source code.
  */
 
+use TYPO3\CMS\Backend\Form\Element\AbstractFormElement;
 use TYPO3\CMS\Backend\Form\NodeFactory;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Resource\File;
@@ -25,19 +26,16 @@ use TYPO3\CMS\Core\Utility\StringUtility;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 
-class ImagemapElement extends \TYPO3\CMS\Backend\Form\Element\AbstractFormElement
+class ImagemapElement extends AbstractFormElement
 {
-    /**
-     * @var string
-     */
-    private $wizardRouteName = 'ajax_wizard_imagemap_manipulation';
+    private string $wizardRouteName = 'ajax_wizard_imagemap_manipulation';
 
     /**
      * Default element configuration
      *
      * @var array
      */
-    public static $defaultConfig = [
+    public static array $defaultConfig = [
         'tableName' => 'tt_content',
         'fieldName' => 'image',
         // default: $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext']

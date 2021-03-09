@@ -16,9 +16,10 @@ namespace Evoweb\Imagemap\DataProcessing;
  */
 
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
+use TYPO3\CMS\Frontend\ContentObject\DataProcessorInterface;
 use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 
-class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcessorInterface
+class ImagemapProcessor implements DataProcessorInterface
 {
     /**
      * Process data of a record to resolve imagemap
