@@ -65,37 +65,24 @@ class ImagemapElement extends AbstractFormElement
         ],
     ];
 
-    /**
-     * @var StandaloneView
-     */
-    protected $templateView;
+    protected StandaloneView $templateView;
 
-    /**
-     * @var UriBuilder
-     */
-    protected $uriBuilder;
+    protected UriBuilder $uriBuilder;
 
-    /**
-     * @var object|\Psr\Log\LoggerAwareInterface|ResourceFactory
-     */
-    protected $resourceFactory;
+    protected ResourceFactory $resourceFactory;
 
-    /**
-     * @param NodeFactory $nodeFactory
-     * @param array $data
-     */
     public function __construct(NodeFactory $nodeFactory, array $data)
     {
         parent::__construct($nodeFactory, $data);
         // Would be great, if we could inject the view here, but since the constructor is in the interface, we can't
+        $this->uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
+        $this->resourceFactory = GeneralUtility::makeInstance(ResourceFactory::class);
         $this->templateView = GeneralUtility::makeInstance(StandaloneView::class);
         $this->templateView->setLayoutRootPaths(['EXT:imagemap/Resources/Private/Layouts/']);
         $this->templateView->setPartialRootPaths(['EXT:imagemap/Resources/Private/Partials/']);
         $this->templateView->setTemplatePathAndFilename(
             'EXT:imagemap/Resources/Private/Templates/FormEngine/ImagemapElement.html'
         );
-        $this->uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
-        $this->resourceFactory = GeneralUtility::makeInstance(ResourceFactory::class);
     }
 
     public function render(): array

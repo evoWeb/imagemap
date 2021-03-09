@@ -26,20 +26,11 @@ use TYPO3\CMS\Fluid\View\StandaloneView;
 
 class ImagemapManipulationController
 {
-    /**
-     * @var string
-     */
-    private $wizardRouteName = 'ajax_wizard_imagemap_manipulation';
+    private string $wizardRouteName = 'ajax_wizard_imagemap_manipulation';
 
-    /**
-     * @var StandaloneView
-     */
-    protected $templateView;
+    protected StandaloneView $templateView;
 
-    /**
-     * @var ResourceFactory
-     */
-    protected $resourceFactory;
+    protected ResourceFactory $resourceFactory;
 
     public function __construct(StandaloneView $templateView, ResourceFactory $resourceFactory)
     {
