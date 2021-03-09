@@ -1,5 +1,7 @@
 <?php
 
+defined('TYPO3') or die();
+
 $GLOBALS['TCA']['tt_content']['ctrl']['typeicon_classes']['imagemap'] = 'extensions-imagemap-content';
 
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTcaSelectItem(
