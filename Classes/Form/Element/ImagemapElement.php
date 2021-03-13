@@ -179,9 +179,9 @@ class ImagemapElement extends AbstractFormElement
         if (MathUtility::canBeInterpretedAsInteger($fileUid)) {
             try {
                 $fileReference = $this->resourceFactory->getFileReferenceObject($fileUid);
-                $file = $fileReference ? $fileReference->getOriginalFile() : null;
+                $file = $fileReference->getOriginalFile();
                 $file->updateProperties(['crop' => $fileReference->getProperty('crop')]);
-            } catch (\InvalidArgumentException $e) {
+            } catch (\Exception $e) {
             }
         }
         return $file;

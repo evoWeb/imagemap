@@ -26,13 +26,13 @@ class SoftReferenceIndex extends \TYPO3\CMS\Core\Database\SoftReferenceIndex
      * Just overrides the method which normally catches all softref-types
      * In this case we already know what type it is ;)
      *
-     * @param string table
-     * @param string field
-     * @param int uid
-     * @param string content
-     * @param string spKey
-     * @param array spParams
-     * @param string structurePath
+     * @param string $table
+     * @param string $field
+     * @param int $uid
+     * @param string $content
+     * @param string $spKey
+     * @param array $spParams
+     * @param string $structurePath
      *
      * @return array the Array which describes what references we found and where ...
      */
