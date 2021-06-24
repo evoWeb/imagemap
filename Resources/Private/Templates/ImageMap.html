@@ -15,12 +15,12 @@
                     <f:then>
                         <div class="ce-outer">
                             <div class="ce-inner">
-                                {f:render(section: 'row', arguments: {gallery: gallery, imageMap: imageMap, settings: settings})}
+                                {f:render(section: 'row', arguments: {gallery: gallery, imageMapAreas: imageMapAreas, imageMapAttributes: imageMapAttributes, imageMapName: imageMapName, settings: settings})}
                             </div>
                         </div>
                     </f:then>
                     <f:else>
-                        {f:render(section: 'row', arguments: {gallery: gallery, imageMap: imageMap, settings: settings})}
+                        {f:render(section: 'row', arguments: {gallery: gallery, imageMapAreas: imageMapAreas, imageMapAttributes: imageMapAttributes, imageMapName: imageMapName, settings: settings})}
                     </f:else>
                 </f:if>
             </div>
@@ -49,10 +49,11 @@
                     <figcaption class="image-caption">{file.description -> f:format.nl2br()}</figcaption>
                 </f:if>
             </figure>
-            <f:if condition="{imageMap}">
+            <f:if condition="{imageMapName}">
                 <map name="{imageMapName}">
                     <f:for each="{imageMapAreas}" as="area">
-                        <i:area href="{f:uri.typolink(parameter: area.href)}" shape="{area.shape}" coords="{area.coords}" alt="{area.alt}" data="{area.data}"/>
+                        <i:area href="{f:uri.typolink(parameter: area.href)}" shape="{area.shape}"
+                                coords="{f:if(condition: area.coords, then: area.coords, else: area.points)}" alt="{area.alt}" data="{area.data}"/>
                     </f:for>
                 </map>
             </f:if>

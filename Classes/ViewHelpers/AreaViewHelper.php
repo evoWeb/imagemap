@@ -15,6 +15,7 @@ namespace Evoweb\Imagemap\ViewHelpers;
 
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
+use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 use TYPO3\CMS\Frontend\Service\TypoLinkCodecService;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractTagBasedViewHelper;
 
@@ -65,18 +66,10 @@ class AreaViewHelper extends AbstractTagBasedViewHelper
     public function render()
     {
         $href = $this->arguments['href'];
-        $absolute = (bool) $this->arguments['absolute'];
         $coords = $this->arguments['coords'];
         $shape = $this->arguments['shape'];
 
         [$shape, $coords] = static::prepareShape($shape, $coords);
-
-        if ($href) {
-            $typoLinkCodec = GeneralUtility::makeInstance(TypoLinkCodecService::class);
-            $typoLinkConfiguration = $typoLinkCodec->decode($href);
-            $typoLinkParameter = $typoLinkCodec->encode($typoLinkConfiguration);
-            $href = static::invokeContentObjectRenderer($typoLinkParameter, $absolute);
-        }
 
         $this->tag->addAttribute('coords', $coords);
         $this->tag->addAttribute('href', $href);
@@ -86,16 +79,21 @@ class AreaViewHelper extends AbstractTagBasedViewHelper
 
     protected static function prepareShape(string $shape, array $coords): array
     {
+        [$width, $height] = self::getTypoScriptFrontendController()->lastImageInfo;
         switch ($shape) {
             case 'rect':
+                $coords = $coords['top'] * $height . ',' . $coords['left'] * $width
+                    . ',' . $coords['bottom'] * $height . ',' . $coords['right'] * $width;
+                break;
+
             case 'circle':
-                $coords = implode(',', $coords);
+                $coords = $coords['top'] * $height . ',' . $coords['left'] * $width . ',' . $coords['radius'] * $width;
                 break;
 
             case 'poly':
                 $points = [];
-                foreach ($coords['points'] as $point) {
-                    $points[] = implode(',', $point);
+                foreach ($coords as $point) {
+                    $points[] = $point['x'] * $width . ',' . $point['y'] * $height;
                 }
                 $coords = implode(',', $points);
                 break;
@@ -103,14 +101,8 @@ class AreaViewHelper extends AbstractTagBasedViewHelper
         return [$shape, $coords];
     }
 
-    protected static function invokeContentObjectRenderer(string $typoLinkParameter, bool $absolute): string
+    protected static function getTypoScriptFrontendController(): TypoScriptFrontendController
     {
-        $instructions = [
-            'parameter' => $typoLinkParameter,
-            'forceAbsoluteUrl' => $absolute,
-        ];
-
-        $contentObject = GeneralUtility::makeInstance(ContentObjectRenderer::class);
-        return $contentObject->typoLink_URL(['typolink.' => $instructions]);
+        return $GLOBALS['TSFE'];
     }
 }
