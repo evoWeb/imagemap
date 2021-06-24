@@ -237,7 +237,7 @@ export abstract class AreaFieldsetAbstract {
   private addBrowselinkTargetInput(): void {
     if (this.form.browselinkTargetForm) {
       let input = this.form.browselinkParent.createElement('input');
-      input.id = `href${this.id}`;
+      input.id = `href${this.id}_target`;
       input.value = this.area.href;
       input.setAttribute('data-formengine-input-name', input.id);
       input.onchange = this.changedBrowselinkTargetInput.bind(this);
@@ -247,7 +247,7 @@ export abstract class AreaFieldsetAbstract {
 
   public removeBrowselinkTargetInput(): void {
     if (this.form && this.form.browselinkTargetForm) {
-      let field = this.form.browselinkTargetForm.querySelector(`#href${this.id}`);
+      let field = this.form.browselinkTargetForm.querySelector(`#href${this.id}_target`);
       if (field) {
         field.remove();
       }
@@ -255,7 +255,7 @@ export abstract class AreaFieldsetAbstract {
   }
 
   private changedBrowselinkTargetInput(): void {
-    let field = (this.form.browselinkTargetForm.querySelector(`#href${this.id}`) as HTMLInputElement);
+    let field = (this.form.browselinkTargetForm.querySelector(`#href${this.id}_target`) as HTMLInputElement);
     this.area.href = field.value;
     this.updateFields();
   }

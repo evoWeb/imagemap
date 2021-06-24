@@ -315,7 +315,7 @@ class EditControl {
     this.currentModal.modal('hide');
   }
 
-  private hideColorSwatch(event: JQueryEventObject): void {
+  private hideColorSwatch(event: Event): void {
     let swatch = (event.target) as HTMLElement;
     if (!$(swatch).parents().add(swatch).hasClass('minicolors')) {
       // Hides all dropdown panels
