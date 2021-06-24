@@ -7,7 +7,6 @@ tt_content.imagemap {
   variables.imageMapAttributes {
     1 = shape
     2 = coords
-    2 = points
     3 = href
     4 = target
     5 = data

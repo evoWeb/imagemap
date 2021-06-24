@@ -16,8 +16,10 @@ namespace Evoweb\Imagemap\DataProcessing;
  */
 
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
+use TYPO3\CMS\Frontend\ContentObject\DataProcessorInterface;
+use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 
-class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcessorInterface
+class ImagemapProcessor implements DataProcessorInterface
 {
     /**
      * Process data of a record to resolve imagemap
@@ -41,7 +43,7 @@ class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcess
 
             $mapData = $cObj->getData($processorConfiguration['data'], $cObj->data);
             $mapArray = $mapData ? \json_decode($mapData, true) : [];
-            if (isset($mapArray) && count($mapArray)) {
+            if (count($mapArray)) {
                 if ($this->getTypoScriptFrontendController()->xhtmlDoctype !== '') {
                     // remove target attribute to have xhtml-strict output
                     $attributes = array_diff($attributes, ['target']);
@@ -50,6 +52,11 @@ class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcess
                 $areas = [];
                 foreach ($mapArray as $areaAttributes) {
                     foreach ($areaAttributes as $key => $value) {
+                        if ($key === 'points') {
+                            $areaAttributes['coords'] = $value;
+                            unset($areaAttributes[$key]);
+                            continue;
+                        }
                         if (!in_array($key, $attributes)) {
                             $areaAttributes['data'][$key] = $value;
                             unset($areaAttributes[$key]);
@@ -77,8 +84,8 @@ class ImagemapProcessor implements \TYPO3\CMS\Frontend\ContentObject\DataProcess
         return $mapName;
     }
 
-    protected function getTypoScriptFrontendController(): ?\TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController
+    protected function getTypoScriptFrontendController(): ?TypoScriptFrontendController
     {
-        return $GLOBALS['TSFE'] ?? null;
+        return $GLOBALS['TSFE'];
     }
 }
