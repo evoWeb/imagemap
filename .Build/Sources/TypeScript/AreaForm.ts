@@ -117,7 +117,7 @@ export class AreaForm {
 
     data.append('P[areaId]', area.id.toString());
     data.append('P[formName]', 'areasForm');
-    data.append('P[itemFormElName]', `href${area.id}`);
+    data.append('P[itemFormElName]', `href${area.id}_target`);
     data.append('P[currentValue]', area.area.href);
     data.append('P[tableName]', this.configuration.tableName);
     data.append('P[fieldName]', this.configuration.fieldName);
