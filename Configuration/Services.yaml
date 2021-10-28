@@ -10,3 +10,8 @@ services:
 
   Evoweb\Imagemap\Controller\Wizard\ImagemapManipulationController:
     public: true
+
+  Evoweb\Imagemap\Database\SoftReferenceIndex:
+    tags:
+      - name: softreference.parser
+        parserKey: imagemap
