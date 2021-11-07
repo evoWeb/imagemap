@@ -48,8 +48,8 @@ define(["require", "exports", "./vendor/Fabric.min", "./AreaFieldsetAbstract", "
                 let temporaryPoint = new Fabric_min_1.Point(point.x - areaShape.pathOffset.x, point.y - areaShape.pathOffset.y), transformed = Fabric_min_1.util.transformPoint(temporaryPoint, matrix), areaPoint = this.area.points.find((findPoint) => { return findPoint.id === point.id; });
                 if (areaPoint) {
                     let xField = areaPoint.element.querySelector('[data-field="x"]'), yField = areaPoint.element.querySelector('[data-field="y"]');
-                    areaPoint.x = AreaForm_1.AreaForm.inputX(transformed.x);
-                    areaPoint.y = AreaForm_1.AreaForm.inputY(transformed.y);
+                    areaPoint.x = this.inputX(transformed.x);
+                    areaPoint.y = this.inputY(transformed.y);
                     xField.value = AreaForm_1.AreaForm.outputX(areaPoint.x);
                     yField.value = AreaForm_1.AreaForm.outputY(areaPoint.y);
                 }
@@ -60,8 +60,8 @@ define(["require", "exports", "./vendor/Fabric.min", "./AreaFieldsetAbstract", "
             if (point !== null) {
                 left = field.dataset.field === 'x' ? parseInt(field.value) : point.x;
                 top = field.dataset.field === 'y' ? parseInt(field.value) : point.y;
-                areaPoint.x = AreaForm_1.AreaForm.inputX(left);
-                areaPoint.y = AreaForm_1.AreaForm.inputY(top);
+                areaPoint.x = this.inputX(left);
+                areaPoint.y = this.inputY(top);
                 point.x = left;
                 point.y = top;
                 this.form.canvas.renderAll();

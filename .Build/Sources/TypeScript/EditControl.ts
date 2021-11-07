@@ -94,13 +94,13 @@ class EditControl {
       initEditorModal: () => void = this.initializeAreaEditorModal.bind(this);
 
     Icons.getIcon('spinner-circle', Icons.sizes.default, null, null, Icons.markupIdentifiers.inline).done((icon: string) => {
-      let content = '<div class="modal-loading">' + icon + '</div>';
-
       /**
        * Open modal with areas to edit
        */
       this.currentModal = Modal.advanced({
-        additionalCssClasses: ['modal-area-wizard modal-image-manipulation'],
+        type: 'default',
+        title: modalTitle,
+        content: '<div class="modal-loading">' + icon + '</div>',
         buttons: [
           {
             btnClass: 'btn-default pull-left',
@@ -143,10 +143,9 @@ class EditControl {
             text: buttonSaveText,
           },
         ],
-        content: content,
-        size: Modal.sizes.full,
         style: Modal.styles.dark,
-        title: modalTitle,
+        size: Modal.sizes.full,
+        additionalCssClasses: ['modal-area-wizard modal-image-manipulation'],
         callback: (currentModal: JQuery) => {
           let data = new FormData(),
             request = new XMLHttpRequest();
@@ -169,8 +168,6 @@ class EditControl {
       this.currentModal.on('hide.bs.modal', () => {
         this.destroy();
       });
-      // do not dismiss the modal when clicking beside it to avoid data loss
-      this.currentModal.data('bs.modal').options.backdrop = 'static';
     });
   }
 

@@ -47,10 +47,10 @@ define(["require", "exports", "./AreaFieldsetAbstract", "./AreaForm"], function 
         }
         shapeModified(event) {
             let shape = event.target, left = Math.round(shape.left), top = Math.round(shape.top), right = Math.round(shape.getScaledWidth() + left), bottom = Math.round(shape.getScaledHeight() + top);
-            this.area.coords.left = AreaForm_1.AreaForm.inputX(left);
-            this.area.coords.right = AreaForm_1.AreaForm.inputX(right);
-            this.area.coords.top = AreaForm_1.AreaForm.inputY(top);
-            this.area.coords.bottom = AreaForm_1.AreaForm.inputX(bottom);
+            this.area.coords.left = this.inputX(left);
+            this.area.coords.right = this.inputX(right);
+            this.area.coords.top = this.inputY(top);
+            this.area.coords.bottom = this.inputX(bottom);
             this.getElement('.left').setAttribute('value', left.toString());
             this.getElement('.right').setAttribute('value', right.toString());
             this.getElement('.top').setAttribute('value', top.toString());
@@ -60,19 +60,19 @@ define(["require", "exports", "./AreaFieldsetAbstract", "./AreaForm"], function 
             let field = (event.currentTarget || event.target), value = parseInt(field.value);
             switch (field.dataset.field) {
                 case 'left':
-                    this.area.coords.left = AreaForm_1.AreaForm.inputX(value);
-                    this.area.coords.right = AreaForm_1.AreaForm.inputX(value + this.shape.getScaledWidth());
+                    this.area.coords.left = this.inputX(value);
+                    this.area.coords.right = this.inputX(value + this.shape.getScaledWidth());
                     this.getElement('#right').setAttribute('value', value + this.shape.getScaledWidth());
                     this.shape.set({ left: value });
                     break;
                 case 'top':
-                    this.area.coords.top = AreaForm_1.AreaForm.inputY(value);
-                    this.area.coords.bottom = AreaForm_1.AreaForm.inputY(value + this.shape.getScaledHeight());
+                    this.area.coords.top = this.inputY(value);
+                    this.area.coords.bottom = this.inputY(value + this.shape.getScaledHeight());
                     this.getElement('#bottom').setAttribute('value', value + this.shape.getScaledHeight());
                     this.shape.set({ top: value });
                     break;
                 case 'right':
-                    this.area.coords.right = AreaForm_1.AreaForm.inputX(value);
+                    this.area.coords.right = this.inputX(value);
                     value -= this.shape.left;
                     if (value < 0) {
                         value = 10;
@@ -81,7 +81,7 @@ define(["require", "exports", "./AreaFieldsetAbstract", "./AreaForm"], function 
                     this.shape.set({ width: value });
                     break;
                 case 'bottom':
-                    this.area.coords.bottom = AreaForm_1.AreaForm.inputY(value);
+                    this.area.coords.bottom = this.inputY(value);
                     value -= this.shape.top;
                     if (value < 0) {
                         value = 10;

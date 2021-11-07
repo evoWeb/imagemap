@@ -14,11 +14,11 @@
 // @ts-ignore
 import 'TYPO3/CMS/Core/Contrib/jquery.minicolors';
 // @ts-ignore
-import { Canvas, Object } from './vendor/Fabric.min';
-import { AreaFieldsetFactory } from './AreaFieldsetFactory';
-import { AreaForm } from './AreaForm';
-import { AreaShapeFactory } from './AreaShapeFactory';
-import { AreaShapePolygon } from './AreaShapePolygon';
+import * as Fabric from './vendor/Fabric.min';
+import {AreaFieldsetFactory} from './AreaFieldsetFactory';
+import {AreaForm} from './AreaForm';
+import {AreaShapeFactory} from './AreaShapeFactory';
+import {AreaShapePolygon} from './AreaShapePolygon';
 
 export class Editor {
   readonly configuration: EditorConfiguration;
@@ -27,7 +27,7 @@ export class Editor {
 
   readonly browselinkParent: Document;
 
-  private canvas: Canvas;
+  private canvas: Fabric.Canvas;
 
   private formSelector: string = '#areasForm';
 
@@ -48,36 +48,20 @@ export class Editor {
   }
 
   private initializeCanvas(canvas: HTMLCanvasElement): void {
-    this.canvas = new Canvas(canvas, {
+    // @ts-ignore
+    let helper: HTMLFrameElement = frameElement;
+    if (helper && helper.contentWindow && Fabric.window !== helper.contentWindow.parent) {
+      Fabric.window = helper.contentWindow.parent;
+      Fabric.document = helper.contentWindow.parent.document;
+    }
+
+    this.canvas = new Fabric.Canvas(canvas, {
       width: AreaForm.width,
       height: AreaForm.height,
       top: AreaForm.height * -1,
       selection: false,
       preserveObjectStacking: true,
       hoverCursor: 'move',
-    });
-
-    this.canvas.on('object:modified', Editor.objectModified.bind(this));
-    [
-      'object:modified', // only fired after the modal was closed and reopened
-      'object:moving', // only fired after the modal is closed
-      'object:moved', // only fired after the modal was closed and reopened
-      'before:transform',
-      'selection:created',
-      'mouse:up', // only fired after the modal was closed and reopened
-      'mouse:down',
-      'mouse:move',
-      'mouse:up:before', // only fired after the modal was closed and reopened
-      'mouse:down:before',
-      'mouse:move:before',
-      'mouse:dblclick',
-      'mouse:wheel',
-      'mouse:over',
-      'mouse:out',
-      'after:render',
-      'object:added',
-    ].forEach((eventName: string) => {
-      this.canvas.on(eventName, (e: FabricEvent) => { console.log(e, eventName); });
     });
   }
 
@@ -87,7 +71,7 @@ export class Editor {
   }
 
   static objectModified(event: FabricEvent): void {
-    let element: Object = event.target;
+    let element: Fabric.Object = event.target;
     if (element.hasOwnProperty('fieldset')) {
       // circle, polygon, rectangle
       element.fieldset.shapeModified(event);

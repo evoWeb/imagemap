@@ -47,9 +47,9 @@ define(["require", "exports", "./AreaFieldsetAbstract", "./AreaForm"], function 
         }
         shapeModified(event) {
             let shape = event.target, radius = shape.getRadiusX(), left = shape.left + radius, top = shape.top + radius;
-            this.area.coords.left = AreaForm_1.AreaForm.inputX(left);
-            this.area.coords.top = AreaForm_1.AreaForm.inputY(top);
-            this.area.coords.radius = AreaForm_1.AreaForm.inputX(radius);
+            this.area.coords.left = this.inputX(left);
+            this.area.coords.top = this.inputY(top);
+            this.area.coords.radius = this.inputX(radius);
             this.getElement('.left').setAttribute('value', left);
             this.getElement('.top').setAttribute('value', top);
             this.getElement('.radius').setAttribute('value', radius);
@@ -59,16 +59,16 @@ define(["require", "exports", "./AreaFieldsetAbstract", "./AreaForm"], function 
             switch (field.dataset.field) {
                 case 'left':
                     value -= parseInt(this.getElement(`.radius`).value);
-                    this.area.coords.left = AreaForm_1.AreaForm.inputX(value);
+                    this.area.coords.left = this.inputX(value);
                     this.shape.set({ left: value });
                     break;
                 case 'top':
                     value -= parseInt(this.getElement(`.radius`).value);
-                    this.area.coords.top = AreaForm_1.AreaForm.inputY(value);
+                    this.area.coords.top = this.inputY(value);
                     this.shape.set({ top: value });
                     break;
                 case 'radius':
-                    this.area.coords.top = AreaForm_1.AreaForm.inputX(value);
+                    this.area.coords.top = this.inputX(value);
                     this.shape.set({ radius: value });
                     break;
             }

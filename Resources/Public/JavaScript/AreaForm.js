@@ -127,12 +127,6 @@ define(["require", "exports", "TYPO3/CMS/Backend/Modal"], function (require, exp
             });
             return JSON.stringify(areas);
         }
-        static inputX(value) {
-            return value / AreaForm.width;
-        }
-        static inputY(value) {
-            return value / AreaForm.height;
-        }
         static outputiX(value) {
             return Math.round(value * AreaForm.width);
         }
