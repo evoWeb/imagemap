@@ -8,31 +8,31 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "./vendor/Fabric.min", "./AreaForm", "./AreaShapeCircle", "./AreaShapePolygon", "./AreaShapeRectangle"], function (require, exports, Fabric_min_1, AreaForm_1, AreaShapeCircle_1, AreaShapePolygon_1, AreaShapeRectangle_1) {
+define(["require", "exports", "./vendor/Fabric.min", "./AreaForm", "./CircleShape", "./PolygonShape", "./RectangleShape"], function (require, exports, Fabric_min_1, AreaForm_1, CircleShape_1, PolygonShape_1, RectangleShape_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    class AreaShapeFactory {
+    class ShapeFactory {
         constructor(canvas = null) {
             this.canvas = canvas;
         }
         createShape(area, selectable) {
-            let areaShape, configuration = Object.assign(Object.assign({}, AreaShapeFactory.shapeConfiguration), { selectable: selectable, hasControls: selectable, stroke: area.color, fill: AreaShapeFactory.hexToRgbA(area.color, 0.4), id: Fabric_min_1.Object.__uid++, canvas: this.canvas });
+            let areaShape, configuration = Object.assign(Object.assign({}, ShapeFactory.shapeConfiguration), { selectable: selectable, hasControls: selectable, stroke: area.color, fill: ShapeFactory.hexToRgbA(area.color, 0.4), id: Fabric_min_1.Object.__uid++, canvas: this.canvas });
             switch (area.shape) {
                 case 'circle':
-                    areaShape = AreaShapeFactory.createCircle(area, configuration);
+                    areaShape = ShapeFactory.createCircle(area, configuration);
                     break;
                 case 'poly':
-                    areaShape = AreaShapeFactory.createPolygon(area, configuration);
+                    areaShape = ShapeFactory.createPolygon(area, configuration);
                     break;
                 case 'rect':
-                    areaShape = AreaShapeFactory.createRectangle(area, configuration);
+                    areaShape = ShapeFactory.createRectangle(area, configuration);
                     break;
             }
             return areaShape;
         }
         static createCircle(area, configuration) {
             let coords = area.coords, radius = AreaForm_1.AreaForm.outputiX(coords.radius), left = AreaForm_1.AreaForm.outputiX(coords.left) - radius, top = AreaForm_1.AreaForm.outputiY(coords.top) - radius;
-            return new AreaShapeCircle_1.AreaShapeCircle(Object.assign(Object.assign({}, configuration), { left: left, top: top, radius: radius, 
+            return new CircleShape_1.CircleShape(Object.assign(Object.assign({}, configuration), { left: left, top: top, radius: radius, 
                 // disable control points as these would stretch the circle
                 // to an ellipse which is not possible in html areas
                 _controlsVisibility: {
@@ -53,11 +53,11 @@ define(["require", "exports", "./vendor/Fabric.min", "./AreaForm", "./AreaShapeC
                     id: point.id,
                 });
             });
-            return new AreaShapePolygon_1.AreaShapePolygon(polygonPoints, Object.assign(Object.assign({}, configuration), { objectCaching: false }));
+            return new PolygonShape_1.PolygonShape(polygonPoints, Object.assign(Object.assign({}, configuration), { objectCaching: false }));
         }
         static createRectangle(area, configuration) {
             let coords = area.coords, left = AreaForm_1.AreaForm.outputiX(coords.left), top = AreaForm_1.AreaForm.outputiY(coords.top), width = AreaForm_1.AreaForm.outputiX(coords.right) - left, height = AreaForm_1.AreaForm.outputiY(coords.bottom) - top;
-            return new AreaShapeRectangle_1.AreaShapeRectangle(Object.assign(Object.assign({}, configuration), { left: left, top: top, width: width, height: height, _controlsVisibility: {
+            return new RectangleShape_1.RectangleShape(Object.assign(Object.assign({}, configuration), { left: left, top: top, width: width, height: height, _controlsVisibility: {
                     mtr: false,
                 } }));
         }
@@ -88,8 +88,8 @@ define(["require", "exports", "./vendor/Fabric.min", "./AreaForm", "./AreaShapeC
             throw new Error('Bad Hex: ' + hex);
         }
     }
-    exports.AreaShapeFactory = AreaShapeFactory;
-    AreaShapeFactory.shapeConfiguration = {
+    exports.ShapeFactory = ShapeFactory;
+    ShapeFactory.shapeConfiguration = {
         cornerColor: '#eee',
         cornerStrokeColor: '#bbb',
         cornerSize: 10,

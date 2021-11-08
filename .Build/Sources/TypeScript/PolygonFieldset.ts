@@ -13,15 +13,15 @@
 
 // @ts-ignore
 import { Object, Point, util } from './vendor/Fabric.min';
-import { AreaFieldsetAbstract } from './AreaFieldsetAbstract';
+import { AbstractFieldset } from './AbstractFieldset';
 import { AreaForm } from './AreaForm';
-import { AreaShapeFactory } from './AreaShapeFactory';
-import { AreaShapePolygon } from './AreaShapePolygon';
+import { ShapeFactory } from './ShapeFactory';
+import { PolygonShape } from './PolygonShape';
 
-export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
+export class PolygonFieldset extends AbstractFieldset {
   readonly name: string = 'polygon';
 
-  public shape: AreaShapePolygon;
+  public shape: PolygonShape;
 
   protected updateFields(): void {
     for (let attributeKey in this.area) {
@@ -114,7 +114,7 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
       parentElement = this.getElement('.positionOptions'),
       [currentPoint, nextPoint, newIndex] = this.getCurrentAndNextIndex(
         currentElement.dataset.point,
-        AreaFieldsetAbstract.after
+        AbstractFieldset.after
       ),
       areaPoint: Point = {
         x: (currentPoint.x + nextPoint.x) / 2,
@@ -130,7 +130,7 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
       parentElement.append(areaPoint.element);
     }
 
-    this.area.points = AreaFieldsetPolygon.addElementWithPosition(this.area.points, areaPoint, newIndex);
+    this.area.points = PolygonFieldset.addElementWithPosition(this.area.points, areaPoint, newIndex);
 
     this.renderNewShape(this.area as Area, true);
   }
@@ -154,12 +154,12 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
     let points: Point[] = area.points || [],
       polygonPoints: Point[] = [],
       configuration: ShapeConfiguration = {
-        ...AreaShapeFactory.shapeConfiguration,
+        ...ShapeFactory.shapeConfiguration,
         selectable: selectable,
         hasControls: selectable,
         stroke: area.color,
         strokeWidth: 0,
-        fill: AreaShapeFactory.hexToRgbA(area.color, 0.4),
+        fill: ShapeFactory.hexToRgbA(area.color, 0.4),
         id: this.id,
         canvas: this.canvas,
       };
@@ -173,7 +173,7 @@ export class AreaFieldsetPolygon extends AreaFieldsetAbstract {
     });
 
     this.form.canvas.remove(this.shape);
-    this.shape = new AreaShapePolygon(polygonPoints, {
+    this.shape = new PolygonShape(polygonPoints, {
       ...configuration,
       objectCaching: false,
     });

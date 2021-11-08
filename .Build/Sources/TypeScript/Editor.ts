@@ -15,10 +15,10 @@
 import 'TYPO3/CMS/Core/Contrib/jquery.minicolors';
 // @ts-ignore
 import * as Fabric from './vendor/Fabric.min';
-import {AreaFieldsetFactory} from './AreaFieldsetFactory';
-import {AreaForm} from './AreaForm';
-import {AreaShapeFactory} from './AreaShapeFactory';
-import {AreaShapePolygon} from './AreaShapePolygon';
+import { FieldsetFactory } from './FieldsetFactory';
+import { AreaForm } from './AreaForm';
+import { ShapeFactory } from './ShapeFactory';
+import { PolygonShape } from './PolygonShape';
 
 export class Editor {
   readonly configuration: EditorConfiguration;
@@ -97,18 +97,18 @@ export class Editor {
 
   public renderAreas(areas: Array<Area>): void {
     if (areas !== undefined) {
-      let areaShapeFactory = new AreaShapeFactory(this.canvas);
-      let areaFieldsetFactory = new AreaFieldsetFactory(this.configuration);
+      let areaShapeFactory = new ShapeFactory(this.canvas);
+      let areaFieldsetFactory = new FieldsetFactory(this.configuration);
 
       areas.forEach((area) => {
-        area.color = AreaShapeFactory.getRandomColor(area.color);
+        area.color = ShapeFactory.getRandomColor(area.color);
         let areaShape = areaShapeFactory.createShape(area, true),
           areaFieldset = areaFieldsetFactory.createFieldset(area, areaShape);
 
         this.canvas.add(areaShape);
         this.form.addArea(areaFieldset);
 
-        if (areaShape instanceof AreaShapePolygon) {
+        if (areaShape instanceof PolygonShape) {
           areaShape.initializeControls();
         }
       });

@@ -11,7 +11,7 @@
 define(["require", "exports", "./vendor/Fabric.min"], function (require, exports, Fabric_min_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    class AreaShapePolygon extends Fabric_min_1.Polygon {
+    class PolygonShape extends Fabric_min_1.Polygon {
         constructor(points, options) {
             super(points, options);
         }
@@ -77,10 +77,10 @@ define(["require", "exports", "./vendor/Fabric.min"], function (require, exports
                 }, fabricObject.calcTransformMatrix()), actionPerformed = fn(eventData, transform, x, y);
                 fabricObject._setPositionDimensions({});
                 let polygonBaseSize = fabricObject._getNonTransformedDimensions(), newX = (fabricObject.points[anchorIndex].x - fabricObject.pathOffset.x) / polygonBaseSize.x, newY = (fabricObject.points[anchorIndex].y - fabricObject.pathOffset.y) / polygonBaseSize.y;
-                fabricObject.setPositionByOrigin(absolutePoint, (newX + 0.5), (newY + 0.5));
+                fabricObject.setPositionByOrigin(absolutePoint, (newX + 0.5).toString(), (newY + 0.5).toString());
                 return actionPerformed;
             };
         }
     }
-    exports.AreaShapePolygon = AreaShapePolygon;
+    exports.PolygonShape = PolygonShape;
 });

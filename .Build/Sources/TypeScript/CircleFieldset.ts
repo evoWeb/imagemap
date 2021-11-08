@@ -11,14 +11,14 @@
 
 /// <reference types="../../types/index"/>
 
-import { AreaFieldsetAbstract } from './AreaFieldsetAbstract';
+import { AbstractFieldset } from './AbstractFieldset';
 import { AreaForm } from './AreaForm';
-import { AreaShapeCircle } from './AreaShapeCircle';
+import { CircleShape } from './CircleShape';
 
-export class AreaFieldsetCircle extends AreaFieldsetAbstract {
+export class CircleFieldset extends AbstractFieldset {
   readonly name: string = 'circle';
 
-  public shape: AreaShapeCircle;
+  public shape: CircleShape;
 
   protected updateFields(): void {
     for (let attributeKey in this.area) {
@@ -56,7 +56,7 @@ export class AreaFieldsetCircle extends AreaFieldsetAbstract {
   }
 
   protected shapeModified(event: FabricEvent): void {
-    let shape = (event.target as AreaShapeCircle),
+    let shape = (event.target as CircleShape),
       radius = shape.getRadiusX(),
       left = shape.left + radius,
       top = shape.top + radius;

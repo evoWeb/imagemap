@@ -14,11 +14,11 @@
 // @ts-ignore
 import { Canvas, Object } from './vendor/Fabric.min';
 import { AreaForm } from './AreaForm';
-import { AreaShapeCircle } from './AreaShapeCircle';
-import { AreaShapePolygon } from './AreaShapePolygon';
-import { AreaShapeRectangle } from './AreaShapeRectangle';
+import { CircleShape } from './CircleShape';
+import { PolygonShape } from './PolygonShape';
+import { RectangleShape } from './RectangleShape';
 
-export class AreaShapeFactory {
+export class ShapeFactory {
   static shapeConfiguration: ShapeConfiguration = {
     cornerColor: '#eee',
     cornerStrokeColor: '#bbb',
@@ -38,39 +38,39 @@ export class AreaShapeFactory {
   public createShape(area: Area, selectable: boolean): Object {
     let areaShape: Object,
       configuration: ShapeConfiguration = {
-        ...AreaShapeFactory.shapeConfiguration,
+        ...ShapeFactory.shapeConfiguration,
         selectable: selectable,
         hasControls: selectable,
         stroke: area.color,
-        fill: AreaShapeFactory.hexToRgbA(area.color, 0.4),
+        fill: ShapeFactory.hexToRgbA(area.color, 0.4),
         id: Object.__uid++,
         canvas: this.canvas
       };
 
     switch (area.shape) {
       case 'circle':
-        areaShape = AreaShapeFactory.createCircle(area, configuration);
+        areaShape = ShapeFactory.createCircle(area, configuration);
         break;
 
       case 'poly':
-        areaShape = AreaShapeFactory.createPolygon(area, configuration);
+        areaShape = ShapeFactory.createPolygon(area, configuration);
         break;
 
       case 'rect':
-        areaShape = AreaShapeFactory.createRectangle(area, configuration);
+        areaShape = ShapeFactory.createRectangle(area, configuration);
         break;
     }
 
     return areaShape;
   }
 
-  static createCircle(area: Area, configuration: ShapeConfiguration): AreaShapeCircle {
+  static createCircle(area: Area, configuration: ShapeConfiguration): CircleShape {
     let coords = area.coords,
       radius = AreaForm.outputiX(coords.radius),
       left = AreaForm.outputiX(coords.left) - radius,
       top = AreaForm.outputiY(coords.top) - radius;
 
-    return new AreaShapeCircle({
+    return new CircleShape({
       ...configuration,
       left: left,
       top: top,
@@ -87,7 +87,7 @@ export class AreaShapeFactory {
     });
   }
 
-  static createPolygon(area: Area, configuration: ShapeConfiguration): AreaShapePolygon {
+  static createPolygon(area: Area, configuration: ShapeConfiguration): PolygonShape {
     let points: Point[] = area.points || [],
       polygonPoints: Point[] = [];
 
@@ -100,20 +100,20 @@ export class AreaShapeFactory {
       });
     });
 
-    return new AreaShapePolygon(polygonPoints, {
+    return new PolygonShape(polygonPoints, {
       ...configuration,
       objectCaching: false,
     });
   }
 
-  static createRectangle(area: Area, configuration: ShapeConfiguration): AreaShapeRectangle {
+  static createRectangle(area: Area, configuration: ShapeConfiguration): RectangleShape {
     let coords = area.coords,
       left = AreaForm.outputiX(coords.left),
       top = AreaForm.outputiY(coords.top),
       width = AreaForm.outputiX(coords.right) - left,
       height = AreaForm.outputiY(coords.bottom) - top;
 
-    return new AreaShapeRectangle({
+    return new RectangleShape({
       ...configuration,
       left: left,
       top: top,

@@ -8,10 +8,10 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "./vendor/Fabric.min", "./AreaFieldsetAbstract", "./AreaForm", "./AreaShapeFactory", "./AreaShapePolygon"], function (require, exports, Fabric_min_1, AreaFieldsetAbstract_1, AreaForm_1, AreaShapeFactory_1, AreaShapePolygon_1) {
+define(["require", "exports", "./vendor/Fabric.min", "./AbstractFieldset", "./AreaForm", "./ShapeFactory", "./PolygonShape"], function (require, exports, Fabric_min_1, AbstractFieldset_1, AreaForm_1, ShapeFactory_1, PolygonShape_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    class AreaFieldsetPolygon extends AreaFieldsetAbstract_1.AreaFieldsetAbstract {
+    class PolygonFieldset extends AbstractFieldset_1.AbstractFieldset {
         constructor() {
             super(...arguments);
             this.name = 'polygon';
@@ -76,7 +76,7 @@ define(["require", "exports", "./vendor/Fabric.min", "./AreaFieldsetAbstract", "
             return data;
         }
         addPointAfterAction(event) {
-            let currentElement = event.currentTarget, parentElement = this.getElement('.positionOptions'), [currentPoint, nextPoint, newIndex] = this.getCurrentAndNextIndex(currentElement.dataset.point, AreaFieldsetAbstract_1.AreaFieldsetAbstract.after), areaPoint = {
+            let currentElement = event.currentTarget, parentElement = this.getElement('.positionOptions'), [currentPoint, nextPoint, newIndex] = this.getCurrentAndNextIndex(currentElement.dataset.point, AbstractFieldset_1.AbstractFieldset.after), areaPoint = {
                 x: (currentPoint.x + nextPoint.x) / 2,
                 y: (currentPoint.y + nextPoint.y) / 2,
                 id: this.id + '-' + Fabric_min_1.Object.__uid++,
@@ -89,7 +89,7 @@ define(["require", "exports", "./vendor/Fabric.min", "./AreaFieldsetAbstract", "
             else {
                 parentElement.append(areaPoint.element);
             }
-            this.area.points = AreaFieldsetPolygon.addElementWithPosition(this.area.points, areaPoint, newIndex);
+            this.area.points = PolygonFieldset.addElementWithPosition(this.area.points, areaPoint, newIndex);
             this.renderNewShape(this.area, true);
         }
         removePointAction(event) {
@@ -106,7 +106,7 @@ define(["require", "exports", "./vendor/Fabric.min", "./AreaFieldsetAbstract", "
             }
         }
         renderNewShape(area, selectable) {
-            let points = area.points || [], polygonPoints = [], configuration = Object.assign(Object.assign({}, AreaShapeFactory_1.AreaShapeFactory.shapeConfiguration), { selectable: selectable, hasControls: selectable, stroke: area.color, strokeWidth: 0, fill: AreaShapeFactory_1.AreaShapeFactory.hexToRgbA(area.color, 0.4), id: this.id, canvas: this.canvas });
+            let points = area.points || [], polygonPoints = [], configuration = Object.assign(Object.assign({}, ShapeFactory_1.ShapeFactory.shapeConfiguration), { selectable: selectable, hasControls: selectable, stroke: area.color, strokeWidth: 0, fill: ShapeFactory_1.ShapeFactory.hexToRgbA(area.color, 0.4), id: this.id, canvas: this.canvas });
             points.map((point) => {
                 polygonPoints.push({
                     x: AreaForm_1.AreaForm.outputiX(point.x),
@@ -115,7 +115,7 @@ define(["require", "exports", "./vendor/Fabric.min", "./AreaFieldsetAbstract", "
                 });
             });
             this.form.canvas.remove(this.shape);
-            this.shape = new AreaShapePolygon_1.AreaShapePolygon(polygonPoints, Object.assign(Object.assign({}, configuration), { objectCaching: false }));
+            this.shape = new PolygonShape_1.PolygonShape(polygonPoints, Object.assign(Object.assign({}, configuration), { objectCaching: false }));
             this.shape.fieldset = this;
             this.form.canvas.add(this.shape);
             this.shape.initializeControls();
@@ -167,5 +167,5 @@ define(["require", "exports", "./vendor/Fabric.min", "./AreaFieldsetAbstract", "
             return array;
         }
     }
-    exports.AreaFieldsetPolygon = AreaFieldsetPolygon;
+    exports.PolygonFieldset = PolygonFieldset;
 });

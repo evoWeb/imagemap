@@ -15,7 +15,7 @@
 import Modal = require('TYPO3/CMS/Backend/Modal');
 // @ts-ignore
 import { Canvas } from './vendor/Fabric.min';
-import { AreaFieldsetAbstract } from './AreaFieldsetAbstract';
+import { AbstractFieldset } from './AbstractFieldset';
 
 export class AreaForm {
   static width: number;
@@ -32,7 +32,7 @@ export class AreaForm {
 
   public browselinkParent: Document;
 
-  public areaFieldsets: Array<AreaFieldsetAbstract> = [];
+  public areaFieldsets: Array<AbstractFieldset> = [];
 
   private browselinkTargetFormSelector: string = '#browselinkTargetForm';
 
@@ -62,18 +62,18 @@ export class AreaForm {
   }
 
   public updateArrowsState(): void {
-    this.areaFieldsets.forEach((area: AreaFieldsetAbstract) => {
+    this.areaFieldsets.forEach((area: AbstractFieldset) => {
       area.updateArrowsState();
     });
   }
 
-  public addArea(area: AreaFieldsetAbstract): void {
+  public addArea(area: AbstractFieldset): void {
     this.areaFieldsets.push(area);
     area.addForm(this);
     this.updateArrowsState();
   }
 
-  public moveArea(area: AreaFieldsetAbstract, offset: number): void {
+  public moveArea(area: AbstractFieldset, offset: number): void {
     let index = this.areaFieldsets.indexOf(area),
       newIndex = index + offset,
       parent = area.element.parentNode;
@@ -88,9 +88,9 @@ export class AreaForm {
     this.updateArrowsState();
   }
 
-  public deleteArea(area: AreaFieldsetAbstract): void {
-    let areaFieldsets: Array<AreaFieldsetAbstract> = [];
-    this.areaFieldsets.forEach((currentArea: AreaFieldsetAbstract, index: number) => {
+  public deleteArea(area: AbstractFieldset): void {
+    let areaFieldsets: Array<AbstractFieldset> = [];
+    this.areaFieldsets.forEach((currentArea: AbstractFieldset, index: number) => {
       if (area === currentArea) {
         if (currentArea.element) {
           currentArea.element.remove();
@@ -109,7 +109,7 @@ export class AreaForm {
     this.updateArrowsState();
   }
 
-  public openLinkBrowser(link: HTMLElement, area: AreaFieldsetAbstract): void {
+  public openLinkBrowser(link: HTMLElement, area: AbstractFieldset): void {
     link.blur();
 
     let data = new FormData(),
@@ -129,7 +129,7 @@ export class AreaForm {
     request.send(data);
   }
 
-  private fetchBrowseLinkCallback(this: AreaFieldsetAbstract, e: ProgressEvent): void {
+  private fetchBrowseLinkCallback(this: AbstractFieldset, e: ProgressEvent): void {
     let request = (e.target as XMLHttpRequest);
     if (request.readyState === 4 && request.status === 200) {
       let data = JSON.parse(request.responseText),
@@ -179,7 +179,7 @@ export class AreaForm {
   public getMapData(): string {
     let areas: Area[] = [];
 
-    this.areaFieldsets.forEach((areaFieldset: AreaFieldsetAbstract) => {
+    this.areaFieldsets.forEach((areaFieldset: AbstractFieldset) => {
       areas.push(areaFieldset.getData());
     });
 

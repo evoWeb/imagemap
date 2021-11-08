@@ -12,15 +12,15 @@
 /// <reference types="../../types/index"/>
 
 // @ts-ignore
-import { Canvas, Rect } from './vendor/Fabric.min';
-import { AreaFieldsetRectangle } from './AreaFieldsetRectangle';
+import { Canvas, Circle } from './vendor/Fabric.min';
+import { CircleFieldset } from './CircleFieldset';
 
-export class AreaShapeRectangle extends Rect {
+export class CircleShape extends Circle {
   public id: number;
 
   public canvas: Canvas;
 
-  public fieldset: AreaFieldsetRectangle;
+  public fieldset: CircleFieldset;
 
   [property: string]: any;
 

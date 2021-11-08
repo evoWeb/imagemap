@@ -14,7 +14,7 @@
 // @ts-ignore
 import { Canvas, Control, Point, Polygon, util } from './vendor/Fabric.min';
 
-export class AreaShapePolygon extends Polygon {
+export class PolygonShape extends Polygon {
   public canvas: Canvas;
 
   [property: string]: any;
@@ -49,7 +49,7 @@ export class AreaShapePolygon extends Polygon {
    * @param finalMatrix
    * @param fabricObject
    */
-  polygonPositionHandler(dim: any, finalMatrix: any, fabricObject: AreaShapePolygon): Point {
+  polygonPositionHandler(dim: any, finalMatrix: any, fabricObject: PolygonShape): Point {
     let x = (fabricObject.points[this.pointIndex].x - fabricObject.pathOffset.x),
       y = (fabricObject.points[this.pointIndex].y - fabricObject.pathOffset.y);
 
@@ -107,7 +107,7 @@ export class AreaShapePolygon extends Polygon {
         newX = (fabricObject.points[anchorIndex].x - fabricObject.pathOffset.x) / polygonBaseSize.x,
         newY = (fabricObject.points[anchorIndex].y - fabricObject.pathOffset.y) / polygonBaseSize.y;
 
-      fabricObject.setPositionByOrigin(absolutePoint, (newX + 0.5), (newY + 0.5));
+      fabricObject.setPositionByOrigin(absolutePoint, (newX + 0.5).toString(), (newY + 0.5).toString());
       return actionPerformed;
     }
   }

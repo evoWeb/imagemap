@@ -8,10 +8,10 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "jquery", "./AreaForm", "./AreaShapeFactory"], function (require, exports, $, AreaForm_1, AreaShapeFactory_1) {
+define(["require", "exports", "jquery", "./AreaForm", "./ShapeFactory"], function (require, exports, $, AreaForm_1, ShapeFactory_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    class AreaFieldsetAbstract {
+    class AbstractFieldset {
         constructor(area, configuration, shape) {
             this.name = '';
             this.id = 0;
@@ -73,7 +73,7 @@ define(["require", "exports", "jquery", "./AreaForm", "./AreaShapeFactory"], fun
             this.area[field.dataset.field] = field.value;
         }
         positionOptionsHandler(event) {
-            this.moveShapeDelay = AreaFieldsetAbstract.wait(() => { this.moveShape(event); }, 500, this.moveShapeDelay);
+            this.moveShapeDelay = AbstractFieldset.wait(() => { this.moveShape(event); }, 500, this.moveShapeDelay);
         }
         updateArrowsState() {
             let areasForm = this.form.element, upButton = this.getElement('[data-action="up"]'), downButton = this.getElement('[data-action="down"]');
@@ -94,10 +94,10 @@ define(["require", "exports", "jquery", "./AreaForm", "./AreaShapeFactory"], fun
             this.form.openLinkBrowser(event.currentTarget, this);
         }
         upAction() {
-            this.form.moveArea(this, AreaFieldsetAbstract.before);
+            this.form.moveArea(this, AbstractFieldset.before);
         }
         downAction() {
-            this.form.moveArea(this, AreaFieldsetAbstract.after);
+            this.form.moveArea(this, AbstractFieldset.after);
         }
         deleteAction() {
             this.form.deleteArea(this);
@@ -121,7 +121,7 @@ define(["require", "exports", "jquery", "./AreaForm", "./AreaShapeFactory"], fun
             this.getElement('.t3js-color-picker').setAttribute('value', this.area.color);
             this.shape.set('borderColor', this.area.color);
             this.shape.set('stroke', this.area.color);
-            this.shape.set('fill', AreaShapeFactory_1.AreaShapeFactory.hexToRgbA(this.area.color, 0.2));
+            this.shape.set('fill', ShapeFactory_1.ShapeFactory.hexToRgbA(this.area.color, 0.2));
             this.form.canvas.renderAll();
         }
         getFieldsetElement(selector, id) {
@@ -184,7 +184,7 @@ define(["require", "exports", "jquery", "./AreaForm", "./AreaShapeFactory"], fun
             return window.setTimeout(callback, delay);
         }
     }
-    exports.AreaFieldsetAbstract = AreaFieldsetAbstract;
-    AreaFieldsetAbstract.before = -1;
-    AreaFieldsetAbstract.after = 1;
+    exports.AbstractFieldset = AbstractFieldset;
+    AbstractFieldset.before = -1;
+    AbstractFieldset.after = 1;
 });

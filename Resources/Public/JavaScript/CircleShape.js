@@ -11,10 +11,10 @@
 define(["require", "exports", "./vendor/Fabric.min"], function (require, exports, Fabric_min_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    class AreaShapeRectangle extends Fabric_min_1.Rect {
+    class CircleShape extends Fabric_min_1.Circle {
         constructor(options) {
             super(options);
         }
     }
-    exports.AreaShapeRectangle = AreaShapeRectangle;
+    exports.CircleShape = CircleShape;
 });

@@ -8,13 +8,13 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "./AreaFieldsetAbstract", "./AreaForm"], function (require, exports, AreaFieldsetAbstract_1, AreaForm_1) {
+define(["require", "exports", "./AbstractFieldset", "./AreaForm"], function (require, exports, AbstractFieldset_1, AreaForm_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    class AreaFieldsetCircle extends AreaFieldsetAbstract_1.AreaFieldsetAbstract {
+    class RectangleFieldset extends AbstractFieldset_1.AbstractFieldset {
         constructor() {
             super(...arguments);
-            this.name = 'circle';
+            this.name = 'rectangle';
         }
         updateFields() {
             for (let attributeKey in this.area) {
@@ -34,10 +34,10 @@ define(["require", "exports", "./AreaFieldsetAbstract", "./AreaForm"], function 
                     continue;
                 }
                 let coordinatesValue = this.area.coords[coordinatesKey] || '', element = this.getElement(`.${coordinatesKey}`);
-                if (['left', 'radius'].indexOf(coordinatesKey) > -1) {
+                if (['left', 'right'].indexOf(coordinatesKey) > -1) {
                     coordinatesValue = AreaForm_1.AreaForm.outputX(coordinatesValue);
                 }
-                else if (['top'].indexOf(coordinatesKey) > -1) {
+                else if (['top', 'bottom'].indexOf(coordinatesKey) > -1) {
                     coordinatesValue = AreaForm_1.AreaForm.outputY(coordinatesValue);
                 }
                 if (element !== null) {
@@ -46,34 +46,52 @@ define(["require", "exports", "./AreaFieldsetAbstract", "./AreaForm"], function 
             }
         }
         shapeModified(event) {
-            let shape = event.target, radius = shape.getRadiusX(), left = shape.left + radius, top = shape.top + radius;
+            let shape = event.target, left = Math.round(shape.left), top = Math.round(shape.top), right = Math.round(shape.getScaledWidth() + left), bottom = Math.round(shape.getScaledHeight() + top);
             this.area.coords.left = this.inputX(left);
+            this.area.coords.right = this.inputX(right);
             this.area.coords.top = this.inputY(top);
-            this.area.coords.radius = this.inputX(radius);
-            this.getElement('.left').setAttribute('value', left);
-            this.getElement('.top').setAttribute('value', top);
-            this.getElement('.radius').setAttribute('value', radius);
+            this.area.coords.bottom = this.inputX(bottom);
+            this.getElement('.left').setAttribute('value', left.toString());
+            this.getElement('.right').setAttribute('value', right.toString());
+            this.getElement('.top').setAttribute('value', top.toString());
+            this.getElement('.bottom').setAttribute('value', bottom.toString());
         }
         moveShape(event) {
             let field = (event.currentTarget || event.target), value = parseInt(field.value);
             switch (field.dataset.field) {
                 case 'left':
-                    value -= parseInt(this.getElement(`.radius`).value);
                     this.area.coords.left = this.inputX(value);
+                    this.area.coords.right = this.inputX(value + this.shape.getScaledWidth());
+                    this.getElement('#right').setAttribute('value', value + this.shape.getScaledWidth());
                     this.shape.set({ left: value });
                     break;
                 case 'top':
-                    value -= parseInt(this.getElement(`.radius`).value);
                     this.area.coords.top = this.inputY(value);
+                    this.area.coords.bottom = this.inputY(value + this.shape.getScaledHeight());
+                    this.getElement('#bottom').setAttribute('value', value + this.shape.getScaledHeight());
                     this.shape.set({ top: value });
                     break;
-                case 'radius':
-                    this.area.coords.top = this.inputX(value);
-                    this.shape.set({ radius: value });
+                case 'right':
+                    this.area.coords.right = this.inputX(value);
+                    value -= this.shape.left;
+                    if (value < 0) {
+                        value = 10;
+                        field.value = this.left + value;
+                    }
+                    this.shape.set({ width: value });
+                    break;
+                case 'bottom':
+                    this.area.coords.bottom = this.inputY(value);
+                    value -= this.shape.top;
+                    if (value < 0) {
+                        value = 10;
+                        field.value = this.top + value;
+                    }
+                    this.shape.set({ height: value });
                     break;
             }
             this.form.canvas.renderAll();
         }
     }
-    exports.AreaFieldsetCircle = AreaFieldsetCircle;
+    exports.RectangleFieldset = RectangleFieldset;
 });

@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "./vendor/Fabric.min", "./AreaForm", "./AreaShapeFactory"], function (require, exports, Fabric_min_1, AreaForm_1, AreaShapeFactory_1) {
+define(["require", "exports", "./vendor/Fabric.min", "./AreaForm", "./ShapeFactory"], function (require, exports, Fabric_min_1, AreaForm_1, ShapeFactory_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Preview {
@@ -28,9 +28,9 @@ define(["require", "exports", "./vendor/Fabric.min", "./AreaForm", "./AreaShapeF
         }
         renderAreas(areas) {
             if (areas !== undefined) {
-                let areaShapeFactory = new AreaShapeFactory_1.AreaShapeFactory();
+                let areaShapeFactory = new ShapeFactory_1.ShapeFactory();
                 areas.forEach((area) => {
-                    area.color = AreaShapeFactory_1.AreaShapeFactory.getRandomColor(area.color);
+                    area.color = ShapeFactory_1.ShapeFactory.getRandomColor(area.color);
                     let areaShape = areaShapeFactory.createShape(area, false);
                     this.canvas.add(areaShape);
                     this.areaShapes.push(areaShape);

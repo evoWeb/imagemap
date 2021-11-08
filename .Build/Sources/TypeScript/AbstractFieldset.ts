@@ -15,9 +15,9 @@ import * as $ from 'jquery';
 // @ts-ignore
 import { Object } from './vendor/Fabric.min';
 import { AreaForm } from './AreaForm';
-import { AreaShapeFactory } from './AreaShapeFactory';
+import { ShapeFactory } from './ShapeFactory';
 
-export abstract class AreaFieldsetAbstract {
+export abstract class AbstractFieldset {
   static before: number = -1;
 
   static after: number = 1;
@@ -113,7 +113,7 @@ export abstract class AreaFieldsetAbstract {
   }
 
   private positionOptionsHandler(event: InputEvent): void {
-    this.moveShapeDelay = AreaFieldsetAbstract.wait(
+    this.moveShapeDelay = AbstractFieldset.wait(
       () => { this.moveShape(event); },
       500,
       this.moveShapeDelay
@@ -143,11 +143,11 @@ export abstract class AreaFieldsetAbstract {
   }
 
   protected upAction(): void {
-    this.form.moveArea(this, AreaFieldsetAbstract.before);
+    this.form.moveArea(this, AbstractFieldset.before);
   }
 
   protected downAction(): void {
-    this.form.moveArea(this, AreaFieldsetAbstract.after);
+    this.form.moveArea(this, AbstractFieldset.after);
   }
 
   public deleteAction(): void {
@@ -177,7 +177,7 @@ export abstract class AreaFieldsetAbstract {
     (this.getElement('.t3js-color-picker') as HTMLInputElement).setAttribute('value', this.area.color);
     this.shape.set('borderColor', this.area.color);
     this.shape.set('stroke', this.area.color);
-    this.shape.set('fill', AreaShapeFactory.hexToRgbA(this.area.color, 0.2));
+    this.shape.set('fill', ShapeFactory.hexToRgbA(this.area.color, 0.2));
     this.form.canvas.renderAll();
   }
 

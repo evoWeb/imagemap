@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "./vendor/Fabric.min", "./AreaFieldsetFactory", "./AreaForm", "./AreaShapeFactory", "./AreaShapePolygon", "TYPO3/CMS/Core/Contrib/jquery.minicolors"], function (require, exports, Fabric, AreaFieldsetFactory_1, AreaForm_1, AreaShapeFactory_1, AreaShapePolygon_1) {
+define(["require", "exports", "./vendor/Fabric.min", "./FieldsetFactory", "./AreaForm", "./ShapeFactory", "./PolygonShape", "TYPO3/CMS/Core/Contrib/jquery.minicolors"], function (require, exports, Fabric, FieldsetFactory_1, AreaForm_1, ShapeFactory_1, PolygonShape_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Editor {
@@ -61,14 +61,14 @@ define(["require", "exports", "./vendor/Fabric.min", "./AreaFieldsetFactory", ".
         }
         renderAreas(areas) {
             if (areas !== undefined) {
-                let areaShapeFactory = new AreaShapeFactory_1.AreaShapeFactory(this.canvas);
-                let areaFieldsetFactory = new AreaFieldsetFactory_1.AreaFieldsetFactory(this.configuration);
+                let areaShapeFactory = new ShapeFactory_1.ShapeFactory(this.canvas);
+                let areaFieldsetFactory = new FieldsetFactory_1.FieldsetFactory(this.configuration);
                 areas.forEach((area) => {
-                    area.color = AreaShapeFactory_1.AreaShapeFactory.getRandomColor(area.color);
+                    area.color = ShapeFactory_1.ShapeFactory.getRandomColor(area.color);
                     let areaShape = areaShapeFactory.createShape(area, true), areaFieldset = areaFieldsetFactory.createFieldset(area, areaShape);
                     this.canvas.add(areaShape);
                     this.form.addArea(areaFieldset);
-                    if (areaShape instanceof AreaShapePolygon_1.AreaShapePolygon) {
+                    if (areaShape instanceof PolygonShape_1.PolygonShape) {
                         areaShape.initializeControls();
                     }
                 });

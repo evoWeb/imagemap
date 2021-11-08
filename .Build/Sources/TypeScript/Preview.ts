@@ -14,7 +14,7 @@
 // @ts-ignore
 import { Canvas, Object } from './vendor/Fabric.min';
 import { AreaForm } from './AreaForm';
-import { AreaShapeFactory } from './AreaShapeFactory';
+import { ShapeFactory } from './ShapeFactory';
 
 export class Preview {
   private areaShapes: Array<Object> = [];
@@ -38,9 +38,9 @@ export class Preview {
 
   public renderAreas(areas: Array<Area>): void {
     if (areas !== undefined) {
-      let areaShapeFactory = new AreaShapeFactory();
+      let areaShapeFactory = new ShapeFactory();
       areas.forEach((area: Area) => {
-        area.color = AreaShapeFactory.getRandomColor(area.color);
+        area.color = ShapeFactory.getRandomColor(area.color);
         let areaShape = areaShapeFactory.createShape(area, false);
 
         this.canvas.add(areaShape);
