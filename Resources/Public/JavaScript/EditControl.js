@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "jquery", "imagesloaded", "TYPO3/CMS/Backend/Icons", "TYPO3/CMS/Backend/Modal", "./AreaForm", "./Editor"], function (require, exports, $, ImagesLoaded, Icons, Modal, AreaForm_1, Editor_1) {
+define(["require", "exports", "imagesloaded", "TYPO3/CMS/Backend/Icons", "TYPO3/CMS/Backend/Modal", "./AreaForm", "./Editor"], function (require, exports, ImagesLoaded, Icons, Modal, AreaForm_1, Editor_1) {
     "use strict";
     class EditControl {
         constructor(fieldSelector) {
@@ -134,7 +134,6 @@ define(["require", "exports", "jquery", "imagesloaded", "TYPO3/CMS/Backend/Icons
             this.buttonSave = modal.querySelector('[data-method=save]');
             this.buttonSave.removeEventListener('click', this.buttonSaveHandler);
             this.buttonSave.addEventListener('click', this.buttonSaveHandler.bind(this));
-            //    $(top.document).on('mousedown.minicolors touchstart.minicolors', this.hideColorSwatch);
             this.initializeEditor();
             this.renderAreas(this.hiddenInput.value);
         }
@@ -222,20 +221,6 @@ define(["require", "exports", "jquery", "imagesloaded", "TYPO3/CMS/Backend/Icons
             // without FormEngineValidation.markFieldAsChanged call
             EditControl.closest(this.hiddenInput, '.t3js-formengine-palette-field').classList.add('has-change');
             this.currentModal.modal('hide');
-        }
-        hideColorSwatch(event) {
-            let swatch = (event.target);
-            if (!$(swatch).parents().add(swatch).hasClass('minicolors')) {
-                // Hides all dropdown panels
-                top.window.$('.minicolors-focus').each(() => {
-                    let minicolors = $(this), input = minicolors.find('.minicolors-input'), panel = minicolors.find('.minicolors-panel'), settings = input.data('minicolors-settings');
-                    panel.fadeOut(settings.hideSpeed, () => {
-                        if (settings.hide)
-                            settings.hide.call(input.get(0));
-                        minicolors.removeClass('minicolors-focus');
-                    });
-                });
-            }
         }
         /**
          * Calls a function when the editor window has been resized

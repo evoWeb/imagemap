@@ -196,8 +196,6 @@ class EditControl {
     this.buttonSave.removeEventListener('click', this.buttonSaveHandler);
     this.buttonSave.addEventListener('click', this.buttonSaveHandler.bind(this));
 
-//    $(top.document).on('mousedown.minicolors touchstart.minicolors', this.hideColorSwatch);
-
     this.initializeEditor();
     this.renderAreas(this.hiddenInput.value);
   }
@@ -310,24 +308,6 @@ class EditControl {
     EditControl.closest(this.hiddenInput, '.t3js-formengine-palette-field').classList.add('has-change');
 
     this.currentModal.modal('hide');
-  }
-
-  private hideColorSwatch(event: Event): void {
-    let swatch = (event.target) as HTMLElement;
-    if (!$(swatch).parents().add(swatch).hasClass('minicolors')) {
-      // Hides all dropdown panels
-      top.window.$('.minicolors-focus').each(() => {
-        let minicolors = $(this),
-          input = minicolors.find('.minicolors-input'),
-          panel = minicolors.find('.minicolors-panel'),
-          settings = input.data('minicolors-settings');
-
-        panel.fadeOut(settings.hideSpeed, () => {
-          if( settings.hide ) settings.hide.call(input.get(0));
-          minicolors.removeClass('minicolors-focus');
-        });
-      });
-    }
   }
 
   /**
