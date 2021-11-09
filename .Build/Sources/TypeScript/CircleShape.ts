@@ -29,12 +29,12 @@ export class CircleShape extends Circle {
     this.initializeEvents();
   }
 
-  initializeEvents() {
-    this.on('moved', this.updateFields.bind(this));
-    this.on('modified', this.updateFields.bind(this));
+  protected initializeEvents() {
+    this.on('moved', this.shapeModified.bind(this));
+    this.on('modified', this.shapeModified.bind(this));
   }
 
-  updateFields(event: any) {
-    console.log(event);
+  public shapeModified() {
+    this.fieldset.shapeModified(this);
   }
 }

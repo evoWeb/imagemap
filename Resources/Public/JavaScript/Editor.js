@@ -44,7 +44,7 @@ define(["require", "exports", "./vendor/Fabric.min", "./FieldsetFactory", "./Are
             let element = event.target;
             if (element.hasOwnProperty('fieldset')) {
                 // circle, polygon, rectangle
-                element.fieldset.shapeModified(event);
+                element.fieldset.shapeModified(element);
             }
         }
         resize(width, height) {

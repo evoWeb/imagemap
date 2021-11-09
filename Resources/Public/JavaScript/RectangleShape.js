@@ -14,6 +14,14 @@ define(["require", "exports", "./vendor/Fabric.min"], function (require, exports
     class RectangleShape extends Fabric_min_1.Rect {
         constructor(options) {
             super(options);
+            this.initializeEvents();
+        }
+        initializeEvents() {
+            this.on('moved', this.shapeModified.bind(this));
+            this.on('modified', this.shapeModified.bind(this));
+        }
+        shapeModified() {
+            this.fieldset.shapeModified(this);
         }
     }
     exports.RectangleShape = RectangleShape;

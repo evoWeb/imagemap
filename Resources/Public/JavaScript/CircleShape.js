@@ -17,11 +17,11 @@ define(["require", "exports", "./vendor/Fabric.min"], function (require, exports
             this.initializeEvents();
         }
         initializeEvents() {
-            this.on('moved', this.updateFields.bind(this));
-            this.on('modified', this.updateFields.bind(this));
+            this.on('moved', this.shapeModified.bind(this));
+            this.on('modified', this.shapeModified.bind(this));
         }
-        updateFields(event) {
-            console.log(event);
+        shapeModified() {
+            this.fieldset.shapeModified(this);
         }
     }
     exports.CircleShape = CircleShape;

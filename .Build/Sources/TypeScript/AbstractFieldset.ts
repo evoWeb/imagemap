@@ -101,7 +101,7 @@ export abstract class AbstractFieldset {
 
   protected abstract updateFields(): void;
 
-  protected abstract shapeModified(event: FabricEvent): void;
+  protected abstract shapeModified(shape: Object): void;
 
   protected abstract moveShape(event: Event): void;
 
@@ -238,11 +238,11 @@ export abstract class AbstractFieldset {
     this.updateFields();
   }
 
-  protected inputX(value: number): number {
+  public inputX(value: number): number {
     return value / AreaForm.width;
   }
 
-  protected inputY(value: number): number {
+  public inputY(value: number): number {
     return value / AreaForm.height;
   }
 

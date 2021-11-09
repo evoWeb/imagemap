@@ -21,6 +21,16 @@ export class PolygonShape extends Polygon {
 
   constructor(points: any, options: any) {
     super(points, options);
+    this.initializeEvents();
+  }
+
+  protected initializeEvents() {
+    this.on('moved', this.shapeModified.bind(this));
+    this.on('modified', this.shapeModified.bind(this));
+  }
+
+  public shapeModified() {
+    this.fieldset.shapeModified(this);
   }
 
   initializeControls(): void {

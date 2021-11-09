@@ -42,10 +42,10 @@ define(["require", "exports", "./vendor/Fabric.min", "./AbstractFieldset", "./Ar
                 yField.value = AreaForm_1.AreaForm.outputY(point.y);
             });
         }
-        shapeModified(event) {
-            let areaShape = event.target, matrix = areaShape.calcTransformMatrix();
-            areaShape.points.forEach((point) => {
-                let temporaryPoint = new Fabric_min_1.Point(point.x - areaShape.pathOffset.x, point.y - areaShape.pathOffset.y), transformed = Fabric_min_1.util.transformPoint(temporaryPoint, matrix), areaPoint = this.area.points.find((findPoint) => { return findPoint.id === point.id; });
+        shapeModified(shape) {
+            let matrix = shape.calcTransformMatrix();
+            shape.points.forEach((point) => {
+                let temporaryPoint = new Fabric_min_1.Point(point.x - shape.pathOffset.x, point.y - shape.pathOffset.y), transformed = Fabric_min_1.util.transformPoint(temporaryPoint, matrix), areaPoint = this.area.points.find((findPoint) => { return findPoint.id === point.id; });
                 if (areaPoint) {
                     let xField = areaPoint.element.querySelector('[data-field="x"]'), yField = areaPoint.element.querySelector('[data-field="y"]');
                     areaPoint.x = this.inputX(transformed.x);

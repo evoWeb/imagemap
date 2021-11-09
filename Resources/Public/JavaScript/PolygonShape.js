@@ -14,6 +14,14 @@ define(["require", "exports", "./vendor/Fabric.min"], function (require, exports
     class PolygonShape extends Fabric_min_1.Polygon {
         constructor(points, options) {
             super(points, options);
+            this.initializeEvents();
+        }
+        initializeEvents() {
+            this.on('moved', this.shapeModified.bind(this));
+            this.on('modified', this.shapeModified.bind(this));
+        }
+        shapeModified() {
+            this.fieldset.shapeModified(this);
         }
         initializeControls() {
             let self = this, lastControl = this.points.length - 1;

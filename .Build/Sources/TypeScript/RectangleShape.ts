@@ -26,5 +26,15 @@ export class RectangleShape extends Rect {
 
   constructor(options: any) {
     super(options);
+    this.initializeEvents();
+  }
+
+  protected initializeEvents() {
+    this.on('moved', this.shapeModified.bind(this));
+    this.on('modified', this.shapeModified.bind(this));
+  }
+
+  public shapeModified() {
+    this.fieldset.shapeModified(this);
   }
 }

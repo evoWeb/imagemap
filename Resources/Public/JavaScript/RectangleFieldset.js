@@ -45,8 +45,8 @@ define(["require", "exports", "./AbstractFieldset", "./AreaForm"], function (req
                 }
             }
         }
-        shapeModified(event) {
-            let shape = event.target, left = Math.round(shape.left), top = Math.round(shape.top), right = Math.round(shape.getScaledWidth() + left), bottom = Math.round(shape.getScaledHeight() + top);
+        shapeModified(shape) {
+            let left = Math.round(shape.left), top = Math.round(shape.top), right = Math.round(shape.getScaledWidth() + left), bottom = Math.round(shape.getScaledHeight() + top);
             this.area.coords.left = this.inputX(left);
             this.area.coords.right = this.inputX(right);
             this.area.coords.top = this.inputY(top);

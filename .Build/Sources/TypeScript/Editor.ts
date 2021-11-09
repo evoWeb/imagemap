@@ -72,7 +72,7 @@ export class Editor {
     let element: Fabric.Object = event.target;
     if (element.hasOwnProperty('fieldset')) {
       // circle, polygon, rectangle
-      element.fieldset.shapeModified(event);
+      element.fieldset.shapeModified(element);
     }
   }
 

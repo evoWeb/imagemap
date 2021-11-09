@@ -55,12 +55,11 @@ export class PolygonFieldset extends AbstractFieldset {
     });
   }
 
-  protected shapeModified(event: FabricEvent): void {
-    let areaShape = (event.target as Object),
-      matrix = areaShape.calcTransformMatrix();
+  protected shapeModified(shape: Object): void {
+    let matrix = shape.calcTransformMatrix();
 
-    areaShape.points.forEach((point: Point) => {
-      let temporaryPoint = new Point(point.x - areaShape.pathOffset.x, point.y - areaShape.pathOffset.y),
+    shape.points.forEach((point: Point) => {
+      let temporaryPoint = new Point(point.x - shape.pathOffset.x, point.y - shape.pathOffset.y),
         transformed = util.transformPoint(temporaryPoint, matrix),
         areaPoint = this.area.points.find((findPoint: Point) => { return findPoint.id === point.id });
 
