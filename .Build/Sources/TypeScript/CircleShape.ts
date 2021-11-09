@@ -26,5 +26,15 @@ export class CircleShape extends Circle {
 
   constructor(options: any) {
     super(options);
+    this.initializeEvents();
+  }
+
+  initializeEvents() {
+    this.on('moved', this.updateFields.bind(this));
+    this.on('modified', this.updateFields.bind(this));
+  }
+
+  updateFields(event: any) {
+    console.log(event);
   }
 }

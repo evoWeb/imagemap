@@ -10,7 +10,7 @@
  */
 
 // @ts-ignore
-import ImagesLoaded = require('TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min');
+import ImagesLoaded = require('imagesloaded');
 import { AreaForm } from './AreaForm';
 import { Preview } from './Preview';
 

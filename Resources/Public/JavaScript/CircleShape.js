@@ -14,6 +14,14 @@ define(["require", "exports", "./vendor/Fabric.min"], function (require, exports
     class CircleShape extends Fabric_min_1.Circle {
         constructor(options) {
             super(options);
+            this.initializeEvents();
+        }
+        initializeEvents() {
+            this.on('moved', this.updateFields.bind(this));
+            this.on('modified', this.updateFields.bind(this));
+        }
+        updateFields(event) {
+            console.log(event);
         }
     }
     exports.CircleShape = CircleShape;

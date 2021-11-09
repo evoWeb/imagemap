@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "./vendor/Fabric.min", "./FieldsetFactory", "./AreaForm", "./ShapeFactory", "./PolygonShape", "TYPO3/CMS/Core/Contrib/jquery.minicolors"], function (require, exports, Fabric, FieldsetFactory_1, AreaForm_1, ShapeFactory_1, PolygonShape_1) {
+define(["require", "exports", "./vendor/Fabric.min", "./FieldsetFactory", "./AreaForm", "./ShapeFactory", "./PolygonShape"], function (require, exports, Fabric, FieldsetFactory_1, AreaForm_1, ShapeFactory_1, PolygonShape_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Editor {

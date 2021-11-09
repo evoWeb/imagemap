@@ -12,8 +12,6 @@
 /// <reference types="../../types/index"/>
 
 // @ts-ignore
-import 'TYPO3/CMS/Core/Contrib/jquery.minicolors';
-// @ts-ignore
 import * as Fabric from './vendor/Fabric.min';
 import { FieldsetFactory } from './FieldsetFactory';
 import { AreaForm } from './AreaForm';

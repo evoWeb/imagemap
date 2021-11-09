@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "./AreaForm", "./Preview"], function (require, exports, ImagesLoaded, AreaForm_1, Preview_1) {
+define(["require", "exports", "imagesloaded", "./AreaForm", "./Preview"], function (require, exports, ImagesLoaded, AreaForm_1, Preview_1) {
     "use strict";
     class FormElement {
         constructor(fieldSelector) {

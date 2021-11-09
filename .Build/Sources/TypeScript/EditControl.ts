@@ -11,7 +11,7 @@
 
 import * as $ from 'jquery';
 // @ts-ignore
-import ImagesLoaded = require('TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min');
+import ImagesLoaded = require('imagesloaded');
 // @ts-ignore
 import Icons = require('TYPO3/CMS/Backend/Icons');
 // @ts-ignore
@@ -196,7 +196,7 @@ class EditControl {
     this.buttonSave.removeEventListener('click', this.buttonSaveHandler);
     this.buttonSave.addEventListener('click', this.buttonSaveHandler.bind(this));
 
-    $(top.document).on('mousedown.minicolors touchstart.minicolors', this.hideColorSwatch);
+//    $(top.document).on('mousedown.minicolors touchstart.minicolors', this.hideColorSwatch);
 
     this.initializeEditor();
     this.renderAreas(this.hiddenInput.value);

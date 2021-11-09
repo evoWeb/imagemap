@@ -11,7 +11,6 @@
 
 /// <reference types="../../types/index"/>
 
-import * as $ from 'jquery';
 // @ts-ignore
 import { Object } from './vendor/Fabric.min';
 import { AreaForm } from './AreaForm';
@@ -64,12 +63,11 @@ export abstract class AbstractFieldset {
   }
 
   private initializeColorPicker(): void {
-    ($(this.getElement('.t3js-color-picker')) as any).minicolors({
+    (top.window.$(this.getElement('.t3js-color-picker')) as any).minicolors({
       format: 'hex',
-      position: 'left',
-      theme: 'default',
-      changeDelay: 100,
-      change: this.colorPickerAction.bind(this)
+      position: 'bottom left',
+      theme: 'bootstrap',
+      change: this.colorPickerAction.bind(this),
     });
   }
 
@@ -172,7 +170,7 @@ export abstract class AbstractFieldset {
   protected redoAction(): void {
   }
 
-  private colorPickerAction(value: string) {
+  public colorPickerAction(value: string): void {
     this.area.color = value;
     (this.getElement('.t3js-color-picker') as HTMLInputElement).setAttribute('value', this.area.color);
     this.shape.set('borderColor', this.area.color);

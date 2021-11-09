@@ -8,6 +8,9 @@ services:
   Evoweb\Imagemap\:
     resource: '../Classes/*'
 
+  Evoweb\Imagemap\Hooks\BackendHook:
+    public: true
+
   Evoweb\Imagemap\Controller\Wizard\ImagemapManipulationController:
     public: true
 

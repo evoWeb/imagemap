@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "jquery", "./AreaForm", "./ShapeFactory"], function (require, exports, $, AreaForm_1, ShapeFactory_1) {
+define(["require", "exports", "./AreaForm", "./ShapeFactory"], function (require, exports, AreaForm_1, ShapeFactory_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class AbstractFieldset {
@@ -36,12 +36,11 @@ define(["require", "exports", "jquery", "./AreaForm", "./ShapeFactory"], functio
             this.form.element.append(this.element);
         }
         initializeColorPicker() {
-            $(this.getElement('.t3js-color-picker')).minicolors({
+            top.window.$(this.getElement('.t3js-color-picker')).minicolors({
                 format: 'hex',
-                position: 'left',
-                theme: 'default',
-                changeDelay: 100,
-                change: this.colorPickerAction.bind(this)
+                position: 'bottom left',
+                theme: 'bootstrap',
+                change: this.colorPickerAction.bind(this),
             });
         }
         initializeEvents() {

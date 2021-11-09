@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "jquery", "TYPO3/CMS/Core/Contrib/imagesloaded.pkgd.min", "TYPO3/CMS/Backend/Icons", "TYPO3/CMS/Backend/Modal", "./AreaForm", "./Editor"], function (require, exports, $, ImagesLoaded, Icons, Modal, AreaForm_1, Editor_1) {
+define(["require", "exports", "jquery", "imagesloaded", "TYPO3/CMS/Backend/Icons", "TYPO3/CMS/Backend/Modal", "./AreaForm", "./Editor"], function (require, exports, $, ImagesLoaded, Icons, Modal, AreaForm_1, Editor_1) {
     "use strict";
     class EditControl {
         constructor(fieldSelector) {
@@ -134,7 +134,7 @@ define(["require", "exports", "jquery", "TYPO3/CMS/Core/Contrib/imagesloaded.pkg
             this.buttonSave = modal.querySelector('[data-method=save]');
             this.buttonSave.removeEventListener('click', this.buttonSaveHandler);
             this.buttonSave.addEventListener('click', this.buttonSaveHandler.bind(this));
-            $(top.document).on('mousedown.minicolors touchstart.minicolors', this.hideColorSwatch);
+            //    $(top.document).on('mousedown.minicolors touchstart.minicolors', this.hideColorSwatch);
             this.initializeEditor();
             this.renderAreas(this.hiddenInput.value);
         }

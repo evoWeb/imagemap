@@ -18,13 +18,17 @@
     </div>
 </div>
 
-<div class="input-group buttons">
-    <div class="input-group-addon">
-        <input type="hidden" id="color_ID" data-field="color" class="t3js-field form-control t3js-color-picker color"/>
+<div class="form-wizards-wrap">
+    <div class="form-wizards-element">
+        <input type="text"
+               data-field="color"
+               id="color_ID"
+               class="form-control t3js-clearable t3js-color-picker formengine-colorpickerelement color"
+               data-formengine-validation-rules="[]" />
     </div>
+</div>
 
-    <div class="form-control"></div>
-
+<div class="input-group buttons">
     <div class="input-group-btn">
         <span data-action="up" class="t3js-btn btn btn-default disabled"
               title="{f:translate(id: 'imagemap.form.area.up', extensionName: 'imagemap')}"><core:icon

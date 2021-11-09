@@ -32,4 +32,7 @@ call_user_func(function () {
         'priority' => 70,
         'class' => \Evoweb\Imagemap\Form\Element\ImagemapElement::class,
     ];
+
+    $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['typo3/backend.php']['constructPostProcess'][] =
+        \Evoweb\Imagemap\Hooks\BackendHook::class . '->addPageRendererResources';
 });
