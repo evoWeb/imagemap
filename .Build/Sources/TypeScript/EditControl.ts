@@ -11,6 +11,8 @@
 
 import * as $ from 'jquery';
 // @ts-ignore
+import 'TYPO3/CMS/Core/Contrib/jquery.minicolors';
+// @ts-ignore
 import ImagesLoaded = require('imagesloaded');
 // @ts-ignore
 import Icons = require('TYPO3/CMS/Backend/Icons');

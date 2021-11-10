@@ -48,12 +48,12 @@ define(["require", "exports", "./AbstractFieldset", "./AreaForm"], function (req
         shapeModified(shape) {
             let left = Math.round(shape.left), top = Math.round(shape.top), right = Math.round(shape.getScaledWidth() + left), bottom = Math.round(shape.getScaledHeight() + top);
             this.area.coords.left = this.inputX(left);
-            this.area.coords.right = this.inputX(right);
             this.area.coords.top = this.inputY(top);
+            this.area.coords.right = this.inputX(right);
             this.area.coords.bottom = this.inputX(bottom);
             this.getElement('.left').setAttribute('value', left.toString());
-            this.getElement('.right').setAttribute('value', right.toString());
             this.getElement('.top').setAttribute('value', top.toString());
+            this.getElement('.right').setAttribute('value', right.toString());
             this.getElement('.bottom').setAttribute('value', bottom.toString());
         }
         moveShape(event) {
@@ -62,13 +62,13 @@ define(["require", "exports", "./AbstractFieldset", "./AreaForm"], function (req
                 case 'left':
                     this.area.coords.left = this.inputX(value);
                     this.area.coords.right = this.inputX(value + this.shape.getScaledWidth());
-                    this.getElement('#right').setAttribute('value', value + this.shape.getScaledWidth());
+                    this.getElement('.right').setAttribute('value', value + this.shape.getScaledWidth());
                     this.shape.set({ left: value });
                     break;
                 case 'top':
                     this.area.coords.top = this.inputY(value);
                     this.area.coords.bottom = this.inputY(value + this.shape.getScaledHeight());
-                    this.getElement('#bottom').setAttribute('value', value + this.shape.getScaledHeight());
+                    this.getElement('.bottom').setAttribute('value', value + this.shape.getScaledHeight());
                     this.shape.set({ top: value });
                     break;
                 case 'right':

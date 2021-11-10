@@ -72,7 +72,7 @@ define(["require", "exports", "./AreaForm", "./ShapeFactory"], function (require
             this.area[field.dataset.field] = field.value;
         }
         positionOptionsHandler(event) {
-            this.moveShapeDelay = AbstractFieldset.wait(() => { this.moveShape(event); }, 500, this.moveShapeDelay);
+            this.moveShapeDelay = AbstractFieldset.wait(() => { this.moveShape(event); }, 300, this.moveShapeDelay);
         }
         updateArrowsState() {
             let areasForm = this.form.element, upButton = this.getElement('[data-action="up"]'), downButton = this.getElement('[data-action="down"]');

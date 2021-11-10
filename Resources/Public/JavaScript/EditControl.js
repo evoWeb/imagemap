@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "imagesloaded", "TYPO3/CMS/Backend/Icons", "TYPO3/CMS/Backend/Modal", "./AreaForm", "./Editor"], function (require, exports, ImagesLoaded, Icons, Modal, AreaForm_1, Editor_1) {
+define(["require", "exports", "imagesloaded", "TYPO3/CMS/Backend/Icons", "TYPO3/CMS/Backend/Modal", "./AreaForm", "./Editor", "TYPO3/CMS/Core/Contrib/jquery.minicolors"], function (require, exports, ImagesLoaded, Icons, Modal, AreaForm_1, Editor_1) {
     "use strict";
     class EditControl {
         constructor(fieldSelector) {

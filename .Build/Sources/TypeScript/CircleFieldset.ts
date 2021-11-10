@@ -9,8 +9,6 @@
  * LICENSE.txt file that was distributed with this source code.
  */
 
-/// <reference types="../../types/index"/>
-
 import { AbstractFieldset } from './AbstractFieldset';
 import { AreaForm } from './AreaForm';
 import { CircleShape } from './CircleShape';
@@ -60,13 +58,13 @@ export class CircleFieldset extends AbstractFieldset {
       left = Math.round(shape.left) + radius,
       top = Math.round(shape.top) + radius;
 
+    this.area.coords.radius = this.inputX(radius);
     this.area.coords.left = this.inputX(left);
     this.area.coords.top = this.inputY(top);
-    this.area.coords.radius = this.inputX(radius);
 
-    this.getElement('.left').setAttribute('value', left);
-    this.getElement('.top').setAttribute('value', top);
-    this.getElement('.radius').setAttribute('value', radius);
+    this.getElement('.radius').setAttribute('value', radius.toString());
+    this.getElement('.left').setAttribute('value', left.toString());
+    this.getElement('.top').setAttribute('value', top.toString());
   }
 
   protected moveShape(event: Event): void {
@@ -74,21 +72,21 @@ export class CircleFieldset extends AbstractFieldset {
       value = parseInt(field.value);
 
     switch (field.dataset.field) {
+      case 'radius':
+        this.area.coords.top = this.inputX(value);
+        this.shape.set({radius: value});
+        break;
+
       case 'left':
-        value -= parseInt(this.getElement(`.radius`).value);
+        value -= parseInt(this.getElement('.radius').value);
         this.area.coords.left = this.inputX(value);
         this.shape.set({left: value});
         break;
 
       case 'top':
-        value -= parseInt(this.getElement(`.radius`).value);
+        value -= parseInt(this.getElement('.radius').value);
         this.area.coords.top = this.inputY(value);
         this.shape.set({top: value});
-        break;
-
-      case 'radius':
-        this.area.coords.top = this.inputX(value);
-        this.shape.set({radius: value});
         break;
     }
 

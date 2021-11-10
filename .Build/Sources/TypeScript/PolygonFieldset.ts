@@ -9,8 +9,6 @@
  * LICENSE.txt file that was distributed with this source code.
  */
 
-/// <reference types="../../types/index"/>
-
 // @ts-ignore
 import { Object, Point, util } from './vendor/Fabric.min';
 import { AbstractFieldset } from './AbstractFieldset';

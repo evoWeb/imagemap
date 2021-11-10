@@ -9,8 +9,6 @@
  * LICENSE.txt file that was distributed with this source code.
  */
 
-/// <reference types="../../types/index"/>
-
 // @ts-ignore
 import * as Fabric from './vendor/Fabric.min';
 import { FieldsetFactory } from './FieldsetFactory';

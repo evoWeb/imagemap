@@ -113,7 +113,7 @@ export abstract class AbstractFieldset {
   private positionOptionsHandler(event: InputEvent): void {
     this.moveShapeDelay = AbstractFieldset.wait(
       () => { this.moveShape(event); },
-      500,
+      300,
       this.moveShapeDelay
     );
   }
