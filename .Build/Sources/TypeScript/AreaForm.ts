@@ -12,8 +12,8 @@
 // @ts-ignore
 import Modal = require('TYPO3/CMS/Backend/Modal');
 // @ts-ignore
-import { Canvas } from './vendor/Fabric.min';
-import { AbstractFieldset } from './AbstractFieldset';
+import * as Fabric from './vendor/Fabric.min';
+import { AbstractFieldset } from './Shape/AbstractFieldset';
 
 export class AreaForm {
   static width: number;
@@ -22,7 +22,7 @@ export class AreaForm {
 
   public element: HTMLElement;
 
-  public canvas: Canvas;
+  public canvas: Fabric.Canvas;
 
   private configuration: EditorConfiguration;
 
@@ -41,7 +41,7 @@ export class AreaForm {
 
   constructor(
     element: HTMLElement,
-    canvas: Canvas,
+    canvas: Fabric.Canvas,
     configuration: EditorConfiguration,
     modalParent: Document,
     browselinkParent: Document
@@ -93,9 +93,9 @@ export class AreaForm {
         if (currentArea.element) {
           currentArea.element.remove();
         }
-        if (currentArea.shape) {
-          this.canvas.remove(currentArea.shape);
-          currentArea.shape = null;
+        if (currentArea.area.canvasShape) {
+          this.canvas.remove(currentArea.area.canvasShape);
+          currentArea.area.canvasShape = null;
         }
         currentArea.removeBrowselinkTargetInput();
         delete(this.areaFieldsets[index]);
@@ -107,23 +107,23 @@ export class AreaForm {
     this.updateArrowsState();
   }
 
-  public openLinkBrowser(link: HTMLElement, area: AbstractFieldset): void {
+  public openLinkBrowser(link: HTMLElement, fieldset: AbstractFieldset): void {
     link.blur();
 
     let data = new FormData(),
       request = new XMLHttpRequest();
 
-    data.append('P[areaId]', area.id.toString());
+    data.append('P[areaId]', fieldset.area.id.toString());
     data.append('P[formName]', 'areasForm');
-    data.append('P[itemFormElName]', `href${area.id}_target`);
-    data.append('P[currentValue]', area.area.href);
+    data.append('P[itemFormElName]', `href${fieldset.area.id}_target`);
+    data.append('P[currentValue]', fieldset.area.areaData.href);
     data.append('P[tableName]', this.configuration.tableName);
     data.append('P[fieldName]', this.configuration.fieldName);
     data.append('P[uid]', this.configuration.uid.toString());
     data.append('P[pid]', this.configuration.pid.toString());
 
     request.open('POST', window.TYPO3.settings.ajaxUrls.imagemap_browselink_url);
-    request.onreadystatechange = this.fetchBrowseLinkCallback.bind(area);
+    request.onreadystatechange = this.fetchBrowseLinkCallback.bind(fieldset);
     request.send(data);
   }
 
@@ -133,21 +133,11 @@ export class AreaForm {
       let data = JSON.parse(request.responseText),
         url = data.url + '&P[currentValue]=' + encodeURIComponent(this.getFieldValue('.href'));
 
-      if (
-        window.hasOwnProperty('TBE_EDITOR')
-        && window.TBE_EDITOR.hasOwnProperty('doSaveFieldName')
-        && window.TBE_EDITOR.doSaveFieldName === 'doSave'
-      ) {
-        // @todo remove once TYPO3 9.x support gets removed
-        let vHWin = window.open(url,'','height=600,width=500,status=0,menubar=0,scrollbars=1');
-        vHWin.focus()
-      } else {
-        Modal.advanced({
-          type: Modal.types.iframe,
-          content: url,
-          size: Modal.sizes.large,
-        });
-      }
+      Modal.advanced({
+        type: Modal.types.iframe,
+        content: url,
+        size: Modal.sizes.large,
+      });
     }
   }
 
@@ -178,25 +168,9 @@ export class AreaForm {
     let areas: Area[] = [];
 
     this.areaFieldsets.forEach((areaFieldset: AbstractFieldset) => {
-      areas.push(areaFieldset.getData());
+      areas.push(areaFieldset.area.getData());
     });
 
     return JSON.stringify(areas);
-  }
-
-  static outputiX(value: number): number {
-    return Math.round(value * AreaForm.width);
-  }
-
-  static outputiY(value: number): number {
-    return Math.round(value * AreaForm.height);
-  }
-
-  static outputX(value: number): string {
-    return AreaForm.outputiX(value).toString();
-  }
-
-  static outputY(value: number): string {
-    return AreaForm.outputiY(value).toString();
   }
 }

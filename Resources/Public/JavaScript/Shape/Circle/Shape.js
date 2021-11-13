@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "./vendor/Fabric.min"], function (require, exports, Fabric_min_1) {
+define(["require", "exports", "../../vendor/Fabric.min"], function (require, exports, Fabric_min_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class CircleShape extends Fabric_min_1.Circle {
@@ -21,7 +21,7 @@ define(["require", "exports", "./vendor/Fabric.min"], function (require, exports
             this.on('modified', this.shapeModified.bind(this));
         }
         shapeModified() {
-            this.fieldset.shapeModified(this);
+            this.area.shapeModified(this);
         }
     }
     exports.CircleShape = CircleShape;

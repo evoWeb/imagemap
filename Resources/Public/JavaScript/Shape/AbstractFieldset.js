@@ -8,20 +8,14 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "./AreaForm", "./ShapeFactory"], function (require, exports, AreaForm_1, ShapeFactory_1) {
+define(["require", "exports", "../AreaForm", "./Factory"], function (require, exports, AreaForm_1, Factory_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class AbstractFieldset {
-        constructor(area, configuration, shape) {
+        constructor(configuration) {
             this.name = '';
-            this.id = 0;
             this.moveShapeDelay = 0;
-            this.area = {};
-            this.area = area;
             this.configuration = configuration;
-            this.shape = shape;
-            this.shape.fieldset = this;
-            this.id = this.shape.id;
         }
         addForm(form) {
             this.form = form;
@@ -32,7 +26,7 @@ define(["require", "exports", "./AreaForm", "./ShapeFactory"], function (require
             this.addBrowselinkTargetInput();
         }
         initializeElement() {
-            this.element = this.getFieldsetElement(`#${this.name}Form`, this.id);
+            this.element = this.getFieldsetElement(`#${this.name}Form`, this.area.id);
             this.form.element.append(this.element);
         }
         initializeColorPicker() {
@@ -69,10 +63,13 @@ define(["require", "exports", "./AreaForm", "./ShapeFactory"], function (require
         }
         basicOptionsHandler(event) {
             let field = event.currentTarget;
-            this.area[field.dataset.field] = field.value;
+            // @todo check if these are only values not related to movement or size
+            if (this.area.areaData.hasOwnProperty(field.dataset.field)) {
+                this.area.areaData[field.dataset.field] = field.value;
+            }
         }
         positionOptionsHandler(event) {
-            this.moveShapeDelay = AbstractFieldset.wait(() => { this.moveShape(event); }, 300, this.moveShapeDelay);
+            this.moveShapeDelay = AbstractFieldset.wait(() => { this.fieldsetModified(event); }, 300, this.moveShapeDelay);
         }
         updateArrowsState() {
             let areasForm = this.form.element, upButton = this.getElement('[data-action="up"]'), downButton = this.getElement('[data-action="down"]');
@@ -116,16 +113,16 @@ define(["require", "exports", "./AreaForm", "./ShapeFactory"], function (require
         redoAction() {
         }
         colorPickerAction(value) {
-            this.area.color = value;
-            this.getElement('.t3js-color-picker').setAttribute('value', this.area.color);
-            this.shape.set('borderColor', this.area.color);
-            this.shape.set('stroke', this.area.color);
-            this.shape.set('fill', ShapeFactory_1.ShapeFactory.hexToRgbA(this.area.color, 0.2));
+            this.area.areaData.color = value;
+            this.getElement('.t3js-color-picker').setAttribute('value', value);
+            this.area.canvasShape.set('borderColor', value);
+            this.area.canvasShape.set('stroke', value);
+            this.area.canvasShape.set('fill', Factory_1.ShapeFactory.hexToRgbA(value, 0.2));
             this.form.canvas.renderAll();
         }
         getFieldsetElement(selector, id) {
             let template = this.form.modalParent.querySelector(selector)
-                .innerHTML.replace(new RegExp('_ID', 'g'), String(id ? id : this.id));
+                .innerHTML.replace(new RegExp('_ID', 'g'), String(id ? id : this.area.id));
             return (new DOMParser()).parseFromString(template, 'text/html').body.firstChild;
         }
         getElement(selector) {
@@ -143,17 +140,14 @@ define(["require", "exports", "./AreaForm", "./ShapeFactory"], function (require
         getFieldValue(selector) {
             return this.getElement(selector).value;
         }
-        getData() {
-            return this.area;
-        }
         /**
          * Add an input as target for browselink which listens for changes and writes value to real field
          */
         addBrowselinkTargetInput() {
             if (this.form.browselinkTargetForm) {
                 let input = this.form.browselinkParent.createElement('input');
-                input.id = `href${this.id}_target`;
-                input.value = this.area.href;
+                input.id = `href${this.area.id}_target`;
+                input.value = this.area.areaData.href;
                 input.setAttribute('data-formengine-input-name', input.id);
                 input.onchange = this.changedBrowselinkTargetInput.bind(this);
                 this.form.browselinkTargetForm.appendChild(input);
@@ -161,15 +155,15 @@ define(["require", "exports", "./AreaForm", "./ShapeFactory"], function (require
         }
         removeBrowselinkTargetInput() {
             if (this.form && this.form.browselinkTargetForm) {
-                let field = this.form.browselinkTargetForm.querySelector(`#href${this.id}_target`);
+                let field = this.form.browselinkTargetForm.querySelector(`#href${this.area.id}_target`);
                 if (field) {
                     field.remove();
                 }
             }
         }
         changedBrowselinkTargetInput() {
-            let field = this.form.browselinkTargetForm.querySelector(`#href${this.id}_target`);
-            this.area.href = field.value;
+            let field = this.form.browselinkTargetForm.querySelector(`#href${this.area.id}_target`);
+            this.area.areaData.href = field.value;
             this.updateFields();
         }
         inputX(value) {

@@ -10,21 +10,22 @@
  */
 
 // @ts-ignore
-import { Canvas, Object } from './vendor/Fabric.min';
+import * as Fabric from './vendor/Fabric.min';
 import { AreaForm } from './AreaForm';
-import { ShapeFactory } from './ShapeFactory';
+import { AbstractArea } from './Shape/AbstractArea';
+import { ShapeFactory } from './Shape/Factory';
 
 export class Preview {
-  private areaShapes: Array<Object> = [];
+  private areas: Array<AbstractArea> = [];
 
-  private canvas: Canvas;
+  private canvas: Fabric.Canvas;
 
   constructor(canvas: HTMLElement) {
     this.initializeCanvas(canvas);
   }
 
   private initializeCanvas(canvas: HTMLElement): void {
-    this.canvas = new Canvas(canvas, {
+    this.canvas = new Fabric.Canvas(canvas, {
       width: AreaForm.width,
       height: AreaForm.height,
       top: AreaForm.height * -1,
@@ -36,22 +37,21 @@ export class Preview {
 
   public renderAreas(areas: Array<Area>): void {
     if (areas !== undefined) {
-      let areaShapeFactory = new ShapeFactory();
-      areas.forEach((area: Area) => {
-        area.color = ShapeFactory.getRandomColor(area.color);
-        let areaShape = areaShapeFactory.createShape(area, false);
+      let shapeFactory = new ShapeFactory();
+      areas.forEach((areaData: Area) => {
+        let area = shapeFactory.create(areaData, false);
 
-        this.canvas.add(areaShape);
-        this.areaShapes.push(areaShape);
+        this.canvas.add(area.canvasShape);
+        this.areas.push(area);
       });
     }
   }
 
   public removeAreas(): void {
-    this.areaShapes.forEach((areaShape: Object) => {
-      this.canvas.remove(areaShape);
-      areaShape = null;
+    this.areas.forEach((area: AbstractArea) => {
+      this.canvas.remove(area.canvasShape);
+      area = null;
     });
-    this.areaShapes = [];
+    this.areas = [];
   }
 }

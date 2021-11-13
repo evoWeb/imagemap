@@ -11,10 +11,9 @@
 
 // @ts-ignore
 import * as Fabric from './vendor/Fabric.min';
-import { FieldsetFactory } from './FieldsetFactory';
 import { AreaForm } from './AreaForm';
-import { ShapeFactory } from './ShapeFactory';
-import { PolygonShape } from './PolygonShape';
+import { ShapeFactory } from './Shape/Factory';
+import { PolygonShape } from './Shape/Polygon/Shape';
 
 export class Editor {
   readonly configuration: EditorConfiguration;
@@ -93,19 +92,16 @@ export class Editor {
 
   public renderAreas(areas: Array<Area>): void {
     if (areas !== undefined) {
-      let areaShapeFactory = new ShapeFactory(this.canvas);
-      let areaFieldsetFactory = new FieldsetFactory(this.configuration);
+      let shapeFactory = new ShapeFactory(this.canvas, this.configuration);
 
       areas.forEach((area) => {
-        area.color = ShapeFactory.getRandomColor(area.color);
-        let areaShape = areaShapeFactory.createShape(area, true),
-          areaFieldset = areaFieldsetFactory.createFieldset(area, areaShape);
+        let shape = shapeFactory.create(area, true);
 
-        this.canvas.add(areaShape);
-        this.form.addArea(areaFieldset);
+        this.canvas.add(shape.canvasShape);
+        this.form.addArea(shape.sidebarFieldset);
 
-        if (areaShape instanceof PolygonShape) {
-          areaShape.initializeControls();
+        if (shape instanceof PolygonShape) {
+          shape.canvasShape.initializeControls();
         }
       });
     }

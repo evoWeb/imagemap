@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "./vendor/Fabric.min", "./FieldsetFactory", "./AreaForm", "./ShapeFactory", "./PolygonShape"], function (require, exports, Fabric, FieldsetFactory_1, AreaForm_1, ShapeFactory_1, PolygonShape_1) {
+define(["require", "exports", "./vendor/Fabric.min", "./AreaForm", "./Shape/Factory", "./Shape/Polygon/Shape"], function (require, exports, Fabric, AreaForm_1, Factory_1, Shape_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Editor {
@@ -61,15 +61,13 @@ define(["require", "exports", "./vendor/Fabric.min", "./FieldsetFactory", "./Are
         }
         renderAreas(areas) {
             if (areas !== undefined) {
-                let areaShapeFactory = new ShapeFactory_1.ShapeFactory(this.canvas);
-                let areaFieldsetFactory = new FieldsetFactory_1.FieldsetFactory(this.configuration);
+                let shapeFactory = new Factory_1.ShapeFactory(this.canvas, this.configuration);
                 areas.forEach((area) => {
-                    area.color = ShapeFactory_1.ShapeFactory.getRandomColor(area.color);
-                    let areaShape = areaShapeFactory.createShape(area, true), areaFieldset = areaFieldsetFactory.createFieldset(area, areaShape);
-                    this.canvas.add(areaShape);
-                    this.form.addArea(areaFieldset);
-                    if (areaShape instanceof PolygonShape_1.PolygonShape) {
-                        areaShape.initializeControls();
+                    let shape = shapeFactory.create(area, true);
+                    this.canvas.add(shape.canvasShape);
+                    this.form.addArea(shape.sidebarFieldset);
+                    if (shape instanceof Shape_1.PolygonShape) {
+                        shape.canvasShape.initializeControls();
                     }
                 });
             }

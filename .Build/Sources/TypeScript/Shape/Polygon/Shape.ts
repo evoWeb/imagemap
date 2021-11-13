@@ -10,10 +10,15 @@
  */
 
 // @ts-ignore
-import { Canvas, Control, Point, Polygon, util } from './vendor/Fabric.min';
+import { Canvas, Control, Point, Polygon, util } from '../../vendor/Fabric.min';
+import { PolygonArea } from './Area';
 
 export class PolygonShape extends Polygon {
+  public id: number;
+
   public canvas: Canvas;
+
+  public area: PolygonArea;
 
   [property: string]: any;
 
@@ -28,10 +33,10 @@ export class PolygonShape extends Polygon {
   }
 
   public shapeModified() {
-    this.fieldset.shapeModified(this);
+    this.area.shapeModified(this);
   }
 
-  initializeControls(): void {
+  public initializeControls(): void {
     let self = this,
       lastControl = this.points.length - 1;
 

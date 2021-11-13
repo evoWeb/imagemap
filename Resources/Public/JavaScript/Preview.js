@@ -8,16 +8,16 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "./vendor/Fabric.min", "./AreaForm", "./ShapeFactory"], function (require, exports, Fabric_min_1, AreaForm_1, ShapeFactory_1) {
+define(["require", "exports", "./vendor/Fabric.min", "./AreaForm", "./Shape/Factory"], function (require, exports, Fabric, AreaForm_1, Factory_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Preview {
         constructor(canvas) {
-            this.areaShapes = [];
+            this.areas = [];
             this.initializeCanvas(canvas);
         }
         initializeCanvas(canvas) {
-            this.canvas = new Fabric_min_1.Canvas(canvas, {
+            this.canvas = new Fabric.Canvas(canvas, {
                 width: AreaForm_1.AreaForm.width,
                 height: AreaForm_1.AreaForm.height,
                 top: AreaForm_1.AreaForm.height * -1,
@@ -28,21 +28,20 @@ define(["require", "exports", "./vendor/Fabric.min", "./AreaForm", "./ShapeFacto
         }
         renderAreas(areas) {
             if (areas !== undefined) {
-                let areaShapeFactory = new ShapeFactory_1.ShapeFactory();
-                areas.forEach((area) => {
-                    area.color = ShapeFactory_1.ShapeFactory.getRandomColor(area.color);
-                    let areaShape = areaShapeFactory.createShape(area, false);
-                    this.canvas.add(areaShape);
-                    this.areaShapes.push(areaShape);
+                let shapeFactory = new Factory_1.ShapeFactory();
+                areas.forEach((areaData) => {
+                    let area = shapeFactory.create(areaData, false);
+                    this.canvas.add(area.canvasShape);
+                    this.areas.push(area);
                 });
             }
         }
         removeAreas() {
-            this.areaShapes.forEach((areaShape) => {
-                this.canvas.remove(areaShape);
-                areaShape = null;
+            this.areas.forEach((area) => {
+                this.canvas.remove(area.canvasShape);
+                area = null;
             });
-            this.areaShapes = [];
+            this.areas = [];
         }
     }
     exports.Preview = Preview;

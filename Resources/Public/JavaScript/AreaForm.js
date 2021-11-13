@@ -51,9 +51,9 @@ define(["require", "exports", "TYPO3/CMS/Backend/Modal"], function (require, exp
                     if (currentArea.element) {
                         currentArea.element.remove();
                     }
-                    if (currentArea.shape) {
-                        this.canvas.remove(currentArea.shape);
-                        currentArea.shape = null;
+                    if (currentArea.area.canvasShape) {
+                        this.canvas.remove(currentArea.area.canvasShape);
+                        currentArea.area.canvasShape = null;
                     }
                     currentArea.removeBrowselinkTargetInput();
                     delete (this.areaFieldsets[index]);
@@ -65,39 +65,30 @@ define(["require", "exports", "TYPO3/CMS/Backend/Modal"], function (require, exp
             this.areaFieldsets = areaFieldsets;
             this.updateArrowsState();
         }
-        openLinkBrowser(link, area) {
+        openLinkBrowser(link, fieldset) {
             link.blur();
             let data = new FormData(), request = new XMLHttpRequest();
-            data.append('P[areaId]', area.id.toString());
+            data.append('P[areaId]', fieldset.area.id.toString());
             data.append('P[formName]', 'areasForm');
-            data.append('P[itemFormElName]', `href${area.id}_target`);
-            data.append('P[currentValue]', area.area.href);
+            data.append('P[itemFormElName]', `href${fieldset.area.id}_target`);
+            data.append('P[currentValue]', fieldset.area.areaData.href);
             data.append('P[tableName]', this.configuration.tableName);
             data.append('P[fieldName]', this.configuration.fieldName);
             data.append('P[uid]', this.configuration.uid.toString());
             data.append('P[pid]', this.configuration.pid.toString());
             request.open('POST', window.TYPO3.settings.ajaxUrls.imagemap_browselink_url);
-            request.onreadystatechange = this.fetchBrowseLinkCallback.bind(area);
+            request.onreadystatechange = this.fetchBrowseLinkCallback.bind(fieldset);
             request.send(data);
         }
         fetchBrowseLinkCallback(e) {
             let request = e.target;
             if (request.readyState === 4 && request.status === 200) {
                 let data = JSON.parse(request.responseText), url = data.url + '&P[currentValue]=' + encodeURIComponent(this.getFieldValue('.href'));
-                if (window.hasOwnProperty('TBE_EDITOR')
-                    && window.TBE_EDITOR.hasOwnProperty('doSaveFieldName')
-                    && window.TBE_EDITOR.doSaveFieldName === 'doSave') {
-                    // @todo remove once TYPO3 9.x support gets removed
-                    let vHWin = window.open(url, '', 'height=600,width=500,status=0,menubar=0,scrollbars=1');
-                    vHWin.focus();
-                }
-                else {
-                    Modal.advanced({
-                        type: Modal.types.iframe,
-                        content: url,
-                        size: Modal.sizes.large,
-                    });
-                }
+                Modal.advanced({
+                    type: Modal.types.iframe,
+                    content: url,
+                    size: Modal.sizes.large,
+                });
             }
         }
         /**
@@ -123,21 +114,9 @@ define(["require", "exports", "TYPO3/CMS/Backend/Modal"], function (require, exp
         getMapData() {
             let areas = [];
             this.areaFieldsets.forEach((areaFieldset) => {
-                areas.push(areaFieldset.getData());
+                areas.push(areaFieldset.area.getData());
             });
             return JSON.stringify(areas);
-        }
-        static outputiX(value) {
-            return Math.round(value * AreaForm.width);
-        }
-        static outputiY(value) {
-            return Math.round(value * AreaForm.height);
-        }
-        static outputX(value) {
-            return AreaForm.outputiX(value).toString();
-        }
-        static outputY(value) {
-            return AreaForm.outputiY(value).toString();
         }
     }
     exports.AreaForm = AreaForm;

@@ -38,6 +38,7 @@
 		"css": "gulp scss",
 		"copy": "gulp copy",
 		"js": "gulp typescript",
+		"copyjs": "gulp typescript && gulp copy",
 		"build": "gulp build"
 	}
 }

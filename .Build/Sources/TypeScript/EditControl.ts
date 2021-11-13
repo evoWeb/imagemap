@@ -9,7 +9,7 @@
  * LICENSE.txt file that was distributed with this source code.
  */
 
-import * as $ from 'jquery';
+// @todo remove if not needed import * as $ from 'jquery';
 // @ts-ignore
 import 'TYPO3/CMS/Core/Contrib/jquery.minicolors';
 // @ts-ignore

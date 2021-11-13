@@ -9,12 +9,11 @@
  * LICENSE.txt file that was distributed with this source code.
  */
 
-/// <reference types="../../types/index"/>
+/// <reference types="../../../types/index"/>
 
-// @ts-ignore
-import { Object } from './vendor/Fabric.min';
-import { AreaForm } from './AreaForm';
-import { ShapeFactory } from './ShapeFactory';
+import { AreaForm } from '../AreaForm';
+import { ShapeFactory } from './Factory';
+import { AbstractArea } from './AbstractArea';
 
 export abstract class AbstractFieldset {
   static before: number = -1;
@@ -23,29 +22,20 @@ export abstract class AbstractFieldset {
 
   readonly name: string = '';
 
-  readonly id: number = 0;
-
   public element: HTMLElement;
 
   private moveShapeDelay: number = 0;
 
   protected form: AreaForm;
 
-  public shape: Object;
-
-  public area: {[k: string]: any} = {};
+  public area: AbstractArea;
 
   private configuration: EditorConfiguration;
 
   [property: string]: any;
 
-  constructor(area: Area, configuration: EditorConfiguration, shape: Object) {
-    this.area = area;
+  constructor(configuration: EditorConfiguration) {
     this.configuration = configuration;
-    this.shape = shape;
-    this.shape.fieldset = this;
-
-    this.id = this.shape.id;
   }
 
   public addForm(form: AreaForm): void {
@@ -58,7 +48,7 @@ export abstract class AbstractFieldset {
   }
 
   private initializeElement(): void {
-    this.element = this.getFieldsetElement(`#${this.name}Form`, this.id);
+    this.element = this.getFieldsetElement(`#${this.name}Form`, this.area.id);
     this.form.element.append(this.element);
   }
 
@@ -101,18 +91,19 @@ export abstract class AbstractFieldset {
 
   protected abstract updateFields(): void;
 
-  protected abstract shapeModified(shape: Object): void;
-
-  protected abstract moveShape(event: Event): void;
+  protected abstract fieldsetModified(event: Event): void;
 
   private basicOptionsHandler(event: InputEvent): void {
     let field = (event.currentTarget as HTMLInputElement);
-    this.area[field.dataset.field] = field.value;
+    // @todo check if these are only values not related to movement or size
+    if (this.area.areaData.hasOwnProperty(field.dataset.field)) {
+      this.area.areaData[field.dataset.field] = field.value;
+    }
   }
 
   private positionOptionsHandler(event: InputEvent): void {
     this.moveShapeDelay = AbstractFieldset.wait(
-      () => { this.moveShape(event); },
+      () => { this.fieldsetModified(event); },
       300,
       this.moveShapeDelay
     );
@@ -171,17 +162,17 @@ export abstract class AbstractFieldset {
   }
 
   public colorPickerAction(value: string): void {
-    this.area.color = value;
-    (this.getElement('.t3js-color-picker') as HTMLInputElement).setAttribute('value', this.area.color);
-    this.shape.set('borderColor', this.area.color);
-    this.shape.set('stroke', this.area.color);
-    this.shape.set('fill', ShapeFactory.hexToRgbA(this.area.color, 0.2));
+    this.area.areaData.color = value;
+    this.getElement('.t3js-color-picker').setAttribute('value', value);
+    this.area.canvasShape.set('borderColor', value);
+    this.area.canvasShape.set('stroke', value);
+    this.area.canvasShape.set('fill', ShapeFactory.hexToRgbA(value, 0.2));
     this.form.canvas.renderAll();
   }
 
   protected getFieldsetElement(selector: string, id: number|string): HTMLElement {
     let template = this.form.modalParent.querySelector(selector)
-      .innerHTML.replace(new RegExp('_ID', 'g'), String(id ? id : this.id));
+      .innerHTML.replace(new RegExp('_ID', 'g'), String(id ? id : this.area.id));
     return (new DOMParser()).parseFromString(template, 'text/html').body.firstChild as HTMLElement;
   }
 
@@ -205,18 +196,14 @@ export abstract class AbstractFieldset {
     return this.getElement(selector).value;
   }
 
-  public getData(): Area {
-    return this.area as Area;
-  }
-
   /**
    * Add an input as target for browselink which listens for changes and writes value to real field
    */
   private addBrowselinkTargetInput(): void {
     if (this.form.browselinkTargetForm) {
       let input = this.form.browselinkParent.createElement('input');
-      input.id = `href${this.id}_target`;
-      input.value = this.area.href;
+      input.id = `href${this.area.id}_target`;
+      input.value = this.area.areaData.href;
       input.setAttribute('data-formengine-input-name', input.id);
       input.onchange = this.changedBrowselinkTargetInput.bind(this);
       this.form.browselinkTargetForm.appendChild(input);
@@ -225,7 +212,7 @@ export abstract class AbstractFieldset {
 
   public removeBrowselinkTargetInput(): void {
     if (this.form && this.form.browselinkTargetForm) {
-      let field = this.form.browselinkTargetForm.querySelector(`#href${this.id}_target`);
+      let field = this.form.browselinkTargetForm.querySelector(`#href${this.area.id}_target`);
       if (field) {
         field.remove();
       }
@@ -233,8 +220,8 @@ export abstract class AbstractFieldset {
   }
 
   private changedBrowselinkTargetInput(): void {
-    let field = (this.form.browselinkTargetForm.querySelector(`#href${this.id}_target`) as HTMLInputElement);
-    this.area.href = field.value;
+    let field = (this.form.browselinkTargetForm.querySelector(`#href${this.area.id}_target`) as HTMLInputElement);
+    this.area.areaData.href = field.value;
     this.updateFields();
   }
 

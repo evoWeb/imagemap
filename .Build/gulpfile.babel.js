@@ -29,7 +29,7 @@ const tasks = {
   },
 
   typescript: {
-    src: `${paths.src}/TypeScript/*.ts`,
+    src: `${paths.src}/TypeScript/**/*.ts`,
     dest: `${paths.dest}/JavaScript/`,
   }
 };

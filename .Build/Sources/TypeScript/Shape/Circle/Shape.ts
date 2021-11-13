@@ -10,15 +10,15 @@
  */
 
 // @ts-ignore
-import { Canvas, Rect } from './vendor/Fabric.min';
-import { RectangleFieldset } from './RectangleFieldset';
+import { Canvas, Circle } from '../../vendor/Fabric.min';
+import { CircleArea } from './Area';
 
-export class RectangleShape extends Rect {
+export class CircleShape extends Circle {
   public id: number;
 
   public canvas: Canvas;
 
-  public fieldset: RectangleFieldset;
+  public area: CircleArea;
 
   [property: string]: any;
 
@@ -33,6 +33,6 @@ export class RectangleShape extends Rect {
   }
 
   public shapeModified() {
-    this.fieldset.shapeModified(this);
+    this.area.shapeModified(this);
   }
 }
