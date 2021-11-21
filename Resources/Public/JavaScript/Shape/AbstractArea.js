@@ -12,21 +12,27 @@ define(["require", "exports", "../AreaForm"], function (require, exports, AreaFo
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class AbstractArea {
-        constructor(areaData, sidebarFieldset, canvasShape) {
+        constructor(areaData) {
             this.id = 0;
             this.areaData = {};
-            this.areaData = areaData;
-            this.sidebarFieldset = sidebarFieldset;
-            this.sidebarFieldset.area = this;
-            this.canvasShape = canvasShape;
-            this.canvasShape.area = this;
+            this.areaData = new Proxy(areaData, {
+                set(target, property, value) {
+                    console.log(`Property ${property} has been set to value ` + value);
+                    target[property] = value;
+                }
+            });
+        }
+        setFieldset(fieldset) {
+            this.sidebarFieldset = fieldset;
+        }
+        setShape(shape) {
+            this.canvasShape = shape;
             this.id = this.canvasShape.id;
         }
         getData() {
             return this.areaData;
         }
-        shapeModified(shape) {
-            this.sidebarFieldset.shapeModified(shape);
+        shapeModified(event) {
         }
         fieldsetModified(event) {
             this.canvasShape.fieldsetModified(event);

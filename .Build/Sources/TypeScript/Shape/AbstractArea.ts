@@ -24,15 +24,21 @@ export class AbstractArea {
 
   public sidebarFieldset: AbstractFieldset
 
-  constructor(areaData: Area, sidebarFieldset: AbstractFieldset, canvasShape: CircleShape|PolygonShape|RectangleShape) {
-    this.areaData = areaData;
+  constructor(areaData: Area) {
+    this.areaData = new Proxy(areaData, {
+      set(target: any, property: string, value: any): any {
+        console.log(`Property ${property} has been set to value ` + value);
+        target[property] = value;
+      }
+    });
+  }
 
-    this.sidebarFieldset = sidebarFieldset;
-    this.sidebarFieldset.area = this;
+  public setFieldset(fieldset: AbstractFieldset) {
+    this.sidebarFieldset = fieldset;
+  }
 
-    this.canvasShape = canvasShape;
-    this.canvasShape.area = this;
-
+  public setShape(shape: CircleShape|PolygonShape|RectangleShape) {
+    this.canvasShape = shape;
     this.id = this.canvasShape.id;
   }
 
@@ -40,8 +46,7 @@ export class AbstractArea {
     return this.areaData as Area;
   }
 
-  public shapeModified(shape: CircleShape|PolygonShape|RectangleShape) {
-    this.sidebarFieldset.shapeModified(shape);
+  public shapeModified(event: FabricEvent) {
   }
 
   public fieldsetModified(event: Event) {

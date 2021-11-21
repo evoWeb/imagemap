@@ -13,6 +13,7 @@ define(["require", "exports", "./vendor/Fabric.min", "./AreaForm", "./Shape/Fact
     Object.defineProperty(exports, "__esModule", { value: true });
     class Editor {
         constructor(configuration, canvas, modalParent, browselinkParent) {
+            this.areas = [];
             this.formSelector = '#areasForm';
             this.configuration = configuration;
             this.modalParent = modalParent;
@@ -21,12 +22,7 @@ define(["require", "exports", "./vendor/Fabric.min", "./AreaForm", "./Shape/Fact
             this.initializeAreaForm();
         }
         initializeCanvas(canvas) {
-            // @ts-ignore
-            let helper = frameElement;
-            if (helper && helper.contentWindow && Fabric.window !== helper.contentWindow.parent) {
-                Fabric.window = helper.contentWindow.parent;
-                Fabric.document = helper.contentWindow.parent.document;
-            }
+            this.setWindowAndDocument();
             this.canvas = new Fabric.Canvas(canvas, {
                 width: AreaForm_1.AreaForm.width,
                 height: AreaForm_1.AreaForm.height,
@@ -36,20 +32,21 @@ define(["require", "exports", "./vendor/Fabric.min", "./AreaForm", "./Shape/Fact
                 hoverCursor: 'move',
             });
         }
+        setWindowAndDocument() {
+            let helper = frameElement;
+            if (helper && helper.contentWindow && Fabric.window !== helper.contentWindow.parent) {
+                Fabric.window = helper.contentWindow.parent;
+                Fabric.document = helper.contentWindow.parent.document;
+            }
+        }
         initializeAreaForm() {
             let element = this.modalParent.querySelector(this.formSelector);
             this.form = new AreaForm_1.AreaForm(element, this.canvas, this.configuration, this.modalParent, this.browselinkParent);
         }
-        static objectModified(event) {
-            let element = event.target;
-            if (element.hasOwnProperty('fieldset')) {
-                // circle, polygon, rectangle
-                element.fieldset.shapeModified(element);
-            }
-        }
         resize(width, height) {
             if (AreaForm_1.AreaForm.width !== width || AreaForm_1.AreaForm.height !== height) {
                 let data = JSON.parse(this.getMapData());
+                // @todo rerender shapes with relative values and update absolute values in shape and fieldset
                 this.removeAreas();
                 AreaForm_1.AreaForm.width = width;
                 AreaForm_1.AreaForm.height = height;
@@ -64,6 +61,7 @@ define(["require", "exports", "./vendor/Fabric.min", "./AreaForm", "./Shape/Fact
                 let shapeFactory = new Factory_1.ShapeFactory(this.canvas, this.configuration);
                 areas.forEach((area) => {
                     let shape = shapeFactory.create(area, true);
+                    this.areas.push(shape);
                     this.canvas.add(shape.canvasShape);
                     this.form.addArea(shape.sidebarFieldset);
                     if (shape instanceof Shape_1.PolygonShape) {
@@ -78,7 +76,11 @@ define(["require", "exports", "./vendor/Fabric.min", "./AreaForm", "./Shape/Fact
             });
         }
         getMapData() {
-            return this.form.getMapData();
+            let areas = [];
+            this.areas.forEach((area) => {
+                areas.push(area.getData());
+            });
+            return JSON.stringify(areas);
         }
         destroy() {
             this.canvas = null;

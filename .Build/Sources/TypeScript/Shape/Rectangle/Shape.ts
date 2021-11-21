@@ -22,17 +22,14 @@ export class RectangleShape extends Rect {
 
   [property: string]: any;
 
-  constructor(options: any) {
+  constructor(area: RectangleArea, options: any) {
     super(options);
+    this.area = area;
     this.initializeEvents();
   }
 
   protected initializeEvents() {
-    this.on('moved', this.shapeModified.bind(this));
-    this.on('modified', this.shapeModified.bind(this));
-  }
-
-  public shapeModified() {
-    this.area.shapeModified(this);
+    this.on('moved', this.area.shapeModified);
+    this.on('modified', this.area.shapeModified);
   }
 }

@@ -12,9 +12,10 @@ define(["require", "exports", "../AreaForm", "./Factory"], function (require, ex
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class AbstractFieldset {
-        constructor(configuration) {
+        constructor(area, configuration) {
             this.name = '';
             this.moveShapeDelay = 0;
+            this.area = area;
             this.configuration = configuration;
         }
         addForm(form) {

@@ -80,25 +80,25 @@ export class ShapeFactory {
       left = this.outputiX(coords.left) - radius,
       top = this.outputiY(coords.top) - radius;
 
-    return new CircleArea(
-      areaData,
-      new CircleFieldset(this.configuration),
-      new CircleShape({
-        ...configuration,
-        left: left,
-        top: top,
-        radius: radius,
-        // disable control points as these would stretch the circle
-        // to an ellipse which is not possible in html areas
-        _controlsVisibility: {
-          ml: false,
-          mt: false,
-          mr: false,
-          mb: false,
-          mtr: false,
-        }
-      })
-    );
+    let area = new CircleArea(areaData);
+    area.setFieldset(new CircleFieldset(area, this.configuration));
+    area.setShape(new CircleShape(area, {
+      ...configuration,
+      left: left,
+      top: top,
+      radius: radius,
+      // disable control points as these would stretch the circle
+      // to an ellipse which is not possible in html areas
+      _controlsVisibility: {
+        ml: false,
+        mt: false,
+        mr: false,
+        mb: false,
+        mtr: false,
+      }
+    }));
+
+    return area;
   }
 
   protected createPolygon(areaData: Area, configuration: ShapeConfiguration): PolygonArea {
@@ -114,14 +114,13 @@ export class ShapeFactory {
       });
     });
 
-    return new PolygonArea(
-      areaData,
-      new PolygonFieldset(this.configuration),
-      new PolygonShape(polygonPoints, {
-        ...configuration,
-        objectCaching: false,
-      })
-    );
+    let area = new PolygonArea(areaData);
+    area.setFieldset(new PolygonFieldset(area, this.configuration));
+    area.setShape(new PolygonShape(area, polygonPoints, {
+      ...configuration,
+      objectCaching: false,
+    }))
+    return area;
   }
 
   protected createRectangle(areaData: Area, configuration: ShapeConfiguration): RectangleArea {
@@ -131,20 +130,19 @@ export class ShapeFactory {
       width = this.outputiX(coords.right) - left,
       height = this.outputiY(coords.bottom) - top;
 
-    return new RectangleArea(
-      areaData,
-      new RectangleFieldset(this.configuration),
-      new RectangleShape({
-        ...configuration,
-        left: left,
-        top: top,
-        width: width,
-        height: height,
-        _controlsVisibility: {
-          mtr: false,
-        }
-      })
-    );
+    let area = new RectangleArea(areaData);
+    area.setFieldset(new RectangleFieldset(area, this.configuration));
+    area.setShape(new RectangleShape(area, {
+      ...configuration,
+      left: left,
+      top: top,
+      width: width,
+      height: height,
+      _controlsVisibility: {
+        mtr: false,
+      }
+    }));
+    return area;
   }
 
   protected outputiX(value: number): number {

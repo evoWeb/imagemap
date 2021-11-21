@@ -34,7 +34,8 @@ export abstract class AbstractFieldset {
 
   [property: string]: any;
 
-  constructor(configuration: EditorConfiguration) {
+  constructor(area: AbstractArea, configuration: EditorConfiguration) {
+    this.area = area;
     this.configuration = configuration;
   }
 

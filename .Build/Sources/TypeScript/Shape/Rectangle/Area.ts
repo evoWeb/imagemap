@@ -13,8 +13,9 @@ import { AbstractArea } from '../AbstractArea';
 import { RectangleShape } from './Shape';
 
 export class RectangleArea extends AbstractArea {
-  public shapeModified(shape: RectangleShape): void {
-    let left = Math.round(shape.left),
+  public shapeModified(event: FabricEvent): void {
+    let shape = (event.target as RectangleShape),
+      left = Math.round(shape.left),
       top = Math.round(shape.top),
       right = Math.round(shape.getScaledWidth() + left),
       bottom = Math.round(shape.getScaledHeight() + top);

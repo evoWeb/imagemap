@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "../../vendor/Fabric.min", "../AbstractArea", "./Shape", "../Factory"], function (require, exports, Fabric_min_1, AbstractArea_1, Shape_1, Factory_1) {
+define(["require", "exports", "../../vendor/Fabric.min", "../AbstractArea", "../Factory", "./Shape"], function (require, exports, Fabric_min_1, AbstractArea_1, Factory_1, Shape_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class PolygonArea extends AbstractArea_1.AbstractArea {
@@ -21,8 +21,8 @@ define(["require", "exports", "../../vendor/Fabric.min", "../AbstractArea", "./S
             });
             return data;
         }
-        shapeModified(shape) {
-            let matrix = shape.calcTransformMatrix(), fieldValues = [];
+        shapeModified(event) {
+            let shape = event.target, matrix = shape.calcTransformMatrix(), fieldValues = [];
             shape.points.forEach((point) => {
                 let temporaryPoint = new Fabric_min_1.Point(point.x - shape.pathOffset.x, point.y - shape.pathOffset.y), transformed = Fabric_min_1.util.transformPoint(temporaryPoint, matrix), areaPoint = this.areaData.points.find((findPoint) => { return findPoint.id === point.id; });
                 if (areaPoint) {
@@ -61,7 +61,7 @@ define(["require", "exports", "../../vendor/Fabric.min", "../AbstractArea", "./S
                 });
             });
             this.canvasShape.canvas.remove(this.canvasShape);
-            this.canvasShape = new Shape_1.PolygonShape(polygonPoints, Object.assign(Object.assign({}, configuration), { objectCaching: false }));
+            this.canvasShape = new Shape_1.PolygonShape(this, polygonPoints, Object.assign(Object.assign({}, configuration), { objectCaching: false }));
             this.canvasShape.area = this;
             this.canvasShape.canvas.add(this.canvasShape);
             this.canvasShape.initializeControls();

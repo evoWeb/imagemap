@@ -22,18 +22,15 @@ export class PolygonShape extends Polygon {
 
   [property: string]: any;
 
-  constructor(points: any, options: any) {
+  constructor(area: PolygonArea, points: any, options: any) {
     super(points, options);
+    this.area = area;
     this.initializeEvents();
   }
 
   protected initializeEvents() {
-    this.on('moved', this.shapeModified.bind(this));
-    this.on('modified', this.shapeModified.bind(this));
-  }
-
-  public shapeModified() {
-    this.area.shapeModified(this);
+    this.on('moved', this.area.shapeModified);
+    this.on('modified', this.area.shapeModified);
   }
 
   public initializeControls(): void {

@@ -12,8 +12,8 @@ define(["require", "exports", "../AbstractArea"], function (require, exports, Ab
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class RectangleArea extends AbstractArea_1.AbstractArea {
-        shapeModified(shape) {
-            let left = Math.round(shape.left), top = Math.round(shape.top), right = Math.round(shape.getScaledWidth() + left), bottom = Math.round(shape.getScaledHeight() + top);
+        shapeModified(event) {
+            let shape = event.target, left = Math.round(shape.left), top = Math.round(shape.top), right = Math.round(shape.getScaledWidth() + left), bottom = Math.round(shape.getScaledHeight() + top);
             this.areaData.coords.left = this.inputX(left);
             this.areaData.coords.top = this.inputY(top);
             this.areaData.coords.right = this.inputX(right);

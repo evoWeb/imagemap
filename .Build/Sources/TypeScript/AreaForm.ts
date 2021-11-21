@@ -163,14 +163,4 @@ export class AreaForm {
       this.browselinkTargetForm.remove();
     }
   }
-
-  public getMapData(): string {
-    let areas: Area[] = [];
-
-    this.areaFieldsets.forEach((areaFieldset: AbstractFieldset) => {
-      areas.push(areaFieldset.area.getData());
-    });
-
-    return JSON.stringify(areas);
-  }
 }

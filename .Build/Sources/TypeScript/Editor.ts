@@ -14,6 +14,8 @@ import * as Fabric from './vendor/Fabric.min';
 import { AreaForm } from './AreaForm';
 import { ShapeFactory } from './Shape/Factory';
 import { PolygonShape } from './Shape/Polygon/Shape';
+import {AbstractArea} from "./Shape/AbstractArea";
+import {AbstractFieldset} from "./Shape/AbstractFieldset";
 
 export class Editor {
   readonly configuration: EditorConfiguration;
@@ -21,6 +23,8 @@ export class Editor {
   readonly modalParent: Document;
 
   readonly browselinkParent: Document;
+
+  private areas: AbstractArea[] = [];
 
   private canvas: Fabric.Canvas;
 
@@ -43,12 +47,7 @@ export class Editor {
   }
 
   private initializeCanvas(canvas: HTMLCanvasElement): void {
-    // @ts-ignore
-    let helper: HTMLFrameElement = frameElement;
-    if (helper && helper.contentWindow && Fabric.window !== helper.contentWindow.parent) {
-      Fabric.window = helper.contentWindow.parent;
-      Fabric.document = helper.contentWindow.parent.document;
-    }
+    this.setWindowAndDocument();
 
     this.canvas = new Fabric.Canvas(canvas, {
       width: AreaForm.width,
@@ -60,23 +59,23 @@ export class Editor {
     });
   }
 
+  private setWindowAndDocument() {
+    let helper: HTMLFrameElement = frameElement as HTMLFrameElement;
+    if (helper && helper.contentWindow && Fabric.window !== helper.contentWindow.parent) {
+      Fabric.window = helper.contentWindow.parent;
+      Fabric.document = helper.contentWindow.parent.document;
+    }
+  }
+
   private initializeAreaForm(): void {
     let element: HTMLElement = this.modalParent.querySelector(this.formSelector);
     this.form = new AreaForm(element, this.canvas, this.configuration, this.modalParent, this.browselinkParent);
   }
 
-  static objectModified(event: FabricEvent): void {
-    let element: Fabric.Object = event.target;
-    if (element.hasOwnProperty('fieldset')) {
-      // circle, polygon, rectangle
-      element.fieldset.shapeModified(element);
-    }
-  }
-
   public resize(width: number, height: number): void {
     if (AreaForm.width !== width || AreaForm.height !== height) {
       let data: Array<Area> = JSON.parse(this.getMapData());
-
+      // @todo rerender shapes with relative values and update absolute values in shape and fieldset
       this.removeAreas();
 
       AreaForm.width = width;
@@ -97,6 +96,7 @@ export class Editor {
       areas.forEach((area) => {
         let shape = shapeFactory.create(area, true);
 
+        this.areas.push(shape);
         this.canvas.add(shape.canvasShape);
         this.form.addArea(shape.sidebarFieldset);
 
@@ -114,7 +114,13 @@ export class Editor {
   }
 
   public getMapData(): string {
-    return this.form.getMapData();
+    let areas: Area[] = [];
+
+    this.areas.forEach((area: AbstractArea) => {
+      areas.push(area.getData());
+    });
+
+    return JSON.stringify(areas);
   }
 
   public destroy(): void {

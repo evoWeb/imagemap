@@ -12,8 +12,8 @@
 // @ts-ignore
 import { Point, util } from '../../vendor/Fabric.min';
 import { AbstractArea } from '../AbstractArea';
+import { ShapeFactory } from '../Factory';
 import { PolygonShape } from './Shape';
-import {ShapeFactory} from "../Factory";
 
 export class PolygonArea extends AbstractArea {
   public getData(): Area {
@@ -30,8 +30,9 @@ export class PolygonArea extends AbstractArea {
     return data as Area;
   }
 
-  public shapeModified(shape: PolygonShape): void {
-    let matrix = shape.calcTransformMatrix(),
+  public shapeModified(event: FabricEvent): void {
+    let shape = (event.target as PolygonShape),
+      matrix = shape.calcTransformMatrix(),
       fieldValues: {id: string, x: string, y: string}[] = [];
 
     shape.points.forEach((point: Point) => {
@@ -98,7 +99,7 @@ export class PolygonArea extends AbstractArea {
     });
 
     this.canvasShape.canvas.remove(this.canvasShape);
-    this.canvasShape = new PolygonShape(polygonPoints, {
+    this.canvasShape = new PolygonShape(this, polygonPoints, {
       ...configuration,
       objectCaching: false,
     });

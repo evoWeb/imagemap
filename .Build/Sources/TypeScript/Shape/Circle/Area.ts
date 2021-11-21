@@ -13,8 +13,9 @@ import { AbstractArea } from '../AbstractArea';
 import { CircleShape } from './Shape';
 
 export class CircleArea extends AbstractArea {
-  public shapeModified(shape: CircleShape): void {
-    let radius = shape.getRadiusX(),
+  public shapeModified(event: FabricEvent): void {
+    let shape = (event.target as CircleShape),
+      radius = shape.getRadiusX(),
       left = Math.round(shape.left) + radius,
       top = Math.round(shape.top) + radius;
 

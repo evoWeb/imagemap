@@ -12,16 +12,14 @@ define(["require", "exports", "../../vendor/Fabric.min"], function (require, exp
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class CircleShape extends Fabric_min_1.Circle {
-        constructor(options) {
+        constructor(area, options) {
             super(options);
+            this.area = area;
             this.initializeEvents();
         }
         initializeEvents() {
-            this.on('moved', this.shapeModified.bind(this));
-            this.on('modified', this.shapeModified.bind(this));
-        }
-        shapeModified() {
-            this.area.shapeModified(this);
+            this.on('moved', this.area.shapeModified);
+            this.on('modified', this.area.shapeModified);
         }
     }
     exports.CircleShape = CircleShape;

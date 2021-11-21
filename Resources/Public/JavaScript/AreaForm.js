@@ -111,13 +111,6 @@ define(["require", "exports", "TYPO3/CMS/Backend/Modal"], function (require, exp
                 this.browselinkTargetForm.remove();
             }
         }
-        getMapData() {
-            let areas = [];
-            this.areaFieldsets.forEach((areaFieldset) => {
-                areas.push(areaFieldset.area.getData());
-            });
-            return JSON.stringify(areas);
-        }
     }
     exports.AreaForm = AreaForm;
 });

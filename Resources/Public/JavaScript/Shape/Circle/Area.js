@@ -12,8 +12,8 @@ define(["require", "exports", "../AbstractArea"], function (require, exports, Ab
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class CircleArea extends AbstractArea_1.AbstractArea {
-        shapeModified(shape) {
-            let radius = shape.getRadiusX(), left = Math.round(shape.left) + radius, top = Math.round(shape.top) + radius;
+        shapeModified(event) {
+            let shape = event.target, radius = shape.getRadiusX(), left = Math.round(shape.left) + radius, top = Math.round(shape.top) + radius;
             this.areaData.coords.radius = this.inputX(radius);
             this.areaData.coords.left = this.inputX(left);
             this.areaData.coords.top = this.inputY(top);

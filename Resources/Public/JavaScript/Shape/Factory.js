@@ -34,7 +34,9 @@ define(["require", "exports", "../vendor/Fabric.min", "../AreaForm", "./Circle/A
         }
         createCircle(areaData, configuration) {
             let coords = areaData.coords, radius = this.outputiX(coords.radius), left = this.outputiX(coords.left) - radius, top = this.outputiY(coords.top) - radius;
-            return new Area_1.CircleArea(areaData, new Fieldset_1.CircleFieldset(this.configuration), new Shape_1.CircleShape(Object.assign(Object.assign({}, configuration), { left: left, top: top, radius: radius, 
+            let area = new Area_1.CircleArea(areaData);
+            area.setFieldset(new Fieldset_1.CircleFieldset(area, this.configuration));
+            area.setShape(new Shape_1.CircleShape(area, Object.assign(Object.assign({}, configuration), { left: left, top: top, radius: radius, 
                 // disable control points as these would stretch the circle
                 // to an ellipse which is not possible in html areas
                 _controlsVisibility: {
@@ -44,6 +46,7 @@ define(["require", "exports", "../vendor/Fabric.min", "../AreaForm", "./Circle/A
                     mb: false,
                     mtr: false,
                 } })));
+            return area;
         }
         createPolygon(areaData, configuration) {
             let points = areaData.points || [], polygonPoints = [];
@@ -55,13 +58,19 @@ define(["require", "exports", "../vendor/Fabric.min", "../AreaForm", "./Circle/A
                     id: point.id,
                 });
             });
-            return new Area_2.PolygonArea(areaData, new Fieldset_2.PolygonFieldset(this.configuration), new Shape_2.PolygonShape(polygonPoints, Object.assign(Object.assign({}, configuration), { objectCaching: false })));
+            let area = new Area_2.PolygonArea(areaData);
+            area.setFieldset(new Fieldset_2.PolygonFieldset(area, this.configuration));
+            area.setShape(new Shape_2.PolygonShape(area, polygonPoints, Object.assign(Object.assign({}, configuration), { objectCaching: false })));
+            return area;
         }
         createRectangle(areaData, configuration) {
             let coords = areaData.coords, left = this.outputiX(coords.left), top = this.outputiY(coords.top), width = this.outputiX(coords.right) - left, height = this.outputiY(coords.bottom) - top;
-            return new Area_3.RectangleArea(areaData, new Fieldset_3.RectangleFieldset(this.configuration), new Shape_3.RectangleShape(Object.assign(Object.assign({}, configuration), { left: left, top: top, width: width, height: height, _controlsVisibility: {
+            let area = new Area_3.RectangleArea(areaData);
+            area.setFieldset(new Fieldset_3.RectangleFieldset(area, this.configuration));
+            area.setShape(new Shape_3.RectangleShape(area, Object.assign(Object.assign({}, configuration), { left: left, top: top, width: width, height: height, _controlsVisibility: {
                     mtr: false,
                 } })));
+            return area;
         }
         outputiX(value) {
             return Math.round(value * AreaForm_1.AreaForm.width);
