@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "./vendor/Fabric.min", "./AreaFieldsetFactory", "./AreaForm", "./AreaShapeFactory", "./AreaShapePolygon", "TYPO3/CMS/Core/Contrib/jquery.minicolors"], function (require, exports, Fabric_min_1, AreaFieldsetFactory_1, AreaForm_1, AreaShapeFactory_1, AreaShapePolygon_1) {
+define(["require", "exports", "./vendor/Fabric.min", "./AreaFieldsetFactory", "./AreaForm", "./AreaShapeFactory", "./AreaShapePolygon", "TYPO3/CMS/Core/Contrib/jquery.minicolors"], function (require, exports, Fabric, AreaFieldsetFactory_1, AreaForm_1, AreaShapeFactory_1, AreaShapePolygon_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Editor {
@@ -21,7 +21,8 @@ define(["require", "exports", "./vendor/Fabric.min", "./AreaFieldsetFactory", ".
             this.initializeAreaForm();
         }
         initializeCanvas(canvas) {
-            this.canvas = new Fabric_min_1.Canvas(canvas, {
+            this.setWindowAndDocument();
+            this.canvas = new Fabric.Canvas(canvas, {
                 width: AreaForm_1.AreaForm.width,
                 height: AreaForm_1.AreaForm.height,
                 top: AreaForm_1.AreaForm.height * -1,
@@ -51,6 +52,13 @@ define(["require", "exports", "./vendor/Fabric.min", "./AreaFieldsetFactory", ".
             ].forEach((eventName) => {
                 this.canvas.on(eventName, (e) => { console.log(e, eventName); });
             });
+        }
+        setWindowAndDocument() {
+            let helper = frameElement;
+            if (helper && helper.contentWindow && Fabric.window !== helper.contentWindow.parent) {
+                Fabric.window = helper.contentWindow.parent;
+                Fabric.document = helper.contentWindow.parent.document;
+            }
         }
         initializeAreaForm() {
             let element = this.modalParent.querySelector(this.formSelector);

@@ -14,7 +14,7 @@
 // @ts-ignore
 import 'TYPO3/CMS/Core/Contrib/jquery.minicolors';
 // @ts-ignore
-import { Canvas, Object } from './vendor/Fabric.min';
+import * as Fabric from './vendor/Fabric.min';
 import { AreaFieldsetFactory } from './AreaFieldsetFactory';
 import { AreaForm } from './AreaForm';
 import { AreaShapeFactory } from './AreaShapeFactory';
@@ -27,7 +27,7 @@ export class Editor {
 
   readonly browselinkParent: Document;
 
-  private canvas: Canvas;
+  private canvas: Fabric.Canvas;
 
   private formSelector: string = '#areasForm';
 
@@ -48,7 +48,9 @@ export class Editor {
   }
 
   private initializeCanvas(canvas: HTMLCanvasElement): void {
-    this.canvas = new Canvas(canvas, {
+    this.setWindowAndDocument();
+
+    this.canvas = new Fabric.Canvas(canvas, {
       width: AreaForm.width,
       height: AreaForm.height,
       top: AreaForm.height * -1,
@@ -81,13 +83,21 @@ export class Editor {
     });
   }
 
+  private setWindowAndDocument() {
+    let helper: HTMLFrameElement = frameElement as HTMLFrameElement;
+    if (helper && helper.contentWindow && Fabric.window !== helper.contentWindow.parent) {
+      Fabric.window = helper.contentWindow.parent;
+      Fabric.document = helper.contentWindow.parent.document;
+    }
+  }
+
   private initializeAreaForm(): void {
     let element: HTMLElement = this.modalParent.querySelector(this.formSelector);
     this.form = new AreaForm(element, this.canvas, this.configuration, this.modalParent, this.browselinkParent);
   }
 
-  static objectModified(event: FabricEvent): void {
-    let element: Object = event.target;
+  static objectModified(event: Fabric.FabricEvent): void {
+    let element: Fabric.Object = event.target;
     if (element.hasOwnProperty('fieldset')) {
       // circle, polygon, rectangle
       element.fieldset.shapeModified(event);
