@@ -14,8 +14,7 @@ import * as Fabric from './vendor/Fabric.min';
 import { AreaForm } from './AreaForm';
 import { ShapeFactory } from './Shape/Factory';
 import { PolygonShape } from './Shape/Polygon/Shape';
-import {AbstractArea} from "./Shape/AbstractArea";
-import {AbstractFieldset} from "./Shape/AbstractFieldset";
+import { AbstractArea } from './Shape/AbstractArea';
 
 export class Editor {
   readonly configuration: EditorConfiguration;
@@ -32,6 +31,12 @@ export class Editor {
 
   private form: AreaForm;
 
+  /**
+   * @param configuration
+   * @param canvas element to use to render shapes into
+   * @param modalParent document in which the image is rendered
+   * @param browselinkParent document in which the browslink is going to set fields
+   */
   constructor(
     configuration: EditorConfiguration,
     canvas: HTMLCanvasElement,
@@ -60,10 +65,10 @@ export class Editor {
   }
 
   private setWindowAndDocument() {
-    let helper: HTMLFrameElement = frameElement as HTMLFrameElement;
-    if (helper && helper.contentWindow && Fabric.window !== helper.contentWindow.parent) {
-      Fabric.window = helper.contentWindow.parent;
-      Fabric.document = helper.contentWindow.parent.document;
+    let frame: HTMLFrameElement = frameElement as HTMLFrameElement;
+    if (frame && frame.contentWindow && Fabric.window !== frame.contentWindow.parent) {
+      Fabric.window = frame.contentWindow.parent;
+      Fabric.document = frame.contentWindow.parent.document;
     }
   }
 

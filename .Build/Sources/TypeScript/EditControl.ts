@@ -51,7 +51,6 @@ class EditControl {
   constructor(fieldSelector: string) {
     this.initializeFormElement(fieldSelector);
     this.initializeTrigger();
-    this.resizeEnd(this.resizeEditor.bind(this));
   }
 
   private initializeFormElement(fieldSelector: string): void {
@@ -66,114 +65,116 @@ class EditControl {
 
   private triggerHandler(event: MouseEvent): void {
     event.preventDefault();
-    this.show();
+    this.initializeModal();
+  }
+
+  private initializeModal(): void {
+    Icons.getIcon(
+      'spinner-circle',
+      Icons.sizes.default,
+      null,
+      null,
+      Icons.markupIdentifiers.inline
+    ).then(this.createModal.bind(this));
+  }
+
+  private createModal(icon: string) {
+    const wizardUri: string = this.trigger.dataset.url,
+      payload: {arguments: string, signature: string} = JSON.parse(this.trigger.dataset.payload),
+      modalLoading = document.createElement('div');
+
+    modalLoading.innerHTML = icon;
+    modalLoading.setAttribute('class', 'modal-loading');
+
+    /**
+     * Open modal with areas to edit
+     */
+    this.currentModal = Modal.advanced({
+      additionalCssClasses: ['modal-area-wizard modal-image-manipulation'],
+      buttons: [
+        {
+          btnClass: 'btn-default pull-left',
+          dataAttributes: {
+            method: 'rectangle',
+          },
+          icon: 'extensions-imagemap-rectangle',
+          text: this.trigger.dataset.buttonAddrectText,
+        },
+        {
+          btnClass: 'btn-default pull-left',
+          dataAttributes: {
+            method: 'circle',
+          },
+          icon: 'extensions-imagemap-circle',
+          text: this.trigger.dataset.buttonAddcircleText,
+        },
+        {
+          btnClass: 'btn-default pull-left',
+          dataAttributes: {
+            method: 'polygon',
+          },
+          icon: 'extensions-imagemap-polygon',
+          text: this.trigger.dataset.buttonAddpolyText,
+        },
+        {
+          btnClass: 'btn-default',
+          dataAttributes: {
+            method: 'dismiss',
+          },
+          icon: 'actions-close',
+          text: this.trigger.dataset.buttonDismissText,
+        },
+        {
+          btnClass: 'btn-primary',
+          dataAttributes: {
+            method: 'save',
+          },
+          icon: 'actions-document-save',
+          text: this.trigger.dataset.buttonSaveText,
+        },
+      ],
+      content: modalLoading,
+      size: Modal.sizes.full,
+      style: Modal.styles.dark,
+      title: this.trigger.dataset.modalTitle,
+      callback: () => {
+        let data = new FormData();
+        data.append('arguments', payload.arguments);
+        data.append('signature', payload.signature);
+
+        fetch(
+          wizardUri,
+          {
+            method: 'POST',
+            cache: 'no-cache',
+            credentials: 'same-origin',
+            body: data
+          }
+        )
+          .then(async (response: Response): Promise<void> => {
+            this.currentModal.find('.t3js-modal-body').html(await response.text()).addClass('imagemap-editor');
+            this.currentModal.find('.modal-loading').remove();
+            this.initializeAreaEditorModal();
+          });
+      },
+    });
+
+    this.currentModal.on('hide.bs.modal', () => {
+      this.destroy();
+    });
   }
 
   private initializeAreaEditorModal(): void {
     const image: HTMLImageElement = this.currentModal[0].querySelector(this.editorImageSelector);
     ImagesLoaded(image, (): void => {
-      setTimeout(
-        (): void => {
-          AreaForm.width = image.width;
-          AreaForm.height = image.height;
-
-          this.init();
-        },
-        100,
-      );
+      this.initializeEventHandler();
+      this.initializeEditor(image);
+      this.resizeEnd(this.resizeEditor.bind(this));
+      this.renderAreas(this.hiddenInput.value);
     });
   }
 
-  private show(): void {
-    const modalTitle: string = this.trigger.dataset.modalTitle,
-      buttonAddRectangleText: string = this.trigger.dataset.buttonAddrectText,
-      buttonAddCircleText: string = this.trigger.dataset.buttonAddcircleText,
-      buttonAddPolygonText: string = this.trigger.dataset.buttonAddpolyText,
-      buttonDismissText: string = this.trigger.dataset.buttonDismissText,
-      buttonSaveText: string = this.trigger.dataset.buttonSaveText,
-      wizardUri: string = this.trigger.dataset.url,
-      payload: {arguments: string, signature: string} = JSON.parse(this.trigger.dataset.payload),
-      initEditorModal: () => void = this.initializeAreaEditorModal.bind(this);
-
-    Icons.getIcon('spinner-circle', Icons.sizes.default, null, null, Icons.markupIdentifiers.inline).done((icon: string) => {
-      /**
-       * Open modal with areas to edit
-       */
-      this.currentModal = Modal.advanced({
-        type: 'default',
-        title: modalTitle,
-        content: '<div class="modal-loading">' + icon + '</div>',
-        buttons: [
-          {
-            btnClass: 'btn-default pull-left',
-            dataAttributes: {
-              method: 'rectangle',
-            },
-            icon: 'extensions-imagemap-rectangle',
-            text: buttonAddRectangleText,
-          },
-          {
-            btnClass: 'btn-default pull-left',
-            dataAttributes: {
-              method: 'circle',
-            },
-            icon: 'extensions-imagemap-circle',
-            text: buttonAddCircleText,
-          },
-          {
-            btnClass: 'btn-default pull-left',
-            dataAttributes: {
-              method: 'polygon',
-            },
-            icon: 'extensions-imagemap-polygon',
-            text: buttonAddPolygonText,
-          },
-          {
-            btnClass: 'btn-default',
-            dataAttributes: {
-              method: 'dismiss',
-            },
-            icon: 'actions-close',
-            text: buttonDismissText,
-          },
-          {
-            btnClass: 'btn-primary',
-            dataAttributes: {
-              method: 'save',
-            },
-            icon: 'actions-document-save',
-            text: buttonSaveText,
-          },
-        ],
-        style: Modal.styles.dark,
-        size: Modal.sizes.full,
-        additionalCssClasses: ['modal-area-wizard modal-image-manipulation'],
-        callback: (currentModal: JQuery) => {
-          let data = new FormData(),
-            request = new XMLHttpRequest();
-
-          data.append('arguments', payload.arguments);
-          data.append('signature', payload.signature);
-
-          request.open('POST', wizardUri);
-          request.onreadystatechange = (e: ProgressEvent) => {
-            let request = (e.target as XMLHttpRequest);
-            if (request.readyState === 4 && request.status === 200) {
-              currentModal.find('.t3js-modal-body').html(request.responseText).addClass('imagemap-editor');
-              initEditorModal();
-            }
-          };
-          request.send(data);
-        },
-      });
-
-      this.currentModal.on('hide.bs.modal', () => {
-        this.destroy();
-      });
-    });
-  }
-
-  private init(): void {
+  private initializeEventHandler(): void {
     let modal = this.currentModal[0];
 
     this.formElement = modal.querySelector(this.formElementSelector);
@@ -197,34 +198,34 @@ class EditControl {
     this.buttonSave = modal.querySelector('[data-method=save]');
     this.buttonSave.removeEventListener('click', this.buttonSaveHandler);
     this.buttonSave.addEventListener('click', this.buttonSaveHandler.bind(this));
-
-    this.initializeEditor();
-    this.renderAreas(this.hiddenInput.value);
   }
 
-  private initializeEditor(): void {
-    let image: HTMLImageElement = this.formElement.querySelector(this.editorImageSelector),
-      data: any = this.hiddenInput.dataset,
+  private initializeEditor(image: HTMLImageElement): void {
+    let data: any = this.hiddenInput.dataset,
       configurations: EditorConfiguration = {
         formSelector: '#areasForm',
         tableName: data.tablename,
         fieldName: data.fieldname,
         uid: parseInt(data.uid),
         pid: parseInt(data.pid),
-      },
-      modalParent = image.parentNode;
+      };
 
-    while (modalParent.parentNode) {
-      modalParent = modalParent.parentNode;
-    }
+    AreaForm.width = image.width;
+    AreaForm.height = image.height;
 
     this.editor = new Editor(
       configurations,
       this.formElement.querySelector('#canvas'),
-      (modalParent as Document),
-      // document in which the browslink is able to set fields
+      this.getTopMostParentOfElement(image),
       window.document
     );
+  }
+
+  private getTopMostParentOfElement(modalParent: Node): Document {
+    while (modalParent.parentNode) {
+      modalParent = modalParent.parentNode;
+    }
+    return modalParent as Document;
   }
 
   private resizeEditor(): void {
@@ -242,7 +243,9 @@ class EditControl {
 
   private destroy(): void {
     if (this.currentModal) {
-      this.editor.destroy();
+      if (this.editor instanceof Editor) {
+        this.editor.destroy();
+      }
       this.editor = null;
       this.currentModal = null;
     }
@@ -319,12 +322,7 @@ class EditControl {
     let timer: number;
     window.addEventListener('resize', (): void => {
       clearTimeout(timer);
-      timer = setTimeout(
-        (): void => {
-          callback();
-        },
-        this.resizeTimeout,
-      );
+      timer = setTimeout(callback, this.resizeTimeout);
     });
   }
 

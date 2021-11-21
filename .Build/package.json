@@ -26,7 +26,7 @@
 		"typescript": "~3.8.3"
 	},
 	"dependencies": {
-		"fabric": "git@github.com:fabricjs/fabric.js.git#4.5.1",
+		"fabric": "git@github.com:fabricjs/fabric.js.git#4.6.0",
 		"jquery": "^3.5"
 	},
 	"babel": {

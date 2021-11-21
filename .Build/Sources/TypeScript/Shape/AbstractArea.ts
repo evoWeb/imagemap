@@ -29,6 +29,7 @@ export class AbstractArea {
       set(target: any, property: string, value: any): any {
         console.log(`Property ${property} has been set to value ` + value);
         target[property] = value;
+        return true;
       }
     });
   }

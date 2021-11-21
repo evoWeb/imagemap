@@ -12,6 +12,12 @@ define(["require", "exports", "./vendor/Fabric.min", "./AreaForm", "./Shape/Fact
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Editor {
+        /**
+         * @param configuration
+         * @param canvas element to use to render shapes into
+         * @param modalParent document in which the image is rendered
+         * @param browselinkParent document in which the browslink is going to set fields
+         */
         constructor(configuration, canvas, modalParent, browselinkParent) {
             this.areas = [];
             this.formSelector = '#areasForm';
@@ -33,10 +39,10 @@ define(["require", "exports", "./vendor/Fabric.min", "./AreaForm", "./Shape/Fact
             });
         }
         setWindowAndDocument() {
-            let helper = frameElement;
-            if (helper && helper.contentWindow && Fabric.window !== helper.contentWindow.parent) {
-                Fabric.window = helper.contentWindow.parent;
-                Fabric.document = helper.contentWindow.parent.document;
+            let frame = frameElement;
+            if (frame && frame.contentWindow && Fabric.window !== frame.contentWindow.parent) {
+                Fabric.window = frame.contentWindow.parent;
+                Fabric.document = frame.contentWindow.parent.document;
             }
         }
         initializeAreaForm() {

@@ -19,6 +19,7 @@ define(["require", "exports", "../AreaForm"], function (require, exports, AreaFo
                 set(target, property, value) {
                     console.log(`Property ${property} has been set to value ` + value);
                     target[property] = value;
+                    return true;
                 }
             });
         }
