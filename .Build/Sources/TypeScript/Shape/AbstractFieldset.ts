@@ -156,9 +156,11 @@ export abstract class AbstractFieldset {
     this.showElement('[data-action="expand"]');
   }
 
+  // @todo make this work
   protected undoAction(): void {
   }
 
+  // @todo make this work
   protected redoAction(): void {
   }
 
@@ -224,14 +226,6 @@ export abstract class AbstractFieldset {
     let field = (this.form.browselinkTargetForm.querySelector(`#href${this.area.id}_target`) as HTMLInputElement);
     this.area.areaData.href = field.value;
     this.updateFields();
-  }
-
-  public inputX(value: number): number {
-    return value / AreaForm.width;
-  }
-
-  public inputY(value: number): number {
-    return value / AreaForm.height;
   }
 
   static wait(callback: Function, delay: number, timer: number): number {

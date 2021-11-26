@@ -9,7 +9,6 @@
  * LICENSE.txt file that was distributed with this source code.
  */
 
-// @todo remove if not needed import * as $ from 'jquery';
 // @ts-ignore
 import 'TYPO3/CMS/Core/Contrib/jquery.minicolors';
 // @ts-ignore
@@ -18,7 +17,6 @@ import ImagesLoaded = require('imagesloaded');
 import Icons = require('TYPO3/CMS/Backend/Icons');
 // @ts-ignore
 import Modal = require('TYPO3/CMS/Backend/Modal');
-import { AreaForm } from './AreaForm';
 import { Editor } from './Editor';
 
 class EditControl {
@@ -50,25 +48,22 @@ class EditControl {
 
   constructor(fieldSelector: string) {
     this.initializeFormElement(fieldSelector);
-    this.initializeTrigger();
+    this.initializeEvents();
   }
 
   private initializeFormElement(fieldSelector: string): void {
     this.hiddenInput = document.querySelector(fieldSelector);
   }
 
-  private initializeTrigger(): void {
+  private initializeEvents(): void {
     this.trigger = document.querySelector('.t3js-area-wizard-trigger');
     this.trigger.removeEventListener('click', this.triggerHandler);
     this.trigger.addEventListener('click', this.triggerHandler.bind(this));
   }
 
   private triggerHandler(event: MouseEvent): void {
+    event.stopPropagation();
     event.preventDefault();
-    this.initializeModal();
-  }
-
-  private initializeModal(): void {
     Icons.getIcon(
       'spinner-circle',
       Icons.sizes.default,
@@ -154,7 +149,7 @@ class EditControl {
           .then(async (response: Response): Promise<void> => {
             this.currentModal.find('.t3js-modal-body').html(await response.text()).addClass('imagemap-editor');
             this.currentModal.find('.modal-loading').remove();
-            this.initializeAreaEditorModal();
+            this.waitForImageToBeLoaded();
           });
       },
     });
@@ -164,7 +159,7 @@ class EditControl {
     });
   }
 
-  private initializeAreaEditorModal(): void {
+  private waitForImageToBeLoaded(): void {
     const image: HTMLImageElement = this.currentModal[0].querySelector(this.editorImageSelector);
     ImagesLoaded(image, (): void => {
       this.initializeEventHandler();
@@ -208,14 +203,13 @@ class EditControl {
         fieldName: data.fieldname,
         uid: parseInt(data.uid),
         pid: parseInt(data.pid),
+        width: image.width,
+        height: image.height
       };
 
-    AreaForm.width = image.width;
-    AreaForm.height = image.height;
-
     this.editor = new Editor(
-      configurations,
       this.formElement.querySelector('#canvas'),
+      configurations,
       this.getTopMostParentOfElement(image),
       window.document
     );
@@ -228,6 +222,17 @@ class EditControl {
     return modalParent as Document;
   }
 
+  /**
+   * Calls a function when the editor window has been resized
+   */
+  private resizeEnd(callback: () => void): void {
+    let timer: number;
+    window.addEventListener('resize', (): void => {
+      clearTimeout(timer);
+      timer = setTimeout(callback, this.resizeTimeout);
+    });
+  }
+
   private resizeEditor(): void {
     if (this.editor) {
       let image: HTMLImageElement = this.formElement.querySelector(this.editorImageSelector);
@@ -235,9 +240,12 @@ class EditControl {
     }
   }
 
-  private renderAreas(areas: string): void {
-    if (areas.length) {
-      this.editor.renderAreas(JSON.parse(areas));
+  private renderAreas(value: string): void {
+    if (value.length) {
+      let areas = JSON.parse(value);
+      if (areas.length) {
+        this.editor.renderAreas(areas);
+      }
     }
   }
 
@@ -313,17 +321,6 @@ class EditControl {
     EditControl.closest(this.hiddenInput, '.t3js-formengine-palette-field').classList.add('has-change');
 
     this.currentModal.modal('hide');
-  }
-
-  /**
-   * Calls a function when the editor window has been resized
-   */
-  private resizeEnd(callback: () => void): void {
-    let timer: number;
-    window.addEventListener('resize', (): void => {
-      clearTimeout(timer);
-      timer = setTimeout(callback, this.resizeTimeout);
-    });
   }
 
   static closest(element: HTMLElement, selector: string): HTMLElement {

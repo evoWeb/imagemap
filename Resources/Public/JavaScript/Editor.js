@@ -13,12 +13,12 @@ define(["require", "exports", "./vendor/Fabric.min", "./AreaForm", "./Shape/Fact
     Object.defineProperty(exports, "__esModule", { value: true });
     class Editor {
         /**
-         * @param configuration
          * @param canvas element to use to render shapes into
+         * @param configuration
          * @param modalParent document in which the image is rendered
          * @param browselinkParent document in which the browslink is going to set fields
          */
-        constructor(configuration, canvas, modalParent, browselinkParent) {
+        constructor(canvas, configuration, modalParent, browselinkParent) {
             this.areas = [];
             this.formSelector = '#areasForm';
             this.configuration = configuration;
@@ -30,9 +30,9 @@ define(["require", "exports", "./vendor/Fabric.min", "./AreaForm", "./Shape/Fact
         initializeCanvas(canvas) {
             this.setWindowAndDocument();
             this.canvas = new Fabric.Canvas(canvas, {
-                width: AreaForm_1.AreaForm.width,
-                height: AreaForm_1.AreaForm.height,
-                top: AreaForm_1.AreaForm.height * -1,
+                width: this.configuration.width,
+                height: this.configuration.height,
+                top: this.configuration.height * -1,
                 selection: false,
                 preserveObjectStacking: true,
                 hoverCursor: 'move',
@@ -49,19 +49,6 @@ define(["require", "exports", "./vendor/Fabric.min", "./AreaForm", "./Shape/Fact
             let element = this.modalParent.querySelector(this.formSelector);
             this.form = new AreaForm_1.AreaForm(element, this.canvas, this.configuration, this.modalParent, this.browselinkParent);
         }
-        resize(width, height) {
-            if (AreaForm_1.AreaForm.width !== width || AreaForm_1.AreaForm.height !== height) {
-                let data = JSON.parse(this.getMapData());
-                // @todo rerender shapes with relative values and update absolute values in shape and fieldset
-                this.removeAreas();
-                AreaForm_1.AreaForm.width = width;
-                AreaForm_1.AreaForm.height = height;
-                this.canvas.setWidth(width);
-                this.canvas.setHeight(height);
-                this.canvas.calcOffset();
-                this.renderAreas(data);
-            }
-        }
         renderAreas(areas) {
             if (areas !== undefined) {
                 let shapeFactory = new Factory_1.ShapeFactory(this.canvas, this.configuration);
@@ -76,9 +63,19 @@ define(["require", "exports", "./vendor/Fabric.min", "./AreaForm", "./Shape/Fact
                 });
             }
         }
-        removeAreas() {
-            this.form.areaFieldsets.forEach((area) => {
-                this.form.deleteArea(area);
+        resize(width, height) {
+            if (this.configuration.width !== width || this.configuration.height !== height) {
+                this.configuration.width = width;
+                this.configuration.height = height;
+                this.canvas.setWidth(width);
+                this.canvas.setHeight(height);
+                this.canvas.calcOffset();
+                this.resizeAreas();
+            }
+        }
+        resizeAreas() {
+            this.areas.forEach((area) => {
+                area.resize(this.configuration.width, this.configuration.height);
             });
         }
         getMapData() {

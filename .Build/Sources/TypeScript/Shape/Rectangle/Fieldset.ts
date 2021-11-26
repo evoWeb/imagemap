@@ -23,10 +23,7 @@ export class RectangleFieldset extends AbstractFieldset {
         element = this.getElement(`.${attributeKey}`);
 
       if (element !== null) {
-        if (typeof attributeValue === 'number') {
-          attributeValue = attributeValue.toString();
-        }
-        element.value = attributeValue;
+        element.value = attributeValue.toString();
       }
     }
 
@@ -44,7 +41,7 @@ export class RectangleFieldset extends AbstractFieldset {
       }
 
       if (element !== null) {
-        element.value = coordinatesValue;
+        element.value = coordinatesValue.toString();
       }
     }
   }

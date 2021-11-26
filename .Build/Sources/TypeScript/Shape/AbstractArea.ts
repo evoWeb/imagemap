@@ -9,7 +9,6 @@
  * LICENSE.txt file that was distributed with this source code.
  */
 
-import { AreaForm } from '../AreaForm';
 import { AbstractFieldset } from './AbstractFieldset';
 import { CircleShape } from './Circle/Shape';
 import { PolygonShape } from './Polygon/Shape';
@@ -34,11 +33,11 @@ export class AbstractArea {
     });
   }
 
-  public setFieldset(fieldset: AbstractFieldset) {
+  public setFieldset(fieldset: AbstractFieldset): void {
     this.sidebarFieldset = fieldset;
   }
 
-  public setShape(shape: CircleShape|PolygonShape|RectangleShape) {
+  public setShape(shape: CircleShape|PolygonShape|RectangleShape): void {
     this.canvasShape = shape;
     this.id = this.canvasShape.id;
   }
@@ -47,34 +46,30 @@ export class AbstractArea {
     return this.areaData as Area;
   }
 
-  public shapeModified(event: FabricEvent) {
+  public resize(newWidth: number, newHeight: number): void {
+    // @todo make this work
   }
 
-  public fieldsetModified(event: Event) {
+  public shapeModified(event: FabricEvent): void {
+  }
+
+  public fieldsetModified(event: Event): void {
     this.canvasShape.fieldsetModified(event);
   }
 
   public inputX(value: number): number {
-    return value / AreaForm.width;
+    return value / this.canvasShape.canvas.get('width');
   }
 
   public inputY(value: number): number {
-    return value / AreaForm.height;
+    return value / this.canvasShape.canvas.get('height');
   }
 
-  public outputiX(value: number): number {
-    return Math.round(value * AreaForm.width);
+  public outputX(value: number): number {
+    return Math.round(value * this.canvasShape.canvas.get('width'));
   }
 
-  public outputiY(value: number): number {
-    return Math.round(value * AreaForm.height);
-  }
-
-  public outputX(value: number): string {
-    return this.outputiX(value).toString();
-  }
-
-  public outputY(value: number): string {
-    return this.outputiY(value).toString();
+  public outputY(value: number): number {
+    return Math.round(value * this.canvasShape.canvas.get('height'));
   }
 }

@@ -38,14 +38,14 @@ define(["require", "exports", "../AbstractFieldset", "../Factory"], function (re
                 let xField = point.element.querySelector('[data-field="x"]'), yField = point.element.querySelector('[data-field="y"]');
                 xField.dataset.point = point.id;
                 yField.dataset.point = point.id;
-                this.getElement('#x' + point.id).setAttribute('value', this.area.outputX(point.x));
-                this.getElement('#y' + point.id).setAttribute('value', this.area.outputY(point.y));
+                this.getElement('#x' + point.id).setAttribute('value', this.area.outputX(point.x).toString());
+                this.getElement('#y' + point.id).setAttribute('value', this.area.outputY(point.y).toString());
             });
         }
         shapeModified(fieldValues) {
             fieldValues.forEach((field) => {
-                this.getElement('#x' + field.id).setAttribute('value', field.x);
-                this.getElement('#y' + field.id).setAttribute('value', field.y);
+                this.getElement('#x' + field.id).setAttribute('value', field.x.toString());
+                this.getElement('#y' + field.id).setAttribute('value', field.y.toString());
             });
         }
         fieldsetModified(event) {
@@ -99,8 +99,8 @@ define(["require", "exports", "../AbstractFieldset", "../Factory"], function (re
         }
         getPointFields(point) {
             let element = this.getFieldsetElement('#polygonCoords', point.id);
-            this.getElement('#x' + point.id).setAttribute('value', this.area.outputX(point.x));
-            this.getElement('#y' + point.id).setAttribute('value', this.area.outputY(point.y));
+            this.getElement('#x' + point.id).setAttribute('value', this.area.outputX(point.x).toString());
+            this.getElement('#y' + point.id).setAttribute('value', this.area.outputY(point.y).toString());
             this.initializeCoordinateFieldEvents(element.querySelectorAll('.t3js-field'));
             this.initializeButtonEvents(element.querySelectorAll('.t3js-btn'));
             return element;

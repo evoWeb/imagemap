@@ -11,7 +11,6 @@
 
 // @ts-ignore
 import { Canvas, Object } from '../vendor/Fabric.min';
-import { AreaForm } from '../AreaForm';
 import { AbstractArea } from './AbstractArea';
 import { CircleArea } from './Circle/Area';
 import { CircleShape } from './Circle/Shape';
@@ -76,9 +75,9 @@ export class ShapeFactory {
 
   protected createCircle(areaData: Area, configuration: ShapeConfiguration): CircleArea {
     let coords = areaData.coords,
-      radius = this.outputiX(coords.radius),
-      left = this.outputiX(coords.left) - radius,
-      top = this.outputiY(coords.top) - radius;
+      radius = this.outputX(coords.radius),
+      left = this.outputX(coords.left) - radius,
+      top = this.outputY(coords.top) - radius;
 
     let area = new CircleArea(areaData);
     area.setFieldset(new CircleFieldset(area, this.configuration));
@@ -108,8 +107,8 @@ export class ShapeFactory {
     points.map((point) => {
       point.id = configuration.id + '-' + ShapeFactory.getObjectId();
       polygonPoints.push({
-        x: this.outputiX(point.x),
-        y: this.outputiY(point.y),
+        x: this.outputX(point.x),
+        y: this.outputY(point.y),
         id: point.id,
       });
     });
@@ -125,10 +124,10 @@ export class ShapeFactory {
 
   protected createRectangle(areaData: Area, configuration: ShapeConfiguration): RectangleArea {
     let coords = areaData.coords,
-      left = this.outputiX(coords.left),
-      top = this.outputiY(coords.top),
-      width = this.outputiX(coords.right) - left,
-      height = this.outputiY(coords.bottom) - top;
+      left = this.outputX(coords.left),
+      top = this.outputY(coords.top),
+      width = this.outputX(coords.right) - left,
+      height = this.outputY(coords.bottom) - top;
 
     let area = new RectangleArea(areaData);
     area.setFieldset(new RectangleFieldset(area, this.configuration));
@@ -145,12 +144,12 @@ export class ShapeFactory {
     return area;
   }
 
-  protected outputiX(value: number): number {
-    return Math.round(value * AreaForm.width);
+  protected outputX(value: number): number {
+    return Math.round(value * this.canvas.get('width'));
   }
 
-  protected outputiY(value: number): number {
-    return Math.round(value * AreaForm.height);
+  protected outputY(value: number): number {
+    return Math.round(value * this.canvas.get('height'));
   }
 
   protected getRandomColor(color: string): string {

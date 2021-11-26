@@ -8,19 +8,20 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "./vendor/Fabric.min", "./AreaForm", "./Shape/Factory"], function (require, exports, Fabric, AreaForm_1, Factory_1) {
+define(["require", "exports", "./vendor/Fabric.min", "./Shape/Factory"], function (require, exports, Fabric, Factory_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Preview {
-        constructor(canvas) {
+        constructor(canvas, configuration) {
             this.areas = [];
+            this.configuration = configuration;
             this.initializeCanvas(canvas);
         }
         initializeCanvas(canvas) {
             this.canvas = new Fabric.Canvas(canvas, {
-                width: AreaForm_1.AreaForm.width,
-                height: AreaForm_1.AreaForm.height,
-                top: AreaForm_1.AreaForm.height * -1,
+                width: this.configuration.width,
+                height: this.configuration.height,
+                top: this.configuration.height * -1,
                 selection: false,
                 preserveObjectStacking: true,
                 hoverCursor: 'default',
@@ -28,7 +29,7 @@ define(["require", "exports", "./vendor/Fabric.min", "./AreaForm", "./Shape/Fact
         }
         renderAreas(areas) {
             if (areas !== undefined) {
-                let shapeFactory = new Factory_1.ShapeFactory();
+                let shapeFactory = new Factory_1.ShapeFactory(this.canvas);
                 areas.forEach((areaData) => {
                     let area = shapeFactory.create(areaData, false);
                     this.canvas.add(area.canvasShape);

@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "../vendor/Fabric.min", "../AreaForm", "./Circle/Area", "./Circle/Shape", "./Circle/Fieldset", "./Polygon/Area", "./Polygon/Shape", "./Polygon/Fieldset", "./Rectangle/Area", "./Rectangle/Shape", "./Rectangle/Fieldset"], function (require, exports, Fabric_min_1, AreaForm_1, Area_1, Shape_1, Fieldset_1, Area_2, Shape_2, Fieldset_2, Area_3, Shape_3, Fieldset_3) {
+define(["require", "exports", "../vendor/Fabric.min", "./Circle/Area", "./Circle/Shape", "./Circle/Fieldset", "./Polygon/Area", "./Polygon/Shape", "./Polygon/Fieldset", "./Rectangle/Area", "./Rectangle/Shape", "./Rectangle/Fieldset"], function (require, exports, Fabric_min_1, Area_1, Shape_1, Fieldset_1, Area_2, Shape_2, Fieldset_2, Area_3, Shape_3, Fieldset_3) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class ShapeFactory {
@@ -33,7 +33,7 @@ define(["require", "exports", "../vendor/Fabric.min", "../AreaForm", "./Circle/A
             return area;
         }
         createCircle(areaData, configuration) {
-            let coords = areaData.coords, radius = this.outputiX(coords.radius), left = this.outputiX(coords.left) - radius, top = this.outputiY(coords.top) - radius;
+            let coords = areaData.coords, radius = this.outputX(coords.radius), left = this.outputX(coords.left) - radius, top = this.outputY(coords.top) - radius;
             let area = new Area_1.CircleArea(areaData);
             area.setFieldset(new Fieldset_1.CircleFieldset(area, this.configuration));
             area.setShape(new Shape_1.CircleShape(area, Object.assign(Object.assign({}, configuration), { left: left, top: top, radius: radius, 
@@ -53,8 +53,8 @@ define(["require", "exports", "../vendor/Fabric.min", "../AreaForm", "./Circle/A
             points.map((point) => {
                 point.id = configuration.id + '-' + ShapeFactory.getObjectId();
                 polygonPoints.push({
-                    x: this.outputiX(point.x),
-                    y: this.outputiY(point.y),
+                    x: this.outputX(point.x),
+                    y: this.outputY(point.y),
                     id: point.id,
                 });
             });
@@ -64,7 +64,7 @@ define(["require", "exports", "../vendor/Fabric.min", "../AreaForm", "./Circle/A
             return area;
         }
         createRectangle(areaData, configuration) {
-            let coords = areaData.coords, left = this.outputiX(coords.left), top = this.outputiY(coords.top), width = this.outputiX(coords.right) - left, height = this.outputiY(coords.bottom) - top;
+            let coords = areaData.coords, left = this.outputX(coords.left), top = this.outputY(coords.top), width = this.outputX(coords.right) - left, height = this.outputY(coords.bottom) - top;
             let area = new Area_3.RectangleArea(areaData);
             area.setFieldset(new Fieldset_3.RectangleFieldset(area, this.configuration));
             area.setShape(new Shape_3.RectangleShape(area, Object.assign(Object.assign({}, configuration), { left: left, top: top, width: width, height: height, _controlsVisibility: {
@@ -72,11 +72,11 @@ define(["require", "exports", "../vendor/Fabric.min", "../AreaForm", "./Circle/A
                 } })));
             return area;
         }
-        outputiX(value) {
-            return Math.round(value * AreaForm_1.AreaForm.width);
+        outputX(value) {
+            return Math.round(value * this.canvas.get('width'));
         }
-        outputiY(value) {
-            return Math.round(value * AreaForm_1.AreaForm.height);
+        outputY(value) {
+            return Math.round(value * this.canvas.get('height'));
         }
         getRandomColor(color) {
             while (color === undefined || !(/^#([A-Fa-f0-9]{3}){1,2}$/.test(color))) {

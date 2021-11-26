@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "../AreaForm", "./Factory"], function (require, exports, AreaForm_1, Factory_1) {
+define(["require", "exports", "./Factory"], function (require, exports, Factory_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class AbstractFieldset {
@@ -109,8 +109,10 @@ define(["require", "exports", "../AreaForm", "./Factory"], function (require, ex
             this.hideElement('[data-action="collapse"]');
             this.showElement('[data-action="expand"]');
         }
+        // @todo make this work
         undoAction() {
         }
+        // @todo make this work
         redoAction() {
         }
         colorPickerAction(value) {
@@ -166,12 +168,6 @@ define(["require", "exports", "../AreaForm", "./Factory"], function (require, ex
             let field = this.form.browselinkTargetForm.querySelector(`#href${this.area.id}_target`);
             this.area.areaData.href = field.value;
             this.updateFields();
-        }
-        inputX(value) {
-            return value / AreaForm_1.AreaForm.width;
-        }
-        inputY(value) {
-            return value / AreaForm_1.AreaForm.height;
         }
         static wait(callback, delay, timer) {
             clearTimeout(timer);

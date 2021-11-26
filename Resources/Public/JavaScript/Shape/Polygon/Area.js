@@ -30,8 +30,8 @@ define(["require", "exports", "../../vendor/Fabric.min", "../AbstractArea", "../
                     areaPoint.y = this.inputY(transformed.y);
                     fieldValues.push({
                         id: point.id,
-                        x: this.outputX(areaPoint.x),
-                        y: this.outputY(areaPoint.y)
+                        x: this.outputX(areaPoint.x).toString(),
+                        y: this.outputY(areaPoint.y).toString()
                     });
                 }
             });
@@ -55,8 +55,8 @@ define(["require", "exports", "../../vendor/Fabric.min", "../AbstractArea", "../
             let points = areaData.points || [], polygonPoints = [], configuration = Object.assign(Object.assign({}, Factory_1.ShapeFactory.shapeConfiguration), { selectable: selectable, hasControls: selectable, stroke: areaData.color, strokeWidth: 0, fill: Factory_1.ShapeFactory.hexToRgbA(areaData.color, 0.4), id: this.id, canvas: this.canvasShape.canvas });
             points.map((point) => {
                 polygonPoints.push({
-                    x: this.outputiX(point.x),
-                    y: this.outputiY(point.y),
+                    x: this.outputX(point.x).toString(),
+                    y: this.outputY(point.y).toString(),
                     id: point.id,
                 });
             });

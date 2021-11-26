@@ -46,8 +46,8 @@ export class PolygonArea extends AbstractArea {
 
         fieldValues.push({
           id: point.id,
-          x: this.outputX(areaPoint.x),
-          y: this.outputY(areaPoint.y)
+          x: this.outputX(areaPoint.x).toString(),
+          y: this.outputY(areaPoint.y).toString()
         });
       }
     });
@@ -92,8 +92,8 @@ export class PolygonArea extends AbstractArea {
 
     points.map((point) => {
       polygonPoints.push({
-        x: this.outputiX(point.x),
-        y: this.outputiY(point.y),
+        x: this.outputX(point.x).toString(),
+        y: this.outputY(point.y).toString(),
         id: point.id,
       });
     });

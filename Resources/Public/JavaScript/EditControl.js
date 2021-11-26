@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "imagesloaded", "TYPO3/CMS/Backend/Icons", "TYPO3/CMS/Backend/Modal", "./AreaForm", "./Editor", "TYPO3/CMS/Core/Contrib/jquery.minicolors"], function (require, exports, ImagesLoaded, Icons, Modal, AreaForm_1, Editor_1) {
+define(["require", "exports", "imagesloaded", "TYPO3/CMS/Backend/Icons", "TYPO3/CMS/Backend/Modal", "./Editor", "TYPO3/CMS/Core/Contrib/jquery.minicolors"], function (require, exports, ImagesLoaded, Icons, Modal, Editor_1) {
     "use strict";
     class EditControl {
         constructor(fieldSelector) {
@@ -16,21 +16,19 @@ define(["require", "exports", "imagesloaded", "TYPO3/CMS/Backend/Icons", "TYPO3/
             this.formElementSelector = '#t3js-imagemap-container';
             this.resizeTimeout = 450;
             this.initializeFormElement(fieldSelector);
-            this.initializeTrigger();
+            this.initializeEvents();
         }
         initializeFormElement(fieldSelector) {
             this.hiddenInput = document.querySelector(fieldSelector);
         }
-        initializeTrigger() {
+        initializeEvents() {
             this.trigger = document.querySelector('.t3js-area-wizard-trigger');
             this.trigger.removeEventListener('click', this.triggerHandler);
             this.trigger.addEventListener('click', this.triggerHandler.bind(this));
         }
         triggerHandler(event) {
+            event.stopPropagation();
             event.preventDefault();
-            this.initializeModal();
-        }
-        initializeModal() {
             Icons.getIcon('spinner-circle', Icons.sizes.default, null, null, Icons.markupIdentifiers.inline).then(this.createModal.bind(this));
         }
         createModal(icon) {
@@ -101,7 +99,7 @@ define(["require", "exports", "imagesloaded", "TYPO3/CMS/Backend/Icons", "TYPO3/
                         .then(async (response) => {
                         this.currentModal.find('.t3js-modal-body').html(await response.text()).addClass('imagemap-editor');
                         this.currentModal.find('.modal-loading').remove();
-                        this.initializeAreaEditorModal();
+                        this.waitForImageToBeLoaded();
                     });
                 },
             });
@@ -109,7 +107,7 @@ define(["require", "exports", "imagesloaded", "TYPO3/CMS/Backend/Icons", "TYPO3/
                 this.destroy();
             });
         }
-        initializeAreaEditorModal() {
+        waitForImageToBeLoaded() {
             const image = this.currentModal[0].querySelector(this.editorImageSelector);
             ImagesLoaded(image, () => {
                 this.initializeEventHandler();
@@ -144,10 +142,10 @@ define(["require", "exports", "imagesloaded", "TYPO3/CMS/Backend/Icons", "TYPO3/
                 fieldName: data.fieldname,
                 uid: parseInt(data.uid),
                 pid: parseInt(data.pid),
+                width: image.width,
+                height: image.height
             };
-            AreaForm_1.AreaForm.width = image.width;
-            AreaForm_1.AreaForm.height = image.height;
-            this.editor = new Editor_1.Editor(configurations, this.formElement.querySelector('#canvas'), this.getTopMostParentOfElement(image), window.document);
+            this.editor = new Editor_1.Editor(this.formElement.querySelector('#canvas'), configurations, this.getTopMostParentOfElement(image), window.document);
         }
         getTopMostParentOfElement(modalParent) {
             while (modalParent.parentNode) {
@@ -155,20 +153,35 @@ define(["require", "exports", "imagesloaded", "TYPO3/CMS/Backend/Icons", "TYPO3/
             }
             return modalParent;
         }
+        /**
+         * Calls a function when the editor window has been resized
+         */
+        resizeEnd(callback) {
+            let timer;
+            window.addEventListener('resize', () => {
+                clearTimeout(timer);
+                timer = setTimeout(callback, this.resizeTimeout);
+            });
+        }
         resizeEditor() {
             if (this.editor) {
                 let image = this.formElement.querySelector(this.editorImageSelector);
                 this.editor.resize(image.offsetWidth, image.offsetHeight);
             }
         }
-        renderAreas(areas) {
-            if (areas.length) {
-                this.editor.renderAreas(JSON.parse(areas));
+        renderAreas(value) {
+            if (value.length) {
+                let areas = JSON.parse(value);
+                if (areas.length) {
+                    this.editor.renderAreas(areas);
+                }
             }
         }
         destroy() {
             if (this.currentModal) {
-                this.editor.destroy();
+                if (this.editor instanceof Editor_1.Editor) {
+                    this.editor.destroy();
+                }
                 this.editor = null;
                 this.currentModal = null;
             }
@@ -224,16 +237,6 @@ define(["require", "exports", "imagesloaded", "TYPO3/CMS/Backend/Icons", "TYPO3/
             // without FormEngineValidation.markFieldAsChanged call
             EditControl.closest(this.hiddenInput, '.t3js-formengine-palette-field').classList.add('has-change');
             this.currentModal.modal('hide');
-        }
-        /**
-         * Calls a function when the editor window has been resized
-         */
-        resizeEnd(callback) {
-            let timer;
-            window.addEventListener('resize', () => {
-                clearTimeout(timer);
-                timer = setTimeout(callback, this.resizeTimeout);
-            });
         }
         static closest(element, selector) {
             let parent;

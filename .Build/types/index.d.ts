@@ -58,7 +58,9 @@ declare interface EditorConfiguration {
   tableName?: string,
   fieldName?: string,
   uid?: number,
-  pid?: number
+  pid?: number,
+  width?: number,
+  height?: number
 }
 
 declare interface FabricEvent {

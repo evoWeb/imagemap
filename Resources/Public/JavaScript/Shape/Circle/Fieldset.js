@@ -23,10 +23,7 @@ define(["require", "exports", "../AbstractFieldset"], function (require, exports
                 }
                 let attributeValue = this.area.areaData[attributeKey] || '', element = this.getElement(`.${attributeKey}`);
                 if (element !== null) {
-                    if (typeof attributeValue === 'number') {
-                        attributeValue = attributeValue.toString();
-                    }
-                    element.value = attributeValue;
+                    element.value = attributeValue.toString();
                 }
             }
             for (let coordinatesKey in this.area.areaData.coords) {
@@ -41,7 +38,7 @@ define(["require", "exports", "../AbstractFieldset"], function (require, exports
                     coordinatesValue = this.area.outputY(coordinatesValue);
                 }
                 if (element !== null) {
-                    element.value = coordinatesValue;
+                    element.value = coordinatesValue.toString();
                 }
             }
         }

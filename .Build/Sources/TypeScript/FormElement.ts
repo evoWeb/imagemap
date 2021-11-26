@@ -11,7 +11,6 @@
 
 // @ts-ignore
 import ImagesLoaded = require('imagesloaded');
-import { AreaForm } from './AreaForm';
 import { Preview } from './Preview';
 
 class FormElement {
@@ -21,9 +20,11 @@ class FormElement {
 
   private preview: Preview;
 
+  private previewImageSelector: string = '.image';
+
   constructor(fieldSelector: string) {
     this.initializeFormElement(fieldSelector);
-    this.initializePreview();
+    this.waitForImageToBeLoaded();
     this.initializeEvents();
   }
 
@@ -32,20 +33,21 @@ class FormElement {
     this.formElement = document.querySelector(fieldSelector + '-canvas');
   }
 
-  private initializePreview(): void {
-    const image: HTMLImageElement = this.formElement.querySelector('.image');
+  private waitForImageToBeLoaded(): void {
+    const image: HTMLImageElement = this.formElement.querySelector(this.previewImageSelector);
     ImagesLoaded(image, (): void => {
-      setTimeout(
-        (): void => {
-          AreaForm.width = image.width;
-          AreaForm.height = image.height;
-
-          this.preview = new Preview(this.formElement.querySelector('#canvas'));
-          this.renderAreas(this.hiddenInput.value);
-        },
-        100,
-      );
+      this.initializePreview(image);
+      this.renderAreas(this.hiddenInput.value);
     });
+  }
+
+  private initializePreview(image: HTMLImageElement): void {
+    let configurations: EditorConfiguration = {
+      width: image.width,
+      height: image.height
+    };
+
+    this.preview = new Preview(image.parentNode.querySelector('#canvas'), configurations);
   }
 
   private initializeEvents(): void {
@@ -54,17 +56,15 @@ class FormElement {
 
   private fieldChangedHandler(): void {
     this.preview.removeAreas();
-
-    const image: HTMLImageElement = this.formElement.querySelector('.image');
-    AreaForm.width = image.width;
-    AreaForm.height = image.height;
-
     this.renderAreas(this.hiddenInput.value);
   }
 
-  private renderAreas(areas: string): void {
-    if (areas.length) {
-      this.preview.renderAreas(JSON.parse(areas));
+  private renderAreas(value: string): void {
+    if (value.length) {
+      let areas = JSON.parse(value);
+      if (areas.length) {
+        this.preview.renderAreas(areas);
+      }
     }
   }
 }

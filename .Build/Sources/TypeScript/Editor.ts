@@ -23,7 +23,7 @@ export class Editor {
 
   readonly browselinkParent: Document;
 
-  private areas: AbstractArea[] = [];
+  private areas: Array<AbstractArea> = [];
 
   private canvas: Fabric.Canvas;
 
@@ -32,14 +32,14 @@ export class Editor {
   private form: AreaForm;
 
   /**
-   * @param configuration
    * @param canvas element to use to render shapes into
+   * @param configuration
    * @param modalParent document in which the image is rendered
    * @param browselinkParent document in which the browslink is going to set fields
    */
   constructor(
-    configuration: EditorConfiguration,
     canvas: HTMLCanvasElement,
+    configuration: EditorConfiguration,
     modalParent: Document,
     browselinkParent: Document
   ) {
@@ -55,9 +55,9 @@ export class Editor {
     this.setWindowAndDocument();
 
     this.canvas = new Fabric.Canvas(canvas, {
-      width: AreaForm.width,
-      height: AreaForm.height,
-      top: AreaForm.height * -1,
+      width: this.configuration.width,
+      height: this.configuration.height,
+      top: this.configuration.height * -1,
       selection: false,
       preserveObjectStacking: true,
       hoverCursor: 'move',
@@ -75,23 +75,6 @@ export class Editor {
   private initializeAreaForm(): void {
     let element: HTMLElement = this.modalParent.querySelector(this.formSelector);
     this.form = new AreaForm(element, this.canvas, this.configuration, this.modalParent, this.browselinkParent);
-  }
-
-  public resize(width: number, height: number): void {
-    if (AreaForm.width !== width || AreaForm.height !== height) {
-      let data: Array<Area> = JSON.parse(this.getMapData());
-      // @todo rerender shapes with relative values and update absolute values in shape and fieldset
-      this.removeAreas();
-
-      AreaForm.width = width;
-      AreaForm.height = height;
-
-      this.canvas.setWidth(width);
-      this.canvas.setHeight(height);
-      this.canvas.calcOffset();
-
-      this.renderAreas(data);
-    }
   }
 
   public renderAreas(areas: Array<Area>): void {
@@ -112,9 +95,22 @@ export class Editor {
     }
   }
 
-  public removeAreas(): void {
-    this.form.areaFieldsets.forEach((area) => {
-      this.form.deleteArea(area);
+  public resize(width: number, height: number): void {
+    if (this.configuration.width !== width || this.configuration.height !== height) {
+      this.configuration.width = width;
+      this.configuration.height = height;
+
+      this.canvas.setWidth(width);
+      this.canvas.setHeight(height);
+      this.canvas.calcOffset();
+
+      this.resizeAreas();
+    }
+  }
+
+  public resizeAreas(): void {
+    this.areas.forEach((area) => {
+      area.resize(this.configuration.width, this.configuration.height);
     })
   }
 

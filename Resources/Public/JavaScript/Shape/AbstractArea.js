@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "../AreaForm"], function (require, exports, AreaForm_1) {
+define(["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class AbstractArea {
@@ -33,28 +33,25 @@ define(["require", "exports", "../AreaForm"], function (require, exports, AreaFo
         getData() {
             return this.areaData;
         }
+        resize(newWidth, newHeight) {
+            // @todo make this work
+        }
         shapeModified(event) {
         }
         fieldsetModified(event) {
             this.canvasShape.fieldsetModified(event);
         }
         inputX(value) {
-            return value / AreaForm_1.AreaForm.width;
+            return value / this.canvasShape.canvas.get('width');
         }
         inputY(value) {
-            return value / AreaForm_1.AreaForm.height;
-        }
-        outputiX(value) {
-            return Math.round(value * AreaForm_1.AreaForm.width);
-        }
-        outputiY(value) {
-            return Math.round(value * AreaForm_1.AreaForm.height);
+            return value / this.canvasShape.canvas.get('height');
         }
         outputX(value) {
-            return this.outputiX(value).toString();
+            return Math.round(value * this.canvasShape.canvas.get('width'));
         }
         outputY(value) {
-            return this.outputiY(value).toString();
+            return Math.round(value * this.canvasShape.canvas.get('height'));
         }
     }
     exports.AbstractArea = AbstractArea;

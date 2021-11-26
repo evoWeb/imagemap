@@ -11,24 +11,30 @@
 
 // @ts-ignore
 import * as Fabric from './vendor/Fabric.min';
-import { AreaForm } from './AreaForm';
 import { AbstractArea } from './Shape/AbstractArea';
 import { ShapeFactory } from './Shape/Factory';
 
 export class Preview {
+  readonly configuration: EditorConfiguration;
+
   private areas: Array<AbstractArea> = [];
 
   private canvas: Fabric.Canvas;
 
-  constructor(canvas: HTMLElement) {
+  constructor(
+    canvas: HTMLElement,
+    configuration: EditorConfiguration
+  ) {
+    this.configuration = configuration;
+
     this.initializeCanvas(canvas);
   }
 
   private initializeCanvas(canvas: HTMLElement): void {
     this.canvas = new Fabric.Canvas(canvas, {
-      width: AreaForm.width,
-      height: AreaForm.height,
-      top: AreaForm.height * -1,
+      width: this.configuration.width,
+      height: this.configuration.height,
+      top: this.configuration.height * -1,
       selection: false,
       preserveObjectStacking: true,
       hoverCursor: 'default',
@@ -37,7 +43,7 @@ export class Preview {
 
   public renderAreas(areas: Array<Area>): void {
     if (areas !== undefined) {
-      let shapeFactory = new ShapeFactory();
+      let shapeFactory = new ShapeFactory(this.canvas);
       areas.forEach((areaData: Area) => {
         let area = shapeFactory.create(areaData, false);
 

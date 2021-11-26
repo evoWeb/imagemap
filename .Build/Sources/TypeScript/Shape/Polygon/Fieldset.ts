@@ -48,15 +48,15 @@ export class PolygonFieldset extends AbstractFieldset {
       xField.dataset.point = point.id;
       yField.dataset.point = point.id;
 
-      this.getElement('#x' + point.id).setAttribute('value', this.area.outputX(point.x));
-      this.getElement('#y' + point.id).setAttribute('value', this.area.outputY(point.y));
+      this.getElement('#x' + point.id).setAttribute('value', this.area.outputX(point.x).toString());
+      this.getElement('#y' + point.id).setAttribute('value', this.area.outputY(point.y).toString());
     });
   }
 
   public shapeModified(fieldValues: {id: string, x: string, y: string}[]): void {
     fieldValues.forEach((field) => {
-      this.getElement('#x' + field.id).setAttribute('value', field.x);
-      this.getElement('#y' + field.id).setAttribute('value', field.y);
+      this.getElement('#x' + field.id).setAttribute('value', field.x.toString());
+      this.getElement('#y' + field.id).setAttribute('value', field.y.toString());
     });
   }
 
@@ -128,8 +128,8 @@ export class PolygonFieldset extends AbstractFieldset {
   private getPointFields(point: Point) {
     let element = this.getFieldsetElement('#polygonCoords', point.id);
 
-    this.getElement('#x' + point.id).setAttribute('value', this.area.outputX(point.x));
-    this.getElement('#y' + point.id).setAttribute('value', this.area.outputY(point.y));
+    this.getElement('#x' + point.id).setAttribute('value', this.area.outputX(point.x).toString());
+    this.getElement('#y' + point.id).setAttribute('value', this.area.outputY(point.y).toString());
 
     this.initializeCoordinateFieldEvents(element.querySelectorAll('.t3js-field'));
     this.initializeButtonEvents(element.querySelectorAll('.t3js-btn'));
