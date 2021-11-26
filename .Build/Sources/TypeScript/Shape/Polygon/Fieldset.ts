@@ -87,7 +87,7 @@ export class PolygonFieldset extends AbstractFieldset {
 
     this.area.areaData.points = this.addElementWithPosition(this.area.areaData.points, areaPoint, newIndex);
 
-    this.area.renderNewShape(this.area.areaData as Area, true);
+    this.area.renderNewShape(this.area.areaData as AreaData, true);
   }
 
   protected removePointAction(event: Event): void {
@@ -101,7 +101,7 @@ export class PolygonFieldset extends AbstractFieldset {
       });
       this.area.areaData.points = this.area.areaData.points.filter((findPoint: Point) => { return findPoint !== null; });
 
-      this.area.renderNewShape(this.area.areaData as Area, true);
+      this.area.renderNewShape(this.area.areaData as AreaData, true);
     }
   }
 

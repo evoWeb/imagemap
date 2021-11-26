@@ -34,23 +34,19 @@ export class Preview {
     this.canvas = new Fabric.Canvas(canvas, {
       width: this.configuration.width,
       height: this.configuration.height,
-      top: this.configuration.height * -1,
       selection: false,
       preserveObjectStacking: true,
       hoverCursor: 'default',
     });
   }
 
-  public renderAreas(areas: Array<Area>): void {
-    if (areas !== undefined) {
-      let shapeFactory = new ShapeFactory(this.canvas);
-      areas.forEach((areaData: Area) => {
-        let area = shapeFactory.create(areaData, false);
-
-        this.canvas.add(area.canvasShape);
-        this.areas.push(area);
-      });
-    }
+  public renderAreas(areas: Array<AreaData>): void {
+    let shapeFactory = new ShapeFactory(this.canvas, this.configuration);
+    areas.forEach((areaData: AreaData) => {
+      let area = shapeFactory.create(areaData, false);
+      this.canvas.add(area.canvasShape);
+      this.areas.push(area);
+    });
   }
 
   public removeAreas(): void {

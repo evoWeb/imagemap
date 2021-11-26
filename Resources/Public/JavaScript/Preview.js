@@ -21,21 +21,18 @@ define(["require", "exports", "./vendor/Fabric.min", "./Shape/Factory"], functio
             this.canvas = new Fabric.Canvas(canvas, {
                 width: this.configuration.width,
                 height: this.configuration.height,
-                top: this.configuration.height * -1,
                 selection: false,
                 preserveObjectStacking: true,
                 hoverCursor: 'default',
             });
         }
         renderAreas(areas) {
-            if (areas !== undefined) {
-                let shapeFactory = new Factory_1.ShapeFactory(this.canvas);
-                areas.forEach((areaData) => {
-                    let area = shapeFactory.create(areaData, false);
-                    this.canvas.add(area.canvasShape);
-                    this.areas.push(area);
-                });
-            }
+            let shapeFactory = new Factory_1.ShapeFactory(this.canvas, this.configuration);
+            areas.forEach((areaData) => {
+                let area = shapeFactory.create(areaData, false);
+                this.canvas.add(area.canvasShape);
+                this.areas.push(area);
+            });
         }
         removeAreas() {
             this.areas.forEach((area) => {

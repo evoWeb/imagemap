@@ -45,7 +45,7 @@ define(["require", "exports", "imagesloaded", "./Preview"], function (require, e
         renderAreas(value) {
             if (value.length) {
                 let areas = JSON.parse(value);
-                if (areas.length) {
+                if (areas !== undefined && areas.length) {
                     this.preview.renderAreas(areas);
                 }
             }

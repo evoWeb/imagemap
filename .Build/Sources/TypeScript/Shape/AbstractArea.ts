@@ -23,7 +23,7 @@ export class AbstractArea {
 
   public sidebarFieldset: AbstractFieldset
 
-  constructor(areaData: Area) {
+  constructor(areaData: AreaData) {
     this.areaData = new Proxy(areaData, {
       set(target: any, property: string, value: any): any {
         console.log(`Property ${property} has been set to value ` + value);
@@ -42,8 +42,8 @@ export class AbstractArea {
     this.id = this.canvasShape.id;
   }
 
-  public getData(): Area {
-    return this.areaData as Area;
+  public getData(): AreaData {
+    return this.areaData as AreaData;
   }
 
   public resize(newWidth: number, newHeight: number): void {

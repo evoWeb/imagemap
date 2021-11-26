@@ -9,6 +9,8 @@
  * LICENSE.txt file that was distributed with this source code.
  */
 
+/// <reference types="../../types/index"/>
+
 // @ts-ignore
 import ImagesLoaded = require('imagesloaded');
 import { Preview } from './Preview';
@@ -62,7 +64,7 @@ class FormElement {
   private renderAreas(value: string): void {
     if (value.length) {
       let areas = JSON.parse(value);
-      if (areas.length) {
+      if (areas !== undefined && areas.length) {
         this.preview.renderAreas(areas);
       }
     }

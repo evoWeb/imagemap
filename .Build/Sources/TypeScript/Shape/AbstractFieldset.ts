@@ -9,8 +9,6 @@
  * LICENSE.txt file that was distributed with this source code.
  */
 
-/// <reference types="../../../types/index"/>
-
 import { AreaForm } from '../AreaForm';
 import { ShapeFactory } from './Factory';
 import { AbstractArea } from './AbstractArea';

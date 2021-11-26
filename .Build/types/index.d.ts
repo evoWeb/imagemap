@@ -24,7 +24,7 @@ declare interface Coordinate {
   radius?: number,
 }
 
-declare interface Area {
+declare interface AreaData {
   shape: string,
   href?: string,
   alt?: string,

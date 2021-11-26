@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "./vendor/Fabric.min", "./AreaForm", "./Shape/Factory", "./Shape/Polygon/Shape"], function (require, exports, Fabric, AreaForm_1, Factory_1, Shape_1) {
+define(["require", "exports", "./vendor/Fabric.min", "./AreaForm", "./Shape/Factory", "./Shape/Polygon/Area"], function (require, exports, Fabric, AreaForm_1, Factory_1, Area_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Editor {
@@ -32,7 +32,6 @@ define(["require", "exports", "./vendor/Fabric.min", "./AreaForm", "./Shape/Fact
             this.canvas = new Fabric.Canvas(canvas, {
                 width: this.configuration.width,
                 height: this.configuration.height,
-                top: this.configuration.height * -1,
                 selection: false,
                 preserveObjectStacking: true,
                 hoverCursor: 'move',
@@ -50,18 +49,16 @@ define(["require", "exports", "./vendor/Fabric.min", "./AreaForm", "./Shape/Fact
             this.form = new AreaForm_1.AreaForm(element, this.canvas, this.configuration, this.modalParent, this.browselinkParent);
         }
         renderAreas(areas) {
-            if (areas !== undefined) {
-                let shapeFactory = new Factory_1.ShapeFactory(this.canvas, this.configuration);
-                areas.forEach((area) => {
-                    let shape = shapeFactory.create(area, true);
-                    this.areas.push(shape);
-                    this.canvas.add(shape.canvasShape);
-                    this.form.addArea(shape.sidebarFieldset);
-                    if (shape instanceof Shape_1.PolygonShape) {
-                        shape.canvasShape.initializeControls();
-                    }
-                });
-            }
+            let shapeFactory = new Factory_1.ShapeFactory(this.canvas, this.configuration);
+            areas.forEach((areaData) => {
+                let area = shapeFactory.create(areaData, true);
+                this.canvas.add(area.canvasShape);
+                this.areas.push(area);
+                if (area instanceof Area_1.PolygonArea) {
+                    area.canvasShape.initializeControls();
+                }
+                this.form.addArea(area.sidebarFieldset);
+            });
         }
         resize(width, height) {
             if (this.configuration.width !== width || this.configuration.height !== height) {

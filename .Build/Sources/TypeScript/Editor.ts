@@ -12,20 +12,20 @@
 // @ts-ignore
 import * as Fabric from './vendor/Fabric.min';
 import { AreaForm } from './AreaForm';
-import { ShapeFactory } from './Shape/Factory';
-import { PolygonShape } from './Shape/Polygon/Shape';
 import { AbstractArea } from './Shape/AbstractArea';
+import { ShapeFactory } from './Shape/Factory';
+import {PolygonArea} from "./Shape/Polygon/Area";
 
 export class Editor {
   readonly configuration: EditorConfiguration;
 
-  readonly modalParent: Document;
-
-  readonly browselinkParent: Document;
-
   private areas: Array<AbstractArea> = [];
 
   private canvas: Fabric.Canvas;
+
+  readonly modalParent: Document;
+
+  readonly browselinkParent: Document;
 
   private formSelector: string = '#areasForm';
 
@@ -57,7 +57,6 @@ export class Editor {
     this.canvas = new Fabric.Canvas(canvas, {
       width: this.configuration.width,
       height: this.configuration.height,
-      top: this.configuration.height * -1,
       selection: false,
       preserveObjectStacking: true,
       hoverCursor: 'move',
@@ -77,22 +76,18 @@ export class Editor {
     this.form = new AreaForm(element, this.canvas, this.configuration, this.modalParent, this.browselinkParent);
   }
 
-  public renderAreas(areas: Array<Area>): void {
-    if (areas !== undefined) {
-      let shapeFactory = new ShapeFactory(this.canvas, this.configuration);
+  public renderAreas(areas: Array<AreaData>): void {
+    let shapeFactory = new ShapeFactory(this.canvas, this.configuration);
+    areas.forEach((areaData: AreaData) => {
+      let area = shapeFactory.create(areaData, true);
+      this.canvas.add(area.canvasShape);
+      this.areas.push(area);
 
-      areas.forEach((area) => {
-        let shape = shapeFactory.create(area, true);
-
-        this.areas.push(shape);
-        this.canvas.add(shape.canvasShape);
-        this.form.addArea(shape.sidebarFieldset);
-
-        if (shape instanceof PolygonShape) {
-          shape.canvasShape.initializeControls();
-        }
-      });
-    }
+      if (area instanceof PolygonArea) {
+        area.canvasShape.initializeControls();
+      }
+      this.form.addArea(area.sidebarFieldset);
+    });
   }
 
   public resize(width: number, height: number): void {
@@ -115,7 +110,7 @@ export class Editor {
   }
 
   public getMapData(): string {
-    let areas: Area[] = [];
+    let areas: Array<AreaData> = [];
 
     this.areas.forEach((area: AbstractArea) => {
       areas.push(area.getData());

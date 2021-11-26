@@ -172,7 +172,7 @@ define(["require", "exports", "imagesloaded", "TYPO3/CMS/Backend/Icons", "TYPO3/
         renderAreas(value) {
             if (value.length) {
                 let areas = JSON.parse(value);
-                if (areas.length) {
+                if (areas !== undefined && areas.length) {
                     this.editor.renderAreas(areas);
                 }
             }

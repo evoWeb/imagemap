@@ -8,7 +8,7 @@
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  */
-define(["require", "exports", "../vendor/Fabric.min", "./Circle/Area", "./Circle/Shape", "./Circle/Fieldset", "./Polygon/Area", "./Polygon/Shape", "./Polygon/Fieldset", "./Rectangle/Area", "./Rectangle/Shape", "./Rectangle/Fieldset"], function (require, exports, Fabric_min_1, Area_1, Shape_1, Fieldset_1, Area_2, Shape_2, Fieldset_2, Area_3, Shape_3, Fieldset_3) {
+define(["require", "exports", "../vendor/Fabric.min", "./Circle/Area", "./Circle/Fieldset", "./Circle/Shape", "./Polygon/Area", "./Polygon/Fieldset", "./Polygon/Shape", "./Rectangle/Area", "./Rectangle/Fieldset", "./Rectangle/Shape"], function (require, exports, Fabric, Area_1, Fieldset_1, Shape_1, Area_2, Fieldset_2, Shape_2, Area_3, Fieldset_3, Shape_3) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class ShapeFactory {
@@ -85,7 +85,7 @@ define(["require", "exports", "../vendor/Fabric.min", "./Circle/Area", "./Circle
             return color;
         }
         static getObjectId() {
-            return Fabric_min_1.Object.__uid++;
+            return Fabric.Object.__uid++;
         }
         static hexToRgbA(hex, alpha) {
             let chars, r, g, b, result;

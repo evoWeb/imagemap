@@ -10,17 +10,17 @@
  */
 
 // @ts-ignore
-import { Canvas, Object } from '../vendor/Fabric.min';
+import * as Fabric from '../vendor/Fabric.min';
 import { AbstractArea } from './AbstractArea';
 import { CircleArea } from './Circle/Area';
-import { CircleShape } from './Circle/Shape';
 import { CircleFieldset } from './Circle/Fieldset';
+import { CircleShape } from './Circle/Shape';
 import { PolygonArea } from './Polygon/Area';
-import { PolygonShape } from './Polygon/Shape';
 import { PolygonFieldset } from './Polygon/Fieldset';
+import { PolygonShape } from './Polygon/Shape';
 import { RectangleArea } from './Rectangle/Area';
-import { RectangleShape } from './Rectangle/Shape';
 import { RectangleFieldset } from './Rectangle/Fieldset';
+import { RectangleShape } from './Rectangle/Shape';
 
 export class ShapeFactory {
   static shapeConfiguration: ShapeConfiguration = {
@@ -33,16 +33,16 @@ export class ShapeFactory {
     transparentCorners: false,
   };
 
-  readonly canvas: Canvas;
+  readonly canvas: Fabric.Canvas;
 
   readonly configuration: EditorConfiguration;
 
-  constructor(canvas: Canvas = null, configuration: EditorConfiguration = null) {
+  constructor(canvas: Fabric.Canvas = null, configuration: EditorConfiguration = null) {
     this.canvas = canvas;
     this.configuration = configuration;
   }
 
-  public create(areaData: Area, selectable: boolean): AbstractArea {
+  public create(areaData: AreaData, selectable: boolean): AbstractArea {
     areaData.color = this.getRandomColor(areaData.color);
 
     let area: AbstractArea,
@@ -73,7 +73,7 @@ export class ShapeFactory {
     return area;
   }
 
-  protected createCircle(areaData: Area, configuration: ShapeConfiguration): CircleArea {
+  protected createCircle(areaData: AreaData, configuration: ShapeConfiguration): CircleArea {
     let coords = areaData.coords,
       radius = this.outputX(coords.radius),
       left = this.outputX(coords.left) - radius,
@@ -100,7 +100,7 @@ export class ShapeFactory {
     return area;
   }
 
-  protected createPolygon(areaData: Area, configuration: ShapeConfiguration): PolygonArea {
+  protected createPolygon(areaData: AreaData, configuration: ShapeConfiguration): PolygonArea {
     let points: Point[] = areaData.points || [],
       polygonPoints: Point[] = [];
 
@@ -122,7 +122,7 @@ export class ShapeFactory {
     return area;
   }
 
-  protected createRectangle(areaData: Area, configuration: ShapeConfiguration): RectangleArea {
+  protected createRectangle(areaData: AreaData, configuration: ShapeConfiguration): RectangleArea {
     let coords = areaData.coords,
       left = this.outputX(coords.left),
       top = this.outputY(coords.top),
@@ -160,7 +160,7 @@ export class ShapeFactory {
   }
 
   static getObjectId(): number {
-    return Object.__uid++;
+    return Fabric.Object.__uid++;
   }
 
   static hexToRgbA(hex: string, alpha?: number): string {

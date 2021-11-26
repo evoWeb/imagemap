@@ -16,7 +16,7 @@ import { ShapeFactory } from '../Factory';
 import { PolygonShape } from './Shape';
 
 export class PolygonArea extends AbstractArea {
-  public getData(): Area {
+  public getData(): AreaData {
     let data = {
       ...this.areaData
     };
@@ -27,7 +27,7 @@ export class PolygonArea extends AbstractArea {
       delete(point.id);
     });
 
-    return data as Area;
+    return data as AreaData;
   }
 
   public shapeModified(event: FabricEvent): void {
@@ -76,7 +76,7 @@ export class PolygonArea extends AbstractArea {
     this.canvasShape.canvas.renderAll();
   }
 
-  public renderNewShape(areaData: Area, selectable: boolean): void {
+  public renderNewShape(areaData: AreaData, selectable: boolean): void {
     let points: Point[] = areaData.points || [],
       polygonPoints: Point[] = [],
       configuration: ShapeConfiguration = {
